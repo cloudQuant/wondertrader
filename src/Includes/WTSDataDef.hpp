@@ -423,8 +423,6 @@ public:
 			case KFT_DATE:
 				vArray->append(day.date);
 				break;
-			case KFT_TIME:
-				vArray->append((double)day.time);
 			}
 		}
 
@@ -666,34 +664,6 @@ public:
 	}	
 
 	/*
-	 *	读取指定位置的总持
-	 *	如果超出范围则返回INVALID_VALUE
-	 */
-	inline double	bidprice(int32_t idx) const
-	{
-		idx = translateIdx(idx);
-
-		if (idx < 0 || idx >= (int32_t)m_vecBarData.size())
-			return INVALID_UINT32;
-
-		return m_vecBarData[idx].bid;
-	}
-
-	/*
-	 *	读取指定位置的增仓
-	 *	如果超出范围则返回INVALID_VALUE
-	 */
-	inline double	askprice(int32_t idx) const
-	{
-		idx = translateIdx(idx);
-
-		if (idx < 0 || idx >= (int32_t)m_vecBarData.size())
-			return INVALID_DOUBLE;
-
-		return m_vecBarData[idx].ask;
-	}
-
-	/*
 	 *	读取指定位置的成交额
 	 *	如果超出范围则返回INVALID_VALUE
 	 */
@@ -785,8 +755,6 @@ public:
 			case KFT_DATE:
 				vArray->append(day.date);
 				break;
-			case KFT_TIME:
-				vArray->append((double)day.time);
 			}
 		}
 
@@ -1045,12 +1013,8 @@ public:
 
 	inline void		setCode(const char* code) { wt_strcpy(m_oqStruct.code, code); }
 
-	inline void setContractInfo(WTSContractInfo* cInfo) { m_pContract = cInfo; }
-	inline WTSContractInfo* getContractInfo() const { return m_pContract; }
-
 private:
-	WTSOrdQueStruct		m_oqStruct;
-	WTSContractInfo*	m_pContract;
+	WTSOrdQueStruct	m_oqStruct;
 };
 
 class WTSOrdDtlData : public WTSObject
@@ -1081,13 +1045,8 @@ public:
 
 	inline void		setCode(const char* code) { wt_strcpy(m_odStruct.code, code); }
 
-	inline void setContractInfo(WTSContractInfo* cInfo) { m_pContract = cInfo; }
-	inline WTSContractInfo* getContractInfo() const { return m_pContract; }
-
-
 private:
-	WTSOrdDtlStruct		m_odStruct;
-	WTSContractInfo*	m_pContract;
+	WTSOrdDtlStruct	m_odStruct;
 };
 
 class WTSTransData : public WTSObject
@@ -1118,12 +1077,8 @@ public:
 
 	inline void		setCode(const char* code) { wt_strcpy(m_tsStruct.code, code); }
 
-	inline void setContractInfo(WTSContractInfo* cInfo) { m_pContract = cInfo; }
-	inline WTSContractInfo* getContractInfo() const { return m_pContract; }
-
 private:
-	WTSTransStruct		m_tsStruct;
-	WTSContractInfo*	m_pContract;
+	WTSTransStruct	m_tsStruct;
 };
 
 /*
@@ -1227,7 +1182,7 @@ private:
 	uint32_t		_count;
 
 protected:
-	WTSTickSlice() { _blocks.clear(); }
+	WTSTickSlice(){}
 	inline int32_t		translateIdx(int32_t idx) const
 	{
 		if (idx < 0)
@@ -1241,8 +1196,8 @@ protected:
 public:
 	static inline WTSTickSlice* create(const char* code, WTSTickStruct* ticks = NULL, uint32_t count = 0)
 	{
-		//if (ticks == NULL || count == 0)
-		//	return NULL;
+		if (ticks == NULL || count == 0)
+			return NULL;
 
 		WTSTickSlice* slice = new WTSTickSlice();
 		wt_strcpy(slice->_code, code);

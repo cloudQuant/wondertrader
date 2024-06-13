@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderAdapter.h
  * \project	WonderTrader
  *
@@ -14,7 +14,6 @@
 #include "../Includes/ITraderApi.h"
 #include "../Share/BoostFile.hpp"
 #include "../Share/StdUtils.hpp"
-#include "../Share/SpinMutex.hpp"
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -26,8 +25,6 @@ class EventNotifier;
 
 class ITrdNotifySink;
 
-typedef std::function<void(const char*, bool, double, double, double, double)> FuncEnumChnlPosCallBack;
-
 class TraderAdapter : public ITraderSpi
 {
 public:
@@ -36,25 +33,25 @@ public:
 
 	typedef enum tagAdapterState
 	{
-		AS_NOTLOGIN,		//æœªç™»å½•
-		AS_LOGINING,		//æ­£åœ¨ç™»å½•
-		AS_LOGINED,			//å·²ç™»å½•
-		AS_LOGINFAILED,		//ç™»å½•å¤±è´¥
-		AS_POSITION_QRYED,	//ä»“ä½å·²æŸ¥
-		AS_ORDERS_QRYED,	//è®¢å•å·²æŸ¥
-		AS_TRADES_QRYED,	//æˆäº¤å·²æŸ¥
-		AS_ALLREADY			//å…¨éƒ¨å°±ç»ª
+		AS_NOTLOGIN,		//Î´µÇÂ¼
+		AS_LOGINING,		//ÕıÔÚµÇÂ¼
+		AS_LOGINED,			//ÒÑµÇÂ¼
+		AS_LOGINFAILED,		//µÇÂ¼Ê§°Ü
+		AS_POSITION_QRYED,	//²ÖÎ»ÒÑ²é
+		AS_ORDERS_QRYED,	//¶©µ¥ÒÑ²é
+		AS_TRADES_QRYED,	//³É½»ÒÑ²é
+		AS_ALLREADY			//È«²¿¾ÍĞ÷
 	} AdapterState;
 
 	typedef struct _PosItem
 	{
-		//å¤šä»“æ•°æ®
+		//¶à²ÖÊı¾İ
 		double	l_newvol;
 		double	l_newavail;
 		double	l_prevol;
 		double	l_preavail;
 
-		//ç©ºä»“æ•°æ®
+		//¿Õ²ÖÊı¾İ
 		double	s_newvol;
 		double	s_newavail;
 		double	s_prevol;
@@ -116,10 +113,6 @@ public:
 		_sinks.insert(sink);
 	}
 
-	inline bool isReady() const { return _state == AS_ALLREADY; }
-
-	void queryFund();
-
 private:
 	uint32_t doEntrust(WTSEntrust* entrust);
 	bool	doCancel(WTSOrderInfo* ordInfo);
@@ -152,8 +145,6 @@ public:
 		return 0;
 	}
 
-	void enumPosition(FuncEnumChnlPosCallBack cb);
-
 	uint32_t openLong(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo = NULL);
 	uint32_t openShort(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo = NULL);
 	uint32_t closeLong(const char* stdCode, double price, double qty, bool isToday, int flag, WTSContractInfo* cInfo = NULL);
@@ -173,17 +164,13 @@ public:
 
 	inline	bool isSelfMatched(const char* stdCode)
 	{
-		//å¦‚æœå¿½ç•¥è‡ªæˆäº¤ï¼Œåˆ™ç›´æ¥è¿”å›false
-		if (_ignore_sefmatch)
-			return false;
-
 		auto it = _self_matches.find(stdCode);
 		return it != _self_matches.end();
 	}
 
 public:
 	//////////////////////////////////////////////////////////////////////////
-	//ITraderSpiæ¥å£
+	//ITraderSpi½Ó¿Ú
 	virtual void handleEvent(WTSTraderEvent e, int32_t ec) override;
 
 	virtual void onLoginResult(bool bSucc, const char* msg, uint32_t tradingdate) override;
@@ -204,7 +191,7 @@ public:
 
 	virtual void onPushTrade(WTSTradeInfo* tradeRecord) override;
 
-	virtual void onTraderError(WTSError* err, void* pData = NULL) override;
+	virtual void onTraderError(WTSError* err) override;
 
 	virtual IBaseDataMgr* getBaseDataMgr() override;
 
@@ -223,52 +210,46 @@ private:
 
 	EventNotifier*		_notifier;
 
-	wt_hashset<ITrdNotifySink*>	_sinks;
+	faster_hashset<ITrdNotifySink*>	_sinks;
 
 	IBaseDataMgr*		_bd_mgr;
 	ActionPolicyMgr*	_policy_mgr;
 
-	wt_hashmap<std::string, PosItem> _positions;
+	faster_hashmap<LongKey, PosItem> _positions;
 
-	SpinMutex	_mtx_orders;
-	OrderMap*	_orders;
-	wt_hashset<std::string> _orderids;	//ä¸»è¦ç”¨äºæ ‡è®°æœ‰æ²¡æœ‰å¤„ç†è¿‡è¯¥è®¢å•
+	StdUniqueMutex _mtx_orders;
+	OrderMap*		_orders;
+	faster_hashset<LongKey> _orderids;	//Ö÷ÒªÓÃÓÚ±ê¼ÇÓĞÃ»ÓĞ´¦Àí¹ı¸Ã¶©µ¥
 
-	wt_hashmap<std::string, std::string>		_trade_refs;	//ç”¨äºè®°å½•æˆäº¤å•å’Œè®¢å•çš„åŒ¹é…
-	wt_hashset<std::string>					_self_matches;	//è‡ªæˆäº¤çš„åˆçº¦
+	faster_hashmap<LongKey, std::string>		_trade_refs;	//ÓÃÓÚ¼ÇÂ¼³É½»µ¥ºÍ¶©µ¥µÄÆ¥Åä
+	faster_hashset<LongKey>						_self_matches;	//×Ô³É½»µÄºÏÔ¼
 
-	/*
-	 *	By Wesley @ 2023.03.16
-	 *	åŠ ä¸€ä¸ªæ§åˆ¶ï¼Œè¿™æ ·è‡ªæˆäº¤å‘ç”Ÿä»¥åï¼Œè¿˜å¯ä»¥æ¢å¤äº¤æ˜“
-	 */
-	bool			_ignore_sefmatch;		//å¿½ç•¥è‡ªæˆäº¤é™åˆ¶
+	faster_hashmap<LongKey, double> _undone_qty;	//Î´Íê³ÉÊıÁ¿
 
-	wt_hashmap<std::string, double> _undone_qty;	//æœªå®Œæˆæ•°é‡
+	typedef WTSHashMap<LongKey>	TradeStatMap;
+	TradeStatMap*	_stat_map;	//Í³¼ÆÊı¾İ
 
-	typedef WTSHashMap<std::string>	TradeStatMap;
-	TradeStatMap*	_stat_map;	//ç»Ÿè®¡æ•°æ®
-
-	//è¿™ä¸¤ä¸ªç¼“å­˜æ—¶é—´å†…çš„å®¹å™¨,ä¸»è¦æ˜¯ä¸ºäº†æ§åˆ¶ç¬é—´æµé‡è€Œè®¾ç½®çš„
+	//ÕâÁ½¸ö»º´æÊ±¼äÄÚµÄÈİÆ÷,Ö÷ÒªÊÇÎªÁË¿ØÖÆË²¼äÁ÷Á¿¶øÉèÖÃµÄ
 	typedef std::vector<uint64_t> TimeCacheList;
-	typedef wt_hashmap<std::string, TimeCacheList> CodeTimeCacheMap;
-	CodeTimeCacheMap	_order_time_cache;	//ä¸‹å•æ—¶é—´ç¼“å­˜
-	CodeTimeCacheMap	_cancel_time_cache;	//æ’¤å•æ—¶é—´ç¼“å­˜
+	typedef faster_hashmap<LongKey, TimeCacheList> CodeTimeCacheMap;
+	CodeTimeCacheMap	_order_time_cache;	//ÏÂµ¥Ê±¼ä»º´æ
+	CodeTimeCacheMap	_cancel_time_cache;	//³·µ¥Ê±¼ä»º´æ
 
-	//å¦‚æœè¢«é£æ§äº†,å°±ä¼šè¿›å…¥åˆ°æ’é™¤é˜Ÿåˆ—
-	wt_hashset<std::string>	_exclude_codes;
+	//Èç¹û±»·ç¿ØÁË,¾Í»á½øÈëµ½ÅÅ³ı¶ÓÁĞ
+	faster_hashset<LongKey>	_exclude_codes;
 	
-	typedef wt_hashmap<std::string, RiskParams>	RiskParamsMap;
+	typedef faster_hashmap<LongKey, RiskParams>	RiskParamsMap;
 	RiskParamsMap	_risk_params_map;
 	bool			_risk_mon_enabled;
 
-	bool			_save_data;	//æ˜¯å¦ä¿å­˜äº¤æ˜“æ—¥å¿—
-	BoostFilePtr	_trades_log;		//äº¤æ˜“æ•°æ®æ—¥å¿—
-	BoostFilePtr	_orders_log;		//è®¢å•æ•°æ®æ—¥å¿—
-	std::string		_rt_data_file;		//å®æ—¶æ•°æ®æ–‡ä»¶
+	bool			_save_data;	//ÊÇ·ñ±£´æ½»Ò×ÈÕÖ¾
+	BoostFilePtr	_trades_log;		//½»Ò×Êı¾İÈÕÖ¾
+	BoostFilePtr	_orders_log;		//¶©µ¥Êı¾İÈÕÖ¾
+	std::string		_rt_data_file;		//ÊµÊ±Êı¾İÎÄ¼ş
 };
 
 typedef std::shared_ptr<TraderAdapter>				TraderAdapterPtr;
-typedef wt_hashmap<std::string, TraderAdapterPtr>	TraderAdapterMap;
+typedef faster_hashmap<std::string, TraderAdapterPtr>	TraderAdapterMap;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -285,8 +266,6 @@ public:
 	TraderAdapterPtr getAdapter(const char* tname);
 
 	bool	addAdapter(const char* tname, TraderAdapterPtr& adapter);
-
-	void	refresh_funds();
 
 private:
 	TraderAdapterMap	_adapters;

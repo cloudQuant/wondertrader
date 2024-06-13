@@ -1,4 +1,4 @@
-﻿#include "ExpParser.h"
+#include "ExpParser.h"
 #include "WtRtRunner.h"
 
 extern WtRtRunner& getRunner();

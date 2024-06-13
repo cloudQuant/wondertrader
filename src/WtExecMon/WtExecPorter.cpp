@@ -1,4 +1,4 @@
-﻿#include "WtExecPorter.h"
+#include "WtExecPorter.h"
 #include "WtExecRunner.h"
 
 #include "../WtCore/WtHelper.h"
@@ -82,9 +82,4 @@ void write_log(unsigned int level, WtString message, WtString catName)
 void set_position(WtString stdCode, double targetPos)
 {
 	getRunner().setPosition(stdCode, targetPos);
-}
-
-void commit_positions()
-{
-	getRunner().commitPositions();
 }

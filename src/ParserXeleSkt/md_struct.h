@@ -1,4 +1,4 @@
-﻿#ifndef SSE_STRUCT_H
+#ifndef SSE_STRUCT_H
 #define SSE_STRUCT_H
 
 #include <stdint.h>

@@ -1,4 +1,4 @@
-﻿#ifndef _CRT_SECURE_NO_WARNINGS
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #include "../WtBtPorter/WtBtPorter.h"
@@ -6,12 +6,11 @@
 #include "../Includes/WTSStruct.h"
 #include "../Share/DLLHelper.hpp"
 #include "../Share/StdUtils.hpp"
-#include "../Share/fmtlib.h"
 
 void on_getbar(CtxHandler ctxid, const char* code, const char* period, WTSBarStruct* bar, WtUInt32 count, bool isLast)
 {
 	if (bar)
-		fmt::print("on_getbar@{}.{}\n", bar->date, bar->time);
+		printf("on_getbar@%u.%llu\r\n", bar->date, bar->time);
 	else
 		int x = 1;
 }
@@ -19,7 +18,7 @@ void on_getbar(CtxHandler ctxid, const char* code, const char* period, WTSBarStr
 void on_gettick(CtxHandler ctxid, const char* code, WTSTickStruct* tick, bool isLast)
 {
 	if (tick)
-		fmt::print("on_gettick@{}\n", tick->action_time);
+		printf("on_gettick@%u\r\n", tick->action_time);
 }
 
 void on_init(CtxHandler ctxid)
@@ -31,25 +30,25 @@ void on_init(CtxHandler ctxid)
 
 void on_tick(CtxHandler ctxid, const char* stdCode, WTSTickStruct* newTick)
 {
-	//fmt::print("on_tick\n");
+	//printf("on_tick\r\n");
 }
 
 void on_calc(CtxHandler ctxid, WtUInt32 curDate, WtUInt32 curTime)
 {
-	fmt::print("on_calc @ {}.{}\n", curDate, curTime);
+	printf("on_calc @ %u.%u\r\n", curDate, curTime);
 	//cta_get_ticks(ctxid, "CFFEX.IF.HOT", 100, on_gettick);
 }
 
 void on_calc_done(CtxHandler ctxid, WtUInt32 curDate, WtUInt32 curTime)
 {
-	fmt::print("on_calc_done @ {}.{}\n", curDate, curTime);
+	printf("on_calc_done @ %u.%u\r\n", curDate, curTime);
 	//cta_get_ticks(ctxid, "CFFEX.IF.HOT", 100, on_gettick);
 }
 
 
 void on_bar(CtxHandler ctxid, const char* code, const char* period, WTSBarStruct* newBar)
 {
-	//fmt::print("on_bar\n");
+	//printf("on_bar\r\n");
 }
 
 void on_session_event(CtxHandler cHandle, WtUInt32 curTDate, bool isBegin)
@@ -92,7 +91,7 @@ void run_bt()
 
 	run_backtest(true, false);
 
-	fmt::print("press enter key to exit\n");
+	printf("press enter key to exit\n");
 	getchar();
 	release_backtest();
 }

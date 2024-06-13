@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * /file main.cpp
  * /project	WonderTrader
  *
@@ -9,6 +9,7 @@
  */
 
 #include "../WTSTools/WTSLogger.h"
+#include "../Share/IniHelper.hpp"
 
 extern void test_uft();
 

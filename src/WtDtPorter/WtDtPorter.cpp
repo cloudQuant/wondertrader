@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtDtPorter.cpp
  * \project	WonderTrader
  *
@@ -29,7 +29,7 @@ char PLATFORM_NAME[] = "UNIX";
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
 #include <boost/filesystem.hpp>
- //è¿™ä¸ªä¸»è¦æ˜¯ç»™MiniDumperç”¨çš„
+ //Õâ¸öÖ÷ÒªÊÇ¸øMiniDumperÓÃµÄ
 const char* getModuleName()
 {
 	static char MODULE_NAME[250] = { 0 };
@@ -50,12 +50,12 @@ WtDtRunner& getRunner()
 	return runner;
 }
 
-void initialize(WtString cfgFile, WtString logCfg, bool bCfgFile, bool bLogCfgFile)
+void initialize(WtString cfgFile, WtString logCfg)
 {
 #ifdef _MSC_VER
 	CMiniDumper::Enable(getModuleName(), true, WtHelper::get_cwd());
 #endif
-	getRunner().initialize(cfgFile, logCfg, getBinDir(), bCfgFile, bLogCfgFile);
+	getRunner().initialize(cfgFile, logCfg, getBinDir());
 }
 
 void start(bool bAsync/* = false*/)
@@ -91,7 +91,7 @@ void write_log(unsigned int level, const char* message, const char* catName)
 	}
 }
 
-#pragma region "æ‰©å±•Parseræ¥å£"
+#pragma region "À©Õ¹Parser½Ó¿Ú"
 
 bool create_ext_parser(const char* id)
 {
@@ -109,9 +109,9 @@ void register_parser_callbacks(FuncParserEvtCallback cbEvt, FuncParserSubCallbac
 }
 
 
-#pragma endregion "æ‰©å±•Parseræ¥å£"
+#pragma endregion "À©Õ¹Parser½Ó¿Ú"
 
-#pragma region "æ‰©å±•Dumperæ¥å£"
+#pragma region "À©Õ¹Dumper½Ó¿Ú"
 bool create_ext_dumper(const char* id)
 {
 	return getRunner().createExtDumper(id);
@@ -126,5 +126,5 @@ void register_extended_hftdata_dumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDt
 {
 	getRunner().registerExtHftDataDumper(ordQueDumper, ordDtlDumper, transDumper);
 }
-#pragma endregion "æ‰©å±•Dumperæ¥å£"
+#pragma endregion "À©Õ¹Dumper½Ó¿Ú"
 

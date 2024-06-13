@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtDataManager.cpp
  * \project	WonderTrader
  *
@@ -30,7 +30,6 @@ WtDtMgr::WtDtMgr()
 	, _bars_cache(NULL)
 	, _ticks_adjusted(NULL)
 	, _rt_tick_map(NULL)
-	, _force_cache(false)
 {
 }
 
@@ -61,14 +60,14 @@ bool WtDtMgr::initStore(WTSVariant* cfg)
 	DllHandle hInst = DLLHelper::load_library(module.c_str());
 	if(hInst == NULL)
 	{
-		WTSLogger::error("Loading data reader module {} failed", module.c_str());
+		WTSLogger::error("Loading data reader module %s failed", module.c_str());
 		return false;
 	}
 
 	FuncCreateDataReader funcCreator = (FuncCreateDataReader)DLLHelper::get_symbol(hInst, "createDataReader");
 	if(funcCreator == NULL)
 	{
-		WTSLogger::error("Loading data reader module {} failed, entrance function createDataReader not found", module.c_str());
+		WTSLogger::error("Loading data reader module %s failed, entrance function createDataReader not found", module.c_str());
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -76,7 +75,7 @@ bool WtDtMgr::initStore(WTSVariant* cfg)
 	_reader = funcCreator();
 	if(_reader == NULL)
 	{
-		WTSLogger::error("Creating instance of data reader module {} failed", module.c_str());
+		WTSLogger::error("Creating instance of data reader module %s failed", module.c_str());
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -86,17 +85,9 @@ bool WtDtMgr::initStore(WTSVariant* cfg)
 	return true;
 }
 
-bool WtDtMgr::init(WTSVariant* cfg, WtEngine* engine, bool bForceCache /* = false */)
+bool WtDtMgr::init(WTSVariant* cfg, WtEngine* engine)
 {
 	_engine = engine;
-
-	_align_by_section = cfg->getBoolean("align_by_section");
-
-	_force_cache = bForceCache;
-
-	WTSLogger::info("Resampled bars will be aligned by section: {}", _align_by_section?"yes":" no");
-
-	WTSLogger::info("Force to cache bars: {}", _force_cache ? "yes" : " no");
 
 	return initStore(cfg->get("store"));
 }
@@ -110,7 +101,7 @@ void WtDtMgr::on_all_bar_updated(uint32_t updateTime)
 
 	for (const NotifyItem& item : _bar_notifies)
 	{
-		_engine->on_bar(item._code, item._period, item._times, item._newBar);
+		_engine->on_bar(item._code.c_str(), item._period.c_str(), item._times, item._newBar);
 	}
 
 	_bar_notifies.clear();
@@ -150,33 +141,33 @@ void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newB
 {
 	std::string key_pattern = fmt::format("{}-{}", code, period);
 
-	char speriod;
+	std::string speriod;
 	uint32_t times = 1;
 	switch (period)
 	{
 	case KP_Minute1:
-		speriod = 'm';
+		speriod = "m";
 		times = 1;
 		break;
 	case KP_Minute5:
-		speriod = 'm';
+		speriod = "m";
 		times = 5;
 		break;
 	default:
-		speriod = 'd';
+		speriod = "d";
 		times = 1;
 		break;
 	}
 
 	if(_subed_basic_bars.find(key_pattern) != _subed_basic_bars.end())
 	{
-		//å¦‚æžœæ˜¯åŸºç¡€å‘¨æœŸ, ç›´æŽ¥è§¦å‘on_baräº‹ä»¶
+		//Èç¹ûÊÇ»ù´¡ÖÜÆÚ, Ö±½Ó´¥·¢on_barÊÂ¼þ
 		//_engine->on_bar(code, speriod.c_str(), times, newBar);
-		//æ›´æ–°å®ŒKçº¿ä»¥åŽ, ç»Ÿä¸€é€šçŸ¥äº¤æ˜“å¼•æ“Ž
-		_bar_notifies.emplace_back(NotifyItem(code, speriod, times, newBar));
+		//¸üÐÂÍêKÏßÒÔºó, Í³Ò»Í¨Öª½»Ò×ÒýÇæ
+		_bar_notifies.emplace_back(NotifyItem({ code, speriod, times, newBar }));
 	}
 
-	//ç„¶åŽå†å¤„ç†éžåŸºç¡€å‘¨æœŸ
+	//È»ºóÔÙ´¦Àí·Ç»ù´¡ÖÜÆÚ
 	if (_bars_cache == NULL || _bars_cache->size() == 0)
 		return;
 	
@@ -189,24 +180,17 @@ void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newB
 			continue;
 
 		WTSKlineData* kData = (WTSKlineData*)it->second;
-		if(kData->times() != 1)
 		{
-			g_dataFact.updateKlineData(kData, newBar, sInfo, _align_by_section);
+			g_dataFact.updateKlineData(kData, newBar, sInfo);
 			if (kData->isClosed())
 			{
-				//å¦‚æžœåŸºç¡€å‘¨æœŸKçº¿çš„æ—¶é—´å’Œè‡ªå®šä¹‰å‘¨æœŸKçº¿çš„æ—¶é—´ä¸€è‡´, è¯´æ˜ŽKçº¿å…³é—­äº†
-				//è¿™é‡Œä¹Ÿè¦è§¦å‘on_baräº‹ä»¶
+				//Èç¹û»ù´¡ÖÜÆÚKÏßµÄÊ±¼äºÍ×Ô¶¨ÒåÖÜÆÚKÏßµÄÊ±¼äÒ»ÖÂ, ËµÃ÷KÏß¹Ø±ÕÁË
+				//ÕâÀïÒ²Òª´¥·¢on_barÊÂ¼þ
 				WTSBarStruct* lastBar = kData->at(-1);
 				//_engine->on_bar(code, speriod.c_str(), times, lastBar);
-				//æ›´æ–°å®ŒKçº¿ä»¥åŽ, ç»Ÿä¸€é€šçŸ¥äº¤æ˜“å¼•æ“Ž
-				_bar_notifies.emplace_back(NotifyItem(code, speriod, times*kData->times(), lastBar));
+				//¸üÐÂÍêKÏßÒÔºó, Í³Ò»Í¨Öª½»Ò×ÒýÇæ
+				_bar_notifies.emplace_back(NotifyItem({ code, speriod, times*kData->times(), lastBar }));
 			}
-		}
-		else
-		{
-			//å¦‚æžœæ˜¯å¼ºåˆ¶ç¼“å­˜çš„ä¸€å€å‘¨æœŸï¼Œç›´æŽ¥åŽ‹åˆ°ç¼“å­˜é˜Ÿåˆ—é‡Œ
-			kData->getDataRef().emplace_back(*newBar);
-			_bar_notifies.emplace_back(NotifyItem(code, speriod, times, newBar));
 		}
 	}
 }
@@ -255,20 +239,6 @@ double WtDtMgr::get_adjusting_factor(const char* stdCode, uint32_t uDate)
 	return 1.0;
 }
 
-uint32_t WtDtMgr::get_adjusting_flag()
-{
-	static uint32_t flag = UINT_MAX;
-	if(flag == UINT_MAX)
-	{
-		if (_reader)
-			flag = _reader->getAdjustingFlag();
-		else
-			flag = 0;
-	}
-
-	return flag;
-}
-
 WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_reader == NULL)
@@ -276,28 +246,28 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 
 	/*
 	 *	By Wesley @ 2022.02.11
-	 *	è¿™é‡Œè¦é‡æ–°å¤„ç†ä¸€ä¸‹
-	 *	å¦‚æžœæ˜¯ä¸å¤æƒæˆ–è€…å‰å¤æƒï¼Œåˆ™ç›´æŽ¥è¯»å–åº•å±‚çš„å®žæ—¶ç¼“å­˜å³å¯
+	 *	ÕâÀïÒªÖØÐÂ´¦ÀíÒ»ÏÂ
+	 *	Èç¹ûÊÇ²»¸´È¨»òÕßÇ°¸´È¨£¬ÔòÖ±½Ó¶ÁÈ¡µ×²ãµÄÊµÊ±»º´æ¼´¿É
 	 */
 	auto len = strlen(stdCode);
 	bool isHFQ = (stdCode[len - 1] == SUFFIX_HFQ);
 
-	//ä¸æ˜¯åŽå¤æƒï¼Œç¼“å­˜ç›´æŽ¥ç”¨åº•å±‚ç¼“å­˜
+	//²»ÊÇºó¸´È¨£¬»º´æÖ±½ÓÓÃµ×²ã»º´æ
 	if(!isHFQ)
 		return _reader->readTickSlice(stdCode, count, etime);
 
-	//å…ˆè½¬æˆä¸å¸¦+çš„æ ‡å‡†ä»£ç 
+	//ÏÈ×ª³É²»´ø+µÄ±ê×¼´úÂë
 	std::string pureStdCode(stdCode, len - 1);
 
 	if (_ticks_adjusted == NULL)
 		_ticks_adjusted = DataCacheMap::create();
 
-	//å¦‚æžœç¼“å­˜æ²¡æœ‰ï¼Œå…ˆé‡æ–°ç”Ÿæˆä¸€ä¸‹ç¼“å­˜
+	//Èç¹û»º´æÃ»ÓÐ£¬ÏÈÖØÐÂÉú³ÉÒ»ÏÂ»º´æ
 	auto it = _ticks_adjusted->find(pureStdCode);
 	if (it == _ticks_adjusted->end())
 	{
-		//å…ˆè¯»å–å…¨éƒ¨tickæ•°æ®
-		double factor = _engine->get_exright_factor(stdCode, NULL);
+		//ÏÈ¶ÁÈ¡È«²¿tickÊý¾Ý
+		double factor = get_adjusting_factor(pureStdCode.c_str(), get_date());
 		WTSTickSlice* slice = _reader->readTickSlice(pureStdCode.c_str(), 999999, etime);
 		std::vector<WTSTickStruct> ayTicks;
 		ayTicks.resize(slice->size());
@@ -308,7 +278,7 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 			offset += slice->get_block_size(bIdx);
 		}
 
-		//ç¼“å­˜çš„æ•°æ®åšä¸€ä¸ªå¤æƒå¤„ç†
+		//»º´æµÄÊý¾Ý×öÒ»¸ö¸´È¨´¦Àí
 		for (WTSTickStruct& tick : ayTicks)
 		{
 			tick.price *= factor;
@@ -317,7 +287,7 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 			tick.low *= factor;
 		}
 
-		//æ·»åŠ åˆ°ç¼“å­˜ä¸­
+		//Ìí¼Óµ½»º´æÖÐ
 		WTSHisTickData* hisTick = WTSHisTickData::create(stdCode, false, factor);
 		hisTick->getDataRef().swap(ayTicks);
 		_ticks_adjusted->add(pureStdCode, hisTick, false);
@@ -341,7 +311,7 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	//æ¯”è¾ƒæ—¶é—´çš„å¯¹è±¡
+	//±È½ÏÊ±¼äµÄ¶ÔÏó
 	WTSTickStruct eTick;
 	eTick.action_date = curDate;
 	eTick.action_time = curTime * 100000 + curSecs;
@@ -357,7 +327,7 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 
 	uint32_t eIdx = pTick - &ticks.front();
 
-	//å¦‚æžœå…‰æ ‡å®šä½çš„tickæ—¶é—´æ¯”ç›®æ ‡æ—¶é—´æ‰“, åˆ™å…¨éƒ¨å›žé€€ä¸€ä¸ª
+	//Èç¹û¹â±ê¶¨Î»µÄtickÊ±¼ä±ÈÄ¿±êÊ±¼ä´ò, ÔòÈ«²¿»ØÍËÒ»¸ö
 	if (pTick->action_date > eTick.action_date || pTick->action_time > eTick.action_time)
 	{
 		pTick--;
@@ -399,50 +369,32 @@ WTSKlineSlice* WtDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod peri
 	if (_reader == NULL)
 		return NULL;
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}", stdCode, (uint32_t)period);
+	std::string key = StrUtil::printf("%s-%u", stdCode, period);
 
-	// å¦‚æžœä¸å¼ºåˆ¶ç¼“å­˜ï¼Œå¹¶ä¸”é‡é‡‡æ ·å€æ•°ä¸º1ï¼Œåˆ™ç›´æŽ¥è¯»å–sliceè¿”å›ž
-	if (times == 1 && !_force_cache)
+	if (times == 1)
 	{
 		_subed_basic_bars.insert(key);
 
 		return _reader->readKlineSlice(stdCode, period, count, etime);
 	}
 
-	//åªæœ‰éžåŸºç¡€å‘¨æœŸçš„ä¼šè¿›åˆ°ä¸‹é¢çš„æ­¥éª¤
+	//Ö»ÓÐ·Ç»ù´¡ÖÜÆÚµÄ»á½øµ½ÏÂÃæµÄ²½Öè
 	WTSSessionInfo* sInfo = _engine->get_session_info(stdCode, true);
 
 	if (_bars_cache == NULL)
 		_bars_cache = DataCacheMap::create();
 
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, (uint32_t)period, times);
+	key = StrUtil::printf("%s-%u-%u", stdCode, period, times);
 
 	WTSKlineData* kData = (WTSKlineData*)_bars_cache->get(key);
-	//å¦‚æžœç¼“å­˜é‡Œçš„Kçº¿æ¡æ•°å¤§äºŽè¯·æ±‚çš„æ¡æ•°, åˆ™ç›´æŽ¥è¿”å›ž
+	//Èç¹û»º´æÀïµÄKÏßÌõÊý´óÓÚÇëÇóµÄÌõÊý, ÔòÖ±½Ó·µ»Ø
 	if (kData == NULL || kData->size() < count)
 	{
-		uint32_t realCount = times==1 ? count: (count*times + times);
+		uint32_t realCount = count*times + times;
 		WTSKlineSlice* rawData = _reader->readKlineSlice(stdCode, period, realCount, etime);
-		if (rawData != NULL && rawData->size() > 0)
+		if (rawData != NULL)
 		{
-			if(times != 1)
-			{
-				kData = g_dataFact.extractKlineData(rawData, period, times, sInfo, true, _align_by_section);
-			}
-			else
-			{
-				kData = WTSKlineData::create(stdCode, rawData->size());
-				kData->setPeriod(period, 1);
-				kData->setClosed(true);
-				WTSBarStruct* pBar = kData->getDataRef().data();
-				for(uint32_t bIdx = 0; bIdx < rawData->get_block_counts(); bIdx++ )
-				{
-					memcpy(pBar, rawData->get_block_addr(bIdx), sizeof(WTSBarStruct)*rawData->get_block_size(bIdx));
-					pBar += rawData->get_block_size(bIdx);
-				}
-			}
-			
+			kData = g_dataFact.extractKlineData(rawData, period, times, sInfo, true);
 			rawData->release();
 		}
 		else
@@ -453,27 +405,14 @@ WTSKlineSlice* WtDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod peri
 		if (kData)
 		{
 			_bars_cache->add(key, kData, false);
-			if(times != 1)
-				WTSLogger::debug("{} bars of {} resampled every {} bars: {} -> {}", 
-					PERIOD_NAME[period], stdCode, times, realCount, kData->size());
+			WTSLogger::debug_f("{} bars of {} resampled every {} bars: {} -> {}", 
+				PERIOD_NAME[period], stdCode, times, realCount, kData->size());
 		}
 	}
 
-	/*
-	 *	By Wesley @ 2023.03.03
-	 *	å½“å¤šå‘¨æœŸKçº¿è·¨è¶Šå°èŠ‚æ—¶ï¼Œå¦‚æžœé‡å¯äº†ç»„åˆ
-	 *	è¿™ä¸ªæ—¶å€™å°±ä¼šåœ¨å¯åŠ¨çš„æ—¶å€™æ‹‰åˆ°ä¸€æ¡æœªé—­åˆçš„Kçº¿
-	 *	ä½†æ˜¯æœªé—­åˆçš„Kçº¿ç­‰ä¸€ä¸‹è¿˜ä¼šé‡æ–°æŽ¨ä¸€é
-	 *	æ‰€ä»¥è¿™é‡Œå¿…é¡»è¦åšä¸€ä¸ªä¿®æ­£
-	 *	åªå¤„ç†å·²ç»é—­åˆçš„Kçº¿
-	 */
-	uint32_t closedSz = kData->size();
-	if (closedSz > 0 && !kData->isClosed())
-		closedSz--;
-
 	int32_t sIdx = 0;
-	uint32_t rtCnt = min(closedSz, count);
-	sIdx = closedSz - rtCnt;
+	uint32_t rtCnt = min(kData->size(), count);
+	sIdx = kData->size() - rtCnt;
 	WTSBarStruct* rtHead = kData->at(sIdx);
 	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, times, rtHead, rtCnt);
 	return slice;

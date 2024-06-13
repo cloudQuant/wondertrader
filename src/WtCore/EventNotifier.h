@@ -1,15 +1,15 @@
-ï»¿/*!
+/*!
  * \file EventCaster.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief UDPå¹¿æ’­å¯¹è±¡å®šä¹‰
+ * \brief UDP¹ã²¥¶ÔÏó¶¨Òå
  */
 #pragma once
 
-#include <boost/asio/io_service.hpp>
+#include <queue>
 
 #include "../Includes/WTSMarcos.h"
 #include "../Includes/WTSObject.hpp"
@@ -46,25 +46,17 @@ public:
 	void	notify(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo);
 	void	notify(const char* trader, const char* message);
 
-	void	notify_log(const char* tag, const char* message);
+	void	notifyLog(const char* tag, const char* message);
 
-	void	notify_event(const char* message);
-
-	void	notify_chart_marker(uint64_t time, const char* straId, double price, const char* icon, const char* tag);
-	void	notify_chart_index(uint64_t time, const char* straId, const char* idxName, const char* lineName, double val);
-	void	notify_trade(const char* straId, const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, const char* userTag);
+	void	notifyEvent(const char* message);
 
 private:
-	std::string		_url;
+	std::string		m_strURL;
 	uint32_t		_mq_sid;
 	FuncCreateMQServer	_creator;
 	FuncDestroyMQServer	_remover;
 	FundPublishMessage	_publisher;
 	FuncRegCallbacks	_register;
-
-	bool			_stopped;
-	boost::asio::io_service		_asyncio;
-	StdThreadPtr				_worker;
 };
 
 NS_WTP_END

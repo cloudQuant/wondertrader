@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file HftStrategyMgr.h
  * \project	WonderTrader
  *
@@ -73,11 +73,11 @@ private:
 				_remover(_fact);
 		}
 	} StraFactInfo;
-	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
+	typedef faster_hashmap<LongKey, StraFactInfo> StraFactMap;
 
 	StraFactMap	_factories;
 
-	typedef wt_hashmap<std::string, HftStrategyPtr> StrategyMap;
+	typedef faster_hashmap<LongKey, HftStrategyPtr> StrategyMap;
 	StrategyMap	_strategies;
 };
 

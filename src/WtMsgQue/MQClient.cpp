@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file EventCaster.cpp
  * \project	WonderTrader
  *
@@ -10,8 +10,7 @@
 #include "MQClient.h"
 #include "MQManager.h"
 
-#include "../Share/fmtlib.h"
-#include "../Share/TimeUtils.hpp"
+#include <spdlog/fmt/fmt.h>
 #include <atomic>
 
 #ifndef NN_STATIC_LIB
@@ -40,8 +39,6 @@ MQClient::MQClient(MQManager* mgr)
 	, _mgr(mgr)
 	, m_bTerminated(false)
 	, _cb_message(NULL)
-	, m_iCheckTime(0)
-	, m_bNeedCheck(false)
 {
 	_id = makeMQCientId();
 }
@@ -68,7 +65,7 @@ bool MQClient::init(const char* url, FuncMQCallback cb)
 	_sock = nn_socket(AF_SP, NN_SUB);
 	if (_sock < 0)
 	{
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has an error {} while initializing", _id, _sock));
+		_mgr->log_client(_id, fmt::format("MQClient {} has an error {} while initializing", _id, _sock).c_str());
 		return false;
 	}
 
@@ -80,17 +77,17 @@ bool MQClient::init(const char* url, FuncMQCallback cb)
 	m_strURL = url;
 	if (nn_connect(_sock, url) < 0)
 	{
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has an error while connecting url {}", _id, url));
+		_mgr->log_client(_id, fmt::format("MQClient {} has an error while connecting url {}", _id, url).c_str());
 		return false;
 	}
 	else
 	{
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has connected to {} ", _id, url));
+		_mgr->log_client(_id, fmt::format("MQClient {} has connected to {} ", _id, url).c_str());
 	}
 
 	m_bReady = true;
 
-	_mgr->log_client(_id, fmtutil::format("MQClient {} inited", _id));
+	_mgr->log_client(_id, fmt::format("MQClient {} inited", _id).c_str());
 	return true;
 }
 
@@ -101,7 +98,7 @@ void MQClient::start()
 
 	if(_sock < 0)
 	{
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has not been initialized yet", _id));
+		_mgr->log_client(_id, fmt::format("MQClient {} has not been initialized yet", _id).c_str());
 		return;
 	}
 
@@ -117,8 +114,6 @@ void MQClient::start()
 					int nBytes = nn_recv(_sock, _recv_buf, RECV_BUF_SIZE, NN_DONTWAIT);
 					if (nBytes > 0)
 					{
-						m_iCheckTime = TimeUtils::getLocalTimeNow();
-						m_bNeedCheck = true;
 						hasData = true;
 						_buffer.append(_recv_buf, nBytes);
 					}
@@ -131,30 +126,16 @@ void MQClient::start()
 				if (hasData)
 					extract_buffer();
 				else
-				{
-					if(m_iCheckTime != 0 && m_bNeedCheck)
-					{
-						int64_t now = TimeUtils::getLocalTimeNow();
-						int64_t elapse = now - m_iCheckTime;
-						if (elapse >= 60 * 1000)
-						{
-							//只通知一次，防止重复通知
-							_cb_message(_id, "TIMEOUT", "", 0);
-							m_bNeedCheck = false;
-						}
-					}
-
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
-				}
 				
 			}
 		}));
 
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has started successfully", _id));
+		_mgr->log_client(_id, fmt::format("MQClient {} has started successfully", _id).c_str());
 	}
 	else
 	{
-		_mgr->log_client(_id, fmtutil::format("MQClient {} has already started", _id));
+		_mgr->log_client(_id, fmt::format("MQClient {} has already started", _id).c_str());
 	}
 	
 }
@@ -164,7 +145,7 @@ void MQClient::extract_buffer()
 	uint32_t proc_len = 0;
 	for(;;)
 	{
-		//先做长度检查
+		//�������ȼ��
 		if (_buffer.length() - proc_len < sizeof(MQPacket))
 			break;
 

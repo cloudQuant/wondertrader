@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include "../Includes/FasterDefs.h"
 #include <stdint.h>
 
@@ -23,17 +23,17 @@ class IExecCommand
 public:
 	IExecCommand(const char* name) :_stub(NULL), _name(name){}
 	/*
-	 *	è®¾ç½®ç›®æ ‡ä»“ä½
+	 *	ÉèÖÃÄ¿±ê²ÖÎ»
 	 */
-	virtual void set_position(const wt_hashmap<std::string, double>& targets) {}
+	virtual void set_position(const faster_hashmap<LongKey, double>& targets) {}
 
 	/*
-	 *	åˆçº¦ä»“ä½å˜åŠ¨
+	 *	ºÏÔ¼²ÖÎ»±ä¶¯
 	 */
-	virtual void on_position_changed(const char* stdCode, double diffPos) {}
+	virtual void on_position_changed(const char* stdCode, double targetPos) {}
 
 	/*
-	 *	å®æ—¶è¡Œæƒ…å›è°ƒ
+	 *	ÊµÊ±ĞĞÇé»Øµ÷
 	 */
 	virtual void on_tick(const char* stdCode, WTSTickData* newTick) {}
 

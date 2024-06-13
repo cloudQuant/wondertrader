@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../Includes/WTSTypes.h"
 
 NS_WTP_BEGIN
@@ -22,8 +22,6 @@ public:
 	virtual WTSTickData* grab_last_tick(const char* stdCode) { return NULL; }
 
 	virtual double get_adjusting_factor(const char* stdCode, uint32_t uDate) { return 1.0; }
-
-	virtual uint32_t get_adjusting_flag() { return 0; }
 };
 
 NS_WTP_END

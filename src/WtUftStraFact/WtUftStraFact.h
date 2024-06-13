@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../Includes/UftStrategyDefs.h"
 
 USING_NS_WTP;

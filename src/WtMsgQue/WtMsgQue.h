@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtMsgQue.h
  * \project	WonderTrader
  *

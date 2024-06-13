@@ -1,4 +1,4 @@
-ï»¿#include "WtStraDtSel.h"
+#include "WtStraDtSel.h"
 
 #include "../Includes/ISelStraCtx.h"
 
@@ -46,7 +46,7 @@ bool WtStraDtSel::init(WTSVariant* cfg)
 
 	_isstk = cfg->getBoolean("stock");
 
-	//é€šè¿‡å‚æ•°ç¡®å®šåˆå§‹åŒ–äº¤æ˜“ä»£ç 
+	//Í¨¹ı²ÎÊıÈ·¶¨³õÊ¼»¯½»Ò×´úÂë
 	std::string codes = cfg->getCString("codes");
 	auto ayCodes = StrUtil::split(codes, ",");
 	for (auto& code : ayCodes)
@@ -77,7 +77,7 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		WTSKlineSlice *kline = ctx->stra_get_bars(code.c_str(), _period.c_str(), _count);
 		if (kline == NULL)
 		{
-			//è¿™é‡Œå¯ä»¥è¾“å‡ºä¸€äº›æ—¥å¿—
+			//ÕâÀï¿ÉÒÔÊä³öÒ»Ğ©ÈÕÖ¾
 			return;
 		}
 
@@ -101,7 +101,7 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		double hc = closes->maxvalue(-days, -2);
 		double lc = closes->minvalue(-days, -2);
 		double curPx = closes->at(-1);
-		closes->release();///!!!è¿™ä¸ªé‡Šæ”¾ä¸€å®šè¦åš
+		closes->release();///!!!Õâ¸öÊÍ·ÅÒ»¶¨Òª×ö
 
 		double openPx = kline->at(-1)->open;
 		double highPx = kline->at(-1)->high;
@@ -118,14 +118,14 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 			if (highPx >= upper_bound)
 			{
 				ctx->stra_set_position(curCode.c_str(), 1 * trdUnit, "DT_EnterLong");
-				//å‘ä¸Šçªç ´
-				ctx->stra_log_info(fmt::format("{} å‘ä¸Šçªç ´{}>={},å¤šä»“è¿›åœº", curCode.c_str(), highPx, upper_bound).c_str());
+				//ÏòÉÏÍ»ÆÆ
+				ctx->stra_log_info(fmt::sprintf("%s ÏòÉÏÍ»ÆÆ%.2f>=%.2f,¶à²Ö½ø³¡", curCode.c_str(), highPx, upper_bound).c_str());
 			}
 			else if (lowPx <= lower_bound && !_isstk)
 			{
 				ctx->stra_set_position(curCode.c_str(), -1 * trdUnit, "DT_EnterShort");
-				//å‘ä¸‹çªç ´
-				ctx->stra_log_info(fmt::format("{} å‘ä¸‹çªç ´{}<={},ç©ºä»“è¿›åœº", curCode.c_str(), lowPx, lower_bound).c_str());
+				//ÏòÏÂÍ»ÆÆ
+				ctx->stra_log_info(fmt::sprintf("%s ÏòÏÂÍ»ÆÆ%.2f<=%.2f,¿Õ²Ö½ø³¡", curCode.c_str(), lowPx, lower_bound).c_str());
 			}
 		}
 		//else if(curPos > 0)
@@ -133,9 +133,9 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		{
 			if (lowPx <= lower_bound)
 			{
-				//å¤šä»“å‡ºåœº
+				//¶à²Ö³ö³¡
 				ctx->stra_set_position(curCode.c_str(), 0, "DT_ExitLong");
-				ctx->stra_log_info(fmt::format("{} å‘ä¸‹çªç ´{}<={},å¤šä»“å‡ºåœº", curCode.c_str(), lowPx, lower_bound).c_str());
+				ctx->stra_log_info(fmt::sprintf("%s ÏòÏÂÍ»ÆÆ%.2f<=%.2f,¶à²Ö³ö³¡", curCode.c_str(), lowPx, lower_bound).c_str());
 			}
 		}
 		//else if(curPos < 0)
@@ -143,13 +143,13 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		{
 			if (highPx >= upper_bound && !_isstk)
 			{
-				//ç©ºä»“å‡ºåœº
+				//¿Õ²Ö³ö³¡
 				ctx->stra_set_position(curCode.c_str(), 0, "DT_ExitShort");
-				ctx->stra_log_info(fmt::format("{} å‘ä¸Šçªç ´{}>={},ç©ºä»“å‡ºåœº", curCode.c_str(), highPx, upper_bound).c_str());
+				ctx->stra_log_info(fmt::sprintf("%s ÏòÉÏÍ»ÆÆ%.2f>=%.2f,¿Õ²Ö³ö³¡", curCode.c_str(), highPx, upper_bound).c_str());
 			}
 		}
 
-		//è¿™ä¸ªé‡Šæ”¾ä¸€å®šè¦åš
+		//Õâ¸öÊÍ·ÅÒ»¶¨Òª×ö
 		kline->release();
 	}
 }

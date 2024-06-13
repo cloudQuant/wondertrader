@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
 * \file MfStrategyMgr.cpp
 * \project	WonderTrader
 *
@@ -30,7 +30,7 @@ bool SelStrategyMgr::loadFactories(const char* path)
 {
 	if (!StdFile::exists(path))
 	{
-		WTSLogger::error("Directory {} of SEL strategy factory not exists", path);
+		WTSLogger::error("Directory %s of SEL strategy factory not exists", path);
 		return false;
 	}
 
@@ -71,7 +71,8 @@ bool SelStrategyMgr::loadFactories(const char* path)
 			fInfo._remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteMfStrategyFact");
 			fInfo._fact = fact;
 
-			WTSLogger::info("SEL strategy factory[{}] loaded", fact->getName());
+			//WTSLogger::info("CTA²ßÂÔ¹¤³§[%s]¼ÓÔØ³É¹¦", fact->getName());
+			WTSLogger::info("SEL strategy factory[%s] loaded", fact->getName());
 
 			count++;
 		}
@@ -83,7 +84,8 @@ bool SelStrategyMgr::loadFactories(const char* path)
 
 	}
 
-	WTSLogger::info("{} SEL strategy factories in directory[{}] loaded", count, path);
+	//WTSLogger::info("Ä¿Â¼[%s]ÏÂ¹²¼ÓÔØ%u¸öCTA²ßÂÔ¹¤³§", path, count);
+	WTSLogger::info("%u SEL strategy factories in directory[%s] loaded", count, path);
 
 	return true;
 }

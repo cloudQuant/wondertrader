@@ -1,4 +1,4 @@
-﻿#include "ExpHftMocker.h"
+#include "ExpHftMocker.h"
 #include "WtBtRunner.h"
 
 #include "../Share/StrUtil.hpp"
@@ -79,7 +79,6 @@ void ExpHftMocker::on_tick_updated(const char* stdCode, WTSTickData* newTick)
 	if (it == _tick_subs.end())
 		return;
 
-	HftMocker::on_tick_updated(stdCode, newTick);
 	getRunner().ctx_on_tick(_context_id, stdCode, newTick, ET_HFT);
 }
 

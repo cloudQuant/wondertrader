@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtHftEngine.h
  * \project	WonderTrader
  *
@@ -28,12 +28,12 @@ public:
 
 public:
 	//////////////////////////////////////////////////////////////////////////
-	//WtEngine æ¥å£
+	//WtEngine ½Ó¿Ú
 	virtual void init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHotMgr* hotMgr, EventNotifier* notifier) override;
 
-	virtual void run() override;
+	virtual void run(bool bAsync = false) override;
 
-	virtual void handle_push_quote(WTSTickData* newTick) override;
+	virtual void handle_push_quote(WTSTickData* newTick, uint32_t hotFlag) override;
 	virtual void handle_push_order_detail(WTSOrdDtlData* curOrdDtl) override;
 	virtual void handle_push_order_queue(WTSOrdQueData* curOrdQue) override;
 	virtual void handle_push_transaction(WTSTransData* curTrans) override;
@@ -63,16 +63,16 @@ public:
 	void sub_transaction(uint32_t sid, const char* stdCode);
 
 private:
-	typedef wt_hashmap<uint32_t, HftContextPtr> ContextMap;
+	typedef faster_hashmap<uint32_t, HftContextPtr> ContextMap;
 	ContextMap		_ctx_map;
 
 	WtHftRtTicker*	_tm_ticker;
 	WTSVariant*		_cfg;
 
 
-	StraSubMap		_ordque_sub_map;	//å§”æ‰˜é˜Ÿåˆ—è®¢é˜…è¡¨
-	StraSubMap		_orddtl_sub_map;	//å§”æ‰˜æ˜ç»†è®¢é˜…è¡¨
-	StraSubMap		_trans_sub_map;		//æˆäº¤æ˜ç»†è®¢é˜…è¡¨
+	StraSubMap		_ordque_sub_map;	//Î¯ÍĞ¶ÓÁĞ¶©ÔÄ±í
+	StraSubMap		_orddtl_sub_map;	//Î¯ÍĞÃ÷Ï¸¶©ÔÄ±í
+	StraSubMap		_trans_sub_map;		//³É½»Ã÷Ï¸¶©ÔÄ±í
 };
 
 NS_WTP_END

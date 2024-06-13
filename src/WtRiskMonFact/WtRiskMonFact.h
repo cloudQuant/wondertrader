@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtRiskMonFact.h
  *
  * \author Wesley

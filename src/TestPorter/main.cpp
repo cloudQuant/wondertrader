@@ -1,54 +1,53 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include "../WtPorter/WtPorter.h"
 //#include "../WtExecMon/WtExecPorter.h"
 
 #include "../Includes/WTSStruct.h"
 #include "../Share/DLLHelper.hpp"
 #include "../Share/CodeHelper.hpp"
-#include "../Share/fmtlib.h"
 
 void PORTER_FLAG on_init(CtxHandler ctxid)
 {
-	fmt::print("on_init\n");
+	printf("on_init\r\n");
 	hft_sub_ticks(ctxid, "CFFEX.IF.HOT");
 }
 
 void PORTER_FLAG on_tick(CtxHandler ctxid, const char* stdCode, WTSTickStruct* newTick)
 {
-	fmt::print("on_tick\n");
+	printf("on_tick\r\n");
 }
 
 void PORTER_FLAG on_calc(CtxHandler ctxid, WtUInt32 uDate, WtUInt32 uTime)
 {
-	fmt::print("on_calc\n");
+	printf("on_calc\r\n");
 }
 
 void PORTER_FLAG on_bar(CtxHandler ctxid, const char* code, const char* period, WTSBarStruct* newBar)
 {
-	fmt::print("on_bar\n");
+	printf("on_bar\r\n");
 }
 
 void PORTER_FLAG on_getbar(CtxHandler ctxid, const char* code, const char* period, WTSBarStruct* bar, bool isLast)
 {
 	if (bar)
-		fmt::print("on_getbar: {}\n", bar->time);
+		printf("on_getbar%I64d\r\n", bar->time);
 	else
 		int x = 1;
 }
 
 void PORTER_FLAG on_getticks(CtxHandler cHandle, const char* code, WTSTickStruct* tick, bool isLast)
 {
-	fmt::print("on_getticks\n");
+	printf("on_getticks\r\n");
 }
 
 void PORTER_FLAG on_event(WtUInt32 evtId, WtUInt32 curDate, WtUInt32 curTime)
 {
-	fmt::print("on_event\n");
+	printf("on_event\r\n");
 }
 
 void PORTER_FLAG on_channel_evt(CtxHandler cHandle, const char* trader, WtUInt32 evtid)
 {
-	fmt::print("on_channel_evt\n");
+	printf("on_channel_evt\r\n");
 	double undone = hft_get_undone(cHandle, "CFFEX.IF.HOT");
 }
 
@@ -97,7 +96,7 @@ void test_porter()
 
 	run_porter(true);
 
-	fmt::print("press enter key to exit\n");
+	printf("press enter key to exit\n");
 	getchar();
 
 	release_porter();

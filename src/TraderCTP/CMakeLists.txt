@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 #2. 确定工程名
 PROJECT(TraderCTP LANGUAGES CXX)
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 11)
 
 SET(SRC  
 	${PROJECT_SOURCE_DIR}/TraderCTP.cpp
@@ -20,7 +20,7 @@ ADD_LIBRARY(TraderCTP SHARED ${SRC})
 IF(MSVC)
 ELSE(GNUCC)
 	SET(LIBS
-		pthread
+		boost_thread
 		boost_filesystem
 		dl
 	)

@@ -1,4 +1,4 @@
-ï»¿#include "WtDistExecuter.h"
+#include "WtDistExecuter.h"
 
 #include "../Includes/WTSVariant.hpp"
 
@@ -31,7 +31,7 @@ bool WtDistExecuter::init(WTSVariant* params)
 	return true;
 }
 
-void WtDistExecuter::set_position(const wt_hashmap<std::string, double>& targets)
+void WtDistExecuter::set_position(const faster_hashmap<LongKey, double>& targets)
 {
 	for (auto it = targets.begin(); it != targets.end(); it++)
 	{
@@ -43,10 +43,10 @@ void WtDistExecuter::set_position(const wt_hashmap<std::string, double>& targets
 		_target_pos[stdCode] = newVol;
 		if (!decimal::eq(oldVol, newVol))
 		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}]{}ç›®æ ‡ä»“ä½æ›´æ–°: {} -> {}", _name.c_str(), stdCode, oldVol, newVol);
+			WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "[{}]{}Ä¿±ê²ÖÎ»¸üĞÂ: {} -> {}", _name.c_str(), stdCode, oldVol, newVol);
 		}
 
-		//è¿™é‡Œå¹¿æ’­ç›®æ ‡ä»“ä½
+		//ÕâÀï¹ã²¥Ä¿±ê²ÖÎ»
 	}
 }
 
@@ -59,13 +59,13 @@ void WtDistExecuter::on_position_changed(const char* stdCode, double targetPos)
 
 	if (!decimal::eq(oldVol, targetPos))
 	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}]{}ç›®æ ‡ä»“ä½æ›´æ–°: {} -> {}", _name.c_str(), stdCode, oldVol, targetPos);
+		WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "[{}]{}Ä¿±ê²ÖÎ»¸üĞÂ: {} -> {}", _name.c_str(), stdCode, oldVol, targetPos);
 	}
 
-	//è¿™é‡Œå¹¿æ’­ç›®æ ‡ä»“ä½
+	//ÕâÀï¹ã²¥Ä¿±ê²ÖÎ»
 }
 
 void WtDistExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 {
-	//åˆ†å¸ƒå¼æ‰§è¡Œå™¨ä¸éœ€è¦å¤„ç†ontick
+	//·Ö²¼Ê½Ö´ĞĞÆ÷²»ĞèÒª´¦Àíontick
 }

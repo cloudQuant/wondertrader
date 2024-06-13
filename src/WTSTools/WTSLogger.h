@@ -1,16 +1,15 @@
-ï»¿/*!
+/*!
  * \file WTSLogger.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief æ—¥å¿—æ¨¡å—å®šä¹‰
+ * \brief ÈÕÖ¾Ä£¿é¶¨Òå
  */
 #pragma once
 #include "../Includes/WTSTypes.h"
 #include "../Includes/WTSCollection.hpp"
-#include "../Share/fmtlib.h"
 
 #include <memory>
 #include <sstream>
@@ -18,8 +17,8 @@
 #include <set>
 
 //By Wesley @ 2022.01.05
-//spdlogå‡çº§åˆ°1.9.2
-//åŒæ—¶ä½¿ç”¨å¤–éƒ¨çš„fmt 8.1.0
+//spdlogÉı¼¶µ½1.9.2
+//Í¬Ê±Ê¹ÓÃÍâ²¿µÄfmt 8.1.0
 #include <spdlog/spdlog.h>
 
 typedef std::shared_ptr<spdlog::logger> SpdLoggerPtr;
@@ -32,6 +31,23 @@ NS_WTP_END
 USING_NS_WTP;
 
 #define MAX_LOG_BUF_SIZE 2048
+
+#include <spdlog/fmt/bundled/printf.h>
+template<typename... Args>
+inline void fmt_print_impl(char* buf, const char* format, const Args&... args)
+{
+	static std::string s;
+	s = std::move(fmt::sprintf(format, args...));
+	memcpy(buf, s.c_str(), s.size());
+	buf[s.size()] = '\0';
+}
+
+template<typename... Args>
+inline void fmt_format_impl(char* buf, const char* format, const Args&... args)
+{
+	memset(buf, 0, MAX_LOG_BUF_SIZE);
+	fmt::format_to(buf, format, args...);
+}
 
 
 class WTSLogger
@@ -50,23 +66,23 @@ private:
 
 public:
 	/*
-	 *	ç›´æ¥è¾“å‡º
+	 *	Ö±½ÓÊä³ö
 	 */
 	static void log_raw(WTSLogLevel ll, const char* message);
 
 	/*
-	 *	åˆ†ç±»è¾“å‡º
+	 *	·ÖÀàÊä³ö
 	 */
 	static void log_raw_by_cat(const char* catName, WTSLogLevel ll, const char* message);
 
 	/*
-	 *	åŠ¨æ€åˆ†ç±»è¾“å‡º
+	 *	¶¯Ì¬·ÖÀàÊä³ö
 	 */
 	static void log_dyn_raw(const char* patttern, const char* catName, WTSLogLevel ll, const char* message);
 
-
 //////////////////////////////////////////////////////////////////////////
-//fmt::formaté£æ ¼æ¥å£
+//printf·ç¸ñ½Ó¿Ú
+#pragma region "printf style apis"
 public:
 	template<typename... Args>
 	static void debug(const char* format, const Args& ...args)
@@ -74,7 +90,7 @@ public:
 		if (m_logLevel > LL_DEBUG || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		if (!m_bInited)
 		{
@@ -91,7 +107,7 @@ public:
 		if (m_logLevel > LL_INFO || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		if (!m_bInited)
 		{
@@ -108,7 +124,7 @@ public:
 		if (m_logLevel > LL_WARN || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		if (!m_bInited)
 		{
@@ -125,7 +141,7 @@ public:
 		if (m_logLevel > LL_ERROR || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		if (!m_bInited)
 		{
@@ -142,7 +158,7 @@ public:
 		if (m_logLevel > LL_FATAL || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		if (!m_bInited)
 		{
@@ -159,7 +175,7 @@ public:
 		if (m_logLevel > ll || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		log_raw(ll, m_buffer);
 	}
@@ -170,22 +186,8 @@ public:
 		if (m_logLevel > ll || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
-		log_raw_by_cat(catName, ll, m_buffer);
-	}
-
-	template<typename... Args>
-	static void log_by_cat_prefix(const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
-	{
-		if (m_logLevel > ll || m_bStopped)
-			return;
-
-		m_buffer[0] = '[';
-		strcpy(m_buffer + 1, catName);
-		auto offset = strlen(catName);
-		m_buffer[offset + 1] = ']';
-		char* s = m_buffer + offset + 2;
 		log_raw_by_cat(catName, ll, m_buffer);
 	}
 
@@ -195,26 +197,134 @@ public:
 		if (m_logLevel > ll || m_bStopped)
 			return;
 
-		fmtutil::format_to(m_buffer, format, args...);
+		fmt_print_impl(m_buffer, format, args...);
 
 		log_dyn_raw(patttern, catName, ll, m_buffer);
 	}
+#pragma endregion "printf style apis"
+
+//////////////////////////////////////////////////////////////////////////
+//fmt::format·ç¸ñ½Ó¿Ú
+#pragma region "format style apis"
+public:
+	template<typename... Args>
+	static void debug_f(const char* format, const Args& ...args)
+	{
+		if (m_logLevel > LL_DEBUG || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		if (!m_bInited)
+		{
+			print_message(m_buffer);
+			return;
+		}
+
+		debug_imp(m_rootLogger, m_buffer);
+	}
 
 	template<typename... Args>
-	static void log_dyn_prefix(const char* patttern, const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
+	static void info_f(const char* format, const Args& ...args)
+	{
+		if (m_logLevel > LL_INFO || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		if (!m_bInited)
+		{
+			print_message(m_buffer);
+			return;
+		}
+
+		info_imp(m_rootLogger, m_buffer);
+	}
+
+	template<typename... Args>
+	static void warn_f(const char* format, const Args& ...args)
+	{
+		if (m_logLevel > LL_WARN || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		if (!m_bInited)
+		{
+			print_message(m_buffer);
+			return;
+		}
+
+		warn_imp(m_rootLogger, m_buffer);
+	}
+
+	template<typename... Args>
+	static void error_f(const char* format, const Args& ...args)
+	{
+		if (m_logLevel > LL_ERROR || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		if (!m_bInited)
+		{
+			print_message(m_buffer);
+			return;
+		}
+
+		error_imp(m_rootLogger, m_buffer);
+	}
+
+	template<typename... Args>
+	static void fatal_f(const char* format, const Args& ...args)
+	{
+		if (m_logLevel > LL_FATAL || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		if (!m_bInited)
+		{
+			print_message(m_buffer);
+			return;
+		}
+
+		fatal_imp(m_rootLogger, m_buffer);
+	}
+
+	template<typename... Args>
+	static void log_f(WTSLogLevel ll, const char* format, const Args& ...args)
 	{
 		if (m_logLevel > ll || m_bStopped)
 			return;
 
-		m_buffer[0] = '[';
-		strcpy(m_buffer+1, catName);
-		auto offset = strlen(catName);
-		m_buffer[offset + 1] = ']';
-		char* s = m_buffer + offset + 2;
-		fmtutil::format_to(s, format, args...);
-		log_dyn_raw(patttern, catName, ll, m_buffer);
+		fmt_format_impl(m_buffer, format, args...);
+
+		log_raw(ll, m_buffer);
 	}
 
+	template<typename... Args>
+	static void log_by_cat_f(const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
+	{
+		if (m_logLevel > ll || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		log_raw_by_cat(catName, ll, m_buffer);
+	}
+
+	template<typename... Args>
+	static void log_dyn_f(const char* patttern, const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
+	{
+		if (m_logLevel > ll || m_bStopped)
+			return;
+
+		fmt_format_impl(m_buffer, format, args...);
+
+		log_dyn_raw(patttern, catName, ll, m_buffer);
+	}
+#pragma endregion "format style apis"
 public:
 	static void init(const char* propFile = "logcfg.json", bool isFile = true, ILogHandler* handler = NULL);
 
@@ -234,7 +344,7 @@ private:
 	static SpdLoggerPtr			m_rootLogger;
 
 	typedef WTSHashMap<std::string>	LogPatterns;
-	static LogPatterns*				m_mapPatterns;
+	static LogPatterns*			m_mapPatterns;
 	static std::set<std::string>	m_setDynLoggers;
 
 	static thread_local char	m_buffer[MAX_LOG_BUF_SIZE];

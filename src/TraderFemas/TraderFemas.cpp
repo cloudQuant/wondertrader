@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderFemas.cpp
  * \project	WonderTrader
  *
@@ -28,7 +28,10 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 	if (sink == NULL)
 		return;
 
-	const char* buffer = fmtutil::format(format, args...);
+	static thread_local char buffer[512] = { 0 };
+	memset(buffer, 0, 512);
+	fmt::format_to(buffer, format, args...);
+
 	sink->handleTraderLog(ll, buffer);
 }
 
@@ -174,13 +177,13 @@ void TraderFemas::connect()
 	m_pUserAPI->RegisterSpi(this);
 	if(m_bQuickStart)
 	{
-		m_pUserAPI->SubscribePublicTopic(USTP_TERT_QUICK);				// æ³¨å†Œå…¬æœ‰æµ
-		m_pUserAPI->SubscribePrivateTopic(USTP_TERT_QUICK);				// æ³¨å†Œç§æœ‰æµ
+		m_pUserAPI->SubscribePublicTopic(USTP_TERT_QUICK);				// ×¢²á¹«ÓÐÁ÷
+		m_pUserAPI->SubscribePrivateTopic(USTP_TERT_QUICK);				// ×¢²áË½ÓÐÁ÷
 	}
 	else
 	{
-		m_pUserAPI->SubscribePublicTopic(USTP_TERT_RESUME);				// æ³¨å†Œå…¬æœ‰æµ
-		m_pUserAPI->SubscribePrivateTopic(USTP_TERT_RESUME);			// æ³¨å†Œç§æœ‰æµ
+		m_pUserAPI->SubscribePublicTopic(USTP_TERT_RESUME);				// ×¢²á¹«ÓÐÁ÷
+		m_pUserAPI->SubscribePrivateTopic(USTP_TERT_RESUME);			// ×¢²áË½ÓÐÁ÷
 	}
 
 	m_pUserAPI->RegisterFront((char*)m_strFront.c_str());
@@ -223,9 +226,9 @@ bool TraderFemas::makeEntrustID(char* buffer, int length)
 
 	try
 	{
+		memset(buffer, 0, length);
 		uint32_t orderref = genLocalOrdID();
-		//sprintf(buffer, "%s%012d", m_strSessionID.c_str(), orderref);
-		fmtutil::format_to(buffer, "{}{:012d}", m_strSessionID.c_str(), orderref);
+		sprintf(buffer, "%s%012d", m_strSessionID.c_str(), orderref);
 		return true;
 	}
 	catch(...)
@@ -273,11 +276,11 @@ int TraderFemas::doLogin()
 	strcpy(req.BrokerID, m_strBroker.c_str());
 	strcpy(req.UserID, m_strUser.c_str());
 	strcpy(req.Password, m_strPass.c_str());
-	strcpy(req.UserProductInfo, m_strProduct.c_str());
+	//strcpy(req.UserProductInfo, productInfo);
 	int iResult = m_pUserAPI->ReqUserLogin(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending login request failed: {}", iResult);
+		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending login request failed: %d", iResult);
 	}
 
 	return 0;
@@ -287,7 +290,6 @@ int TraderFemas::login( const char* user, const char* pass, const char* productI
 {
 	m_strUser = user;
 	m_strPass = pass;
-	m_strProduct = productInfo;
 
 	if(m_pUserAPI == NULL)
 	{
@@ -314,7 +316,7 @@ int TraderFemas::logout()
 	int iResult = m_pUserAPI->ReqUserLogout(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending logout request failed: {}", iResult);
+		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending logout request failed: %d", iResult);
 	}
 
 	return 0;
@@ -329,12 +331,12 @@ int TraderFemas::orderInsert(WTSEntrust* entrust)
 
 	CUstpFtdcInputOrderField req;
 	memset(&req, 0, sizeof(req));
-	///ç»çºªå…¬å¸ä»£ç 
+	///¾­¼Í¹«Ë¾´úÂë
 	strcpy(req.BrokerID, m_strBroker.c_str());
-	///æŠ•èµ„è€…ä»£ç 
+	///Í¶×ÊÕß´úÂë
 	strcpy(req.UserID, m_strUser.c_str());
 	strcpy(req.InvestorID, m_strUser.c_str());
-	///åˆçº¦ä»£ç 
+	///ºÏÔ¼´úÂë
 	strcpy(req.InstrumentID, entrust->getCode());
 
 	WTSContractInfo* ct = entrust->getContractInfo();
@@ -345,14 +347,14 @@ int TraderFemas::orderInsert(WTSEntrust* entrust)
 
 	if(strlen(entrust->getUserTag()) == 0)
 	{
-		///æŠ¥å•å¼•ç”¨
-		fmtutil::format_to(req.UserOrderLocalID, "{}{:012d}", m_strSessionID.c_str(), genLocalOrdID());
+		///±¨µ¥ÒýÓÃ
+		sprintf(req.UserOrderLocalID, "%s%012u", m_strSessionID.c_str(), genLocalOrdID());
 	}
 	else
 	{
 		strcpy(req.UserOrderLocalID, entrust->getUserTag());
 	}
-	//ç”Ÿæˆæœ¬åœ°å§”æ‰˜å•å·
+	//Éú³É±¾µØÎ¯ÍÐµ¥ºÅ
 	//entrust->setEntrustID(req.UserOrderLocalID);
 
 	req.OrderPriceType = wrapPriceType(entrust->getPriceType(), strcmp(ct->getExchg(), "CFFEX") == 0);
@@ -383,7 +385,7 @@ int TraderFemas::orderInsert(WTSEntrust* entrust)
 	int iResult = m_pUserAPI->ReqOrderInsert(&req, genRequestID());
 	if(iResult != 0)
 	{
-		write_log(m_sink,LL_ERROR, "[TraderFemas] Order inserting failed: {}", iResult);
+		write_log(m_sink,LL_ERROR, "[TraderFemas] Order inserting failed: %d", iResult);
 	}
 
 	return 0;
@@ -404,8 +406,11 @@ int TraderFemas::orderAction( WTSEntrustAction* action )
 	strcpy(req.InvestorID, m_strUser.c_str());
 	strcpy(req.UserID, m_strUser.c_str());
 	strcpy(req.UserOrderLocalID, action->getEntrustID());
-	fmtutil::format_to(req.UserOrderActionLocalID, "{}{:012d}", m_strSessionID.c_str(), genLocalOrdID());
+	sprintf(req.UserOrderActionLocalID, "%s%012u", m_strSessionID.c_str(), genLocalOrdID());
 	req.ActionFlag = wrapActionFlag(action->getActionFlag());
+	req.LimitPrice = action->getPrice();
+
+	req.VolumeChange = (int32_t)action->getVolume();
 
 	strcpy(req.OrderSysID, action->getOrderID());
 	strcpy(req.ExchangeID, wrapExchg(action->getExchg()));
@@ -413,7 +418,7 @@ int TraderFemas::orderAction( WTSEntrustAction* action )
 	int iResult = m_pUserAPI->ReqOrderAction(&req, genRequestID());
 	if(iResult != 0)
 	{
-		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending cancel request failed: {}", iResult);
+		write_log(m_sink,LL_ERROR, "[TraderFemas] Sending cancel request failed: %d", iResult);
 	}
 
 	return 0;	
@@ -535,7 +540,7 @@ void TraderFemas::OnQryFrontDisconnected(int nReason)
 
 void TraderFemas::OnHeartBeatWarning( int nTimeLapse )
 {
-	write_log(m_sink,LL_DEBUG, "[TraderFemas][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
+	write_log(m_sink,LL_DEBUG, "[TraderFemas][%s-%s] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
 void TraderFemas::OnRspQueryUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
@@ -554,7 +559,7 @@ void TraderFemas::OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField *pDSU
 	}
 	else
 	{
-		write_log(m_sink,LL_ERROR, "[TraderFemas][{}-{}] Authentiation failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
+		write_log(m_sink,LL_ERROR, "[TraderFemas][%s-%s] Authentiation failed: %s", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
 		m_wrapperState = WS_LOGINFAILED;
 
 		if (m_sink)
@@ -568,23 +573,23 @@ void TraderFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUs
 	{
 		m_wrapperState = WS_LOGINED;
 
-		// ä¿å­˜ä¼šè¯å‚æ•°
+		// ±£´æ»á»°²ÎÊý
 		m_strSessionID = pRspUserLogin->MaxOrderLocalID;
 		StrUtil::trim(m_strSessionID, "0", false, true);
 		
-		///èŽ·å–å½“å‰äº¤æ˜“æ—¥
+		///»ñÈ¡µ±Ç°½»Ò×ÈÕ
 		m_lDate = atoi(m_pUserAPI->GetTradingDay());
 
-		write_log(m_sink,LL_INFO,"[TraderFemas][{}-{}] Login succeed...", m_strBroker.c_str(), m_strUser.c_str());
+		write_log(m_sink,LL_INFO,"[TraderFemas][%s-%s] Login succeed...", m_strBroker.c_str(), m_strUser.c_str());
 
-		//æ®è¯´é£žé©¬ä¸æ”¯æŒç»“ç®—,æ‰€ä»¥æŸ¥ä¸åˆ°ç»“ç®—å•
-		write_log(m_sink,LL_INFO, "[TraderFemas][{}-{}] Querying confirming state of settlement data...", m_strBroker.c_str(), m_strUser.c_str());
+		//¾ÝËµ·ÉÂí²»Ö§³Ö½áËã,ËùÒÔ²é²»µ½½áËãµ¥
+		write_log(m_sink,LL_INFO, "[TraderFemas][%s-%s] Querying confirming state of settlement data...", m_strBroker.c_str(), m_strUser.c_str());
 		if (m_bQryOnline)
 			onInitialized();
 	}
 	else
 	{
-		write_log(m_sink,LL_ERROR,"[TraderFemas][{}-{}] Login failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
+		write_log(m_sink,LL_ERROR,"[TraderFemas][%s-%s] Login failed: %s", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
 		m_wrapperState = WS_LOGINFAILED;
 
 		if(m_sink)
@@ -640,6 +645,8 @@ void TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRsp
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
 	{
 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+		accountInfo->setDescription(StrUtil::printf("%s-%s", m_strBroker.c_str(), m_strUser.c_str()).c_str());
+		//accountInfo->setUsername(m_strUserName.c_str());
 		accountInfo->setPreBalance(pRspInvestorAccount->PreBalance);
 		accountInfo->setCloseProfit(pRspInvestorAccount->CloseProfit);
 		accountInfo->setDynProfit(pRspInvestorAccount->PositionProfit);
@@ -719,7 +726,7 @@ void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pR
 			//if (pos->getTotalPosition() > 0 && pos->getMargin() == 0)
 			if (decimal::lt(pos->getTotalPosition(), 0.0) && decimal::eq(pos->getMargin(), 0.0))
 			{
-				//æœ‰ä»“ä½,ä½†æ˜¯ä¿è¯é‡‘ä¸º0,åˆ™è¯´æ˜Žæ˜¯å¥—åˆ©åˆçº¦,å•ä¸ªåˆçº¦çš„å¯ç”¨æŒä»“å…¨éƒ¨ç½®ä¸º0
+				//ÓÐ²ÖÎ»,µ«ÊÇ±£Ö¤½ðÎª0,ÔòËµÃ÷ÊÇÌ×ÀûºÏÔ¼,µ¥¸öºÏÔ¼µÄ¿ÉÓÃ³Ö²ÖÈ«²¿ÖÃÎª0
 				pos->setAvailNewPos(0);
 				pos->setAvailPrePos(0);
 			}
@@ -801,7 +808,7 @@ void TraderFemas::OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoFie
 
 void TraderFemas::onInitialized()
 {
-	write_log(m_sink,LL_INFO, "[TraderFemas][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
+	write_log(m_sink,LL_INFO, "[TraderFemas][%s-%s] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
 	m_wrapperState = WS_ALLREADY;
 	if (m_sink)
 		m_sink->onLoginResult(true, "", m_lDate);
@@ -810,7 +817,7 @@ void TraderFemas::onInitialized()
 void TraderFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
 {
 	if (m_sink)
-		write_log(m_sink,LL_ERROR, "[TraderFemas][{}-{}] Error occured: {}, request id: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg, nRequestID);
+		write_log(m_sink,LL_ERROR, "[TraderFemas][TraderFemas] Error occured: %s, request id: %d", pRspInfo->ErrorMsg, nRequestID);
 }
 
 void TraderFemas::OnRtnOrder( CUstpFtdcOrderField *pOrder )
@@ -1073,15 +1080,15 @@ WTSTradeInfo* TraderFemas::makeTradeRecord(CUstpFtdcTradeField *tradeField)
 	uint32_t uDate = strtoul(tradeField->TradingDay, NULL, 10);
 	//if(uDate == m_pContractMgr->getTradingDate())
 	//{
-	//	//å¦‚æžœå½“å‰æ—¥æœŸå’Œäº¤æ˜“æ—¥ä¸€è‡´,ä¸”æ—¶é—´å¤§äºŽ21ç‚¹,è¯´æ˜Žæ˜¯å¤œç›˜,ä¹Ÿå°±æ˜¯å®žé™…æ—¥æœŸè¦å•ç‹¬è®¡ç®—
+	//	//Èç¹ûµ±Ç°ÈÕÆÚºÍ½»Ò×ÈÕÒ»ÖÂ,ÇÒÊ±¼ä´óÓÚ21µã,ËµÃ÷ÊÇÒ¹ÅÌ,Ò²¾ÍÊÇÊµ¼ÊÈÕÆÚÒªµ¥¶À¼ÆËã
 	//	if (uTime / 10000 >= 21)
 	//	{
 	//		uDate = m_pMarketMgr->getPrevTDate(mInfo->getExchange(), uDate, 1);
 	//	}
 	//	else if(uTime <= 3)
 	//	{
-	//		//å¦‚æžœåœ¨3ç‚¹ä»¥å†…,å°±è¦å…ˆèŽ·å–ä¸Šä¸€ä¸ªäº¤æ˜“æ—¥,å†èŽ·å–ä¸‹ä¸€ä¸ªè‡ªç„¶æ—¥
-	//		//è¿™æ ·åšçš„ç›®çš„æ˜¯,é‡åˆ°å‘¨äº”æ™šä¸Šçš„æƒ…å†µ,å¯ä»¥å¤„ç†è¿‡æ¥
+	//		//Èç¹ûÔÚ3µãÒÔÄÚ,¾ÍÒªÏÈ»ñÈ¡ÉÏÒ»¸ö½»Ò×ÈÕ,ÔÙ»ñÈ¡ÏÂÒ»¸ö×ÔÈ»ÈÕ
+	//		//ÕâÑù×öµÄÄ¿µÄÊÇ,Óöµ½ÖÜÎåÍíÉÏµÄÇé¿ö,¿ÉÒÔ´¦Àí¹ýÀ´
 	//		uDate = m_pMarketMgr->getPrevTDate(mInfo->getExchange(), uDate, 1);
 	//		uDate = TimeUtils::getNextDate(uDate);
 	//	}
@@ -1125,12 +1132,6 @@ void TraderFemas::OnErrRtnOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUs
 void TraderFemas::OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo)
 {
 
-}
-
-void TraderFemas::OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus)
-{
-	if (m_sink)
-		m_sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
 }
 
 bool TraderFemas::isConnected()

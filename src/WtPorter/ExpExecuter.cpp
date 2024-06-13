@@ -1,4 +1,4 @@
-﻿#include "ExpExecuter.h"
+#include "ExpExecuter.h"
 #include "WtRtRunner.h"
 
 extern WtRtRunner& getRunner();
@@ -8,7 +8,7 @@ void ExpExecuter::init()
 	getRunner().executer_init(name());
 }
 
-void ExpExecuter::set_position(const wt_hashmap<std::string, double>& targets)
+void ExpExecuter::set_position(const faster_hashmap<LongKey, double>& targets)
 {
 	for(auto& v : targets)
 	{

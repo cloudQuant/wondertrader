@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 #2. 确定工程名
 PROJECT(QuoteFactory LANGUAGES CXX)
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 11)
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/QuoteFactory)
 
@@ -28,8 +28,7 @@ ELSE(GNUCC)
 	LIST(APPEND LIBS
 		dl
 		boost_filesystem
-        boost_thread
-        pthread
+        	pthread
 		)
 	if(WIN32)
 		LIST(APPEND LIBS

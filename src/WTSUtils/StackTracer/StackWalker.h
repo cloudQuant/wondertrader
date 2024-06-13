@@ -173,6 +173,7 @@ protected:
 		ULONGLONG fileVersion);
 	virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry);
 	virtual void OnDbgHelpErr(LPCSTR szFuncName, DWORD gle, DWORD64 addr);
+	virtual void OnOutput(LPCSTR szText);
 
 	StackWalkerInternal* m_sw;
 	HANDLE               m_hProcess;

@@ -1,4 +1,4 @@
-Ôªø/*!
+/*!
  * /file WtUftRunner.h
  * /project	WonderTrader
  *
@@ -13,7 +13,6 @@
 
 #include "../Includes/ILogHandler.h"
 
-#include "../WtUftCore/EventNotifier.h"
 #include "../WtUftCore/UftStrategyMgr.h"
 
 #include "../WtUftCore/WtUftEngine.h"
@@ -38,9 +37,12 @@ public:
 	~WtUftRunner();
 
 public:
-	void init(const std::string& filename);
+	/*
+	 *	≥ı ºªØ
+	 */
+	bool init();
 
-	bool config(const std::string& filename);
+	bool config();
 
 	void run(bool bAsync = false);
 
@@ -49,7 +51,7 @@ private:
 	bool initParsers(WTSVariant* cfgParser);
 	bool initDataMgr();
 	bool initUftStrategies();
-	bool initEvtNotifier();
+
 	bool initEngine();
 
 //////////////////////////////////////////////////////////////////////////
@@ -67,12 +69,10 @@ private:
 	WtUftDtMgr			_data_mgr;
 
 	WTSBaseDataMgr		_bd_mgr;
-	EventNotifier		_notifier;
+	WTSHotMgr			_hot_mgr;
 
 	UftStrategyMgr		_uft_stra_mgr;
 
 	ActionPolicyMgr		_act_policy;
-
-	bool				_to_exit;
 };
 

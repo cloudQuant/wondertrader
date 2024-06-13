@@ -1,4 +1,4 @@
-﻿#include "ExpDumper.h"
+#include "ExpDumper.h"
 #include "WtDtRunner.h"
 
 extern WtDtRunner& getRunner();

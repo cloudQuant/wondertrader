@@ -1,11 +1,11 @@
-ï»¿/*!
+/*!
  * \file ParserAdapter.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief è¡Œæƒ…è§£ææ¨¡å—é€‚é…ç±»å®šä¹‰
+ * \brief ĞĞÇé½âÎöÄ£¿éÊÊÅäÀà¶¨Òå
  */
 #pragma once
 #include <set>
@@ -22,12 +22,11 @@ USING_NS_WTP;
 class wxMainFrame;
 class WTSBaseDataMgr;
 class DataManager;
-class IndexFactory;
 
 class ParserAdapter : public IParserSpi, private boost::noncopyable
 {
 public:
-	ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr, IndexFactory *idxFactory);
+	ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr);
 	~ParserAdapter();
 
 public:
@@ -61,11 +60,10 @@ private:
 	FuncDeleteParser	_remover;
 	WTSBaseDataMgr*		_bd_mgr;
 	DataManager*		_dt_mgr;
-	IndexFactory*		_idx_fact;
 
 	bool				_stopped;
 
-	typedef wt_hashset<std::string>	ExchgFilter;
+	typedef faster_hashset<std::string>	ExchgFilter;
 	ExchgFilter			_exchg_filter;
 	ExchgFilter			_code_filter;
 	WTSVariant*			_cfg;
@@ -73,7 +71,7 @@ private:
 };
 
 typedef std::shared_ptr<ParserAdapter>	ParserAdapterPtr;
-typedef wt_hashmap<std::string, ParserAdapterPtr>	ParserAdapterMap;
+typedef faster_hashmap<std::string, ParserAdapterPtr>	ParserAdapterMap;
 
 class ParserAdapterMgr : private boost::noncopyable
 {
@@ -86,7 +84,7 @@ public:
 
 	bool	addAdapter(const char* id, ParserAdapterPtr& adapter);
 
-	uint32_t size() const { return (uint32_t)_adapters.size(); }
+	uint32_t size() const { return _adapters.size(); }
 
 public:
 	ParserAdapterMap _adapters;

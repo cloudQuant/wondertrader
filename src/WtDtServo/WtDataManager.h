@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtDataManager.h
  * \project	WonderTrader
  *
@@ -15,7 +15,6 @@
 #include "../Includes/IRdmDtReader.h"
 #include "../Includes/FasterDefs.h"
 #include "../Includes/WTSCollection.hpp"
-#include "../Share/StdUtils.hpp"
 
 
 class WtDtRunner;
@@ -30,7 +29,6 @@ class IBaseDataMgr;
 class IHotMgr;
 class WTSSessionInfo;
 struct WTSBarStruct;
-class WTSCommodityInfo;
 
 class WtDataManager : public IRdmDtReaderSink
 {
@@ -47,49 +45,34 @@ private:
 //IRdmDtReaderSink
 public:
 	/*
-	 *	@brief	è·å–åŸºç¡€æ•°æ®ç®¡ç†æ¥å£æŒ‡é’ˆ
+	 *	@brief	»ñÈ¡»ù´¡Êı¾İ¹ÜÀí½Ó¿ÚÖ¸Õë
 	 */
 	virtual IBaseDataMgr*	get_basedata_mgr() override { return _bd_mgr; }
 
 	/*
-	 *	@brief	è·å–ä¸»åŠ›åˆ‡æ¢è§„åˆ™ç®¡ç†æ¥å£æŒ‡é’ˆ
+	 *	@brief	»ñÈ¡Ö÷Á¦ÇĞ»»¹æÔò¹ÜÀí½Ó¿ÚÖ¸Õë
 	 */
 	virtual IHotMgr*		get_hot_mgr() override { return _hot_mgr; }
 
 	/*
-	 *	@brief	è¾“å‡ºæ•°æ®è¯»å–æ¨¡å—çš„æ—¥å¿—
+	 *	@brief	Êä³öÊı¾İ¶ÁÈ¡Ä£¿éµÄÈÕÖ¾
 	 */
 	virtual void			reader_log(WTSLogLevel ll, const char* message) override;
 
 public:
 	bool	init(WTSVariant* cfg, WtDtRunner* runner);
 
+	void	handle_push_quote(const char* stdCode, WTSTickData* newTick);
+
 	WTSOrdQueSlice* get_order_queue_slice(const char* stdCode, uint64_t stime, uint64_t etime = 0);
 	WTSOrdDtlSlice* get_order_detail_slice(const char* stdCode, uint64_t stime, uint64_t etime = 0);
 	WTSTransSlice* get_transaction_slice(const char* stdCode, uint64_t stime, uint64_t etime = 0);
 
-	WTSTickSlice* get_tick_slice_by_date(const char* stdCode, uint32_t uDate = 0);
-	WTSKlineSlice* get_skline_slice_by_date(const char* stdCode, uint32_t secs, uint32_t uDate = 0);
-	WTSKlineSlice* get_kline_slice_by_date(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t uDate = 0);
-
 	WTSTickSlice* get_tick_slices_by_range(const char* stdCode, uint64_t stime, uint64_t etime = 0);
 	WTSKlineSlice* get_kline_slice_by_range(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime = 0);
 
-	WTSTickSlice* get_tick_slice_by_count(const char* stdCode, uint32_t count, uint64_t etime = 0);
+	WTSTickSlice* get_tick_slices_by_count(const char* stdCode, uint32_t count, uint64_t etime = 0);
 	WTSKlineSlice* get_kline_slice_by_count(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t count, uint64_t etime = 0);
-
-	/*
-	 *	è·å–å¤æƒå› å­
-	 *	@stdCode	åˆçº¦ä»£ç 
-	 *	@commInfo	å“ç§ä¿¡æ¯
-	 */
-	double	get_exright_factor(const char* stdCode, WTSCommodityInfo* commInfo = NULL);
-
-	void	subscribe_bar(const char* stdCode, WTSKlinePeriod period, uint32_t times);
-	void	clear_subbed_bars();
-	void	update_bars(const char* stdCode, WTSTickData* newTick);
-
-	void	clear_cache();
 
 private:
 	IRdmDtReader*			_reader;
@@ -98,9 +81,8 @@ private:
 	IBaseDataMgr*	_bd_mgr;
 	IHotMgr*		_hot_mgr;
 	WtDtRunner*		_runner;
-	bool			_align_by_section;
 
-	//Kçº¿ç¼“å­˜
+	//KÏß»º´æ
 	typedef struct _BarCache
 	{
 		WTSKlineData*	_bars;
@@ -110,12 +92,8 @@ private:
 
 		_BarCache():_last_bartime(0),_period(KP_DAY),_times(1),_bars(NULL){}
 	} BarCache;
-	typedef wt_hashmap<std::string, BarCache>	BarCacheMap;
+	typedef faster_hashmap<std::string, BarCache>	BarCacheMap;
 	BarCacheMap	_bars_cache;
-
-	typedef WTSHashMap<std::string>	RtBarMap;
-	RtBarMap*		_rt_bars;
-	StdUniqueMutex	_mtx_rtbars;
 };
 
 NS_WTP_END

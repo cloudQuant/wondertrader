@@ -1,11 +1,11 @@
-ï»¿/*!
+/*!
  * \file EventCaster.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  *
- * \brief UDPå¹¿æ’­å¯¹è±¡å®šä¹‰
+ * \brief UDP¹ã²¥¶ÔÏó¶¨Òå
  */
 #pragma once
 #include "PorterDefs.h"
@@ -60,13 +60,11 @@ private:
 
 	StdThreadPtr	m_thrdRecv;
 	bool			m_bTerminated;
-	int64_t			m_iCheckTime;
-	bool			m_bNeedCheck;
 
 	std::string		_buffer;
 	FuncMQCallback	_cb_message;
 
-	wt_hashset<std::string> _topics;
+	faster_hashset<std::string> _topics;
 	char			_recv_buf[1024 * 1024];
 };
 

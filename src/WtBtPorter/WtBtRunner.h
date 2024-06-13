@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtBtRunner.h
  * \project	WonderTrader
  *
@@ -24,9 +24,9 @@ USING_NS_WTP;
 
 typedef enum tagEngineType
 {
-	ET_CTA = 999,	//CTAå¼•æ“	
-	ET_HFT,			//é«˜é¢‘å¼•æ“
-	ET_SEL			//é€‰è‚¡å¼•æ“
+	ET_CTA = 999,	//CTAÒıÇæ	
+	ET_HFT,			//¸ßÆµÒıÇæ
+	ET_SEL			//Ñ¡¹ÉÒıÇæ
 } EngineType;
 
 class SelMocker;
@@ -64,7 +64,7 @@ public:
 
 public:
 	void	registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
-		FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone = NULL, FuncStraCondTriggerCallback cbCondTrigger = NULL);
+		FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone = NULL);
 	void	registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 		FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone = NULL);
 	void registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar,
@@ -85,10 +85,9 @@ public:
 		_loader_auto_trans = bAutoTrans;
 	}
 
-	uint32_t	initCtaMocker(const char* name, int32_t slippage = 0, bool hook = false, bool persistData = true, bool bIncremental = false, bool isRatioSlp = false);
+	uint32_t	initCtaMocker(const char* name, int32_t slippage = 0, bool hook = false, bool persistData = true);
 	uint32_t	initHftMocker(const char* name, bool hook = false);
-	uint32_t	initSelMocker(const char* name, uint32_t date, uint32_t time, const char* period, 
-		const char* trdtpl = "CHINA", const char* session = "TRADING", int32_t slippage = 0, bool isRatioSlp = false);
+	uint32_t	initSelMocker(const char* name, uint32_t date, uint32_t time, const char* period, const char* trdtpl = "CHINA", const char* session = "TRADING", int32_t slippage = 0);
 
 	bool	initEvtNotifier(WTSVariant* cfg);
 
@@ -98,7 +97,6 @@ public:
 	void	ctx_on_calc(uint32_t id, uint32_t uDate, uint32_t uTime, EngineType eType);
 	void	ctx_on_calc_done(uint32_t id, uint32_t uDate, uint32_t uTime, EngineType eType);
 	void	ctx_on_bar(uint32_t id, const char* stdCode, const char* period, WTSBarStruct* newBar, EngineType eType);
-	void	ctx_on_cond_triggered(uint32_t id, const char* stdCode, double target, double price, const char* usertag, EngineType eType = ET_CTA);
 
 	void	hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueData* newOrdQue);
 	void	hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtlData* newOrdDtl);
@@ -120,8 +118,6 @@ public:
 	void	enable_tick(bool bEnabled = true);
 
 	void	clear_cache();
-
-	const char*	get_raw_stdcode(const char* stdCode);
 
 	inline CtaMocker*		cta_mocker() { return _cta_mocker; }
 	inline SelMocker*		sel_mocker() { return _sel_mocker; }
@@ -164,7 +160,6 @@ private:
 	FuncStraCalcCallback	_cb_cta_calc;
 	FuncStraCalcCallback	_cb_cta_calc_done;
 	FuncStraBarCallback		_cb_cta_bar;
-	FuncStraCondTriggerCallback _cb_cta_cond_trigger;
 
 	FuncStraInitCallback	_cb_sel_init;
 	FuncSessionEvtCallback	_cb_sel_sessevt;
@@ -188,11 +183,11 @@ private:
 
 	FuncEventCallback		_cb_evt;
 
-	FuncLoadFnlBars			_ext_fnl_bar_loader;//æœ€ç»ˆKçº¿åŠ è½½å™¨
-	FuncLoadRawBars			_ext_raw_bar_loader;//åŸå§‹Kçº¿åŠ è½½å™¨
-	FuncLoadAdjFactors		_ext_adj_fct_loader;//å¤æƒå› å­åŠ è½½å™¨
-	FuncLoadRawTicks		_ext_tick_loader;	//tickåŠ è½½å™¨
-	bool					_loader_auto_trans;	//æ˜¯å¦è‡ªåŠ¨è½¬å‚¨
+	FuncLoadFnlBars			_ext_fnl_bar_loader;//×îÖÕKÏß¼ÓÔØÆ÷
+	FuncLoadRawBars			_ext_raw_bar_loader;//Ô­Ê¼KÏß¼ÓÔØÆ÷
+	FuncLoadAdjFactors		_ext_adj_fct_loader;//¸´È¨Òò×Ó¼ÓÔØÆ÷
+	FuncLoadRawTicks		_ext_tick_loader;	//tick¼ÓÔØÆ÷
+	bool					_loader_auto_trans;	//ÊÇ·ñ×Ô¶¯×ª´¢
 
 	CtaMocker*		_cta_mocker;
 	SelMocker*		_sel_mocker;
@@ -212,6 +207,5 @@ private:
 	FuncReadTicks	_feeder_ticks;
 	FuncReadFactors	_feeder_fcts;
 	StdUniqueMutex	_feed_mtx;
-	WTSVariant* _cfg;
 };
 

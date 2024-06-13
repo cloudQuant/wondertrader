@@ -1,14 +1,15 @@
-ï»¿/*!
+/*!
  * \file UDPCaster.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief UDPå¹¿æ’­å¯¹è±¡å®šä¹‰
+ * \brief UDP¹ã²¥¶ÔÏó¶¨Òå
  */
 #pragma once
-#include "IDataCaster.h"
+
+#include "../Includes/WTSMarcos.h"
 #include "../Includes/WTSObject.hpp"
 #include "../Share/StdUtils.hpp"
 
@@ -16,15 +17,19 @@
 #include <queue>
 
 NS_WTP_BEGIN
+	class WTSTickData;
+	class WTSQueue;
 	class WTSVariant;
+	class WTSOrdDtlData;
+	class WTSOrdQueData;
+	class WTSTransData;
 NS_WTP_END
 
 USING_NS_WTP;
-
 class WTSBaseDataMgr;
 class DataManager;
 
-class UDPCaster : public IDataCaster
+class UDPCaster
 {
 public:
 	UDPCaster();
@@ -48,12 +53,13 @@ public:
 	typedef std::vector<UDPReceiverPtr>		ReceiverList;
 
 private:
-	void	handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred); 
-	void	handle_send_multi(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred); 
+	void handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred); 
+	void handle_send_multi(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred); 
 
-	void	do_receive();
+	void do_receive();
+	void do_send();
 
-	void	do_broadcast(WTSObject* data, uint32_t dataType);
+	void broadcast(WTSObject* data, uint32_t dataType);
 
 public:
 	bool	init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
@@ -63,11 +69,10 @@ public:
 	bool	addBRecver(const char* remote, int port, int type = 0);
 	bool	addMRecver(const char* remote, int port, int sendport, int type = 0);
 
-public:
-	virtual void	broadcast(WTSTickData* curTick) override;
-	virtual void	broadcast(WTSOrdQueData* curOrdQue) override;
-	virtual void	broadcast(WTSOrdDtlData* curOrdDtl) override;
-	virtual void	broadcast(WTSTransData* curTrans) override;
+	void	broadcast(WTSTickData* curTick);
+	void	broadcast(WTSOrdQueData* curOrdQue);
+	void	broadcast(WTSOrdDtlData* curOrdDtl);
+	void	broadcast(WTSTransData* curTrans);
 
 private:
 	typedef boost::asio::ip::udp::socket	UDPSocket;
@@ -81,7 +86,7 @@ private:
 	boost::asio::ip::udp::endpoint	m_senderEP;
 	char			m_data[max_length];
 
-	//å¹¿æ’­
+	//¹ã²¥
 	ReceiverList	m_listFlatRecver;
 	ReceiverList	m_listJsonRecver;
 	ReceiverList	m_listRawRecver;

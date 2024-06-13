@@ -1,4 +1,4 @@
-﻿#include "../WTSUtils/WtLMDB.hpp"
+#include "../WTSUtils/WtLMDB.hpp"
 #include "../Share/StrUtil.hpp"
 #include "gtest/gtest/gtest.h"
 
@@ -14,7 +14,7 @@ TEST(test_lmdb, test_constructor)
 TEST(test_lmdb, test_query)
 {
 	{	
-		//–¥≤È—Ø
+		//д��ѯ
 		WtLMDB db(false);
 		EXPECT_TRUE(db.open("./testdb"));
 
@@ -32,7 +32,7 @@ TEST(test_lmdb, test_query)
 	}
 
 	{
-		//∂¡≤È—Ø
+		//����ѯ
 		WtLMDB db(true);
 		EXPECT_TRUE(db.open("./testdb"));
 
@@ -84,7 +84,7 @@ std::string makeData(uint32_t v, bool trans)
 TEST(test_lmdb, test_endian)
 {
 	{
-		//–¥≤È—Ø
+		//д��ѯ
 		WtLMDB db(false);
 		EXPECT_TRUE(db.open("./endiandb"));
 
@@ -103,7 +103,7 @@ TEST(test_lmdb, test_endian)
 	}
 
 	{
-		//∂¡≤È—Ø
+		//����ѯ
 		WtLMDB db(true);
 		EXPECT_TRUE(db.open("./endiandb"));
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DataDefine.h"
 
 #include "../Includes/FasterDefs.h"
@@ -8,12 +8,10 @@
 #include "../Share/SpinMutex.hpp"
 
 #include <queue>
-#include <map>
 
 typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
 
 NS_WTP_BEGIN
-class WTSObject;
 class WTSContractInfo;
 NS_WTP_END
 
@@ -41,11 +39,6 @@ private:
 	bool	dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar);
 
 	bool	proc_block_data(const char* tag, std::string& content, bool isBar, bool bKeepHead = true);
-
-	void	procTick(WTSTickData* curTick, uint32_t procFlag);
-	void	procQueue(WTSOrdQueData* curOrdQue);
-	void	procOrder(WTSOrdDtlData* curOrdDetail);
-	void	procTrans(WTSTransData* curTrans);
 
 public:
 	virtual bool init(WTSVariant* params, IDataWriterSink* sink) override;
@@ -83,7 +76,7 @@ private:
 		}
 
 	} KBlockPair;
-	typedef wt_hashmap<std::string, KBlockPair*>	KBlockFilesMap;
+	typedef faster_hashmap<LongKey, KBlockPair*>	KBlockFilesMap;
 
 	typedef struct _TickBlockPair
 	{
@@ -102,7 +95,7 @@ private:
 			_lasttime = 0;
 		}
 	} TickBlockPair;
-	typedef wt_hashmap<std::string, TickBlockPair*>	TickBlockFilesMap;
+	typedef faster_hashmap<LongKey, TickBlockPair*>	TickBlockFilesMap;
 
 	typedef struct _TransBlockPair
 	{
@@ -118,7 +111,7 @@ private:
 			_lasttime = 0;
 		}
 	} TransBlockPair;
-	typedef wt_hashmap<std::string, TransBlockPair*>	TransBlockFilesMap;
+	typedef faster_hashmap<LongKey, TransBlockPair*>	TransBlockFilesMap;
 
 	typedef struct _OdeDtlBlockPair
 	{
@@ -134,7 +127,7 @@ private:
 			_lasttime = 0;
 		}
 	} OrdDtlBlockPair;
-	typedef wt_hashmap<std::string, OrdDtlBlockPair*>	OrdDtlBlockFilesMap;
+	typedef faster_hashmap<LongKey, OrdDtlBlockPair*>	OrdDtlBlockFilesMap;
 
 	typedef struct _OdeQueBlockPair
 	{
@@ -150,7 +143,7 @@ private:
 			_lasttime = 0;
 		}
 	} OrdQueBlockPair;
-	typedef wt_hashmap<std::string, OrdQueBlockPair*>	OrdQueBlockFilesMap;
+	typedef faster_hashmap<LongKey, OrdQueBlockPair*>	OrdQueBlockFilesMap;
 	
 
 	KBlockFilesMap	_rt_min1_blocks;
@@ -162,24 +155,11 @@ private:
 	OrdQueBlockFilesMap _rt_ordque_blocks;
 
 	SpinMutex		_lck_tick_cache;
-	wt_hashmap<std::string, uint32_t> _tick_cache_idx;
+	faster_hashmap<LongKey, uint32_t> _tick_cache_idx;
 	BoostMFPtr		_tick_cache_file;
 	RTTickCache*	_tick_cache_block;
 
-	//typedef std::function<void()> TaskInfo;
-	typedef struct alignas(64) _TaskInfo
-	{
-		WTSObject*	_obj;
-		uint64_t	_type;
-		uint32_t	_flag;		
-
-		_TaskInfo(WTSObject* data, uint64_t dtype, uint32_t flag = 0);
-
-		_TaskInfo(const _TaskInfo& rhs);
-
-		~_TaskInfo();
-
-	} TaskInfo;
+	typedef std::function<void()> TaskInfo;
 	std::queue<TaskInfo>	_tasks;
 	StdThreadPtr			_task_thrd;
 	StdUniqueMutex			_task_mtx;
@@ -198,9 +178,6 @@ private:
 	bool			_terminated;
 
 	bool			_save_tick_log;
-	bool			_skip_notrade_tick;
-	bool			_skip_notrade_bar;
-	bool			_disable_his;
 
 	bool			_disable_tick;
 	bool			_disable_min1;
@@ -210,12 +187,6 @@ private:
 	bool			_disable_trans;
 	bool			_disable_ordque;
 	bool			_disable_orddtl;
-
-	/*
-	 *	by Wesley @ 2023.05.04
-	 *	分钟线价格模式，0-常规模式，1-将买卖价也记录下来，这个设计时只针对期权这种不活跃的品种
-	 */
-	uint32_t		_min_price_mode;
 	
 	std::map<std::string, uint32_t> _proc_date;
 
@@ -238,6 +209,6 @@ private:
 	template<typename T>
 	void	releaseBlock(T* block);
 
-	void pushTask(const TaskInfo& task);
+	void pushTask(TaskInfo task);
 };
 

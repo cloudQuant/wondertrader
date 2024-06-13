@@ -1,4 +1,4 @@
-ï»¿#include "WtBtDtReader.h"
+#include "WtBtDtReader.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/StrUtil.hpp"
@@ -37,7 +37,7 @@ extern "C"
 };
 
 /*
- *	å¤„ç†å—æ•°æ®
+ *	´¦Àí¿éÊı¾İ
  */
 extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead);
 
@@ -99,63 +99,6 @@ bool WtBtDtReader::read_raw_ticks(const char* exchg, const char* code, uint32_t 
 	bool bSucc = proc_block_data(buffer, false, false);
 	if (!bSucc)
 		pipe_btreader_log(_sink, LL_ERROR, "Processing back tick data from file {} failed", filename);
-
-	return bSucc;
-}
-
-bool WtBtDtReader::read_raw_order_details(const char* exchg, const char* code, uint32_t uDate, std::string& buffer)
-{
-	std::stringstream ss;
-	ss << _base_dir << "his/orders/" << exchg << "/" << uDate << "/" << code << ".dsb";
-	std::string filename = ss.str();
-	if (!StdFile::exists(filename.c_str()))
-	{
-		pipe_btreader_log(_sink, LL_WARN, "Back order detail data file {} not exists", filename);
-		return false;
-	}
-
-	StdFile::read_file_content(filename.c_str(), buffer);
-	bool bSucc = proc_block_data(buffer, false, false);
-	if (!bSucc)
-		pipe_btreader_log(_sink, LL_ERROR, "Processing back order detail data from file {} failed", filename);
-
-	return bSucc;
-}
-
-bool WtBtDtReader::read_raw_order_queues(const char* exchg, const char* code, uint32_t uDate, std::string& buffer)
-{
-	std::stringstream ss;
-	ss << _base_dir << "his/queue/" << exchg << "/" << uDate << "/" << code << ".dsb";
-	std::string filename = ss.str();
-	if (!StdFile::exists(filename.c_str()))
-	{
-		pipe_btreader_log(_sink, LL_WARN, "Back order queue data file {} not exists", filename);
-		return false;
-	}
-
-	StdFile::read_file_content(filename.c_str(), buffer);
-	bool bSucc = proc_block_data(buffer, false, false);
-	if (!bSucc)
-		pipe_btreader_log(_sink, LL_ERROR, "Processing back order queue data from file {} failed", filename);
-
-	return bSucc;
-}
-
-bool WtBtDtReader::read_raw_transactions(const char* exchg, const char* code, uint32_t uDate, std::string& buffer)
-{
-	std::stringstream ss;
-	ss << _base_dir << "his/trans/" << exchg << "/" << uDate << "/" << code << ".dsb";
-	std::string filename = ss.str();
-	if (!StdFile::exists(filename.c_str()))
-	{
-		pipe_btreader_log(_sink, LL_WARN, "Back transaction data file {} not exists", filename);
-		return false;
-	}
-
-	StdFile::read_file_content(filename.c_str(), buffer);
-	bool bSucc = proc_block_data(buffer, false, false);
-	if (!bSucc)
-		pipe_btreader_log(_sink, LL_ERROR, "Processing back transaction data from file {} failed", filename);
 
 	return bSucc;
 }

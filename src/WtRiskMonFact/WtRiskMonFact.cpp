@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtRiskMonFact.cpp
  *
  * \author Wesley

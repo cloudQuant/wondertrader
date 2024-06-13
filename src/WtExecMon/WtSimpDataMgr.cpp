@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtSimpDataMgr.cpp
  * \project	WonderTrader
  *
@@ -54,14 +54,14 @@ bool WtSimpDataMgr::initStore(WTSVariant* cfg)
 	DllHandle hInst = DLLHelper::load_library(module.c_str());
 	if (hInst == NULL)
 	{
-		WTSLogger::error("Data reader {} loading failed", module.c_str());
+		WTSLogger::error("Data reader %s loading failed", module.c_str());
 		return false;
 	}
 
 	FuncCreateDataReader funcCreator = (FuncCreateDataReader)DLLHelper::get_symbol(hInst, "createDataReader");
 	if (funcCreator == NULL)
 	{
-		WTSLogger::error("Data reader {} loading failed: entrance function createDataReader not found", module.c_str());
+		WTSLogger::error("Data reader %s loading failed: entrance function createDataReader not found", module.c_str());
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -69,7 +69,7 @@ bool WtSimpDataMgr::initStore(WTSVariant* cfg)
 	_reader = funcCreator();
 	if (_reader == NULL)
 	{
-		WTSLogger::error("Data reader {} creating api failed", module.c_str());
+		WTSLogger::error("Data reader %s creating api failed", module.c_str());
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -196,7 +196,7 @@ WTSKlineSlice* WtSimpDataMgr::get_kline_slice(const char* stdCode, WTSKlinePerio
 		return _reader->readKlineSlice(stdCode, period, count, etime);
 	}
 
-	//åªæœ‰éžåŸºç¡€å‘¨æœŸçš„ä¼šè¿›åˆ°ä¸‹é¢çš„æ­¥éª¤
+	//Ö»ÓÐ·Ç»ù´¡ÖÜÆÚµÄ»á½øµ½ÏÂÃæµÄ²½Öè
 	WTSSessionInfo* sInfo = _runner->get_session_info(stdCode, true);
 
 	if (_bars_cache == NULL)
@@ -205,7 +205,7 @@ WTSKlineSlice* WtSimpDataMgr::get_kline_slice(const char* stdCode, WTSKlinePerio
 	key = StrUtil::printf("%s-%u-%u", stdCode, period, times);
 
 	WTSKlineData* kData = (WTSKlineData*)_bars_cache->get(key);
-	//å¦‚æžœç¼“å­˜é‡Œçš„Kçº¿æ¡æ•°å¤§äºŽè¯·æ±‚çš„æ¡æ•°, åˆ™ç›´æŽ¥è¿”å›ž
+	//Èç¹û»º´æÀïµÄKÏßÌõÊý´óÓÚÇëÇóµÄÌõÊý, ÔòÖ±½Ó·µ»Ø
 	if (kData == NULL || kData->size() < count)
 	{
 		uint32_t realCount = count * times + times;

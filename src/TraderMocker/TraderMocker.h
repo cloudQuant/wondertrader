@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include <atomic>
 
 #include <boost/asio.hpp>
@@ -18,7 +18,7 @@ NS_WTP_END
 USING_NS_WTP;
 
 /*
- *	ä»¿çœŸäº¤æ˜“å™¨
+ *	·ÂÕæ½»Ò×Æ÷
  */
 class TraderMocker : public ITraderApi
 {
@@ -28,7 +28,7 @@ public:
 
 private:
 	/*
-	*	æ’®åˆ å®šæ—¶å™¨
+	*	´éºÏ ¶¨Ê±Æ÷
 	*/
 	int32_t		match_once();
 
@@ -69,7 +69,7 @@ private:
 	OrderCache*			_awaits;
 	StdUniqueMutex	_mtx_awaits;
 
-	wt_hashset<std::string>	_codes;
+	faster_hashset<std::string>	_codes;
 
 	uint64_t		_max_tick_time;
 	uint64_t		_last_match_time;
@@ -94,7 +94,7 @@ private:
 		}
 	} PosItem;
 
-	wt_hashmap<std::string, PosItem> _positions;
+	faster_hashmap<std::string, PosItem> _positions;
 	std::string		_pos_file;
 
 private:

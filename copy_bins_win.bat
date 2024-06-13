@@ -1,4 +1,2 @@
-@echo off
-set despath=%1
-if "%despath%"=="" set despath="../wtpy"
-python ./scripts/copy_bins_win.py %despath%
+@echo this is for envs on which python is not registered to PATH
+python ./scripts/copy_bins_win.py

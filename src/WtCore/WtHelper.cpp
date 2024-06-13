@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtHelper.cpp
  * \project	WonderTrader
  *
@@ -54,14 +54,6 @@ std::string WtHelper::getModulePath(const char* moduleName, const char* subDir, 
 const char* WtHelper::getStraDataDir()
 {
 	static std::string folder = StrUtil::standardisePath(_gen_dir) + "stradata/";
-	if (!StdFile::exists(folder.c_str()))
-		boost::filesystem::create_directories(folder);
-	return folder.c_str();
-}
-
-const char* WtHelper::getExecDataDir()
-{
-	static std::string folder = StrUtil::standardisePath(_gen_dir) + "execdata/";
 	if (!StdFile::exists(folder.c_str()))
 		boost::filesystem::create_directories(folder);
 	return folder.c_str();

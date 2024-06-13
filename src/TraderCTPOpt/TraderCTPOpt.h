@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderCTPOpt.h
  * \project	WonderTrader
  *
@@ -34,13 +34,13 @@ public:
 public:
 	typedef enum
 	{
-		WS_NOTLOGIN,		//æœªç™»å½•
-		WS_LOGINING,		//æ­£åœ¨ç™»å½•
-		WS_LOGINED,			//å·²ç™»å½•
-		WS_LOGINFAILED,		//ç™»å½•å¤±è´¥
+		WS_NOTLOGIN,		//Î´µÇÂ¼
+		WS_LOGINING,		//ÕıÔÚµÇÂ¼
+		WS_LOGINED,			//ÒÑµÇÂ¼
+		WS_LOGINFAILED,		//µÇÂ¼Ê§°Ü
 		WS_CONFIRM_QRYED,
-		WS_CONFIRMED,		//å·²ç¡®è®¤
-		WS_ALLREADY			//å…¨éƒ¨å°±ç»ª
+		WS_CONFIRMED,		//ÒÑÈ·ÈÏ
+		WS_ALLREADY			//È«²¿¾ÍĞ÷
 	} WrapperState;
 
 
@@ -55,7 +55,7 @@ private:
 	int doLogin();
 
 	//////////////////////////////////////////////////////////////////////////
-	//ITraderApiæ¥å£
+	//ITraderApi½Ó¿Ú
 public:
 	virtual bool init(WTSVariant* params) override;
 
@@ -100,7 +100,7 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////
-	//CTPäº¤æ˜“æ¥å£å®ç°
+	//CTP½»Ò×½Ó¿ÚÊµÏÖ
 public:
 	virtual void OnFrontConnected() override;
 
@@ -128,7 +128,7 @@ public:
 
 	virtual void OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///è¯·æ±‚æŸ¥è¯¢æˆäº¤å“åº”
+	///ÇëÇó²éÑ¯³É½»ÏìÓ¦
 	virtual void OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
 	virtual void OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
@@ -141,26 +141,24 @@ public:
 
 	virtual void OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo) override;
 
-	virtual void OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) override;
-
 	//////////////////////////////////////////////////////////////////////////
-	///æ‰§è¡Œå®£å‘Šå½•å…¥è¯·æ±‚å“åº”
+	///Ö´ĞĞĞû¸æÂ¼ÈëÇëÇóÏìÓ¦
 	virtual void OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æ‰§è¡Œå®£å‘Šæ“ä½œè¯·æ±‚å“åº”
+	///Ö´ĞĞĞû¸æ²Ù×÷ÇëÇóÏìÓ¦
 	virtual void OnRspExecOrderAction(CThostFtdcInputExecOrderActionField *pInputExecOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æ‰§è¡Œå®£å‘Šé€šçŸ¥
+	///Ö´ĞĞĞû¸æÍ¨Öª
 	virtual void OnRtnExecOrder(CThostFtdcExecOrderField *pExecOrder) override;
 
-	///æ‰§è¡Œå®£å‘Šå½•å…¥é”™è¯¯å›æŠ¥
+	///Ö´ĞĞĞû¸æÂ¼Èë´íÎó»Ø±¨
 	virtual void OnErrRtnExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo) override;
 
 	virtual void OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
 protected:
 	/*
-	*	æ£€æŸ¥é”™è¯¯ä¿¡æ¯
+	*	¼ì²é´íÎóĞÅÏ¢
 	*/
 	bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo);
 
@@ -172,7 +170,7 @@ protected:
 	WTSTradeInfo*	makeTradeRecord(CThostFtdcTradeField *tradeField);
 	WTSEntrust*		makeEntrust(CThostFtdcInputExecOrderField *entrustField);
 
-	void			generateEntrustID(char* buffer, uint32_t frontid, uint32_t sessionid, uint32_t orderRef);
+	std::string		generateEntrustID(uint32_t frontid, uint32_t sessionid, uint32_t orderRef);
 	bool			extractEntrustID(const char* entrustid, uint32_t &frontid, uint32_t &sessionid, uint32_t &orderRef);
 
 	//uint64_t		calcCommission(uint32_t qty, uint32_t price, WTSOffsetType flag, WTSContractInfo* ct);
@@ -208,9 +206,9 @@ protected:
 	uint64_t		m_uLastQryTime;
 
 	uint32_t					m_lDate;
-	TThostFtdcFrontIDType		m_frontID;		//å‰ç½®ç¼–å·
-	TThostFtdcSessionIDType		m_sessionID;	//ä¼šè¯ç¼–å·
-	std::atomic<uint32_t>		m_orderRef;		//æŠ¥å•å¼•ç”¨
+	TThostFtdcFrontIDType		m_frontID;		//Ç°ÖÃ±àºÅ
+	TThostFtdcSessionIDType		m_sessionID;	//»á»°±àºÅ
+	std::atomic<uint32_t>		m_orderRef;		//±¨µ¥ÒıÓÃ
 
 	WrapperState				m_wrapperState;
 

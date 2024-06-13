@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderXTP.h
  * \project	WonderTrader
  *
@@ -17,9 +17,9 @@
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"
 
+#include "../Share/IniHelper.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
-#include "../Share/WtKVCache.hpp"
 
 USING_NS_WTP;
 
@@ -31,16 +31,16 @@ public:
 
 	typedef enum
 	{
-		TS_NOTLOGIN,		//æœªç™»å½•
-		TS_LOGINING,		//æ­£åœ¨ç™»å½•
-		TS_LOGINED,			//å·²ç™»å½•
-		TS_LOGINFAILED,		//ç™»å½•å¤±è´¥
-		TS_ALLREADY			//å…¨éƒ¨å°±ç»ª
+		TS_NOTLOGIN,		//Î´µÇÂ¼
+		TS_LOGINING,		//ÕıÔÚµÇÂ¼
+		TS_LOGINED,			//ÒÑµÇÂ¼
+		TS_LOGINFAILED,		//µÇÂ¼Ê§°Ü
+		TS_ALLREADY			//È«²¿¾ÍĞ÷
 	} TraderState;
 
 public:
 	//////////////////////////////////////////////////////////////////////////
-	//XTP::API::TraderSpi æ¥å£
+	//XTP::API::TraderSpi ½Ó¿Ú
 	virtual void OnDisconnected(uint64_t session_id, int reason) override;
 
 	virtual void OnError(XTPRI *error_info) override;
@@ -61,7 +61,7 @@ public:
 
 public:
 	//////////////////////////////////////////////////////////////////////////
-	//ITraderApi æ¥å£
+	//ITraderApi ½Ó¿Ú
 	virtual bool init(WTSVariant *params) override;
 
 	virtual void release() override;
@@ -94,15 +94,13 @@ public:
 
 private:
 	void		reconnect();
-	inline uint32_t			genRequestID();
-	void					doLogin();
+	inline uint32_t	genRequestID();
 
 	inline WTSOrderInfo*	makeOrderInfo(XTPQueryOrderRsp* orderField);
 	inline WTSEntrust*		makeEntrust(XTPOrderInfo *entrustField);
 	inline WTSTradeInfo*	makeTradeInfo(XTPQueryTradeRsp *tradeField);
 
-	inline bool	extractEntrustID(const char* entrustid, uint32_t &orderRef);
-	inline void	genEntrustID(char* buffer, uint32_t orderRef);
+	inline std::string		genEntrustID(uint32_t orderRef);
 
 private:
 	XTP::API::TraderApi*	_api;
@@ -126,29 +124,21 @@ private:
 	int				_client;
 
 	bool			_quick;
-	bool			_inited;
-
-	uint32_t			_hbInterval;
 
 	TraderState		_state;
 
 	uint64_t		_sessionid;
 	uint32_t		_tradingday;
 	std::atomic<uint32_t>		_reqid;
-	std::atomic<uint32_t>		_ordref;		//æŠ¥å•å¼•ç”¨
+	std::atomic<uint32_t>		_ordref;		//±¨µ¥ÒıÓÃ
 
 	boost::asio::io_service		_asyncio;
 	StdThreadPtr				_thrd_worker;
-	typedef std::shared_ptr<boost::asio::io_service::work> BoostWorkerPtr;
-	BoostWorkerPtr				_worker;
 
 	DllHandle		m_hInstXTP;
 	typedef XTP::API::TraderApi* (*XTPCreator)(uint8_t, const char*, XTP_LOG_LEVEL);
 	XTPCreator		m_funcCreator;
 
-	//å§”æ‰˜å•æ ‡è®°ç¼“å­˜å™¨
-	WtKVCache		m_eidCache;
-	//è®¢å•æ ‡è®°ç¼“å­˜å™¨
-	WtKVCache		m_oidCache;
+	IniHelper		_ini;
 };
 

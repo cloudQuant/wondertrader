@@ -1,10 +1,8 @@
-ï»¿#include "../WtDtCore/ParserAdapter.h"
+#include "../WtDtCore/ParserAdapter.h"
 #include "../WtDtCore/DataManager.h"
 #include "../WtDtCore/StateMonitor.h"
 #include "../WtDtCore/UDPCaster.h"
-#include "../WtDtCore/ShmCaster.h"
 #include "../WtDtCore/WtHelper.h"
-#include "../WtDtCore/IndexFactory.h"
 
 #include "../Includes/WTSSessionInfo.hpp"
 #include "../Includes/WTSVariant.hpp"
@@ -14,18 +12,16 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 #include "../Share/StrUtil.hpp"
-#include "../Share/cppcli.hpp"
 
 #include "../WTSUtils/SignalHook.hpp"
 
 WTSBaseDataMgr	g_baseDataMgr;
 WTSHotMgr		g_hotMgr;
+boost::asio::io_service g_asyncIO;
 StateMonitor	g_stateMon;
 UDPCaster		g_udpCaster;
-ShmCaster		g_shmCaster;
 DataManager		g_dataMgr;
 ParserAdapterMgr g_parsers;
-IndexFactory	g_idxFactory;
 
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
@@ -63,8 +59,8 @@ const char* getBinDir()
 
 void initDataMgr(WTSVariant* config, bool bAlldayMode = false)
 {
-	//å¦‚æžœæ˜¯å…¨å¤©æ¨¡å¼ï¼Œåˆ™ä¸ä¼ é€’çŠ¶æ€æœºç»™DataManager
-	g_dataMgr.init(config, &g_baseDataMgr, bAlldayMode ? NULL : &g_stateMon);
+	//Èç¹ûÊÇÈ«ÌìÄ£Ê½£¬Ôò²»´«µÝ×´Ì¬»ú¸øDataManager
+	g_dataMgr.init(config, &g_baseDataMgr, bAlldayMode ? NULL : &g_stateMon, &g_udpCaster);
 }
 
 void initParsers(WTSVariant* cfg)
@@ -77,7 +73,7 @@ void initParsers(WTSVariant* cfg)
 
 		const char* id = cfgItem->getCString("id");
 		// By Wesley @ 2021.12.14
-		// å¦‚æžœidä¸ºç©ºï¼Œåˆ™ç”Ÿæˆè‡ªåŠ¨id
+		// Èç¹ûidÎª¿Õ£¬ÔòÉú³É×Ô¶¯id
 		std::string realid = id;
 		if (realid.empty())
 		{
@@ -85,30 +81,39 @@ void initParsers(WTSVariant* cfg)
 			realid = StrUtil::printf("auto_parser_%u", auto_parserid++);
 		}
 
-		ParserAdapterPtr adapter(new ParserAdapter(&g_baseDataMgr, &g_dataMgr, &g_idxFactory));
+		ParserAdapterPtr adapter(new ParserAdapter(&g_baseDataMgr, &g_dataMgr));
 		adapter->init(realid.c_str(), cfgItem);
 		g_parsers.addAdapter(realid.c_str(), adapter);
 	}
 
-	WTSLogger::info("{} market data parsers loaded in total", g_parsers.size());
+	WTSLogger::info("%u market data parsers loaded in total", g_parsers.size());
 }
 
-void initialize(const std::string& filename)
+void initialize()
 {
 	WtHelper::set_module_dir(getBinDir());
 
-	WTSVariant* config = WTSCfgLoader::load_from_file(filename.c_str());
+	std::string filename("QFConfig.json");
+	if (!StdFile::exists(filename.c_str()))
+		filename = "QFConfig.yaml";
+	if (!StdFile::exists(filename.c_str()))
+		filename = "dtcfg.json";
+	if (!StdFile::exists(filename.c_str()))
+		filename = "dtcfg.yaml";
+
+	WTSVariant* config = WTSCfgLoader::load_from_file(filename.c_str(), true);
 	if(config == NULL)
 	{
-		WTSLogger::error("Loading config file {} failed", filename);
+		WTSLogger::error_f("Loading config file {} failed", filename);
 		return;
 	}
 
-	//åŠ è½½å¸‚åœºä¿¡æ¯
+	//¼ÓÔØÊÐ³¡ÐÅÏ¢
 	WTSVariant* cfgBF = config->get("basefiles");
+	bool isUTF8 = cfgBF->getBoolean("utf-8");
 	if (cfgBF->get("session"))
 	{
-		g_baseDataMgr.loadSessions(cfgBF->getCString("session"));
+		g_baseDataMgr.loadSessions(cfgBF->getCString("session"), isUTF8);
 		WTSLogger::info("Trading sessions loaded");
 	}
 
@@ -117,13 +122,13 @@ void initialize(const std::string& filename)
 	{
 		if (cfgItem->type() == WTSVariant::VT_String)
 		{
-			g_baseDataMgr.loadCommodities(cfgItem->asCString());
+			g_baseDataMgr.loadCommodities(cfgItem->asCString(), isUTF8);
 		}
 		else if (cfgItem->type() == WTSVariant::VT_Array)
 		{
 			for (uint32_t i = 0; i < cfgItem->size(); i++)
 			{
-				g_baseDataMgr.loadCommodities(cfgItem->get(i)->asCString());
+				g_baseDataMgr.loadCommodities(cfgItem->get(i)->asCString(), isUTF8);
 			}
 		}
 	}
@@ -133,13 +138,13 @@ void initialize(const std::string& filename)
 	{
 		if (cfgItem->type() == WTSVariant::VT_String)
 		{
-			g_baseDataMgr.loadContracts(cfgItem->asCString());
+			g_baseDataMgr.loadContracts(cfgItem->asCString(), isUTF8);
 		}
 		else if (cfgItem->type() == WTSVariant::VT_Array)
 		{
 			for (uint32_t i = 0; i < cfgItem->size(); i++)
 			{
-				g_baseDataMgr.loadContracts(cfgItem->get(i)->asCString());
+				g_baseDataMgr.loadContracts(cfgItem->get(i)->asCString(), isUTF8);
 			}
 		}
 	}
@@ -149,44 +154,25 @@ void initialize(const std::string& filename)
 		g_baseDataMgr.loadHolidays(cfgBF->getCString("holiday"));
 		WTSLogger::info("Holidays loaded");
 	}
-	if (cfgBF->get("hot"))
-	{
-		g_hotMgr.loadHots(cfgBF->getCString("hot"));
-		WTSLogger::log_raw(LL_INFO, "Hot rules loaded");
-	}
-
-	if (cfgBF->get("second"))
-	{
-		g_hotMgr.loadSeconds(cfgBF->getCString("second"));
-		WTSLogger::log_raw(LL_INFO, "Second rules loaded");
-	}
-
-	if (cfgBF->has("rules"))
-	{
-		auto cfgRules = cfgBF->get("rules");
-		auto tags = cfgRules->memberNames();
-		for (const std::string& ruleTag : tags)
-		{
-			g_hotMgr.loadCustomRules(ruleTag.c_str(), cfgRules->getCString(ruleTag.c_str()));
-			WTSLogger::info("{} rules loaded from {}", ruleTag, cfgRules->getCString(ruleTag.c_str()));
-		}
-	}
-
-	if (config->has("shmcaster"))
-	{
-		g_shmCaster.init(config->get("shmcaster"));
-		g_dataMgr.add_caster(&g_shmCaster);
-	}
-
-	if (config->has("broadcaster"))
-	{
-		g_udpCaster.init(config->get("broadcaster"), &g_baseDataMgr, &g_dataMgr);
-		g_dataMgr.add_caster(&g_udpCaster);
-	}
-
 
 	//By Wesley @ 2021.12.27
-	//å…¨å¤©å€™æ¨¡å¼ï¼Œä¸éœ€è¦å†ä½¿ç”¨çŠ¶æ€æœº
+	//datakit²»ÐèÒªÖ÷Á¦Ó³Éä¹æÔò
+	//if (cfgBF->get("hot"))
+	//{
+	//	g_hotMgr.loadHots(cfgBF->getCString("hot"));
+	//	WTSLogger::info("Hot rules loaded");
+	//}
+
+	//if (cfgBF->get("second"))
+	//{
+	//	g_hotMgr.loadSeconds(cfgBF->getCString("second"));
+	//	WTSLogger::info("Second rules loaded");
+	//}
+
+	g_udpCaster.init(config->get("broadcaster"), &g_baseDataMgr, &g_dataMgr);
+
+	//By Wesley @ 2021.12.27
+	//È«ÌìºòÄ£Ê½£¬²»ÐèÒªÔÙÊ¹ÓÃ×´Ì¬»ú
 	bool bAlldayMode = config->getBoolean("allday");
 	if (!bAlldayMode)
 	{
@@ -198,23 +184,6 @@ void initialize(const std::string& filename)
 	}
 	initDataMgr(config->get("writer"), bAlldayMode);
 
-	if(config->has("index"))
-	{
-		//å¦‚æžœå­˜åœ¨æŒ‡æ•°æ¨¡å—è¦ï¼Œé…ç½®æŒ‡æ•°
-		const char* filename = config->getCString("index");
-		WTSLogger::info("Reading index config from {}...", filename);
-		WTSVariant* var = WTSCfgLoader::load_from_file(filename);
-		if (var)
-		{
-			g_idxFactory.init(var, &g_hotMgr, &g_baseDataMgr, &g_dataMgr);
-			var->release();
-		}
-		else
-		{
-			WTSLogger::error("Loading index config {} failed", filename);
-		}		
-	}
-
 	WTSVariant* cfgParser = config->get("parsers");
 	if (cfgParser)
 	{
@@ -223,8 +192,8 @@ void initialize(const std::string& filename)
 			const char* filename = cfgParser->asCString();
 			if (StdFile::exists(filename))
 			{
-				WTSLogger::info("Reading parser config from {}...", filename);
-				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
+				WTSLogger::info_f("Reading parser config from {}...", filename);
+				WTSVariant* var = WTSCfgLoader::load_from_file(filename, isUTF8);
 				if (var)
 				{
 					initParsers(var->get("parsers"));
@@ -232,12 +201,12 @@ void initialize(const std::string& filename)
 				}
 				else
 				{
-					WTSLogger::error("Loading parser config {} failed", filename);
+					WTSLogger::error_f("Loading parser config {} failed", filename);
 				}
 			}
 			else
 			{
-				WTSLogger::error("Parser configuration {} not exists", filename);
+				WTSLogger::error_f("Parser configuration {} not exists", filename);
 			}
 		}
 		else if (cfgParser->type() == WTSVariant::VT_Array)
@@ -248,35 +217,24 @@ void initialize(const std::string& filename)
 
 	config->release();
 
-	g_parsers.run();
+	g_asyncIO.post([bAlldayMode](){
+		g_parsers.run();
 
-	//å…¨å¤©å€™æ¨¡å¼ï¼Œä¸å¯åŠ¨çŠ¶æ€æœº
-	if(!bAlldayMode)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		g_stateMon.run();
-	}
+		//È«ÌìºòÄ£Ê½£¬²»Æô¶¯×´Ì¬»ú
+		if(!bAlldayMode)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			g_stateMon.run();
+		}
+	});
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-	cppcli::Option opt(argc, argv);
+	std::string filename = "logcfgdt.json";
+	if (!StdFile::exists(filename.c_str()))
+		filename = "logcfgdt.yaml";
 
-	auto cParam = opt("-c", "--config", "configure filepath, dtcfg.yaml as default", false);
-	auto lParam = opt("-l", "--logcfg", "logging configure filepath, logcfgdt.yaml as default", false);
-
-	auto hParam = opt("-h", "--help", "gain help doc", false)->asHelpParam();
-
-	opt.parse();
-
-	if (hParam->exists())
-		return 0;
-
-	std::string filename;
-	if (lParam->exists())
-		filename = lParam->get<std::string>();
-	else
-		filename = "./logcfgdt.yaml";
 	WTSLogger::init(filename.c_str());
 
 #ifdef _MSC_VER
@@ -293,36 +251,18 @@ int main(int argc, char* argv[])
 	CMiniDumper::Enable("QuoteFactory.exe", true);
 #endif
 
-	bool bExit = false;
-	install_signal_hooks([&bExit](const char* message) {
-		if(!bExit)
-			WTSLogger::error(message);
-	}, [&bExit](bool toExit) {
-		if (bExit)
-			return;
-
-		bExit = toExit;
-		WTSLogger::info("Exit flag is {}", bExit);
+#if _WIN32
+#pragma message("Signal hooks disabled in WIN32")
+#else
+#pragma message("Signal hooks enabled in UNIX")
+	install_signal_hooks([](const char* message) {
+		WTSLogger::error(message);
 	});
+#endif
 
-	if (cParam->exists())
-		filename = cParam->get<std::string>();
-	else
-		filename = "./dtcfg.yaml";
+	initialize();
 
-	if(!StdFile::exists(filename.c_str()))
-	{
-		fmt::print("confiture {} not exists", filename);
-		return 0;
-	}
-
-	initialize(filename);
-
-	while (!bExit)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-	
-	return 0;
+	boost::asio::io_service::work work(g_asyncIO);
+	g_asyncIO.run();
 }
 

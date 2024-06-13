@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file ParserCTPMini.cpp
  * \project	WonderTrader
  *
@@ -9,16 +9,13 @@
  */
 #include "ParserCTPMini.h"
 #include "../Share/StrUtil.hpp"
-#include "../Share/StdUtils.hpp"
 #include "../Share/TimeUtils.hpp"
-#include "../Share/ModuleHelper.hpp"
-
 #include "../Includes/WTSDataDef.hpp"
+#include "../Share/StdUtils.hpp"
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IBaseDataMgr.h"
-#include "../Includes/WTSVersion.h"
-
+#include "../Share/ModuleHelper.hpp"
 #include <boost/filesystem.hpp>
 
  //By Wesley @ 2022.01.05
@@ -30,7 +27,8 @@ inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, cons
 		return;
 
 	static thread_local char buffer[512] = { 0 };
-	fmtutil::format_to(buffer, format, args...);
+	memset(buffer, 0, 512);
+	fmt::format_to(buffer, format, args...);
 
 	sink->handleParserLog(ll, buffer);
 }
@@ -185,7 +183,7 @@ void ParserCTPMini::OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, 
 			m_sink->handleEvent(WPE_Login, 0);
 		}
 
-		//è®¢é˜…è¡Œæƒ…æ•°æ®
+		//¶©ÔÄĞĞÇéÊı¾İ
 		SubscribeMarketData();
 	}
 }
@@ -228,14 +226,14 @@ void ParserCTPMini::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepth
 
 	if (actDate == m_uTradingDate && actHour >= 20)
 	{
-		//è¿™æ ·çš„æ—¶é—´æ˜¯æœ‰é—®é¢˜,å› ä¸ºå¤œç›˜æ—¶å‘ç”Ÿæ—¥æœŸä¸å¯èƒ½ç­‰äºäº¤æ˜“æ—¥
-		//è¿™å°±éœ€è¦æ‰‹åŠ¨è®¾ç½®ä¸€ä¸‹
+		//ÕâÑùµÄÊ±¼äÊÇÓĞÎÊÌâ,ÒòÎªÒ¹ÅÌÊ±·¢ÉúÈÕÆÚ²»¿ÉÄÜµÈÓÚ½»Ò×ÈÕ
+		//Õâ¾ÍĞèÒªÊÖ¶¯ÉèÖÃÒ»ÏÂ
 		uint32_t curDate, curTime;
 		TimeUtils::getDateTime(curDate, curTime);
 		uint32_t curHour = curTime / 10000000;
 
-		//æ—©ä¸Šå¯åŠ¨ä»¥å,ä¼šæ”¶åˆ°æ˜¨æ™š12ç‚¹ä»¥å‰æ”¶ç›˜çš„è¡Œæƒ…,è¿™ä¸ªæ—¶å€™å¯èƒ½ä¼šæœ‰å‘ç”Ÿæ—¥æœŸ=äº¤æ˜“æ—¥çš„æƒ…å†µå‡ºç°
-		//è¿™ç¬”æ•°æ®ç›´æ¥ä¸¢æ‰
+		//ÔçÉÏÆô¶¯ÒÔºó,»áÊÕµ½×òÍí12µãÒÔÇ°ÊÕÅÌµÄĞĞÇé,Õâ¸öÊ±ºò¿ÉÄÜ»áÓĞ·¢ÉúÈÕÆÚ=½»Ò×ÈÕµÄÇé¿ö³öÏÖ
+		//Õâ±ÊÊı¾İÖ±½Ó¶ªµô
 		if (curHour >= 3 && curHour < 9)
 			return;
 
@@ -243,12 +241,12 @@ void ParserCTPMini::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepth
 
 		if (actHour == 23 && curHour == 0)
 		{
-			//è¡Œæƒ…æ—¶é—´æ…¢äºç³»ç»Ÿæ—¶é—´
+			//ĞĞÇéÊ±¼äÂıÓÚÏµÍ³Ê±¼ä
 			actDate = TimeUtils::getNextDate(curDate, -1);
 		}
 		else if (actHour == 0 && curHour == 23)
 		{
-			//ç³»ç»Ÿæ—¶é—´æ…¢äºè¡Œæƒ…æ—¶é—´
+			//ÏµÍ³Ê±¼äÂıÓÚĞĞÇéÊ±¼ä
 			actDate = TimeUtils::getNextDate(curDate, 1);
 		}
 	}
@@ -299,28 +297,28 @@ void ParserCTPMini::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepth
 	quote.pre_settle = checkValid(pDepthMarketData->PreSettlementPrice);
 	quote.pre_interest = (uint32_t)pDepthMarketData->PreOpenInterest;
 
-	//å§”å–ä»·æ ¼
+	//Î¯Âô¼Û¸ñ
 	quote.ask_prices[0] = checkValid(pDepthMarketData->AskPrice1);
 	quote.ask_prices[1] = checkValid(pDepthMarketData->AskPrice2);
 	quote.ask_prices[2] = checkValid(pDepthMarketData->AskPrice3);
 	quote.ask_prices[3] = checkValid(pDepthMarketData->AskPrice4);
 	quote.ask_prices[4] = checkValid(pDepthMarketData->AskPrice5);
 
-	//å§”ä¹°ä»·æ ¼
+	//Î¯Âò¼Û¸ñ
 	quote.bid_prices[0] = checkValid(pDepthMarketData->BidPrice1);
 	quote.bid_prices[1] = checkValid(pDepthMarketData->BidPrice2);
 	quote.bid_prices[2] = checkValid(pDepthMarketData->BidPrice3);
 	quote.bid_prices[3] = checkValid(pDepthMarketData->BidPrice4);
 	quote.bid_prices[4] = checkValid(pDepthMarketData->BidPrice5);
 
-	//å§”å–é‡
+	//Î¯ÂôÁ¿
 	quote.ask_qty[0] = pDepthMarketData->AskVolume1;
 	quote.ask_qty[1] = pDepthMarketData->AskVolume2;
 	quote.ask_qty[2] = pDepthMarketData->AskVolume3;
 	quote.ask_qty[3] = pDepthMarketData->AskVolume4;
 	quote.ask_qty[4] = pDepthMarketData->AskVolume5;
 
-	//å§”ä¹°é‡
+	//Î¯ÂòÁ¿
 	quote.bid_qty[0] = pDepthMarketData->BidVolume1;
 	quote.bid_qty[1] = pDepthMarketData->BidVolume2;
 	quote.bid_qty[2] = pDepthMarketData->BidVolume3;
@@ -363,7 +361,6 @@ void ParserCTPMini::ReqUserLogin()
 	strcpy(req.BrokerID, m_strBroker.c_str());
 	strcpy(req.UserID, m_strUserID.c_str());
 	strcpy(req.Password, m_strPassword.c_str());
-	strcpy(req.UserProductInfo, WT_PRODUCT);
 	int iResult = m_pUserAPI->ReqUserLogin(&req, ++m_iRequestID);
 	if(iResult != 0)
 	{
@@ -376,7 +373,7 @@ void ParserCTPMini::SubscribeMarketData()
 {
 	CodeSet codeFilter = m_filterSubs;
 	if(codeFilter.empty())
-	{//å¦‚æœè®¢é˜…ç¤¼åŒ…åªç©ºçš„,åˆ™å–å‡ºå…¨éƒ¨åˆçº¦åˆ—è¡¨
+	{//Èç¹û¶©ÔÄÀñ°üÖ»¿ÕµÄ,ÔòÈ¡³öÈ«²¿ºÏÔ¼ÁĞ±í
 		return;
 	}
 

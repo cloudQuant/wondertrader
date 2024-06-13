@@ -1,9 +1,9 @@
-﻿#include "SelStraContext.h"
+#include "SelStraContext.h"
 #include "../Includes/SelStrategyDefs.h"
 
 
-SelStraContext::SelStraContext(WtSelEngine* engine, const char* name, int32_t slippage)
-	: SelStraBaseCtx(engine, name, slippage)
+SelStraContext::SelStraContext(WtSelEngine* engine, const char* name)
+	: SelStraBaseCtx(engine, name)
 	, _strategy(NULL)
 {
 }

@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file UDPCaster.cpp
  * \project	WonderTrader
  *
@@ -21,19 +21,19 @@
 
 #define UDP_MSG_SUBSCRIBE	0x100
 #define UDP_MSG_PUSHTICK	0x200
-#define UDP_MSG_PUSHORDQUE	0x201	//å§”æ‰˜é˜Ÿåˆ—
-#define UDP_MSG_PUSHORDDTL	0x202	//å§”æ‰˜æ˜ç»†
-#define UDP_MSG_PUSHTRANS	0x203	//é€ç¬”æˆäº¤
+#define UDP_MSG_PUSHORDQUE	0x201	//Î¯ÍĞ¶ÓÁĞ
+#define UDP_MSG_PUSHORDDTL	0x202	//Î¯ÍĞÃ÷Ï¸
+#define UDP_MSG_PUSHTRANS	0x203	//Öğ±Ê³É½»
 
 #pragma pack(push,1)
-//UDPè¯·æ±‚åŒ…
+//UDPÇëÇó°ü
 typedef struct _UDPReqPacket
 {
 	uint32_t		_type;
 	char			_data[1020];
 } UDPReqPacket;
 
-//UDPTickæ•°æ®åŒ…
+//UDPTickÊı¾İ°ü
 template <typename T>
 struct UDPDataPacket
 {
@@ -88,8 +88,8 @@ bool UDPCaster::init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
 	}
 
 	//By Wesley @ 2022.01.11
-	//è¿™æ˜¯è®¢é˜…ç«¯å£ï¼Œä½†æ˜¯ä»¥å‰å…¨éƒ¨ç”¨çš„bportï¼Œå±äºç¬”è¯¯
-	//åªèƒ½å†™ä¸€ä¸ªå…¼å®¹äº†
+	//ÕâÊÇ¶©ÔÄ¶Ë¿Ú£¬µ«ÊÇÒÔÇ°È«²¿ÓÃµÄbport£¬ÊôÓÚ±ÊÎó
+	//Ö»ÄÜĞ´Ò»¸ö¼æÈİÁË
 	int32_t sport = cfg->getInt32("sport");
 	if (sport == 0)
 		sport = cfg->getInt32("bport");
@@ -113,7 +113,7 @@ void UDPCaster::start(int sport)
 	}
 	catch(...)
 	{
-		WTSLogger::error("Exception raised while start subscribing service @ port {}", sport);
+		WTSLogger::error_f("Exception raised while start subscribing service @ port {}", sport);
 	}
 
 	do_receive();
@@ -158,7 +158,7 @@ void UDPCaster::do_receive()
 			UDPReqPacket* req = (UDPReqPacket*)m_data;
 
 			std::string data;
-			//å¤„ç†è¯·æ±‚
+			//´¦ÀíÇëÇó
 			if (req->_type == UDP_MSG_SUBSCRIBE)
 			{
 				const StringVector& ay = StrUtil::split(req->_data, ",");
@@ -194,7 +194,7 @@ void UDPCaster::do_receive()
 						delete data;
 						if (ec)
 						{
-							WTSLogger::error("Sending data on UDP failed: {}", ec.message().c_str());
+							WTSLogger::error("Sending data on UDP failed: %s", ec.message().c_str());
 						}
 					});
 				}
@@ -210,7 +210,7 @@ void UDPCaster::do_receive()
 				delete data;
 				if (ec)
 				{
-					WTSLogger::error("Sending data on UDP failed: {}", ec.message().c_str());
+					WTSLogger::error("Sending data on UDP failed: %s", ec.message().c_str());
 				}
 			});
 		}
@@ -267,25 +267,25 @@ bool UDPCaster::addMRecver(const char* remote, int port, int sendport, int type 
 
 void UDPCaster::broadcast(WTSTickData* curTick)
 {
-	do_broadcast(curTick, UDP_MSG_PUSHTICK);
+	broadcast(curTick, UDP_MSG_PUSHTICK);
 }
 
 void UDPCaster::broadcast(WTSOrdDtlData* curOrdDtl)
 {
-	do_broadcast(curOrdDtl, UDP_MSG_PUSHORDDTL);
+	broadcast(curOrdDtl, UDP_MSG_PUSHORDDTL);
 }
 
 void UDPCaster::broadcast(WTSOrdQueData* curOrdQue)
 {
-	do_broadcast(curOrdQue, UDP_MSG_PUSHORDQUE);
+	broadcast(curOrdQue, UDP_MSG_PUSHORDQUE);
 }
 
 void UDPCaster::broadcast(WTSTransData* curTrans)
 {
-	do_broadcast(curTrans, UDP_MSG_PUSHTRANS);
+	broadcast(curTrans, UDP_MSG_PUSHTRANS);
 }
 
-void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
+void UDPCaster::broadcast(WTSObject* data, uint32_t dataType)
 {
 	if(m_sktBroadcast == NULL || data == NULL || m_bTerminated)
 		return;
@@ -321,7 +321,7 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 					if (castData._data == NULL)
 						break;
 
-					//ç›´æ¥å¹¿æ’­
+					//Ö±½Ó¹ã²¥
 					if (!m_listRawGroup.empty() || !m_listRawRecver.empty())
 					{
 						std::string buf_raw;
@@ -362,7 +362,7 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 							break;
 						}
 
-						//å¹¿æ’­
+						//¹ã²¥
 						boost::system::error_code ec;
 						for (auto it = m_listRawRecver.begin(); it != m_listRawRecver.end(); it++)
 						{
@@ -370,19 +370,19 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 							m_sktBroadcast->send_to(boost::asio::buffer(buf_raw), receiver->_ep, 0, ec);
 							if (ec)
 							{
-								WTSLogger::error("Error occured while sending to ({}:{}): {}({})", 
+								WTSLogger::error_f("Error occured while sending to ({}:{}): {}({})", 
 									receiver->_ep.address().to_string(), receiver->_ep.port(), ec.value(), ec.message());
 							}
 						}
 
-						//ç»„æ’­
+						//×é²¥
 						for (auto it = m_listRawGroup.begin(); it != m_listRawGroup.end(); it++)
 						{
 							const MulticastPair& item = *it;
 							it->first->send_to(boost::asio::buffer(buf_raw), item.second->_ep, 0, ec);
 							if (ec)
 							{
-								WTSLogger::error("Error occured while sending to ({}:{}): {}({})",
+								WTSLogger::error_f("Error occured while sending to ({}:{}): {}({})",
 									item.second->_ep.address().to_string(), item.second->_ep.port(), ec.value(), ec.message());
 							}
 						}
@@ -397,13 +397,124 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 	{
 		m_condCast.notify_all();
 	}
+
+	//´¿ÎÄ±¾¸ñÊ½
+	/*
+	if(!m_listFlatRecver.empty() || !m_listFlatGroup.empty())
+	{
+		uint32_t curTime = curTick->actiontime()/1000;
+		char buf_flat[2048] = {0};
+		char *str = buf_flat;
+		//ÈÕÆÚ,Ê±¼ä,Âò¼Û,Âô¼Û,´úÂë,×îĞÂ¼Û,¿ª,¸ß,µÍ,½ñ½á,×ò½á,×ÜÊÖ,ÏÖÊÖ,×Ü³Ö,Ôö²Ö,µµÎ»[Âòx¼Û,ÂòxÁ¿,Âôx¼Û,ÂôxÁ¿]
+		str += sprintf(str, "%04d.%02d.%02d,", 
+			curTick->actiondate()/10000, curTick->actiondate()%10000/100, curTick->actiondate()%100);
+		str += sprintf(str, "%02d:%02d:%02d,", 
+			curTime/10000, curTime%10000/100, curTime%100);
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->bidprice(0)));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->askprice(0)));
+		str += sprintf(str, "%s,", curTick->code());
+
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->price()));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->open()));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->high()));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->low()));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->settlepx()));
+		str += sprintf(str, "%.2f,", PRICE_INT_TO_DOUBLE(curTick->preclose()));
+
+		str += sprintf(str, "%u,", curTick->totalvolume());
+		str += sprintf(str, "%u,", curTick->volume());
+		str += sprintf(str, "%u,", curTick->openinterest());
+		str += sprintf(str, "%d,", curTick->additional());
+
+		for(int i = 0; i < 5; i++)
+		{
+			str += sprintf(str, "%.2f,%u,", PRICE_INT_TO_DOUBLE(curTick->bidprice(i)), curTick->bidqty(i));
+			str += sprintf(str, "%.2f,%u,", PRICE_INT_TO_DOUBLE(curTick->askprice(i)), curTick->askqty(i));
+		}
+
+		for(auto it = m_listFlatRecver.begin(); it != m_listFlatRecver.end(); it++)
+		{
+			const UDPReceiverPtr& receiver = (*it);
+			m_sktBroadcast->send_to(boost::asio::buffer(buf_flat, strlen(buf_flat)), receiver->_ep);
+			sendTicks++;
+			sendBytes += strlen(buf_flat);
+		}
+
+		//×é²¥
+		for(auto it = m_listFlatGroup.begin(); it != m_listFlatGroup.end(); it++)
+		{
+			const MulticastPair& item = *it;
+			it->first->send_to(boost::asio::buffer(buf_flat, strlen(buf_flat)), item.second->_ep);
+			sendTicks++;
+			sendBytes += strlen(buf_flat);
+		}
+	}
+	
+
+	//json¸ñÊ½
+	if(!m_listJsonRecver.empty() || !m_listJsonGroup.empty())
+	{
+		datasvr::TickData newTick;
+		newTick.set_market(curTick->market());
+		newTick.set_code(curTick->code());
+
+		newTick.set_price(curTick->price());
+		newTick.set_open(curTick->open());
+		newTick.set_high(curTick->high());
+		newTick.set_low(curTick->low());
+		newTick.set_preclose(curTick->preclose());
+		newTick.set_settlepx(curTick->settlepx());
+
+		newTick.set_totalvolume(curTick->totalvolume());
+		newTick.set_volume(curTick->volume());
+		newTick.set_totalmoney(curTick->totalturnover());
+		newTick.set_money(curTick->turnover());
+		newTick.set_openinterest(curTick->openinterest());
+		newTick.set_additional(curTick->additional());
+
+		newTick.set_tradingdate(curTick->tradingdate());
+		newTick.set_actiondate(curTick->actiondate());
+		newTick.set_actiontime(curTick->actiontime());
+
+		for(int i = 0; i < 10; i++)
+		{
+			if(curTick->bidprice(i) == 0 && curTick->askprice(i) == 0)
+				break;
+
+			newTick.add_bidprices(curTick->bidprice(i));
+			newTick.add_bidqty(curTick->bidqty(i));
+
+			newTick.add_askprices(curTick->askprice(i));
+			newTick.add_askqty(curTick->askqty(i));
+		}
+		const std::string& buf_json =  pb2json(newTick);
+
+		//¹ã²¥
+		for(auto it = m_listJsonRecver.begin(); it != m_listJsonRecver.end(); it++)
+		{
+			const UDPReceiverPtr& receiver = (*it);
+			m_sktBroadcast->send_to(boost::asio::buffer(buf_json), receiver->_ep);
+			sendTicks++;
+			sendBytes += buf_json.size();
+		}
+
+		//×é²¥
+		for(auto it = m_listJsonGroup.begin(); it != m_listJsonGroup.end(); it++)
+		{
+			const MulticastPair& item = *it;
+			it->first->send_to(boost::asio::buffer(buf_json), item.second->_ep);
+			sendTicks++;
+			sendBytes += buf_json.size();
+		}
+	}
+	*/
 }
 
 void UDPCaster::handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred)
 {
 	if(error)
 	{
-		WTSLogger::error("Broadcasting of market data failed, remote addr: {}, error message: {}", ep.address().to_string().c_str(), error.message().c_str());
+		WTSLogger::error("Broadcasting of market data failed, remote addr: %s, error message: %s", ep.address().to_string().c_str(), error.message().c_str());
 	}
 }
 
@@ -411,7 +522,7 @@ void UDPCaster::handle_send_multi(const EndPoint& ep, const boost::system::error
 {
 	if(error)
 	{
-		WTSLogger::error("Multicasting of market data failed, remote addr: {}, error message: {}", ep.address().to_string().c_str(), error.message().c_str());
+		WTSLogger::error("Multicasting of market data failed, remote addr: %s, error message: %s", ep.address().to_string().c_str(), error.message().c_str());
 	}
 }
 

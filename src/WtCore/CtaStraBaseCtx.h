@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file CtaStraBaseCtx.h
  * \project	WonderTrader
  *
@@ -14,9 +14,6 @@
 
 #include "../Share/BoostFile.hpp"
 #include "../Share/fmtlib.h"
-#include "../Share/SpinMutex.hpp"
-
-#include <unordered_map>
 
 class CtaStrategy;
 
@@ -24,11 +21,11 @@ NS_WTP_BEGIN
 
 class WtCtaEngine;
 
-const char COND_ACTION_OL = 0;	//å¼€å¤š
-const char COND_ACTION_CL = 1;	//å¹³å¤š
-const char COND_ACTION_OS = 2;	//å¼€ç©º
-const char COND_ACTION_CS = 3;	//å¹³ç©º
-const char COND_ACTION_SP = 4;	//ç›´æ¥è®¾ç½®ä»“ä½
+const char COND_ACTION_OL = 0;	//¿ª¶à
+const char COND_ACTION_CL = 1;	//Æ½¶à
+const char COND_ACTION_OS = 2;	//¿ª¿Õ
+const char COND_ACTION_CS = 3;	//Æ½¿Õ
+const char COND_ACTION_SP = 4;	//Ö±½ÓÉèÖÃ²ÖÎ»
 
 typedef struct _CondEntrust
 {
@@ -38,7 +35,7 @@ typedef struct _CondEntrust
 
 	double			_qty;
 
-	char			_action;	//0-å¼€å¤š, 1-å¹³å¤š, 2-å¼€ç©º, 3-å¹³ç©º
+	char			_action;	//0-¿ª¶à, 1-Æ½¶à, 2-¿ª¿Õ, 3-Æ½¿Õ
 
 	char			_code[MAX_INSTRUMENT_LENGTH];
 	char			_usertag[32];
@@ -52,13 +49,13 @@ typedef struct _CondEntrust
 } CondEntrust;
 
 typedef std::vector<CondEntrust>	CondList;
-typedef wt_hashmap<std::string, CondList>	CondEntrustMap;
+typedef faster_hashmap<LongKey, CondList>	CondEntrustMap;
 
 
 class CtaStraBaseCtx : public ICtaStraCtx
 {
 public:
-	CtaStraBaseCtx(WtCtaEngine* engine, const char* name, int32_t slippage);
+	CtaStraBaseCtx(WtCtaEngine* engine, const char* name);
 	virtual ~CtaStraBaseCtx();
 
 private:
@@ -76,39 +73,37 @@ private:
 
 	void	update_dyn_profit(const char* stdCode, double price);
 
-	void	do_set_position(const char* stdCode, double qty, const char* userTag = "", bool bFireAtOnce = false);
-	void	append_signal(const char* stdCode, double qty, const char* userTag = "", uint32_t sigType = 0);
+	void	do_set_position(const char* stdCode, double qty, const char* userTag = "", bool bTriggered = false);
+	void	append_signal(const char* stdCode, double qty, const char* userTag = "");
 
 	inline CondList& get_cond_entrusts(const char* stdCode);
-
-protected:
+	
+private:
 	template<typename... Args>
 	void log_debug(const char* format, const Args& ...args)
 	{
-		const char* buffer = fmtutil::format(format, args...);
-		stra_log_debug(buffer);
+		std::string s = fmt::sprintf(format, args...);
+		stra_log_debug(s.c_str());
 	}
 
 	template<typename... Args>
 	void log_info(const char* format, const Args& ...args)
 	{
-		const char* buffer = fmtutil::format(format, args...);
-		stra_log_info(buffer);
+		std::string s = fmt::sprintf(format, args...);
+		stra_log_info(s.c_str());
 	}
 
 	template<typename... Args>
 	void log_error(const char* format, const Args& ...args)
 	{
-		const char* buffer = fmtutil::format(format, args...);
-		stra_log_error(buffer);
+		std::string s = fmt::sprintf(format, args...);
+		stra_log_error(s.c_str());
 	}
-
-	void	dump_chart_info();
 
 public:
 	virtual uint32_t id() { return _context_id; }
 
-	//å›è°ƒå‡½æ•°
+	//»Øµ÷º¯Êı
 	virtual void on_init() override;
 	virtual void on_session_begin(uint32_t uTDate) override;
 	virtual void on_session_end(uint32_t uTDate) override;
@@ -116,11 +111,11 @@ public:
 	virtual void on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override;
 	virtual bool on_schedule(uint32_t curDate, uint32_t curTime) override;
 
-	virtual void enum_position(FuncEnumCtaPosCallBack cb, bool bForExecute = false) override;
+	virtual void enum_position(FuncEnumCtaPosCallBack cb) override;
 
 
 	//////////////////////////////////////////////////////////////////////////
-	//ç­–ç•¥æ¥å£
+	//²ßÂÔ½Ó¿Ú
 	virtual void stra_enter_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override;
 	virtual void stra_enter_short(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override;
 	virtual void stra_exit_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override;
@@ -129,11 +124,6 @@ public:
 	virtual double stra_get_position(const char* stdCode, bool bOnlyValid = false, const char* userTag = "") override;
 	virtual void stra_set_position(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override;
 	virtual double stra_get_price(const char* stdCode) override;
-
-	/*
-	 *	è¯»å–å½“æ—¥ä»·æ ¼
-	 */
-	virtual double stra_get_day_price(const char* stdCode, int flag = 0) override;
 
 	virtual uint32_t stra_get_tdate() override;
 	virtual uint32_t stra_get_date() override;
@@ -157,84 +147,36 @@ public:
 	virtual WTSTickSlice*	stra_get_ticks(const char* stdCode, uint32_t count) override;
 	virtual WTSTickData*	stra_get_last_tick(const char* stdCode) override;
 
-	/*
-	 *	è·å–åˆ†æœˆåˆçº¦ä»£ç 
-	 */
-	virtual std::string		stra_get_rawcode(const char* stdCode) override;
-
 	virtual void stra_sub_ticks(const char* stdCode) override;
-	virtual void stra_sub_bar_events(const char* stdCode, const char* period) override;
 
 	virtual void stra_log_info(const char* message) override;
 	virtual void stra_log_debug(const char* message) override;
-	virtual void stra_log_warn(const char* message) override;
 	virtual void stra_log_error(const char* message) override;
 
 	virtual void stra_save_user_data(const char* key, const char* val) override;
 
 	virtual const char* stra_load_user_data(const char* key, const char* defVal = "") override;
 
-	virtual const char* stra_get_last_entertag(const char* stdCode) override;
-
-public:
-	/*
-	 *	è®¾ç½®å›¾è¡¨Kçº¿
-	 */
-	virtual void set_chart_kline(const char* stdCode, const char* period) override;
-
-	/*
-	 *	æ·»åŠ ä¿¡å·
-	 */
-	virtual void add_chart_mark(double price, const char* icon, const char* tag) override;
-
-	/*
-	 *	æ·»åŠ æŒ‡æ ‡
-	 */
-	virtual void register_index(const char* idxName, uint32_t indexType) override;
-
-	/*
-	 *	æ·»åŠ æŒ‡æ ‡çº¿
-	 */
-	virtual bool register_index_line(const char* idxName, const char* lineName, uint32_t lineType) override;
-
-	/*
-	 *	æ·»åŠ åŸºå‡†çº¿
-	 *	@idxName	æŒ‡æ ‡åç§°
-	 *	@lineName	çº¿æ¡åç§°
-	 *	@val		æ•°å€¼
-	 */
-	virtual bool add_index_baseline(const char* idxName, const char* lineName, double val) override;
-
-	/*
-	 *	è®¾ç½®æŒ‡æ ‡å€¼
-	 */
-	virtual bool set_index_value(const char* idxName, const char* lineName, double val) override;
-
 protected:
 	uint32_t		_context_id;
 	WtCtaEngine*	_engine;
 
-	int32_t			_slippage;
-
-	uint64_t		_total_calc_time;	//æ€»è®¡ç®—æ—¶é—´
-	uint32_t		_emit_times;		//æ€»è®¡ç®—æ¬¡æ•°
+	uint64_t		_total_calc_time;	//×Ü¼ÆËãÊ±¼ä
+	uint32_t		_emit_times;		//×Ü¼ÆËã´ÎÊı
 
 	std::string		_main_key;
-	std::string		_main_code;
-	std::string		_main_period;
 
 	typedef struct _KlineTag
 	{
-		bool	_closed;
-		bool	_notify;
+		bool			_closed;
 
-		_KlineTag() :_closed(false), _notify(false){}
+		_KlineTag() :_closed(false){}
 
 	} KlineTag;
-	typedef wt_hashmap<std::string, KlineTag> KlineTags;
+	typedef faster_hashmap<LongKey, KlineTag> KlineTags;
 	KlineTags	_kline_tags;
 
-	typedef wt_hashmap<std::string, double> PriceMap;
+	typedef faster_hashmap<LongKey, double> PriceMap;
 	PriceMap		_price_map;
 
 	typedef struct _DetailInfo
@@ -246,8 +188,6 @@ protected:
 		uint32_t	_opentdate;
 		double		_max_profit;
 		double		_max_loss;
-		double		_max_price;
-		double		_min_price;
 		double		_profit;
 		char		_opentag[32];
 		uint32_t	_open_barno;
@@ -283,7 +223,7 @@ protected:
 			_frozen_date = 0;
 		}
 	} PosInfo;
-	typedef wt_hashmap<std::string, PosInfo> PositionMap;
+	typedef faster_hashmap<LongKey, PosInfo> PositionMap;
 	PositionMap		_pos_map;
 
 	typedef struct _SigInfo
@@ -291,39 +231,34 @@ protected:
 		double		_volume;
 		std::string	_usertag;
 		double		_sigprice;
-		uint32_t	_sigtype;	// 0-onscheduleä¿¡å·ï¼Œ1-ontickä¿¡å·ï¼Œ2-æ¡ä»¶å•ä¿¡å·
-		uint64_t	_gentime;
 		bool		_triggered;
+		uint64_t	_gentime;
 
 		_SigInfo()
 		{
 			_volume = 0;
 			_sigprice = 0;
-			_sigtype = 0;
-			_gentime = 0;
 			_triggered = false;
+			_gentime = 0;
 		}
 	}SigInfo;
-	typedef wt_hashmap<std::string, SigInfo>	SignalMap;
+	typedef faster_hashmap<LongKey, SigInfo>	SignalMap;
 	SignalMap		_sig_map;
 
 	BoostFilePtr	_trade_logs;
 	BoostFilePtr	_close_logs;
 	BoostFilePtr	_fund_logs;
 	BoostFilePtr	_sig_logs;
-	BoostFilePtr	_pos_logs;
-	BoostFilePtr	_idx_logs;
-	BoostFilePtr	_mark_logs;
 
 	CondEntrustMap	_condtions;
-	uint64_t		_last_cond_min;	//ä¸Šæ¬¡è®¾ç½®æ¡ä»¶å•çš„æ—¶é—´
-	uint32_t		_last_barno;	//ä¸Šæ¬¡è®¾ç½®çš„Kçº¿ç¼–å·
+	uint64_t		_last_cond_min;	//ÉÏ´ÎÉèÖÃÌõ¼şµ¥µÄÊ±¼ä
+	uint32_t		_last_barno;	//ÉÏ´ÎÉèÖÃµÄKÏß±àºÅ
 
-	//æ˜¯å¦å¤„äºè°ƒåº¦ä¸­çš„æ ‡è®°
-	bool			_is_in_schedule;	//æ˜¯å¦åœ¨è‡ªåŠ¨è°ƒåº¦ä¸­
+	//ÊÇ·ñ´¦ÓÚµ÷¶ÈÖĞµÄ±ê¼Ç
+	bool			_is_in_schedule;	//ÊÇ·ñÔÚ×Ô¶¯µ÷¶ÈÖĞ
 
-	//ç”¨æˆ·æ•°æ®
-	typedef wt_hashmap<std::string, std::string> StringHashMap;
+	//ÓÃ»§Êı¾İ
+	typedef faster_hashmap<LongKey, std::string> StringHashMap;
 	StringHashMap	_user_datas;
 	bool			_ud_modified;
 
@@ -341,33 +276,8 @@ protected:
 
 	StraFundInfo		_fund_info;
 
-	//tickè®¢é˜…åˆ—è¡¨
-	wt_hashset<std::string> _tick_subs;
-	wt_hashset<std::string> _barevt_subs;
-
-	//////////////////////////////////////////////////////////////////////////
-	//å›¾è¡¨ç›¸å…³
-	std::string		_chart_code;
-	std::string		_chart_period;
-
-	typedef struct _ChartLine
-	{
-		std::string	_name;
-		uint32_t	_lineType;
-	} ChartLine;
-
-	typedef struct _ChartIndex
-	{
-		std::string	_name;
-		uint32_t	_indexType;
-		wt_hashmap<std::string, ChartLine> _lines;
-		wt_hashmap<std::string, double> _base_lines;
-	} ChartIndex;
-
-	wt_hashmap<std::string, ChartIndex>	_chart_indice;
-
-private:
-	SpinMutex		_mutex;
+	//tick¶©ÔÄÁĞ±í
+	faster_hashset<LongKey> _tick_subs;
 };
 
 

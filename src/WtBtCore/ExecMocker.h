@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file ExecMocker.h
  * \project	WonderTrader
  *
@@ -33,7 +33,7 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	//IDataSink
-	virtual void handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override;
+	virtual void handle_tick(const char* stdCode, WTSTickData* curTick) override;
 	virtual void handle_schedule(uint32_t uDate, uint32_t uTime) override;
 	virtual void handle_init() override;
 

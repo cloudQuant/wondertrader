@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <boost/pool/pool.hpp>
 #include <atomic>
 
@@ -27,7 +27,7 @@ public:
 		_pool.free(pobj);
 	}
 
-	//手动释放未使用的内存
+	//�ֶ��ͷ�δʹ�õ��ڴ�
 	void release()
 	{
 		_pool.release_memory();

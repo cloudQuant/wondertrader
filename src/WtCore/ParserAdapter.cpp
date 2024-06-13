@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file ParserAdapter.cpp
  * \project	WonderTrader
  *
@@ -13,8 +13,6 @@
 #include "WtHelper.h"
 
 #include "../Share/CodeHelper.hpp"
-#include "../Share/TimeUtils.hpp"
-
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
@@ -75,7 +73,7 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 		}
 		else
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: api initializing failed...", _id.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[%s] Parser initializing failed: api initializing failed...", _id.c_str());
 		}
 	}
 
@@ -98,43 +96,41 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 	_cfg = cfg;
 	_cfg->retain();
 
-	_check_time = cfg->getBoolean("check_time");
-
 	{
-		//åŠ è½½æ¨¡å—
+		//¼ÓÔØÄ£¿é
 		if (cfg->getString("module").empty())
 			return false;
 
 		std::string module = DLLHelper::wrap_module(cfg->getCString("module"), "lib");;
 
-		//å…ˆçœ‹å·¥ä½œç›®å½•ä¸‹æ˜¯å¦æœ‰äº¤æ˜“æ¨¡å—
+		//ÏÈ¿´¹¤×÷Ä¿Â¼ÏÂÊÇ·ñÓÐ½»Ò×Ä£¿é
 		std::string dllpath = WtHelper::getModulePath(module.c_str(), "parsers", true);
-		//å¦‚æžœæ²¡æœ‰,åˆ™å†çœ‹æ¨¡å—ç›®å½•,å³dllåŒç›®å½•ä¸‹
+		//Èç¹ûÃ»ÓÐ,ÔòÔÙ¿´Ä£¿éÄ¿Â¼,¼´dllÍ¬Ä¿Â¼ÏÂ
 		if (!StdFile::exists(dllpath.c_str()))
 			dllpath = WtHelper::getModulePath(module.c_str(), "parsers", false);
 
 		DllHandle hInst = DLLHelper::load_library(dllpath.c_str());
 		if (hInst == NULL)
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser module {} loading failed", _id.c_str(), dllpath.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[%s] Parser module %s loading failed", _id.c_str(), dllpath.c_str());
 			return false;
 		}
 		else
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser module {} loaded", _id.c_str(), dllpath.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[%s] Parser module %s loaded", _id.c_str(), dllpath.c_str());
 		}
 
 		FuncCreateParser pFuncCreateParser = (FuncCreateParser)DLLHelper::get_symbol(hInst, "createParser");
 		if (NULL == pFuncCreateParser)
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Entrance function createParser not found", _id.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[%s] Entrance function createParser not found", _id.c_str());
 			return false;
 		}
 
 		_parser_api = pFuncCreateParser();
 		if (NULL == _parser_api)
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Creating parser api failed", _id.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[%s] Creating parser api failed", _id.c_str());
 			return false;
 		}
 
@@ -171,42 +167,23 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 		if (_parser_api->init(cfg))
 		{
 			ContractSet contractSet;
-			if (!_code_filter.empty())//ä¼˜å…ˆåˆ¤æ–­åˆçº¦è¿‡æ»¤å™¨
+			if (!_code_filter.empty())//ÓÅÏÈÅÐ¶ÏºÏÔ¼¹ýÂËÆ÷
 			{
 				ExchgFilter::iterator it = _code_filter.begin();
 				for (; it != _code_filter.end(); it++)
 				{
-					//å…¨ä»£ç ,å½¢å¼å¦‚SSE.600000,æœŸè´§ä»£ç ä¸ºCFFEX.IF2005
+					//È«´úÂë,ÐÎÊ½ÈçSSE.600000,ÆÚ»õ´úÂëÎªCFFEX.IF2005
 					std::string code, exchg;
 					auto ay = StrUtil::split((*it).c_str(), ".");
 					if (ay.size() == 1)
 						code = ay[0];
-					else if (ay.size() == 2)
+					else
 					{
 						exchg = ay[0];
 						code = ay[1];
 					}
-					else if (ay.size() == 3)
-					{
-						exchg = ay[0];
-						code = ay[2];
-					}
 					WTSContractInfo* contract = _bd_mgr->getContract(code.c_str(), exchg.c_str());
-					if(contract)
-						contractSet.insert(contract->getFullCode());
-					else
-					{
-						//å¦‚æžœæ˜¯å“ç§IDï¼Œåˆ™å°†è¯¥å“ç§ä¸‹å…¨éƒ¨åˆçº¦éƒ½åŠ åˆ°è®¢é˜…åˆ—è¡¨
-						WTSCommodityInfo* commInfo = _bd_mgr->getCommodity(exchg.c_str(), code.c_str());
-						if(commInfo)
-						{
-							const auto& codes = commInfo->getCodes();
-							for(const auto& c : codes)
-							{
-								contractSet.insert(fmt::format("{}.{}", exchg, c.c_str()));
-							}							
-						}
-					}
+					contractSet.insert(contract->getFullCode());
 				}
 			}
 			else if (!_exchg_filter.empty())
@@ -243,15 +220,13 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 		}
 		else
 		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: api initializing failed...", _id.c_str());
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[%s] Parser initializing failed: api initializing failed...", _id.c_str());
 		}
 	}
 	else
 	{
-		WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: creating api failed...", _id.c_str());
+		WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[%s] Parser initializing failed: creating api failed...", _id.c_str());
 	}
-
-	WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser initialzied, check_time: {}", _id.c_str(), _check_time);
 
 	return true;
 }
@@ -279,8 +254,6 @@ bool ParserAdapter::run()
 	return true;
 }
 
-//åˆç†æ¯«ç§’æ•°æ—¶é—´å·®
-const int RESONABLE_MILLISECS = 60 * 60 * 1000;
 void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
 {
 	if (quote == NULL || _stopped || quote->actiondate() == 0 || quote->tradingdate() == 0)
@@ -288,6 +261,8 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
 
 	if (!_exchg_filter.empty() && (_exchg_filter.find(quote->exchg()) == _exchg_filter.end()))
 		return;
+
+	uint32_t hotflag = 0;
 
 	WTSContractInfo* cInfo = quote->getContractInfo();
 	if (cInfo == NULL)
@@ -300,35 +275,19 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
-	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
-
-	if (_check_time)
-	{
-		int64_t tick_time = TimeUtils::makeTime(quote->actiondate(), quote->actiontime());
-		int64_t local_time = TimeUtils::getLocalTimeNow();
-
-		/*
-		 *	By Wesley @ 2022.04.20
-		 *	å¦‚æžœæœ€æ–°çš„tickæ—¶é—´ï¼Œå’Œæœ¬åœ°æ—¶é—´ç›¸å·®å¤ªå¤§
-		 *	åˆ™è®¤ä¸ºtickçš„æ—¶é—´æˆ³æ˜¯é”™è¯¯çš„
-		 *	è¿™é‡Œè¦æ±‚æœ¬åœ°æ—¶é—´æ˜¯è¦æ—¶å¸¸è¿›è¡Œæ ¡å‡†çš„
-		 */
-		if (tick_time - local_time > RESONABLE_MILLISECS)
-		{
-			WTSLogger::warn("Tick of {} with wrong timestamp {}.{} received, skipped", cInfo->getFullCode(), quote->actiondate(), quote->actiontime());
-			return;
-		}
-	}
 
 	std::string stdCode;
-	if (commInfo->getCategoty() == CC_FutOption || commInfo->getCategoty() == CC_SpotOption)
+	if (commInfo->getCategoty() == CC_FutOption)
 	{
 		stdCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
 	}
 	else if(CodeHelper::isMonthlyCode(quote->code()))
 	{
-		//å¦‚æžœæ˜¯åˆ†æœˆåˆçº¦ï¼Œåˆ™è¿›è¡Œä¸»åŠ›å’Œæ¬¡ä¸»åŠ›çš„åˆ¤æ–­
+		//Èç¹ûÊÇ·ÖÔÂºÏÔ¼£¬Ôò½øÐÐÖ÷Á¦ºÍ´ÎÖ÷Á¦µÄÅÐ¶Ï
 		stdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+		bool bHot = _hot_mgr->isHot(quote->exchg(), quote->code(), 0);
+		bool b2nd = _hot_mgr->isSecond(quote->exchg(), quote->code(), 0);
+		hotflag = bHot ? 1 : (b2nd ? 2 : 0);
 	}
 	else
 	{
@@ -336,7 +295,7 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
 	}
 	quote->setCode(stdCode.c_str());
 
-	_stub->handle_push_quote(quote);
+	_stub->handle_push_quote(quote, hotflag);
 }
 
 void ParserAdapter::handleOrderQueue(WTSOrdQueData* ordQueData)
@@ -438,7 +397,7 @@ bool ParserAdapterMgr::addAdapter(const char* id, ParserAdapterPtr& adapter)
 	auto it = _adapters.find(id);
 	if (it != _adapters.end())
 	{
-		WTSLogger::error(" Same name of parsers: {}", id);
+		WTSLogger::error(" Same name of parsers: %s", id);
 		return false;
 	}
 
@@ -466,5 +425,5 @@ void ParserAdapterMgr::run()
 		it->second->run();
 	}
 
-	WTSLogger::info("{} parsers started", _adapters.size());
+	WTSLogger::info("%u parsers started", _adapters.size());
 }

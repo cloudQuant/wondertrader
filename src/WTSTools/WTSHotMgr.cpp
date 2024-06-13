@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WTSHotMgr.cpp
  * \project	WonderTrader
  *
@@ -10,18 +10,18 @@
 #include "WTSHotMgr.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 
-#include "../Includes/WTSSwitchItem.hpp"
+#include "../Includes/WTSHotItem.hpp"
 #include "../Includes/WTSVariant.hpp"
 
 #include "../Share/StrUtil.hpp"
 #include "../Share/TimeUtils.hpp"
 #include "../Share/CodeHelper.hpp"
 #include "../Share/StdUtils.hpp"
-#include "../Share/decimal.h"
 
 
 WTSHotMgr::WTSHotMgr()
-	: m_mapCustRules(NULL)
+	: m_pExchgHotMap(NULL)
+	, m_pExchgScndMap(NULL)
 	, m_bInitialized(false)
 {
 }
@@ -31,293 +31,693 @@ WTSHotMgr::~WTSHotMgr()
 {
 }
 
-const char* WTSHotMgr::getRuleTag(const char* stdCode)
-{
-	if (m_mapCustRules == NULL)
-		return "";
-
-	auto len = strlen(stdCode);
-	if (stdCode[len - 1] == '+' || stdCode[len - 1] == '-')
-		len--;
-
-	auto idx = StrUtil::findLast(stdCode, '.');
-	if (idx == std::string::npos)
-	{
-		auto it = m_mapCustRules->find(std::string(stdCode, len));
-		if (it == m_mapCustRules->end())
-			return "";
-
-		return it->first.c_str();
-	}
-
-	const char* tail = stdCode + idx + 1;
-	auto it = m_mapCustRules->find(std::string(tail, len - idx - 1));
-	if (it == m_mapCustRules->end())
-		return "";
-
-	return it->first.c_str();
-}
-
-double WTSHotMgr::getRuleFactor(const char* ruleTag, const char* fullPid, uint32_t uDate /* = 0 */ )
-{
-	if (m_mapCustRules == NULL)
-		return 1.0;
-
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(ruleTag);
-	if (prodMap == NULL)
-		return 1.0;
-
-	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
-	if (dtMap == NULL)
-		return 1.0;
-
-	if(uDate == 0)
-	{
-		WTSSwitchItem* pItem = STATIC_CONVERT(dtMap->rbegin()->second, WTSSwitchItem*);
-		return pItem->get_factor();
-	}
-
-	auto it = dtMap->lower_bound(uDate);
-	if(it == dtMap->end())
-	{
-		//æ‰¾ä¸åˆ°ï¼Œè¯´æ˜Žè®°å½•çš„æ—¥æœŸéƒ½æ¯”ä¼ å…¥çš„æ—¥æœŸå°ï¼Œæ‰€ä»¥è¿”å›žæœ€åŽä¸€æ¡çš„å¤æƒå› å­
-		WTSSwitchItem* pItem = STATIC_CONVERT(dtMap->rbegin()->second, WTSSwitchItem*);
-		return pItem->get_factor();
-	}
-	else
-	{
-		//æ‰¾åˆ°äº†ï¼Œå°±è¦çœ‹åˆ‡æ¢æ—¥æœŸæ˜¯å¦ç­‰äºŽä¼ å…¥æ—¥æœŸ
-		//å¦‚æžœç›¸ç­‰ï¼Œè¯´æ˜Žåˆšå¥½åˆ‡æ¢ï¼Œé‚£ä¹ˆå°±ç›´æŽ¥è¿”å›žå¤æƒå› å­
-		WTSSwitchItem* pItem = STATIC_CONVERT(it->second, WTSSwitchItem*);
-		if (pItem->switch_date() == uDate)
-		{
-			return pItem->get_factor();
-		}
-		else
-		{
-			//å¦‚æžœåˆ‡æ¢æ—¥æœŸå¤§äºŽä¼ å…¥æ—¥æœŸï¼Œåˆ™è¦çœ‹å‰ä¸€ä¸ªé˜¶æ®µ
-			//å¦‚æžœå·²ç»æ˜¯ç¬¬ä¸€ä¸ªäº†ï¼Œåˆ™ç›´æŽ¥è¿”å›ž1.0
-			if (it == dtMap->begin())
-			{
-				return 1.0;
-			}
-			else
-			{
-				//å¦‚æžœä¸æ˜¯ç¬¬ä¸€ä¸ªï¼Œåˆ™å›žé€€ä¸€ä¸ªï¼Œå†è¿”å›žå³å¯
-				it--;
-				WTSSwitchItem* pItem = STATIC_CONVERT(it->second, WTSSwitchItem*);
-				return pItem->get_factor();
-			}
-		}
-	}
-
-}
-
-#pragma region "æ¬¡ä¸»åŠ›æŽ¥å£"
+#pragma region "´ÎÖ÷Á¦½Ó¿Ú"
 bool WTSHotMgr::loadHots(const char* filename)
-{
-	loadCustomRules("HOT", filename);
-	m_bInitialized = true;
-	return true;
-}
-
-const char* WTSHotMgr::getPrevRawCode(const char* exchg, const char* pid, uint32_t dt)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return getPrevCustomRawCode("HOT", fullPid, dt);
-}
-
-const char* WTSHotMgr::getRawCode(const char* exchg, const char* pid, uint32_t dt)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return getCustomRawCode("HOT", fullPid, dt);
-}
-
-bool WTSHotMgr::isHot(const char* exchg, const char* rawCode, uint32_t dt)
-{
-	static thread_local char fullCode[64] = { 0 };
-	fmtutil::format_to(fullCode, "{}.{}", exchg, rawCode);
-
-	return isCustomHot("HOT", fullCode, dt);
-}
-
-bool WTSHotMgr::splitHotSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return splitCustomSections("HOT", fullPid, sDt, eDt, sections);
-}
-#pragma endregion "ä¸»åŠ›æŽ¥å£"
-
-#pragma region "æ¬¡ä¸»åŠ›æŽ¥å£"
-bool WTSHotMgr::loadSeconds(const char* filename)
-{
-	return loadCustomRules("2ND", filename);
-}
-
-const char* WTSHotMgr::getPrevSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return getPrevCustomRawCode("2ND", fullPid, dt);
-}
-
-const char* WTSHotMgr::getSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return getCustomRawCode("2ND", fullPid, dt);
-}
-
-bool WTSHotMgr::isSecond(const char* exchg, const char* rawCode, uint32_t dt)
-{
-	static thread_local char fullCode[64] = { 0 };
-	fmtutil::format_to(fullCode, "{}.{}", exchg, rawCode);
-
-	return isCustomHot("2NDT", fullCode, dt);
-}
-
-bool WTSHotMgr::splitSecondSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
-{
-	static thread_local char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", exchg, pid);
-
-	return splitCustomSections("2ND", fullPid, sDt, eDt, sections);
-}
-
-#pragma endregion "æ¬¡ä¸»åŠ›æŽ¥å£"
-
-#pragma region "è‡ªå®šä¹‰ä¸»åŠ›æŽ¥å£"
-bool WTSHotMgr::loadCustomRules(const char* tag, const char* filename)
 {
 	if (!StdFile::exists(filename))
 	{
 		return false;
 	}
 
-	WTSVariant* root = WTSCfgLoader::load_from_file(filename);
+	WTSVariant* root = WTSCfgLoader::load_from_file(filename, true);
 	if (root == NULL)
 		return false;
 
-	if (m_mapCustRules == NULL)
-		m_mapCustRules = WTSCustomSwitchMap::create();
-
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
-	if(prodMap == NULL)
+	if (m_pExchgHotMap != NULL)
 	{
-		prodMap = WTSProductHotMap::create();
-		m_mapCustRules->add(tag, prodMap, false);
+		m_pExchgHotMap->release();
+		m_pExchgHotMap = NULL;
 	}
 
-	for (const std::string& exchg : root->memberNames())
+	m_pExchgHotMap = WTSExchgHotMap::create();
+
+	for(const std::string& exchg : root->memberNames())
 	{
 		WTSVariant* jExchg = root->get(exchg);
+
+		WTSProductHotMap* productMap = WTSProductHotMap::create();
+		m_pExchgHotMap->add(exchg, productMap, false);
 
 		for (const std::string& pid : jExchg->memberNames())
 		{
 			WTSVariant* jProduct = jExchg->get(pid);
-			std::string fullPid = fmt::format("{}.{}", exchg, pid);
 
 			WTSDateHotMap* dateMap = WTSDateHotMap::create();
-			prodMap->add(fullPid.c_str(), dateMap, false);
+			productMap->add(pid.c_str(), dateMap, false);
 
 			std::string lastCode;
-			double factor = 1.0;
 			for (uint32_t i = 0; i < jProduct->size(); i++)
 			{
 				WTSVariant* jHotItem = jProduct->get(i);
-				WTSSwitchItem* pItem = WTSSwitchItem::create(
-					exchg.c_str(), pid.c_str(),
-					jHotItem->getCString("from"), jHotItem->getCString("to"), 
-					jHotItem->getUInt32("date"));
-
-				//è®¡ç®—å¤æƒå› å­
-				double oldclose = jHotItem->getDouble("oldclose");
-				double newclose = jHotItem->getDouble("newclose");
-				factor *= (decimal::eq(oldclose, 0.0) ? 1.0 : (oldclose/ newclose));
-				pItem->set_factor(factor);
-				dateMap->add(pItem->switch_date(), pItem, false);
+				WTSHotItem* pItem = WTSHotItem::create(exchg.c_str(), pid.c_str(),
+					jHotItem->getCString("from"), jHotItem->getCString("to"), jHotItem->getUInt32("date"));
+				dateMap->add(pItem->switchdate(), pItem, false);
 				lastCode = jHotItem->getCString("to");
 			}
 
-			std::string fullCode = fmt::format("{}.{}", exchg.c_str(), lastCode.c_str());
-			m_mapCustCodes[tag].insert(fullCode);
+			std::string fullCode = StrUtil::printf("%s.%s", exchg.c_str(), lastCode.c_str());
+			m_curHotCodes[fullCode] = pid + "0001";
 		}
 	}
 
 	root->release();
+	m_bInitialized = true;
 	return true;
 }
 
-const char* WTSHotMgr::getPrevCustomRawCode(const char* tag, const char* fullPid, uint32_t dt /* = 0 */)
+const char* WTSHotMgr::getPrevRawCode(const char* exchg, const char* pid, uint32_t dt)
 {
-	if (m_mapCustRules == NULL)
-		return "";
-
 	if (dt == 0)
 		dt = TimeUtils::getCurDate();
 
-	if (m_mapCustRules == NULL)
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
 		return "";
 
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
-	if (prodMap == NULL)
+	if (m_pExchgHotMap == NULL)
 		return "";
 
-	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
-	if (dtMap == NULL)
-		return "";
-
-	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
-	if (cit != dtMap->end())
+	if (strcmp(exchg, HOTS_MARKET) != 0)
 	{
-		if (dt < cit->first)
-			cit--;
-
-		if (cit == dtMap->end() || cit == dtMap->begin())
+		WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgHotMap->get(exchg), WTSProductHotMap*);
+		if (proMap == NULL)
 			return "";
 
-		cit--;
+		WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+		if (dtMap == NULL)
+			return "";
 
-		WTSSwitchItem* pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
-		return pItem->to();
+		WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+		if (cit != dtMap->end())
+		{
+			if (dt < cit->first)
+				cit--;
+
+			if (cit == dtMap->end() || cit == dtMap->begin())
+				return "";
+
+			cit--;
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
+		else
+		{
+			cit--;
+
+			if (cit == dtMap->end() || cit == dtMap->begin())
+				return "";
+
+			cit--;
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
 	}
 	else
 	{
-		cit--;
+		for (auto pit = m_pExchgHotMap->begin(); pit != m_pExchgHotMap->end(); pit++)
+		{
+			WTSProductHotMap* proMap = STATIC_CONVERT(pit->second, WTSProductHotMap*);
+			if (proMap == NULL)
+				continue;
 
-		if (cit == dtMap->end() || cit == dtMap->begin())
+			WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+			if (dtMap == NULL)
+				continue;
+
+			WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+			if (cit != dtMap->end())
+			{
+				if (dt < cit->first)
+					cit--;
+
+				if (cit == dtMap->end() || cit == dtMap->begin())
+					return "";
+
+				cit--;
+
+				WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+				return pItem->to();
+			}
+			else
+			{
+				cit--;
+
+				if (cit == dtMap->end() || cit == dtMap->begin())
+					return "";
+
+				cit--;
+
+				WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+				return pItem->to();
+			}
+		}
+	}
+
+
+	return "";
+}
+
+const char* WTSHotMgr::getRawCode(const char* exchg, const char* pid, uint32_t dt)
+{
+	if (dt == 0)
+		dt = TimeUtils::getCurDate();
+
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
+		return "";
+
+	if(m_pExchgHotMap == NULL)
+		return "";
+
+	if (strcmp(exchg, HOTS_MARKET) != 0)
+	{
+		WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgHotMap->get(exchg), WTSProductHotMap*);
+		if (proMap == NULL)
 			return "";
 
-		cit--;
+		WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+		if (dtMap == NULL)
+			return "";
 
-		WTSSwitchItem* pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
-		return pItem->to();
+		WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+		if (cit != dtMap->end())
+		{
+			if (dt < cit->first)
+				cit--;
+
+			if (cit == dtMap->end())
+				return "";
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
+		else
+		{
+			WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+			return pItem->to();
+		}
+	}
+	else
+	{
+		for (auto pit = m_pExchgHotMap->begin(); pit != m_pExchgHotMap->end(); pit++)
+		{
+			WTSProductHotMap* proMap = STATIC_CONVERT(pit->second, WTSProductHotMap*);
+			if (proMap == NULL)
+				continue;
+
+			WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+			if (dtMap == NULL)
+				continue;
+
+			WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+			if (cit != dtMap->end())
+			{
+				if (dt < cit->first)
+					cit--;
+
+				if (cit == dtMap->end())
+					return "";
+
+				WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+				return pItem->to();
+			}
+			else
+			{
+				WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+				return pItem->to();
+			}
+		}
+	}
+	
+
+	return "";
+}
+
+const char* WTSHotMgr::getHotCode(const char* exchg, const char* rawCode, uint32_t dt)
+{
+	if(strlen(exchg) == 0)
+		return "";
+
+	if(dt == 0)
+	{
+		thread_local static char buf[64] = { 0 };
+		auto len = strlen(exchg);
+		wt_strcpy(buf, exchg, len);
+		buf[len] = '.';
+		wt_strcpy(buf + len + 1, rawCode);
+
+		auto it = m_curHotCodes.find(buf);
+		if (it == m_curHotCodes.end())
+			return "";
+		else
+			return it->second.c_str();
+	}
+
+	std::string product = CodeHelper::rawMonthCodeToRawCommID(rawCode);
+
+	if(m_pExchgHotMap == NULL)
+		return "";
+
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgHotMap->get(exchg), WTSProductHotMap*);
+	if(proMap == NULL)
+		return "";
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+	if(dtMap == NULL)
+		return "";
+
+	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+	if(cit != dtMap->end())
+	{
+		if(dt < cit->first)
+			cit--;
+
+		if(cit == dtMap->end())
+			return "";
+
+		WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+		if(strcmp(pItem->to(), rawCode) == 0)
+			return pItem->hot();
+	}
+	else
+	{
+		WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+		if(strcmp(pItem->to(), rawCode) == 0)
+			return pItem->hot();
 	}
 
 	return "";
 }
 
-const char* WTSHotMgr::getCustomRawCode(const char* tag, const char* fullPid, uint32_t dt /* = 0 */)
+bool WTSHotMgr::isHot(const char* exchg, const char* rawCode, uint32_t dt)
 {
-	if (m_mapCustRules == NULL)
+	if (strlen(exchg) == 0)
 		return "";
 
 	if (dt == 0)
+	{
+		thread_local static char buf[64] = { 0 };
+		auto len = strlen(exchg);
+		wt_strcpy(buf, exchg, len);
+		buf[len] = '.';
+		wt_strcpy(buf + len + 1, rawCode);
+		len += strlen(rawCode)  + 1;
+		buf[len] = '\0';
+
+		auto it = m_curHotCodes.find(buf);
+		if (it == m_curHotCodes.end())
+			return false;
+		else
+			return true;
+	}
+
+	std::string product = CodeHelper::rawMonthCodeToRawCommID(rawCode);
+
+	if(m_pExchgHotMap == NULL)
+		false;
+
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgHotMap->get(exchg), WTSProductHotMap*);
+	if(proMap == NULL)
+		false;
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+	if(dtMap == NULL)
+		false;
+
+	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+	if(cit != dtMap->end())
+	{
+		WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+		if(strcmp(pItem->to(), rawCode) == 0)
+			return true;
+	}
+	else if(dtMap->size() > 0)
+	{
+		WTSHotItem* pItem = (WTSHotItem*)dtMap->last();
+		if (strcmp(pItem->to(), rawCode) == 0)
+			return true;
+	}
+
+	return false;
+}
+
+bool WTSHotMgr::splitHotSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
+{
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
+		return false;
+
+	if (m_pExchgHotMap == NULL)
+		return false;
+
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgHotMap->get(exchg), WTSProductHotMap*);
+	if (proMap == NULL)
+		return false;
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+	if (dtMap == NULL)
+		return false;
+
+	uint32_t leftDate = sDt;
+	uint32_t lastDate = 0;
+	const char* curHot = "";
+	auto cit = dtMap->begin();
+	for (; cit != dtMap->end(); cit++)
+	{
+		uint32_t curDate = cit->first;
+		WTSHotItem* hotItem = (WTSHotItem*)cit->second;
+		
+		if(curDate > eDt)
+		{
+			//sections[hotItem->from()] = HotSection(leftDate, eDt);
+			sections.emplace_back(HotSection(hotItem->from(), leftDate, eDt));
+		}
+		else if(leftDate < curDate)
+		{
+			//Èç¹û¿ªÊ¼ÈÕÆÚÐ¡ÓÚµ±Ç°ÇÐ»»µÄÈÕÆÚ,ÔòÌí¼ÓÒ»¶Î
+			if(strlen(hotItem->from()) > 0)//ÕâÀïfromÎª¿Õ,Ö÷ÒªÊÇµÚÒ»Ìõ¹æÔò,Èç¹ûÕæµÄÓöµ½ÕâÖÖÇé¿ö,Ò²Ã»ÓÐÌ«ºÃµÄ°ì·¨,Ö»ÄÜ²»ÒªÕâÒ»¶ÎÊý¾ÝÁË,Ò»°ãÇé¿öÏÂÊÇ¹»µÄ
+			{
+				//sections[hotItem->from()] = HotSection(leftDate, TimeUtils::getNextDate(curDate, -1));
+				sections.emplace_back(HotSection(hotItem->from(), leftDate, TimeUtils::getNextDate(curDate, -1)));
+			}
+			
+			leftDate = curDate;
+		}
+
+		lastDate = curDate;
+		curHot = hotItem->to();
+	}
+
+	if(leftDate >= lastDate && lastDate != 0)
+	{
+		//sections[curHot] = HotSection(leftDate, eDt);
+		sections.emplace_back(HotSection(curHot, leftDate, eDt));
+	}
+
+	return true;
+}
+
+void WTSHotMgr::getHotCodes(const char* exchg, std::map<std::string, std::string> &mapHots)
+{
+	if(m_pExchgHotMap == NULL)
+		return;
+
+	WTSExchgHotMap::ConstIterator cit = m_pExchgHotMap->begin();
+	for(; cit != m_pExchgHotMap->end(); cit++)
+	{
+		if (strlen(exchg) == 0 || cit->first.compare(exchg)==0)
+		{
+			WTSProductHotMap* pMap = (WTSProductHotMap*)cit->second;
+			WTSProductHotMap::ConstIterator pit = pMap->begin();
+			for(; pit != pMap->end(); pit++)
+			{
+				WTSDateHotMap* dtMap = (WTSDateHotMap*)pit->second;
+				WTSHotItem* item = (WTSHotItem*)dtMap->last();
+				mapHots[item->hot()] = item->to();
+			}
+		}
+	}
+}
+
+bool WTSHotMgr::hasHotCodes()
+{
+	if (m_pExchgHotMap == NULL)
+		return false;
+
+	uint32_t cnt = 0;
+	WTSExchgHotMap::ConstIterator cit = m_pExchgHotMap->begin();
+	for (; cit != m_pExchgHotMap->end(); cit++)
+	{
+		WTSProductHotMap* pMap = (WTSProductHotMap*)cit->second;
+		cnt += pMap->size();
+	}
+
+	return cnt > 0;
+}
+
+#pragma endregion "Ö÷Á¦½Ó¿Ú"
+
+#pragma region "´ÎÖ÷Á¦½Ó¿Ú"
+bool WTSHotMgr::loadSeconds(const char* filename)
+{
+	if (!StdFile::exists(filename))
+	{
+		return false;
+	}
+
+	WTSVariant* root = WTSCfgLoader::load_from_file(filename, true);
+	if (root == NULL)
+		return false;
+
+	if (m_pExchgScndMap != NULL)
+	{
+		m_pExchgScndMap->release();
+		m_pExchgScndMap = NULL;
+	}
+
+	m_pExchgScndMap = WTSExchgHotMap::create();
+
+	for (const std::string& exchg : root->memberNames())
+	{
+		WTSVariant* jExchg = root->get(exchg);
+
+		WTSProductHotMap* productMap = WTSProductHotMap::create();
+		m_pExchgScndMap->add(exchg, productMap, false);
+
+		for (const std::string& pid : jExchg->memberNames())
+		{
+			WTSVariant* jProduct = jExchg->get(pid);
+
+			WTSDateHotMap* dateMap = WTSDateHotMap::create();
+			productMap->add(pid.c_str(), dateMap, false);
+
+			std::string lastCode;
+			for (uint32_t i = 0; i < jProduct->size(); i++)
+			{
+				WTSVariant* jHotItem = jProduct->get(i);
+				WTSHotItem* pItem = WTSHotItem::create(exchg.c_str(), pid.c_str(),
+					jHotItem->getCString("from"), jHotItem->getCString("to"), jHotItem->getUInt32("date"));
+				dateMap->add(pItem->switchdate(), pItem, false);
+				lastCode = jHotItem->getCString("to");
+			}
+
+			std::string fullCode = StrUtil::printf("%s.%s", exchg.c_str(), lastCode.c_str());
+			m_curSecCodes[fullCode] = pid + "0002";
+		}
+	}
+
+	return true;
+}
+
+const char* WTSHotMgr::getPrevSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
+{
+	if (dt == 0)
 		dt = TimeUtils::getCurDate();
 
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
-	if (prodMap == NULL)
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
 		return "";
 
-	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
+	if (m_pExchgScndMap == NULL)
+		return "";
+
+	if (strcmp(exchg, SECONDS_MARKET) != 0)
+	{
+		WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgScndMap->get(exchg), WTSProductHotMap*);
+		if (proMap == NULL)
+			return "";
+
+		WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+		if (dtMap == NULL)
+			return "";
+
+		WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+		if (cit != dtMap->end())
+		{
+			if (dt < cit->first)
+				cit--;
+
+			if (cit == dtMap->end() || cit == dtMap->begin())
+				return "";
+
+			cit--;
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
+		else
+		{
+			cit--;
+
+			if (cit == dtMap->end() || cit == dtMap->begin())
+				return "";
+
+			cit--;
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
+	}
+	else
+	{
+		for (auto pit = m_pExchgScndMap->begin(); pit != m_pExchgScndMap->end(); pit++)
+		{
+			WTSProductHotMap* proMap = STATIC_CONVERT(pit->second, WTSProductHotMap*);
+			if (proMap == NULL)
+				continue;
+
+			WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+			if (dtMap == NULL)
+				continue;
+
+			WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+			if (cit != dtMap->end())
+			{
+				if (dt < cit->first)
+					cit--;
+
+				if (cit == dtMap->end() || cit == dtMap->begin())
+					return "";
+
+				cit--;
+
+				WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+				return pItem->to();
+			}
+			else
+			{
+				cit--;
+
+				if (cit == dtMap->end() || cit == dtMap->begin())
+					return "";
+
+				cit--;
+
+				WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+				return pItem->to();
+			}
+		}
+	}
+
+
+	return "";
+}
+
+const char* WTSHotMgr::getSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
+{
+	if (dt == 0)
+		dt = TimeUtils::getCurDate();
+
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
+		return "";
+
+	if (m_pExchgScndMap == NULL)
+		return "";
+
+	if (strcmp(exchg, SECONDS_MARKET) != 0)
+	{
+		WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgScndMap->get(exchg), WTSProductHotMap*);
+		if (proMap == NULL)
+			return "";
+
+		WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+		if (dtMap == NULL)
+			return "";
+
+		WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+		if (cit != dtMap->end())
+		{
+			if (dt < cit->first)
+				cit--;
+
+			if (cit == dtMap->end())
+				return "";
+
+			WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+			return pItem->to();
+		}
+		else
+		{
+			WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+			return pItem->to();
+		}
+	}
+	else
+	{
+		for (auto pit = m_pExchgScndMap->begin(); pit != m_pExchgScndMap->end(); pit++)
+		{
+			WTSProductHotMap* proMap = STATIC_CONVERT(pit->second, WTSProductHotMap*);
+			if (proMap == NULL)
+				continue;
+
+			WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
+			if (dtMap == NULL)
+				continue;
+
+			WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
+			if (cit != dtMap->end())
+			{
+				if (dt < cit->first)
+					cit--;
+
+				if (cit == dtMap->end())
+					return "";
+
+				WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+				return pItem->to();
+			}
+			else
+			{
+				WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+				return pItem->to();
+			}
+		}
+	}
+
+
+	return "";
+}
+
+const char* WTSHotMgr::getSecondCode(const char* exchg, const char* rawCode, uint32_t dt)
+{
+	//if (dt == 0)
+	//	dt = TimeUtils::getCurDate();
+
+	if (strlen(exchg) == 0)
+		return "";
+
+	if (dt == 0)
+	{
+		thread_local static char buf[64] = { 0 };
+		auto len = strlen(exchg);
+		wt_strcpy(buf, exchg, len);
+		buf[len] = '.';
+		wt_strcpy(buf + len + 1, rawCode);
+		auto it = m_curSecCodes.find(buf);
+		if (it == m_curSecCodes.end())
+			return "";
+		else
+			return it->second.c_str();
+	}
+
+	std::string product = CodeHelper::rawMonthCodeToRawCommID(rawCode);
+
+	if (m_pExchgScndMap == NULL)
+		return "";
+
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgScndMap->get(exchg), WTSProductHotMap*);
+	if (proMap == NULL)
+		return "";
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
 	if (dtMap == NULL)
 		return "";
 
@@ -330,66 +730,65 @@ const char* WTSHotMgr::getCustomRawCode(const char* tag, const char* fullPid, ui
 		if (cit == dtMap->end())
 			return "";
 
-		WTSSwitchItem* pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
-		return pItem->to();
+		WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
+		if (strcmp(pItem->to(), rawCode) == 0)
+			return pItem->hot();
 	}
 	else
 	{
-		WTSSwitchItem* pItem = STATIC_CONVERT(dtMap->last(), WTSSwitchItem*);
-		return pItem->to();
+		WTSHotItem* pItem = STATIC_CONVERT(dtMap->last(), WTSHotItem*);
+		if (strcmp(pItem->to(), rawCode) == 0)
+			return pItem->hot();
 	}
 
 	return "";
 }
 
-bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /* = 0 */)
+bool WTSHotMgr::isSecond(const char* exchg, const char* rawCode, uint32_t dt)
 {
-	if (m_mapCustRules == NULL)
-		return false;
+	//if (dt == 0)
+	//	dt = TimeUtils::getCurDate();
 
-	const auto& curHotCodes = m_mapCustCodes[tag];
-	if (curHotCodes.empty())
-		return false;
+	if (strlen(exchg) == 0)
+		false;
 
 	if (dt == 0)
 	{
-		auto it = curHotCodes.find(fullCode);
-		if (it == curHotCodes.end())
+		thread_local static char buf[64] = { 0 };
+		auto len = strlen(exchg);
+		wt_strcpy(buf, exchg, len);
+		buf[len] = '.';
+		wt_strcpy(buf + len + 1, rawCode);
+		auto it = m_curSecCodes.find(buf);
+		if (it == m_curSecCodes.end())
 			return false;
 		else
 			return true;
 	}
 
-	auto idx = StrUtil::findFirst(fullCode, '.');
-	const char* rawCode = fullCode + idx + 1;
-	std::string fullPid(fullCode, idx);
-	fullPid += ".";
-	fullPid += CodeHelper::rawMonthCodeToRawCommID(rawCode);
+	std::string product = CodeHelper::rawMonthCodeToRawCommID(rawCode);
 
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
-	if (prodMap == NULL)
-		return "";
+	if (m_pExchgScndMap == NULL)
+		false;
 
-	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgScndMap->get(exchg), WTSProductHotMap*);
+	if (proMap == NULL)
+		false;
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
 	if (dtMap == NULL)
-		return "";
+		false;
 
 	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
 	if (cit != dtMap->end())
 	{
-		WTSSwitchItem* pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
-		//å› ä¸ºç™»è®°çš„æ¢æœˆæ—¥æœŸæ˜¯å¼€å§‹ç”Ÿæ•ˆçš„äº¤æ˜“æ—¥ï¼Œå¦‚æžœæ˜¯ä¸‹åˆç›˜åŽç¡®å®šä¸»åŠ›çš„è¯
-		//é‚£ä¹ˆdtå°±ä¼šæ˜¯ç¬¬äºŒå¤©ï¼Œæ‰€ä»¥ï¼Œdtå¿…é¡»å¤§äºŽç­‰äºŽåˆ‡æ¢æ—¥æœŸ
-		if (pItem->switch_date() > dt)
-			cit--;
-
-		pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
+		WTSHotItem* pItem = STATIC_CONVERT(cit->second, WTSHotItem*);
 		if (strcmp(pItem->to(), rawCode) == 0)
 			return true;
 	}
 	else if (dtMap->size() > 0)
 	{
-		WTSSwitchItem* pItem = (WTSSwitchItem*)dtMap->last();
+		WTSHotItem* pItem = (WTSHotItem*)dtMap->last();
 		if (strcmp(pItem->to(), rawCode) == 0)
 			return true;
 	}
@@ -397,16 +796,21 @@ bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /
 	return false;
 }
 
-bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32_t sDt, uint32_t eDt, HotSections& sections)
+bool WTSHotMgr::splitSecondSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
 {
-	if (m_mapCustRules == NULL)
+	std::string product = pid;
+
+	if (strlen(exchg) == 0)
 		return false;
 
-	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
-	if (prodMap == NULL)
+	if (m_pExchgScndMap == NULL)
 		return false;
 
-	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
+	WTSProductHotMap* proMap = STATIC_CONVERT(m_pExchgScndMap->get(exchg), WTSProductHotMap*);
+	if (proMap == NULL)
+		return false;
+
+	WTSDateHotMap* dtMap = STATIC_CONVERT(proMap->get(product), WTSDateHotMap*);
 	if (dtMap == NULL)
 		return false;
 
@@ -414,58 +818,54 @@ bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32
 	uint32_t lastDate = 0;
 	const char* curHot = "";
 	auto cit = dtMap->begin();
-	double prevFactor = 1.0;
 	for (; cit != dtMap->end(); cit++)
 	{
 		uint32_t curDate = cit->first;
-		WTSSwitchItem* hotItem = (WTSSwitchItem*)cit->second;
+		WTSHotItem* hotItem = (WTSHotItem*)cit->second;
 
 		if (curDate > eDt)
 		{
-			sections.emplace_back(HotSection(hotItem->from(), leftDate, eDt, prevFactor));
+			//sections[hotItem->from()] = HotSection(leftDate, eDt);
+			sections.emplace_back(HotSection(hotItem->from(), leftDate, eDt));
 		}
 		else if (leftDate < curDate)
 		{
-			//å¦‚æžœå¼€å§‹æ—¥æœŸå°äºŽå½“å‰åˆ‡æ¢çš„æ—¥æœŸ,åˆ™æ·»åŠ ä¸€æ®µ
-			if (strlen(hotItem->from()) > 0)//è¿™é‡Œfromä¸ºç©º,ä¸»è¦æ˜¯ç¬¬ä¸€æ¡è§„åˆ™,å¦‚æžœçœŸçš„é‡åˆ°è¿™ç§æƒ…å†µ,ä¹Ÿæ²¡æœ‰å¤ªå¥½çš„åŠžæ³•,åªèƒ½ä¸è¦è¿™ä¸€æ®µæ•°æ®äº†,ä¸€èˆ¬æƒ…å†µä¸‹æ˜¯å¤Ÿçš„
+			//Èç¹û¿ªÊ¼ÈÕÆÚÐ¡ÓÚµ±Ç°ÇÐ»»µÄÈÕÆÚ,ÔòÌí¼ÓÒ»¶Î
+			if (strlen(hotItem->from()) > 0)//ÕâÀïfromÎª¿Õ,Ö÷ÒªÊÇµÚÒ»Ìõ¹æÔò,Èç¹ûÕæµÄÓöµ½ÕâÖÖÇé¿ö,Ò²Ã»ÓÐÌ«ºÃµÄ°ì·¨,Ö»ÄÜ²»ÒªÕâÒ»¶ÎÊý¾ÝÁË,Ò»°ãÇé¿öÏÂÊÇ¹»µÄ
 			{
-				sections.emplace_back(HotSection(hotItem->from(), leftDate, TimeUtils::getNextDate(curDate, -1), prevFactor));
+				//sections[hotItem->from()] = HotSection(leftDate, TimeUtils::getNextDate(curDate, -1));
+				sections.emplace_back(HotSection(hotItem->from(), leftDate, TimeUtils::getNextDate(curDate, -1)));
 			}
 
 			leftDate = curDate;
 		}
 
 		lastDate = curDate;
-		prevFactor = hotItem->get_factor();
 		curHot = hotItem->to();
 	}
 
 	if (leftDate >= lastDate && lastDate != 0)
 	{
-		sections.emplace_back(HotSection(curHot, leftDate, eDt, prevFactor));
+		//sections[curHot] = HotSection(leftDate, eDt);
+		sections.emplace_back(HotSection(curHot, leftDate, eDt));
 	}
 
 	return true;
 }
-#pragma endregion "è‡ªå®šä¹‰ä¸»åŠ›æŽ¥å£"
+
+#pragma endregion "´ÎÖ÷Á¦½Ó¿Ú"
 
 void WTSHotMgr::release()
 {
-	//if (m_pExchgHotMap)
-	//{
-	//	m_pExchgHotMap->release();
-	//	m_pExchgHotMap = NULL;
-	//}
-
-	//if (m_pExchgScndMap)
-	//{
-	//	m_pExchgScndMap->release();
-	//	m_pExchgScndMap = NULL;
-	//}
-
-	if(m_mapCustRules)
+	if (m_pExchgHotMap)
 	{
-		m_mapCustRules->release();
-		m_mapCustRules = NULL;
+		m_pExchgHotMap->release();
+		m_pExchgHotMap = NULL;
+	}
+
+	if (m_pExchgScndMap)
+	{
+		m_pExchgScndMap->release();
+		m_pExchgScndMap = NULL;
 	}
 }

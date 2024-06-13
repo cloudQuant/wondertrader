@@ -1,4 +1,4 @@
-﻿#include "MQManager.h"
+#include "MQManager.h"
 
 #include <spdlog/fmt/fmt.h>
 

@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file HftStraContext.h
  * \project	WonderTrader
  *
@@ -18,7 +18,7 @@ class HftStrategy;
 class HftStraContext : public HftStraBaseCtx
 {
 public:
-	HftStraContext(WtHftEngine* engine, const char* name, bool bAgent, int32_t slippage);
+	HftStraContext(WtHftEngine* engine, const char* name, bool bAgent);
 	virtual ~HftStraContext();
 
 	void set_strategy(HftStrategy* stra){ _strategy = stra; }

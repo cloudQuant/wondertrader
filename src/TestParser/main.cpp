@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <boost/filesystem.hpp>
 
 #include "../Includes/IParserApi.h"
@@ -73,21 +73,21 @@ public:
         DllHandle hInst = DLLHelper::load_library(moduleName);
 		if (hInst == NULL)
 		{
-			WTSLogger::error("Loading module {} failed", moduleName);
+			WTSLogger::error_f("Loading module {} failed", moduleName);
 			return false;
 		}
 
 		FuncCreateParser pCreator = (FuncCreateParser)DLLHelper::get_symbol(hInst, "createParser");
 		if (NULL == pCreator)
 		{
-			WTSLogger::error("Entry function createParser not found");
+			WTSLogger::error_f("Entry function createParser not found");
 			return false;
 		}
 
 		_api = pCreator();
 		if (NULL == _api)
 		{
-			WTSLogger::error("Creating parser api failed");
+			WTSLogger::error_f("Creating parser api failed");
 			return false;
 		}
 
@@ -103,7 +103,7 @@ public:
 
 	virtual void handleQuote(WTSTickData *quote, uint32_t procFlag) override
 	{
-		WTSLogger::info("{}@{}.{}, price:{}, voume:{}", quote->code(), quote->actiondate(), quote->actiontime(), quote->price(), quote->totalvolume());
+		WTSLogger::info_f("{}@{}.{}, price:{}, voume:{}", quote->code(), quote->actiondate(), quote->actiontime(), quote->price(), quote->totalvolume());
 	}
 
 	virtual void handleSymbolList(const WTSArray* aySymbols) override
@@ -142,7 +142,7 @@ int main()
 {
 	WTSLogger::init("logcfg.yaml");
 
-	WTSVariant* root = WTSCfgLoader::load_from_file("config.yaml");
+	WTSVariant* root = WTSCfgLoader::load_from_file("config.yaml", true);
 	if (root == NULL)
 	{
 		WTSLogger::log_raw(LL_ERROR, "Loading config.yaml failed");
@@ -150,21 +150,22 @@ int main()
 	}
 
 	WTSVariant* cfg = root->get("config");
+	bool isUTF8 = cfg->getBoolean("utf8");
 	if (cfg->has("session"))
-		g_bdMgr.loadSessions(cfg->getCString("session"));
+		g_bdMgr.loadSessions(cfg->getCString("session"), isUTF8);
 
 	if (cfg->has("commodity"))
-		g_bdMgr.loadCommodities(cfg->getCString("commodity"));
+		g_bdMgr.loadCommodities(cfg->getCString("commodity"), isUTF8);
 
 	if (cfg->has("contract"))
-		g_bdMgr.loadContracts(cfg->getCString("contract"));
+		g_bdMgr.loadContracts(cfg->getCString("contract"), isUTF8);
 
 	std::string module = cfg->getCString("parser");
 	std::string profile = cfg->getCString("profile");
 	WTSVariant* params = root->get(profile.c_str());
 	if (params == NULL)
 	{
-		WTSLogger::error("Configure {} not exist", profile);
+		WTSLogger::error_f("Configure {} not exist", profile);
 		return 0;
 	}
 

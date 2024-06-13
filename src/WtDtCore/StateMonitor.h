@@ -1,34 +1,27 @@
-ï»¿/*!
+/*!
  * \file StateMonitor.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief çŠ¶æ€æ§åˆ¶å™¨å®šä¹‰
+ * \brief ×´Ì¬¿ØÖÆÆ÷¶¨Òå
  */
 #pragma once
 #include <vector>
 #include "../Share/StdUtils.hpp"
 #include "../Includes/FasterDefs.h"
-#include "../Includes/WTSMarcos.h"
-
-NS_WTP_BEGIN
-class WTSSessionInfo;
-NS_WTP_END
-
-USING_NS_WTP;
 
 typedef enum tagSimpleState
 {
-	SS_ORIGINAL,		//æœªåˆå§‹åŒ–
-	SS_INITIALIZED,		//å·²åˆå§‹åŒ–
-	SS_RECEIVING,		//äº¤æ˜“ä¸­
-	SS_PAUSED,			//ä¼‘æ¯ä¸­
-	SS_CLOSED,			//å·²æ”¶ç›˜
-	SS_PROCING,			//æ”¶ç›˜ä½œä¸šä¸­
-	SS_PROCED,			//ç›˜åå·²å¤„ç†
-	SS_Holiday	= 99	//èŠ‚å‡æ—¥
+	SS_ORIGINAL,		//Î´³õÊ¼»¯
+	SS_INITIALIZED,		//ÒÑ³õÊ¼»¯
+	SS_RECEIVING,		//½»Ò×ÖĞ
+	SS_PAUSED,			//ĞİÏ¢ÖĞ
+	SS_CLOSED,			//ÒÑÊÕÅÌ
+	SS_PROCING,			//ÊÕÅÌ×÷ÒµÖĞ
+	SS_PROCED,			//ÅÌºóÒÑ´¦Àí
+	SS_Holiday	= 99	//½Ú¼ÙÈÕ
 } SimpleState;
 
 typedef struct _StateInfo
@@ -38,7 +31,6 @@ typedef struct _StateInfo
 	uint32_t	_close_time;
 	uint32_t	_proc_time;
 	SimpleState	_state;
-	WTSSessionInfo*	_sInfo;
 
 	typedef struct _Section
 	{
@@ -47,7 +39,7 @@ typedef struct _StateInfo
 	} Section;
 	std::vector<Section> _sections;
 
-	inline bool isInSections(uint32_t curTime)
+	bool isInSections(uint32_t curTime)
 	{
 		for (auto it = _sections.begin(); it != _sections.end(); it++)
 		{
@@ -65,12 +57,11 @@ typedef struct _StateInfo
 		_close_time = 0;
 		_proc_time = 0;
 		_state = SS_ORIGINAL;
-		_sInfo = nullptr;
 	}
 } StateInfo;
 
 typedef std::shared_ptr<StateInfo> StatePtr;
-typedef wtp::wt_hashmap<std::string, StatePtr>	StateMap;
+typedef faster_hashmap<std::string, StatePtr>	StateMap;
 
 class WTSBaseDataMgr;
 class DataManager;
@@ -82,45 +73,15 @@ public:
 	~StateMonitor();
 
 public:
-	bool initialize(const char* filename, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
-	void run();
-	void stop();
+	bool		initialize(const char* filename, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
 
-	inline bool	isAnyInState(SimpleState ss) const
-	{
-		auto it = _map.begin();
-		for (; it != _map.end(); it++)
-		{
-			const StatePtr& sInfo = it->second;
-			if (sInfo->_state == ss)
-				return true;
-		}
+	bool		isAnyInState(SimpleState ss) const;
+	bool		isAllInState(SimpleState ss) const;
 
-		return false;
-	}
+	bool		isInState(const char* sid, SimpleState ss) const;
 
-	inline bool	isAllInState(SimpleState ss) const
-	{
-		auto it = _map.begin();
-		for (; it != _map.end(); it++)
-		{
-			const StatePtr& sInfo = it->second;
-			if (sInfo->_state != SS_Holiday && sInfo->_state != ss)
-				return false;
-		}
-
-		return true;
-	}
-
-	inline bool	isInState(const char* sid, SimpleState ss) const
-	{
-		auto it = _map.find(sid);
-		if (it == _map.end())
-			return false;
-
-		const StatePtr& sInfo = it->second;
-		return sInfo->_state == ss;
-	}
+	void		run();
+	void		stop();
 
 private:
 	StateMap		_map;

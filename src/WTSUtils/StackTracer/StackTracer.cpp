@@ -1,6 +1,5 @@
 
 #include "StackTracer.h"
-#include "cstdlib"
 
 #ifdef _WIN32
 #	ifdef _MSC_VER

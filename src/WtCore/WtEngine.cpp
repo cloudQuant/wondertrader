@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WtEngine.cpp
  * \project	WonderTrader
  *
@@ -79,26 +79,13 @@ void WtEngine::set_trading_date(uint32_t curTDate)
 
 WTSCommodityInfo* WtEngine::get_commodity_info(const char* stdCode)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	return _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
+	return _base_data_mgr->getCommodity(CodeHelper::stdCodeToStdCommID(stdCode).c_str());
 }
 
 WTSContractInfo* WtEngine::get_contract_info(const char* stdCode)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	return _base_data_mgr->getContract(cInfo._code, cInfo._exchg);
-}
-
-std::string WtEngine::get_rawcode(const char* stdCode)
-{
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	if (cInfo.hasRule())
-	{
-		std::string code = _hot_mgr->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _cur_tdate);
-		return CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
-	}
-
-	return "";
 }
 
 WTSSessionInfo* WtEngine::get_session_info(const char* sid, bool isCode /* = false */)
@@ -106,8 +93,7 @@ WTSSessionInfo* WtEngine::get_session_info(const char* sid, bool isCode /* = fal
 	if (!isCode)
 		return _base_data_mgr->getSession(sid);
 
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(sid, _hot_mgr);
-	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
+	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(CodeHelper::stdCodeToStdCommID(sid).c_str());
 	if (cInfo == NULL)
 		return NULL;
 
@@ -118,7 +104,7 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 {
 	_price_map[stdCode] = curTick->price();
 
-	//å…ˆæ£€æŸ¥æ˜¯å¦è¦ä¿¡å·è¦è§¦å‘
+	//ÏÈ¼ì²éÊÇ·ñÒªĞÅºÅÒª´¥·¢
 	{
 		bool bTriggered = false;
 		auto it = _sig_map.find(stdCode);
@@ -142,7 +128,7 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 			save_datas();
 	}
 
-	//å¦‚æœæˆäº¤é‡ä¸º0ï¼Œä»·æ ¼ä¹Ÿä¸ä¼šæœ‰å˜åŠ¨
+	//Èç¹û³É½»Á¿Îª0£¬¼Û¸ñÒ²²»»áÓĞ±ä¶¯
 	if (curTick->volume() == 0)
 		return;
 
@@ -153,8 +139,7 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 		if (it == _pos_map.end())
 			return;
 
-		PosInfoPtr& pInfo = it->second;
-		SpinLock lock(pInfo->_mtx);
+		PosInfo* pInfo = (PosInfo*)&it->second;
 		if (pInfo->_volume == 0)
 		{
 			pInfo->_dynprofit = 0;
@@ -184,7 +169,7 @@ void WtEngine::update_fund_dynprofit()
 	WTSFundStruct& fundInfo = _port_fund->fundInfo();
 	if (fundInfo._last_date == _cur_tdate)
 	{
-		//ä¸Šæ¬¡ç»“ç®—æ—¥æœŸç­‰äºå½“å‰äº¤æ˜“æ—¥,è¯´æ˜å·²ç»ç»“ç®—,ä¸å†æ›´æ–°äº†
+		//ÉÏ´Î½áËãÈÕÆÚµÈÓÚµ±Ç°½»Ò×ÈÕ,ËµÃ÷ÒÑ¾­½áËã,²»ÔÙ¸üĞÂÁË
 		return;
 	}
 
@@ -196,10 +181,10 @@ void WtEngine::update_fund_dynprofit()
 	}
 
 	double profit = 0.0;
-	for(const auto& v : _pos_map)
+	for(auto v : _pos_map)
 	{
-		const PosInfoPtr& pItem = v.second;
-		profit += pItem->_dynprofit;
+		const PosInfo& pItem = v.second;
+		profit += pItem._dynprofit;
 	}
 
 	fundInfo._dynprofit = profit;
@@ -235,8 +220,7 @@ void WtEngine::update_fund_dynprofit()
 void WtEngine::writeRiskLog(const char* message)
 {
 	static thread_local char szBuf[2048] = { 0 };
-	auto len = wt_strcpy(szBuf, "[RiskControl] ");
-	wt_strcpy(szBuf + len, message);
+	sprintf(szBuf, "[RiskControl] %s", message);
 	WTSLogger::log_raw_by_cat("risk", LL_INFO, szBuf);
 }
 
@@ -266,7 +250,7 @@ void WtEngine::setVolScale(double scale)
 	_risk_volscale = scale;
 	_risk_date = _cur_tdate;
 
-	WTSLogger::log_by_cat("risk", LL_INFO, "Position risk scale updated: {} - > {}", oldScale, scale);
+	WTSLogger::log_by_cat_f("risk", LL_INFO, "Position risk scale updated: {} - > {}", oldScale, scale);
 	save_datas();
 }
 
@@ -285,7 +269,7 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 	_hot_mgr = hotMgr;
 	_notifier = notifier;
 
-	WTSLogger::info("Running mode: Production");
+	WTSLogger::info("Platform running mode: Production");
 
 	_filter_mgr.set_notifier(notifier);
 
@@ -304,8 +288,8 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 	}
 	else
 	{
-		//å¦‚æœæ²¡æœ‰é…ç½®é£æ§çº¿ç¨‹ï¼Œåˆ™éœ€è¦è‡ªå·±æ›´æ–°æµ®åŠ¨ç›ˆäº
-		//æŠŠæ›´æ–°æ—¶é—´é—´éš”è®¾ç½®ä¸º5s
+		//Èç¹ûÃ»ÓĞÅäÖÃ·ç¿ØÏß³Ì£¬ÔòĞèÒª×Ô¼º¸üĞÂ¸¡¶¯Ó¯¿÷
+		//°Ñ¸üĞÂÊ±¼ä¼ä¸ôÉèÖÃÎª5s
 		_fund_udt_span = 5;
 		WTSLogger::log_raw(LL_WARN, "RiskMon is not configured, portfilio fund will be updated every 5s");
 	}
@@ -313,7 +297,7 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 
 void WtEngine::on_session_end()
 {
-	//èµ„é‡‘ç»“ç®—
+	//×Ê½ğ½áËã
 	WTSFundStruct& fundInfo = _port_fund->fundInfo();
 	if (fundInfo._last_date < _cur_tdate)
 	{
@@ -333,9 +317,9 @@ void WtEngine::on_session_end()
 			}
 		}
 
-		//å¯èƒ½è¿™é‡Œè¿˜éœ€è¦å†™ä¸€æ¡èµ„é‡‘è®°å½•
+		//¿ÉÄÜÕâÀï»¹ĞèÒªĞ´Ò»Ìõ×Ê½ğ¼ÇÂ¼
 		//date,predynbalance,prebalance,balance,closeprofit,dynprofit,fee,maxdynbalance,maxtime,mindynbalance,mintime,mdmaxbalance,mdmaxdate,mdminbalance,mdmindate
-		fund_log->write_file(fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", 
+		fund_log->write_file(StrUtil::printf("%u,%f,%f,%f,%f,%f,%f,%f,%u,%f,%u,%f,%u,%f,%u\n", 
 			_cur_tdate, fundInfo._predynbal, fundInfo._prebalance, fundInfo._balance, 
 			fundInfo._profit, fundInfo._dynprofit, fundInfo._fees, fundInfo._max_dyn_bal,
 			fundInfo._max_time, fundInfo._min_dyn_bal, fundInfo._min_time,
@@ -366,7 +350,7 @@ void WtEngine::save_datas()
 	rj::Document::AllocatorType &allocator = root.GetAllocator();
 
 	if (_port_fund != NULL)
-	{//ä¿å­˜èµ„é‡‘æ•°æ®
+	{//±£´æ×Ê½ğÊı¾İ
 		const WTSFundStruct& fundInfo = _port_fund->fundInfo();
 		rj::Value jFund(rj::kObjectType);
 		jFund.AddMember("predynbal", fundInfo._predynbal, allocator);
@@ -400,22 +384,22 @@ void WtEngine::save_datas()
 		root.AddMember("fund", jFund, allocator);
 	}
 
-	{//æŒä»“æ•°æ®ä¿å­˜
+	{//³Ö²ÖÊı¾İ±£´æ
 		rj::Value jPos(rj::kArrayType);
 
 		for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 		{
 			const char* stdCode = it->first.c_str();
-			const PosInfoPtr& pInfo = it->second;
+			const PosInfo& pInfo = it->second;
 
 			rj::Value pItem(rj::kObjectType);
 			pItem.AddMember("code", rj::Value(stdCode, allocator), allocator);
-			pItem.AddMember("volume", pInfo->_volume, allocator);
-			pItem.AddMember("closeprofit", pInfo->_closeprofit, allocator);
-			pItem.AddMember("dynprofit", pInfo->_dynprofit, allocator);
+			pItem.AddMember("volume", pInfo._volume, allocator);
+			pItem.AddMember("closeprofit", pInfo._closeprofit, allocator);
+			pItem.AddMember("dynprofit", pInfo._dynprofit, allocator);
 
 			rj::Value details(rj::kArrayType);
-			for (auto dit = pInfo->_details.begin(); dit != pInfo->_details.end(); dit++)
+			for (auto dit = pInfo._details.begin(); dit != pInfo._details.end(); dit++)
 			{
 				const DetailInfo& dInfo = *dit;
 				if(decimal::eq(dInfo._volume, 0))
@@ -440,7 +424,7 @@ void WtEngine::save_datas()
 		root.AddMember("positions", jPos, allocator);
 	}
 
-	//é£æ§å‚æ•°è®¾ç½®
+	//·ç¿Ø²ÎÊıÉèÖÃ
 	{
 		rj::Value jRisk(rj::kObjectType);
 
@@ -489,7 +473,7 @@ void WtEngine::load_datas()
 	if (root.HasParseError())
 		return;
 
-	//è¯»å–èµ„é‡‘
+	//¶ÁÈ¡×Ê½ğ
 	{
 		const rj::Value& jFund = root["fund"];
 		if (!jFund.IsNull() && jFund.IsObject())
@@ -522,7 +506,7 @@ void WtEngine::load_datas()
 		}
 	}
 
-	{//è¯»å–ä»“ä½
+	{//¶ÁÈ¡²ÖÎ»
 		double total_profit = 0;
 		double total_dynprofit = 0;
 		const rj::Value& jPos = root["positions"];
@@ -531,18 +515,16 @@ void WtEngine::load_datas()
 			for (const rj::Value& pItem : jPos.GetArray())
 			{
 				const char* stdCode = pItem["code"].GetString();
-				PosInfoPtr& pInfo = _pos_map[stdCode];
-				if (pInfo == NULL)
-					pInfo.reset(new PosInfo);
-				pInfo->_closeprofit = pItem["closeprofit"].GetDouble();
-				pInfo->_volume = pItem["volume"].GetDouble();
-				if (pInfo->_volume == 0)
-					pInfo->_dynprofit = 0;
+				PosInfo& pInfo = _pos_map[stdCode];
+				pInfo._closeprofit = pItem["closeprofit"].GetDouble();
+				pInfo._volume = pItem["volume"].GetDouble();
+				if (pInfo._volume == 0)
+					pInfo._dynprofit = 0;
 				else
-					pInfo->_dynprofit = pItem["dynprofit"].GetDouble();
+					pInfo._dynprofit = pItem["dynprofit"].GetDouble();
 
-				total_profit += pInfo->_closeprofit;
-				total_dynprofit += pInfo->_dynprofit;
+				total_profit += pInfo._closeprofit;
+				total_dynprofit += pInfo._dynprofit;
 
 				const rj::Value& details = pItem["details"];
 				if (details.IsNull() || !details.IsArray() || details.Size() == 0)
@@ -560,22 +542,22 @@ void WtEngine::load_datas()
 						dInfo._opentdate = dItem["opentdate"].GetUint();
 
 					dInfo._profit = dItem["profit"].GetDouble();
-					pInfo->_details.emplace_back(dInfo);
+					pInfo._details.emplace_back(dInfo);
 				}
 
-				WTSLogger::debug("Porfolio position confirmed,{} -> {}", stdCode, pInfo->_volume);
+				WTSLogger::debug_f("Porfolio position confirmed,{} -> {}", stdCode, pInfo._volume);
 			}
 		}
 
 		WTSFundStruct& fundInfo = _port_fund->fundInfo();
 		fundInfo._dynprofit = total_dynprofit;
 
-		WTSLogger::debug("{} position info of portfolio loaded", _pos_map.size());
+		WTSLogger::debug("%u position info of portfolio loaded", _pos_map.size());
 	}
 
 	if(root.HasMember("riskmon"))
 	{
-		//è¯»å–é£æ§å‚æ•°
+		//¶ÁÈ¡·ç¿Ø²ÎÊı
 		const rj::Value& jRisk = root["riskmon"];
 		if (!jRisk.IsNull() && jRisk.IsObject())
 		{
@@ -597,19 +579,20 @@ WTSTickData* WtEngine::get_last_tick(uint32_t sid, const char* stdCode)
 
 WTSKlineSlice* WtEngine::get_kline_slice(uint32_t sid, const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
+	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(CodeHelper::stdCodeToStdCommID(stdCode).c_str());
 	if (cInfo == NULL)
 		return NULL;
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, period, times);
+	WTSSessionInfo* sInfo = _base_data_mgr->getSession(cInfo->getSession());
+	if (sInfo == NULL)
+		return NULL;
 
+	std::string key = StrUtil::printf("%s-%s-%u", stdCode, period, times);
 	SubList& sids = _bar_sub_map[key];
 	sids[sid] = std::make_pair(sid, 0);
 
 	WTSKlinePeriod kp;
-	if (period[0] == 'm')
+	if (strcmp(period, "m") == 0)
 	{
 		if (times % 5 == 0)
 		{
@@ -628,69 +611,61 @@ WTSKlineSlice* WtEngine::get_kline_slice(uint32_t sid, const char* stdCode, cons
 }
 
 
-void WtEngine::handle_push_quote(WTSTickData* curTick)
+void WtEngine::handle_push_quote(WTSTickData* curTick, uint32_t hotFlag)
 {
 	std::string stdCode = curTick->code();
 	_data_mgr->handle_push_quote(stdCode.c_str(), curTick);
 	on_tick(stdCode.c_str(), curTick);
 
 	double price = curTick->price();
-	WTSContractInfo* cInfo = curTick->getContractInfo();
 
-	//if(hotFlag == 1)
-	if(!cInfo->isFlat())
+	if(hotFlag == 1)
 	{
-		const char* hotCode = cInfo->getHotCode();
+		std::string hotCode = CodeHelper::stdCodeToStdHotCode(stdCode.c_str());
 		WTSTickData* hotTick = WTSTickData::create(curTick->getTickStruct());
-		hotTick->setCode(hotCode);
-		hotTick->setContractInfo(curTick->getContractInfo());
-
-		_data_mgr->handle_push_quote(hotCode, hotTick);
-		on_tick(hotCode, hotTick);
+		hotTick->setCode(hotCode.c_str());
+		
+		_data_mgr->handle_push_quote(hotCode.c_str(), hotTick);
+		on_tick(hotCode.c_str(), hotTick);
 
 		hotTick->release();
 	}
-	//else if (hotFlag == 2)
-	//{
-	//	std::string scndCode = CodeHelper::stdCodeToStd2ndCode(stdCode.c_str());
-	//	WTSTickData* scndTick = WTSTickData::create(curTick->getTickStruct());
-	//	scndTick->setCode(scndCode.c_str());
-	//	scndTick->setContractInfo(curTick->getContractInfo());
+	else if (hotFlag == 2)
+	{
+		std::string scndCode = CodeHelper::stdCodeToStd2ndCode(stdCode.c_str());
+		WTSTickData* scndTick = WTSTickData::create(curTick->getTickStruct());
+		scndTick->setCode(scndCode.c_str());
 
-	//	_data_mgr->handle_push_quote(scndCode.c_str(), scndTick);
-	//	on_tick(scndCode.c_str(), scndTick);
+		_data_mgr->handle_push_quote(scndCode.c_str(), scndTick);
+		on_tick(scndCode.c_str(), scndTick);
 
-	//	scndTick->release();
-	//}
+		scndTick->release();
+	}
 }
 
 double WtEngine::get_cur_price(const char* stdCode)
 {
 	auto len = strlen(stdCode);
 	char lastChar = stdCode[len - 1];
-	//å‰å¤æƒç›´æ¥è¯»å–æ ‡å‡†åˆçº¦ä»£ç 
+	//Ç°¸´È¨Ö±½Ó¶ÁÈ¡±ê×¼ºÏÔ¼´úÂë
 	bool bAdjusted = (lastChar == SUFFIX_QFQ || lastChar == SUFFIX_HFQ);
-	//å‰å¤æƒéœ€è¦å»æ‰ï¼ï¼Œåå¤æƒå’Œæœªå¤æƒéƒ½ç›´æ¥æŸ¥æ‰¾
+	//Ç°¸´È¨ĞèÒªÈ¥µô£­£¬ºó¸´È¨ºÍÎ´¸´È¨¶¼Ö±½Ó²éÕÒ
 	std::string sCode = (lastChar == SUFFIX_QFQ) ? std::string(stdCode, len - 1) : stdCode;
 	auto it = _price_map.find(sCode);
 	if(it == _price_map.end())
 	{
-		//æ‰¾ä¸åˆ°çš„æ—¶å€™ï¼Œå…ˆè¯»å–æœªå¤æƒçš„tickæ•°æ®
+		//ÕÒ²»µ½µÄÊ±ºò£¬ÏÈ¶ÁÈ¡Î´¸´È¨µÄtickÊı¾İ
 		std::string fCode = bAdjusted ? std::string(stdCode, len - 1) : stdCode;
 		WTSTickData* lastTick = _data_mgr->grab_last_tick(fCode.c_str());
 		if (lastTick == NULL)
 			return 0.0;
 
-		WTSContractInfo* cInfo = lastTick->getContractInfo();
-
 		double ret = lastTick->price();
 		lastTick->release();
 
-		//å¦‚æœæ˜¯åå¤æƒï¼Œåˆ™è¿›è¡Œå¤æƒå¤„ç†
+		//Èç¹ûÊÇºó¸´È¨£¬Ôò½øĞĞ¸´È¨´¦Àí
 		if (lastChar == SUFFIX_HFQ)
-		{
-			ret *= get_exright_factor(stdCode, cInfo->getCommInfo());
-		}
+			ret *= _data_mgr->get_adjusting_factor(fCode.c_str(), get_trading_date());
 
 		_price_map[sCode] = ret;
 		return ret;
@@ -701,122 +676,30 @@ double WtEngine::get_cur_price(const char* stdCode)
 	}
 }
 
-double WtEngine::get_day_price(const char* stdCode, int flag /* = 0 */)
-{
-	auto len = strlen(stdCode);
-	char lastChar = stdCode[len - 1];
-	//å‰å¤æƒç›´æ¥è¯»å–æ ‡å‡†åˆçº¦ä»£ç 
-	bool bAdjusted = (lastChar == SUFFIX_QFQ || lastChar == SUFFIX_HFQ);
-	//å‰å¤æƒéœ€è¦å»æ‰ï¼ï¼Œåå¤æƒå’Œæœªå¤æƒéƒ½ç›´æ¥æŸ¥æ‰¾
-	std::string sCode = (lastChar == SUFFIX_QFQ) ? std::string(stdCode, len - 1) : stdCode;
-
-	//æ‰¾ä¸åˆ°çš„æ—¶å€™ï¼Œå…ˆè¯»å–æœªå¤æƒçš„tickæ•°æ®
-	std::string fCode = bAdjusted ? std::string(stdCode, len - 1) : stdCode;
-	WTSTickData* lastTick = _data_mgr->grab_last_tick(fCode.c_str());
-	if (lastTick == NULL)
-		return 0.0;
-
-	WTSCommodityInfo* commInfo = get_commodity_info(fCode.c_str());
-
-	double ret = 0.0;
-	switch (flag)
-	{
-	case 0:
-		ret = lastTick->open(); break;
-	case 1:
-		ret = lastTick->high(); break;
-	case 2:
-		ret = lastTick->low(); break;
-	case 3:
-		ret = lastTick->price(); break;
-	default:
-		break;
-	}
-	lastTick->release();
-
-	//å¦‚æœæ˜¯åå¤æƒï¼Œåˆ™è¿›è¡Œå¤æƒå¤„ç†
-	if (lastChar == SUFFIX_HFQ)
-	{
-		ret *= get_exright_factor(stdCode, commInfo);
-	}
-
-	return ret;
-}
-
-double WtEngine::get_exright_factor(const char* stdCode, WTSCommodityInfo* commInfo /* = NULL */)
-{
-	if (commInfo == NULL)
-		commInfo = get_commodity_info(stdCode);
-
-	if (commInfo == NULL)
-		return 1.0;
-
-	if (commInfo->isStock())
-		return _data_mgr->get_adjusting_factor(stdCode, get_trading_date());
-	else
-	{
-		const char* ruleTag = _hot_mgr->getRuleTag(stdCode);
-		if(strlen(ruleTag) > 0)
-			return _hot_mgr->getRuleFactor(ruleTag, commInfo->getFullPid(), get_trading_date());
-	}
-
-	return 1.0;
-}
-
-uint32_t WtEngine::get_adjusting_flag()
-{
-	if (_data_mgr)
-		_data_mgr->get_adjusting_flag();
-
-	return 0;
-}
-
 void WtEngine::sub_tick(uint32_t sid, const char* stdCode)
 {
-	//å¦‚æœæ˜¯ä¸»åŠ›åˆçº¦ä»£ç , å¦‚SHFE.ag.HOT, é‚£ä¹ˆè¦è½¬æ¢æˆåŸåˆçº¦ä»£ç , SHFE.ag.1912
-	//å› ä¸ºæ‰§è¡Œå™¨åªè¯†åˆ«åŸåˆçº¦ä»£ç 
-	const char* ruleTag = _hot_mgr->getRuleTag(stdCode);
-	if(strlen(ruleTag) > 0)
+	//Èç¹ûÊÇÖ÷Á¦ºÏÔ¼´úÂë, ÈçSHFE.ag.HOT, ÄÇÃ´Òª×ª»»³ÉÔ­ºÏÔ¼´úÂë, SHFE.ag.1912
+	//ÒòÎªÖ´ĞĞÆ÷Ö»Ê¶±ğÔ­ºÏÔ¼´úÂë
+	if (CodeHelper::isStdFutHotCode(stdCode))
 	{
-		//SubList& sids = _tick_sub_map[stdCode];
-		//sids[sid] = std::make_pair(sid, 0);
+		SubList& sids = _tick_sub_map[stdCode];
+		sids[sid] = std::make_pair(sid, 0);
 
-		std::size_t length = strlen(stdCode);
-		uint32_t flag = 0;
-		if (stdCode[length - 1] == SUFFIX_QFQ || stdCode[length - 1] == SUFFIX_HFQ)
-		{
-			length--;
-
-			flag = (stdCode[length] == SUFFIX_QFQ) ? 1 : 2;
-		}
-
-		SubList& sids = _tick_sub_map[std::string(stdCode, length)];
-		sids[sid] = std::make_pair(sid, flag);
-
-		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-		std::string rawCode = _hot_mgr->getCustomRawCode(ruleTag, cInfo.stdCommID(), _cur_tdate);
+		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+		std::string rawCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, _cur_tdate);
 		std::string stdRawCode = CodeHelper::rawMonthCodeToStdCode(rawCode.c_str(), cInfo._exchg);
+		//_ticksubed_raw_codes.insert(stdRawCode);
 	}
-	//if (CodeHelper::isStdFutHotCode(stdCode))
-	//{
-	//	SubList& sids = _tick_sub_map[stdCode];
-	//	sids[sid] = std::make_pair(sid, 0);
+	else if (CodeHelper::isStdFut2ndCode(stdCode))
+	{
+		SubList& sids = _tick_sub_map[stdCode];
+		sids[sid] = std::make_pair(sid, 0);
 
-	//	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
-	//	std::string rawCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, _cur_tdate);
-	//	std::string stdRawCode = CodeHelper::rawMonthCodeToStdCode(rawCode.c_str(), cInfo._exchg);
-	//	//_ticksubed_raw_codes.insert(stdRawCode);
-	//}
-	//else if (CodeHelper::isStdFut2ndCode(stdCode))
-	//{
-	//	SubList& sids = _tick_sub_map[stdCode];
-	//	sids[sid] = std::make_pair(sid, 0);
-
-	//	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
-	//	std::string rawCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, _cur_tdate);
-	//	std::string stdRawCode = CodeHelper::rawMonthCodeToStdCode(rawCode.c_str(), cInfo._exchg);
-	//	//_ticksubed_raw_codes.insert(stdRawCode);
-	//}
+		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+		std::string rawCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, _cur_tdate);
+		std::string stdRawCode = CodeHelper::rawMonthCodeToStdCode(rawCode.c_str(), cInfo._exchg);
+		//_ticksubed_raw_codes.insert(stdRawCode);
+	}
 	else
 	{
 		std::size_t length = strlen(stdCode);
@@ -842,48 +725,45 @@ void WtEngine::load_fees(const char* filename)
 
 	if (!StdFile::exists(filename))
 	{
-		WTSLogger::error("Fee templates file {} not exists", filename);
+		WTSLogger::error("Fee templates file %s not exists", filename);
 		return;
 	}
 
-	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
+	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename, true);
 	if (cfg == NULL)
 	{
-		WTSLogger::error("Fee templates file {} loading failed", filename);
+		WTSLogger::error("Fee templates file %s loading failed", filename);
 		return;
 	}
 
 	auto keys = cfg->memberNames();
-	for (const std::string& fullPid : keys)
+	for (const std::string& key : keys)
 	{
-		WTSVariant* cfgItem = cfg->get(fullPid.c_str());
-		const StringVector& ay = StrUtil::split(fullPid, ".");
-		WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(ay[0].c_str(), ay[1].c_str());
-		if (commInfo == NULL)
-			continue;
-
-		commInfo->setFeeRates(cfgItem->getDouble("open"), cfgItem->getDouble("close"), cfgItem->getDouble("closetoday"), cfgItem->getBoolean("byvolume"));
-		commInfo->setMarginRate(cfgItem->getDouble("margin"));
+		WTSVariant* cfgItem = cfg->get(key.c_str());
+		FeeItem& fItem = _fee_map[key];
+		fItem._by_volume = cfgItem->getBoolean("byvolume");
+		fItem._open = cfgItem->getDouble("open");
+		fItem._close = cfgItem->getDouble("close");
+		fItem._close_today = cfgItem->getDouble("closetoday");
 	}
 
 	cfg->release();
 
-	WTSLogger::info("{} fee templates loaded", _fee_map.size());
+	WTSLogger::info("%u fee templates loaded", _fee_map.size());
 }
 
 double WtEngine::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	const char* stdPID = codeInfo.stdCommID();
+	std::string stdPID = CodeHelper::stdCodeToStdCommID(stdCode);
 	auto it = _fee_map.find(stdPID);
 	if (it == _fee_map.end())
 	{
-		WTSLogger::warn("Fee template of {} not found, return 0.0 as default", stdPID);
+		WTSLogger::warn("Fee template of %s not found, return 0.0 as default", stdCode);
 		return 0.0;
 	}
 
 	double ret = 0.0;
-	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(stdPID);
+	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(stdPID.c_str());
 	const FeeItem& fItem = it->second;
 	if(fItem._by_volume)
 	{
@@ -914,12 +794,12 @@ void WtEngine::append_signal(const char* stdCode, double qty, bool bStandBy /* =
 {
 	/*
 	 *	By Wesley @ 2021.12.16
-	 *	è¿™é‡Œå‘ç°ä¸€ä¸ªé—®é¢˜ï¼Œå°±æ˜¯ç»„åˆçš„ç†è®ºæˆäº¤ä»·å’Œç­–ç•¥çš„ç†è®ºæˆäº¤ä»·ä¸ä¸€è‡´
-	 *	æ£€æŸ¥ä»¥åå‘ç°ï¼Œç­–ç•¥çš„ç†è®ºæˆäº¤ä»·ä¼šåœ¨ä¸‹ä¸€ä¸ªtickæ›´æ–°
-	 *	ä½†æ˜¯ç»„åˆçš„ç†è®ºæˆäº¤ä»·è¿™ä¸€ä¸ªtickå°±ç›´æ¥æ›´æ–°äº†
-	 *	è¿™å°±å¯¼è‡´ç»„åˆæˆäº¤ä»·æ°¸è¿œæ¯”ç­–ç•¥æå‰ä¸€ä¸ªtick
-	 *	è¿™é‡Œåšä¸€ä¸ªä¿®æ­£ï¼Œç­‰ä¸‹ä¸€ä¸ªtickè¿›æ¥ï¼Œè§¦å‘signal
-	 *	å¦‚æœæ˜¯barå†…è§¦å‘çš„ï¼ŒbStandByä¸ºfalseï¼Œåˆ™ç›´æ¥ä¿®æ”¹æŒä»“
+	 *	ÕâÀï·¢ÏÖÒ»¸öÎÊÌâ£¬¾ÍÊÇ×éºÏµÄÀíÂÛ³É½»¼ÛºÍ²ßÂÔµÄÀíÂÛ³É½»¼Û²»Ò»ÖÂ
+	 *	¼ì²éÒÔºó·¢ÏÖ£¬²ßÂÔµÄÀíÂÛ³É½»¼Û»áÔÚÏÂÒ»¸ötick¸üĞÂ
+	 *	µ«ÊÇ×éºÏµÄÀíÂÛ³É½»¼ÛÕâÒ»¸ötick¾ÍÖ±½Ó¸üĞÂÁË
+	 *	Õâ¾Íµ¼ÖÂ×éºÏ³É½»¼ÛÓÀÔ¶±È²ßÂÔÌáÇ°Ò»¸ötick
+	 *	ÕâÀï×öÒ»¸öĞŞÕı£¬µÈÏÂÒ»¸ötick½øÀ´£¬´¥·¢signal
+	 *	Èç¹ûÊÇbarÄÚ´¥·¢µÄ£¬bStandByÎªfalse£¬ÔòÖ±½ÓĞŞ¸Ä³Ö²Ö
 	 */
 	double curPx = get_cur_price(stdCode);
 	if(bStandBy || decimal::eq(curPx, 0.0))
@@ -950,11 +830,7 @@ void WtEngine::append_signal(const char* stdCode, double qty, bool bStandBy /* =
 
 void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* = -1 */)
 {
-	PosInfoPtr& pInfo = _pos_map[stdCode];
-	if (pInfo == NULL)
-		pInfo.reset(new PosInfo);
-
-	SpinLock lock(pInfo->_mtx);
+	PosInfo& pInfo = _pos_map[stdCode];
 
 	if(decimal::lt(curPx, 0))
 		curPx = get_cur_price(stdCode);
@@ -962,19 +838,18 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 	uint64_t curTm = (uint64_t)_cur_date * 10000 + _cur_time;
 	uint32_t curTDate = _cur_tdate;
 
-	if (decimal::eq(pInfo->_volume, qty))
+	if (decimal::eq(pInfo._volume, qty))
 		return;
 
-	double diff = qty - pInfo->_volume;
+	double diff = qty - pInfo._volume;
 
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
+	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(CodeHelper::stdCodeToStdCommID(stdCode).c_str());
 
 	WTSFundStruct& fundInfo = _port_fund->fundInfo();
 
-	if (decimal::gt(pInfo->_volume*diff, 0))//å½“å‰æŒä»“å’Œç›®æ ‡ä»“ä½æ–¹å‘ä¸€è‡´, å¢åŠ ä¸€æ¡æ˜ç»†, å¢åŠ æ•°é‡å³å¯
+	if (decimal::gt(pInfo._volume*diff, 0))//µ±Ç°³Ö²ÖºÍÄ¿±ê²ÖÎ»·½ÏòÒ»ÖÂ, Ôö¼ÓÒ»ÌõÃ÷Ï¸, Ôö¼ÓÊıÁ¿¼´¿É
 	{
-		pInfo->_volume = qty;
+		pInfo._volume = qty;
 
 		DetailInfo dInfo;
 		dInfo._long = decimal::gt(qty, 0);
@@ -982,23 +857,23 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 		dInfo._volume = abs(diff);
 		dInfo._opentime = curTm;
 		dInfo._opentdate = curTDate;
-		pInfo->_details.emplace_back(dInfo);
+		pInfo._details.emplace_back(dInfo);
 
-		double fee = commInfo->calcFee(curPx, abs(qty), 0);
+		double fee = calc_fee(stdCode, curPx, abs(qty), 0);
 		fundInfo._fees += fee;
 		fundInfo._balance -= fee;
 
 		log_trade(stdCode, dInfo._long, true, curTm, curPx, abs(diff), fee);
 	}
 	else
-	{//æŒä»“æ–¹å‘å’Œç›®æ ‡ä»“ä½æ–¹å‘ä¸ä¸€è‡´, éœ€è¦å¹³ä»“
+	{//³Ö²Ö·½ÏòºÍÄ¿±ê²ÖÎ»·½Ïò²»Ò»ÖÂ, ĞèÒªÆ½²Ö
 		double left = abs(diff);
 
-		pInfo->_volume = qty;
-		if (decimal::eq(pInfo->_volume, 0))
-			pInfo->_dynprofit = 0;
+		pInfo._volume = qty;
+		if (decimal::eq(pInfo._volume, 0))
+			pInfo._dynprofit = 0;
 		uint32_t count = 0;
-		for (auto it = pInfo->_details.begin(); it != pInfo->_details.end(); it++)
+		for (auto it = pInfo._details.begin(); it != pInfo._details.end(); it++)
 		{
 			DetailInfo& dInfo = *it;
 			if (decimal::eq(dInfo._volume, 0))
@@ -1021,33 +896,33 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 			double profit = (curPx - dInfo._price) * maxQty * commInfo->getVolScale();
 			if (!dInfo._long)
 				profit *= -1;
-			pInfo->_closeprofit += profit;
-			pInfo->_dynprofit = pInfo->_dynprofit*dInfo._volume / (dInfo._volume + maxQty);//æµ®ç›ˆä¹Ÿè¦åšç­‰æ¯”ç¼©æ”¾
+			pInfo._closeprofit += profit;
+			pInfo._dynprofit = pInfo._dynprofit*dInfo._volume / (dInfo._volume + maxQty);//¸¡Ó¯Ò²Òª×öµÈ±ÈËõ·Å
 			fundInfo._profit += profit;
 			fundInfo._balance += profit;
 
-			double fee = commInfo->calcFee(curPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = calc_fee(stdCode, curPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
 			fundInfo._fees += fee;
 			fundInfo._balance -= fee;
 
-			//è¿™é‡Œå†™æˆäº¤è®°å½•
+			//ÕâÀïĞ´³É½»¼ÇÂ¼
 			log_trade(stdCode, dInfo._long, false, curTm, curPx, maxQty, fee);
-			//è¿™é‡Œå†™å¹³ä»“è®°å½•
-			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, curPx, maxQty, profit, pInfo->_closeprofit);
+			//ÕâÀïĞ´Æ½²Ö¼ÇÂ¼
+			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, curPx, maxQty, profit, pInfo._closeprofit);
 
 			if (left == 0)
 				break;
 		}
 
-		//éœ€è¦æ¸…ç†æ‰å·²ç»å¹³ä»“å®Œçš„æ˜ç»†
+		//ĞèÒªÇåÀíµôÒÑ¾­Æ½²ÖÍêµÄÃ÷Ï¸
 		while (count > 0)
 		{
-			auto it = pInfo->_details.begin();
-			pInfo->_details.erase(it);
+			auto it = pInfo._details.begin();
+			pInfo._details.erase(it);
 			count--;
 		}
 
-		//æœ€å, å¦‚æœè¿˜æœ‰å‰©ä½™çš„, åˆ™éœ€è¦åæ‰‹äº†
+		//×îºó, Èç¹û»¹ÓĞÊ£ÓàµÄ, ÔòĞèÒª·´ÊÖÁË
 		//if (left > 0)
 		if(decimal::gt(left, 0))
 		{
@@ -1059,10 +934,10 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 			dInfo._volume = abs(left);
 			dInfo._opentime = curTm;
 			dInfo._opentdate = curTDate;
-			pInfo->_details.emplace_back(dInfo);
+			pInfo._details.emplace_back(dInfo);
 
-			//è¿™é‡Œè¿˜éœ€è¦å†™ä¸€ç¬”æˆäº¤è®°å½•
-			double fee = commInfo->calcFee(curPx, abs(qty), 0);
+			//ÕâÀï»¹ĞèÒªĞ´Ò»±Ê³É½»¼ÇÂ¼
+			double fee = calc_fee(stdCode, curPx, abs(qty), 0);
 			fundInfo._fees += fee;
 			fundInfo._balance -= fee;
 
@@ -1126,16 +1001,16 @@ bool WtEngine::init_riskmon(WTSVariant* cfg)
 		return false;
 
 	std::string module = DLLHelper::wrap_module(cfg->getCString("module"));
-	//å…ˆçœ‹å·¥ä½œç›®å½•ä¸‹æ˜¯å¦æœ‰å¯¹åº”æ¨¡å—
+	//ÏÈ¿´¹¤×÷Ä¿Â¼ÏÂÊÇ·ñÓĞ¶ÔÓ¦Ä£¿é
 	std::string dllpath = WtHelper::getCWD() + module;
-	//å¦‚æœæ²¡æœ‰,åˆ™å†çœ‹æ¨¡å—ç›®å½•,å³dllåŒç›®å½•ä¸‹
+	//Èç¹ûÃ»ÓĞ,ÔòÔÙ¿´Ä£¿éÄ¿Â¼,¼´dllÍ¬Ä¿Â¼ÏÂ
 	if (!StdFile::exists(dllpath.c_str()))
 		dllpath = WtHelper::getInstDir() + module;
 
 	DllHandle hInst = DLLHelper::load_library(dllpath.c_str());
 	if (hInst == NULL)
 	{
-		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module {} loading failed", dllpath.c_str());
+		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module %s loading failed", dllpath.c_str());
 		return false;
 	}
 
@@ -1143,7 +1018,7 @@ bool WtEngine::init_riskmon(WTSVariant* cfg)
 	if (creator == NULL)
 	{
 		DLLHelper::free_library(hInst);
-		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module {} is not compatible", module.c_str());
+		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module %s is not compatible", module.c_str());
 		return false;
 	}
 

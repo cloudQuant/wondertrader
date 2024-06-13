@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../WtBtCore/HftMocker.h"
 
 class ExpHftMocker : public HftMocker

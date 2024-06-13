@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * /file WtUftRunner.cpp
  * /project	WonderTrader
  *
@@ -106,28 +106,28 @@ namespace hft
 				quote.pre_settle = x;
 				quote.pre_interest = 0;
 
-				//å§”å–ä»·æ ¼
+				//Î¯Âô¼Û¸ñ
 				quote.ask_prices[0] = x;
 				quote.ask_prices[1] = x;
 				quote.ask_prices[2] = x;
 				quote.ask_prices[3] = x;
 				quote.ask_prices[4] = x;
 
-				//å§”ä¹°ä»·æ ¼
+				//Î¯Âò¼Û¸ñ
 				quote.bid_prices[0] = x;
 				quote.bid_prices[1] = x;
 				quote.bid_prices[2] = x;
 				quote.bid_prices[3] = x;
 				quote.bid_prices[4] = x;
 
-				//å§”å–é‡
+				//Î¯ÂôÁ¿
 				quote.ask_qty[0] = 0;
 				quote.ask_qty[1] = 0;
 				quote.ask_qty[2] = 0;
 				quote.ask_qty[3] = 0;
 				quote.ask_qty[4] = 0;
 
-				//å§”ä¹°é‡
+				//Î¯ÂòÁ¿
 				quote.bid_qty[0] = 0;
 				quote.bid_qty[1] = 0;
 				quote.bid_qty[2] = 0;
@@ -139,7 +139,7 @@ namespace hft
 			}
 			auto total = ticker.nano_seconds();
 			double t2t = total * 1.0 / times;
-			WTSLogger::warn("{} ticks simulated in {:.0f} ns, HftEngine Innner Latency: {:.3f} ns", times, total*1.0, t2t);
+			WTSLogger::warn("%u ticks simulated in %.0f ns, HftEngine Innner Latency: %.3f ns", times, total*1.0, t2t);
 		}
 
 	public:
@@ -186,12 +186,12 @@ namespace hft
 		TestStrategy(const char* id) : HftStrategy(id) {}
 
 		/*
-		*	æ‰§è¡Œå•å…ƒåç§°
+		*	Ö´ÐÐµ¥ÔªÃû³Æ
 		*/
 		virtual const char* getName() { return "TestStrategy"; }
 
 		/*
-		*	æ‰€å±žæ‰§è¡Œå™¨å·¥åŽ‚åç§°
+		*	ËùÊôÖ´ÐÐÆ÷¹¤³§Ãû³Æ
 		*/
 		virtual const char* getFactName() { return "TestStrategyFact"; }
 
@@ -222,31 +222,31 @@ namespace hft
 	{
 		WTSLogger::init("logcfg.yaml");
 
-		WTSVariant* _config = WTSCfgLoader::load_from_file("config.yaml");
+		WTSVariant* _config = WTSCfgLoader::load_from_file("config.yaml", true);
 		if (_config == NULL)
 		{
 			WTSLogger::log_raw(LL_ERROR, "Loading config file config.yaml failed");
 			return false;
 		}
 
-		//åŸºç¡€æ•°æ®æ–‡ä»¶
+		//»ù´¡Êý¾ÝÎÄ¼þ
 		WTSVariant* cfgBF = _config->get("basefiles");
 		bool isUTF8 = cfgBF->getBoolean("utf-8");
 		if (cfgBF->get("session"))
-			_bd_mgr.loadSessions(cfgBF->getCString("session"));
+			_bd_mgr.loadSessions(cfgBF->getCString("session"), isUTF8);
 
 		WTSVariant* cfgItem = cfgBF->get("commodity");
 		if (cfgItem)
 		{
 			if (cfgItem->type() == WTSVariant::VT_String)
 			{
-				_bd_mgr.loadCommodities(cfgItem->asCString());
+				_bd_mgr.loadCommodities(cfgItem->asCString(), isUTF8);
 			}
 			else if (cfgItem->type() == WTSVariant::VT_Array)
 			{
 				for (uint32_t i = 0; i < cfgItem->size(); i++)
 				{
-					_bd_mgr.loadCommodities(cfgItem->get(i)->asCString());
+					_bd_mgr.loadCommodities(cfgItem->get(i)->asCString(), isUTF8);
 				}
 			}
 		}
@@ -256,13 +256,13 @@ namespace hft
 		{
 			if (cfgItem->type() == WTSVariant::VT_String)
 			{
-				_bd_mgr.loadContracts(cfgItem->asCString());
+				_bd_mgr.loadContracts(cfgItem->asCString(), isUTF8);
 			}
 			else if (cfgItem->type() == WTSVariant::VT_Array)
 			{
 				for (uint32_t i = 0; i < cfgItem->size(); i++)
 				{
-					_bd_mgr.loadContracts(cfgItem->get(i)->asCString());
+					_bd_mgr.loadContracts(cfgItem->get(i)->asCString(), isUTF8);
 				}
 			}
 		}
@@ -276,10 +276,10 @@ namespace hft
 		_act_mgr.init("actpolicy.yaml");
 
 		_times = _config->getUInt32("times");
-		WTSLogger::warn("{} ticks will be simulated", _times);
+		WTSLogger::warn_f("{} ticks will be simulated", _times);
 
 		_core = _config->getUInt32("core");
-		WTSLogger::warn("Testing thread will be bind to core {}", _core);
+		WTSLogger::warn_f("Testing thread will be bind to core {}", _core);
 
 		initEngine(_config->get("env"));
 		initModules();
@@ -291,7 +291,7 @@ namespace hft
 
 	bool HftLatencyTool::initStrategies()
 	{
-		HftStraContext* ctx = new HftStraContext(&_engine, "stra", false, 0);
+		HftStraContext* ctx = new HftStraContext(&_engine, "stra", false);
 		ctx->set_strategy(new TestStrategy("stra"));
 
 		TraderAdapterPtr trader = _traders.getAdapter("trader");
@@ -338,7 +338,7 @@ namespace hft
 		{
 			if (!CpuHelper::bind_core(_core - 1))
 			{
-				WTSLogger::error("Binding to core {} failed", _core);
+				WTSLogger::error_f("Binding to core {} failed", _core);
 			}
 		}
 
@@ -347,7 +347,7 @@ namespace hft
 			_parsers.run();
 			_traders.run();
 
-			_engine.run();
+			_engine.run(true);
 
 			theParser->run(_times);
 		}

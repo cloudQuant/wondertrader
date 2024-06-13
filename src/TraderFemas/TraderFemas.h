@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderFemas.h
  * \project	WonderTrader
  *
@@ -45,13 +45,13 @@ public:
 public:
 	typedef enum 
 	{
-		WS_NOTLOGIN,		//æœªç™»å½•
-		WS_LOGINING,		//æ­£åœ¨ç™»å½•
-		WS_LOGINED,			//å·²ç™»å½•
-		WS_LOGINFAILED,		//ç™»å½•å¤±è´¥
+		WS_NOTLOGIN,		//Î´µÇÂ¼
+		WS_LOGINING,		//ÕıÔÚµÇÂ¼
+		WS_LOGINED,			//ÒÑµÇÂ¼
+		WS_LOGINFAILED,		//µÇÂ¼Ê§°Ü
 		WS_CONFIRM_QRYED,
-		WS_CONFIRMED,		//å·²ç¡®è®¤
-		WS_ALLREADY			//å…¨éƒ¨å°±ç»ª
+		WS_CONFIRMED,		//ÒÑÈ·ÈÏ
+		WS_ALLREADY			//È«²¿¾ÍĞ÷
 	} WrapperState;
 
 
@@ -63,7 +63,7 @@ private:
 	int doLogin();
 
 //////////////////////////////////////////////////////////////////////////
-//ITraderApiæ¥å£
+//ITraderApi½Ó¿Ú
 public:
 	virtual bool init(WTSVariant* params);
 
@@ -100,7 +100,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////
-//Femasäº¤æ˜“æ¥å£å®ç°
+//Femas½»Ò×½Ó¿ÚÊµÏÖ
 public:
 	virtual void OnFrontConnected() override;
 
@@ -116,23 +116,23 @@ public:
 
 	virtual void OnRspUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æŸ¥è¯¢å‰ç½®ç³»ç»Ÿç”¨æˆ·ç™»å½•åº”ç­”
+	///²éÑ¯Ç°ÖÃÏµÍ³ÓÃ»§µÇÂ¼Ó¦´ğ
 	virtual void OnRspQueryUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
 	virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *pRspUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
 	virtual void OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField *pDSUserCertRspData, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æˆäº¤å›æŠ¥
+	///³É½»»Ø±¨
 	virtual void OnRtnTrade(CUstpFtdcTradeField *pTrade) override;
 
-	///æŠ¥å•å›æŠ¥
+	///±¨µ¥»Ø±¨
 	virtual void OnRtnOrder(CUstpFtdcOrderField *pOrder) override;
 
-	///æŠ¥å•å½•å…¥åº”ç­”
+	///±¨µ¥Â¼ÈëÓ¦´ğ
 	virtual void OnRspOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æŠ¥å•æ“ä½œåº”ç­”
+	///±¨µ¥²Ù×÷Ó¦´ğ
 	virtual void OnRspOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
 	virtual void OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
@@ -141,16 +141,14 @@ public:
 
 	virtual void OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æŠ•èµ„è€…æŒä»“æŸ¥è¯¢åº”ç­”
+	///Í¶×ÊÕß³Ö²Ö²éÑ¯Ó¦´ğ
 	virtual void OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	///æŠ¥å•å½•å…¥é”™è¯¯å›æŠ¥
+	///±¨µ¥Â¼Èë´íÎó»Ø±¨
 	virtual void OnErrRtnOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo) override;
 
-	///æŠ¥å•æ“ä½œé”™è¯¯å›æŠ¥
+	///±¨µ¥²Ù×÷´íÎó»Ø±¨
 	virtual void OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo) override;
-
-	virtual void OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus) override;
 
 protected:
 	bool IsErrorRspInfo(CUstpFtdcRspInfoField *pRspInfo);
@@ -193,8 +191,6 @@ protected:
 	std::string		m_strAuthCode;
 	std::string		m_strFlowDir;
 
-	std::string		m_strProduct;
-
 	bool			m_bQuickStart;
 
 	std::string		m_strTag;
@@ -206,7 +202,7 @@ protected:
 
 	long			m_lDate;
 
-	std::atomic<uint32_t>		m_uLocalOrdID;		//æŠ¥å•å¼•ç”¨
+	std::atomic<uint32_t>		m_uLocalOrdID;		//±¨µ¥ÒıÓÃ
 	std::string					m_strSessionID;
 
 	WrapperState				m_wrapperState;

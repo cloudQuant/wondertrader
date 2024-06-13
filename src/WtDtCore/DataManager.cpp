@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file DataManager.cpp
  * \project	WonderTrader
  *
@@ -11,7 +11,6 @@
 #include "StateMonitor.h"
 #include "UDPCaster.h"
 #include "WtHelper.h"
-#include "IDataCaster.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/DLLHelper.hpp"
@@ -24,6 +23,7 @@ DataManager::DataManager()
 	: _writer(NULL)
 	, _bd_mgr(NULL)
 	, _state_mon(NULL)
+	, _udp_caster(NULL)
 {
 }
 
@@ -40,10 +40,11 @@ bool DataManager::isSessionProceeded(const char* sid)
 	return _writer->isSessionProceeded(sid);
 }
 
-bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* stMonitor)
+bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* stMonitor, UDPCaster* caster /* = NULL */)
 {
 	_bd_mgr = bdMgr;
 	_state_mon = stMonitor;
+	_udp_caster = caster;
 
 	std::string module = params->getCString("module");
 	if (module.empty())
@@ -51,16 +52,16 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 	else
 		module = WtHelper::get_module_dir() + DLLHelper::wrap_module(module.c_str());
 	
-	DllHandle libWriter = DLLHelper::load_library(module.c_str());
-	if (libWriter)
+	DllHandle libParser = DLLHelper::load_library(module.c_str());
+	if (libParser)
 	{
-		FuncCreateWriter pFuncCreateWriter = (FuncCreateWriter)DLLHelper::get_symbol(libWriter, "createWriter");
+		FuncCreateWriter pFuncCreateWriter = (FuncCreateWriter)DLLHelper::get_symbol(libParser, "createWriter");
 		if (pFuncCreateWriter == NULL)
 		{
 			WTSLogger::error("Initializing of data writer failed: function createWriter not found...");
 		}
 
-		FuncDeleteWriter pFuncDeleteWriter = (FuncDeleteWriter)DLLHelper::get_symbol(libWriter, "deleteWriter");
+		FuncDeleteWriter pFuncDeleteWriter = (FuncDeleteWriter)DLLHelper::get_symbol(libParser, "deleteWriter");
 		if (pFuncDeleteWriter == NULL)
 		{
 			WTSLogger::error("Initializing of data writer failed: function deleteWriter not found...");
@@ -71,12 +72,12 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 			_writer = pFuncCreateWriter();
 			_remover = pFuncDeleteWriter;
 		}
-		WTSLogger::info("Data storage module {} loaded", module);
+		WTSLogger::info_f("Data storage module {} loaded", module);
 	}
 	else
 	{
-		WTSLogger::error("Initializing of data writer failed: loading module {} failed...", module.c_str());
-		return false;
+		WTSLogger::error("Initializing of data writer failed: loading module %s failed...", module.c_str());
+
 	}
 
 	return _writer->init(params, this);
@@ -155,7 +156,7 @@ IBaseDataMgr* DataManager::getBDMgr()
 bool DataManager::canSessionReceive(const char* sid)
 {
 	//By Wesley @ 2021.12.27
-	//å¦‚æžœçŠ¶æ€æœºä¸ºNULLï¼Œè¯´æ˜Žæ˜¯å…¨å¤©å€™æ¨¡å¼ï¼Œç›´æŽ¥è¿”å›žtrueå³å¯
+	//Èç¹û×´Ì¬»úÎªNULL£¬ËµÃ÷ÊÇÈ«ÌìºòÄ£Ê½£¬Ö±½Ó·µ»Øtrue¼´¿É
 	if (_state_mon == NULL)
 		return true;
 
@@ -164,26 +165,26 @@ bool DataManager::canSessionReceive(const char* sid)
 
 void DataManager::broadcastTick(WTSTickData* curTick)
 {
-	for(IDataCaster* caster : _casters)
-		caster->broadcast(curTick);
+	if (_udp_caster)
+		_udp_caster->broadcast(curTick);
 }
 
 void DataManager::broadcastOrdDtl(WTSOrdDtlData* curOrdDtl)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curOrdDtl);
+	if (_udp_caster)
+		_udp_caster->broadcast(curOrdDtl);
 }
 
 void DataManager::broadcastOrdQue(WTSOrdQueData* curOrdQue)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curOrdQue);
+	if (_udp_caster)
+		_udp_caster->broadcast(curOrdQue);
 }
 
 void DataManager::broadcastTrans(WTSTransData* curTrans)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curTrans);
+	if (_udp_caster)
+		_udp_caster->broadcast(curTrans);
 }
 
 CodeSet* DataManager::getSessionComms(const char* sid)

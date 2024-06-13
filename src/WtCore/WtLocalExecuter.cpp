@@ -1,11 +1,11 @@
-ï»¿/*!
+/*!
  * \file WtExecuter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
- *
- * \brief
+ * 
+ * \brief 
  */
 #include "WtLocalExecuter.h"
 #include "TraderAdapter.h"
@@ -29,7 +29,6 @@ WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, I
 	, _channel_ready(false)
 	, _scale(1.0)
 	, _auto_clear(true)
-	, _trader(NULL)
 {
 }
 
@@ -38,14 +37,6 @@ WtLocalExecuter::~WtLocalExecuter()
 {
 	if (_pool)
 		_pool->wait();
-}
-
-void WtLocalExecuter::setTrader(TraderAdapter* adapter)
-{
-	_trader = adapter;
-	//è®¾ç½®çš„æ—¶å€™è¯»å–ä¸€ä¸‹traderçš„çŠ¶æ€
-	if(_trader)
-		_channel_ready = _trader->isReady();
 }
 
 bool WtLocalExecuter::init(WTSVariant* params)
@@ -57,8 +48,6 @@ bool WtLocalExecuter::init(WTSVariant* params)
 	_config->retain();
 
 	_scale = params->getDouble("scale");
-	_strict_sync  = params->getBoolean("strict_sync");
-
 	uint32_t poolsize = params->getUInt32("poolsize");
 	if(poolsize > 0)
 	{
@@ -67,10 +56,10 @@ bool WtLocalExecuter::init(WTSVariant* params)
 
 	/*
 	 *	By Wesley @ 2021.12.14
-	 *	ä»Žé…ç½®æ–‡ä»¶ä¸­è¯»å–è‡ªåŠ¨æ¸…ç†çš„ç­–ç•¥
-	 *	active: æ˜¯å¦å¯ç”¨
-	 *	includes: åŒ…å«åˆ—è¡¨ï¼Œæ ¼å¼å¦‚CFFEX.IF
-	 *	excludes: æŽ’é™¤åˆ—è¡¨ï¼Œæ ¼å¼å¦‚CFFEX.IF
+	 *	´ÓÅäÖÃÎÄ¼þÖÐ¶ÁÈ¡×Ô¶¯ÇåÀíµÄ²ßÂÔ
+	 *	active: ÊÇ·ñÆôÓÃ
+	 *	includes: °üº¬ÁÐ±í£¬¸ñÊ½ÈçCFFEX.IF
+	 *	excludes: ÅÅ³ýÁÐ±í£¬¸ñÊ½ÈçCFFEX.IF
 	 */
 	WTSVariant* cfgClear = params->get("clear");
 	if(cfgClear)
@@ -101,46 +90,19 @@ bool WtLocalExecuter::init(WTSVariant* params)
 		}
 	}
 
-	WTSVariant* cfgGroups = params->get("groups");
-	if (cfgGroups)
-	{
-		auto names = cfgGroups->memberNames();
-		for(const std::string& gpname : names)
-		{
-			CodeGroupPtr& gpInfo = _groups[gpname];
-			if (gpInfo == NULL)
-			{
-				gpInfo.reset(new CodeGroup);
-				wt_strcpy(gpInfo->_name, gpname.c_str(), gpname.size());
-			}
-
-			WTSVariant* cfgGrp = cfgGroups->get(gpname.c_str());
-			auto codes = cfgGrp->memberNames();
-			for(const std::string& code : codes)
-			{
-				gpInfo->_items[code] = cfgGrp->getDouble(code.c_str());
-				_code_to_groups[code] = gpInfo;
-			}
-		}
-	}
-
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Local executer inited, scale: {}, auto_clear: {}, strict_sync: {}, thread poolsize: {}, code_groups: {}",
-		_scale, _auto_clear, _strict_sync, poolsize, _groups.size());
+	WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Local executer inited, scale: {}, auto_clear: {}, thread poolsize: {}", _scale, _auto_clear, poolsize);
 
 	return true;
 }
 
 ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	std::string commID = codeInfo.stdCommID();
+	std::string commID = CodeHelper::stdCodeToStdCommID(stdCode);
 
 	WTSVariant* policy = _config->get("policy");
 	std::string des = commID;
 	if (!policy->has(commID.c_str()))
 		des = "default";
-
-	SpinLock lock(_mtx_units);
 
 	auto it = _unit_map.find(stdCode);
 	if(it != _unit_map.end())
@@ -158,10 +120,6 @@ ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /*
 		{
 			_unit_map[stdCode] = unit;
 			unit->self()->init(this, stdCode, cfg);
-
-			//å¦‚æžœé€šé“å·²ç»å°±ç»ªï¼Œåˆ™ç›´æŽ¥é€šçŸ¥æ‰§è¡Œå•å…ƒ
-			if (_channel_ready)
-				unit->self()->on_channel_ready();
 		}
 		return unit;
 	}
@@ -174,7 +132,7 @@ ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /*
 
 //////////////////////////////////////////////////////////////////////////
 //ExecuteContext
-#pragma region Contextå›žè°ƒæŽ¥å£
+#pragma region Context»Øµ÷½Ó¿Ú
 WTSTickSlice* WtLocalExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_data_mgr == NULL)
@@ -193,25 +151,16 @@ WTSTickData* WtLocalExecuter::grabLastTick(const char* stdCode)
 
 double WtLocalExecuter::getPosition(const char* stdCode, bool validOnly /* = true */, int32_t flag /* = 3 */)
 {
-	if (NULL == _trader)
-		return 0.0;
-
 	return _trader->getPosition(stdCode, validOnly, flag);
 }
 
 double WtLocalExecuter::getUndoneQty(const char* stdCode)
 {
-	if (NULL == _trader)
-		return 0.0;
-
 	return _trader->getUndoneQty(stdCode);
 }
 
 OrderMap* WtLocalExecuter::getOrders(const char* stdCode)
 {
-	if (NULL == _trader)
-		return NULL;
-
 	return _trader->getOrders(stdCode);
 }
 
@@ -219,7 +168,6 @@ OrderIDs WtLocalExecuter::buy(const char* stdCode, double price, double qty, boo
 {
 	if (!_channel_ready)
 		return OrderIDs();
-
 	return _trader->buy(stdCode, price, qty, 0, bForceClose);
 }
 
@@ -250,8 +198,7 @@ OrderIDs WtLocalExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 void WtLocalExecuter::writeLog(const char* message)
 {
 	static thread_local char szBuf[2048] = { 0 };
-	fmtutil::format_to(szBuf, "[{}]", _name.c_str());
-	strcat(szBuf, message);
+	fmt::format_to(szBuf, "[{}]{}", _name.c_str(), message);
 	WTSLogger::log_dyn_raw("executer", _name.c_str(), LL_INFO, szBuf);
 }
 
@@ -271,116 +218,75 @@ uint64_t WtLocalExecuter::getCurTime()
 	//return TimeUtils::makeTime(_stub->get_date(), _stub->get_raw_time() * 100000 + _stub->get_secs());
 }
 
-#pragma endregion Contextå›žè°ƒæŽ¥å£
+#pragma endregion Context»Øµ÷½Ó¿Ú
 //ExecuteContext
 //////////////////////////////////////////////////////////////////////////
 
 
-#pragma region å¤–éƒ¨æŽ¥å£
-void WtLocalExecuter::on_position_changed(const char* stdCode, double diffPos)
+#pragma region Íâ²¿½Ó¿Ú
+void WtLocalExecuter::on_position_changed(const char* stdCode, double targetPos)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode);
 	if (unit == NULL)
 		return;
 
+	targetPos = round(targetPos*_scale);
+
 	double oldVol = _target_pos[stdCode];
-	double newVol = oldVol + diffPos;
-	_target_pos[stdCode] = newVol;
+	//int32_t targetPos = oldVol + diffQty;
+	_target_pos[stdCode] = targetPos;
 
-	double traderTarget = round(newVol * _scale);
-
-	if(!decimal::eq(diffPos, 0))
+	if(!decimal::eq(oldVol, targetPos))
 	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
+		WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {}", stdCode, oldVol, targetPos);
 	}
 
 	if (_trader && !_trader->checkOrderLimits(stdCode))
 	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
+		WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
 		return;
 	}
 
-	unit->self()->set_position(stdCode, traderTarget);
+	unit->self()->set_position(stdCode, targetPos);
 }
 
-void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& targets)
+void WtLocalExecuter::set_position(const faster_hashmap<LongKey, double>& targets)
 {
-	/*
-	 *	å…ˆè¦æŠŠç›®æ ‡å¤´å¯¸è¿›è¡Œç»„åˆåŒ¹é…
-	 */
-	auto real_targets = targets;
-	for(auto& v : _groups)
-	{
-		const CodeGroupPtr& gpInfo = v.second;
-		bool bHit = false;
-		double gpQty = DBL_MAX;
-		for(auto& vi : gpInfo->_items)
-		{
-			double unit = vi.second;
-			auto it = real_targets.find(vi.first);
-			if (it == real_targets.end())
-			{
-				bHit = false;
-				break;
-			}
-			else
-			{
-				bHit = true;
-				//è®¡ç®—æœ€å°çš„ç»„åˆå•ä½æ•°é‡
-				gpQty = std::min(gpQty, decimal::mod(it->second, unit));
-			}
-		}
-
-		if(bHit && decimal::gt(gpQty, 0))
-		{
-			real_targets[gpInfo->_name] = gpQty;
-			for (auto& vi : gpInfo->_items)
-			{
-				double unit = vi.second;
-				real_targets[vi.first] -= gpQty * unit;
-			}
-		}
-	}
-
-
 	for (auto it = targets.begin(); it != targets.end(); it++)
 	{
-		const char* stdCode = it->first.c_str();
+		const char* stdCode = it->first.c_str();		
 		double newVol = it->second;
 		ExecuteUnitPtr unit = getUnit(stdCode);
 		if (unit == NULL)
 			continue;
 
+		newVol = round(newVol*_scale);
 		double oldVol = _target_pos[stdCode];
 		_target_pos[stdCode] = newVol;
-		// è´¦æˆ·çš„ç†è®ºæŒä»“è¦ç»è¿‡ä¿®æ­£
-		double traderTarget = round(newVol * _scale);
-
 		if(!decimal::eq(oldVol, newVol))
 		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale{}", stdCode, oldVol, newVol, traderTarget, _scale);
+			WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {}", stdCode, oldVol, newVol);
 		}
 
 		if (_trader && !_trader->checkOrderLimits(stdCode))
 		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "{} is disabled due to entrust limit control ", stdCode);
+			WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
 			continue;
 		}
 
 		if (_pool)
 		{
 			std::string code = stdCode;
-			_pool->schedule([unit, code, traderTarget](){
-				unit->self()->set_position(code.c_str(), traderTarget);
+			_pool->schedule([unit, code, newVol](){
+				unit->self()->set_position(code.c_str(), newVol);
 			});
 		}
 		else
 		{
-			unit->self()->set_position(stdCode, traderTarget);
+			unit->self()->set_position(stdCode, newVol);
 		}
 	}
 
-	//åœ¨åŽŸæ¥çš„ç›®æ ‡å¤´å¯¸ä¸­ï¼Œä½†æ˜¯ä¸åœ¨æ–°çš„ç›®æ ‡å¤´å¯¸ä¸­ï¼Œåˆ™éœ€è¦è‡ªåŠ¨è®¾ç½®ä¸º0
 	for (auto it = _target_pos.begin(); it != _target_pos.end(); it++)
 	{
 		const char* code = it->first.c_str();
@@ -388,8 +294,6 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		auto tit = targets.find(code);
 		if(tit != targets.end())
 			continue;
-
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is not in target, set to 0 automatically", code);
 
 		ExecuteUnitPtr unit = getUnit(code);
 		if (unit == NULL)
@@ -408,36 +312,6 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		}
 
 		pos = 0;
-	}
-
-	//å¦‚æžœå¼€å¯äº†ä¸¥æ ¼åŒæ­¥ï¼Œåˆ™éœ€è¦æ£€æŸ¥é€šé“æŒä»“
-	//å¦‚æžœé€šé“æŒä»“ä¸åœ¨ç®¡ç†ä¸­ï¼Œåˆ™ç›´æŽ¥å¹³æŽ‰
-	if(_strict_sync)
-	{
-		for(const std::string& stdCode : _channel_holds)
-		{
-			auto it = _target_pos.find(stdCode.c_str());
-			if(it != _target_pos.end())
-				continue;
-
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is not in management, set to 0 due to strict sync mode", stdCode.c_str());
-
-			ExecuteUnitPtr unit = getUnit(stdCode.c_str());
-			if (unit == NULL)
-				continue;
-
-			if (_pool)
-			{
-				std::string code = stdCode.c_str();
-				_pool->schedule([unit, code]() {
-					unit->self()->set_position(code.c_str(), 0);
-				});
-			}
-			else
-			{
-				unit->self()->set_position(stdCode.c_str(), 0);
-			}
-		}
 	}
 }
 
@@ -526,7 +400,6 @@ void WtLocalExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSu
 void WtLocalExecuter::on_channel_ready()
 {
 	_channel_ready = true;
-	SpinLock lock(_mtx_units);
 	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
 	{
 		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
@@ -550,12 +423,12 @@ void WtLocalExecuter::on_channel_ready()
 void WtLocalExecuter::on_channel_lost()
 {
 	_channel_ready = false;
-	SpinLock lock(_mtx_units);
 	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
 	{
 		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
 		if (unitPtr)
 		{
+			//unitPtr->self()->on_channel_lost();
 			if (_pool)
 			{
 				_pool->schedule([unitPtr](){
@@ -570,83 +443,56 @@ void WtLocalExecuter::on_channel_lost()
 	}
 }
 
-void WtLocalExecuter::on_account(const char* currency, double prebalance, double balance, double dynbalance, 
-	double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
-{
-	SpinLock lock(_mtx_units);
-	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
-	{
-		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
-		if (unitPtr)
-		{
-			if (_pool)
-			{
-				std::string strCur = currency;
-				_pool->schedule([unitPtr, strCur, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw]() {
-					unitPtr->self()->on_account(strCur.c_str(), prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
-				});
-			}
-			else
-			{
-				unitPtr->self()->on_account(currency, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
-			}
-		}
-	}
-}
-
 void WtLocalExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
 {
-	_channel_holds.insert(stdCode);
-
 	/*
 	 *	By Wesley @ 2021.12.14
-	 *	å…ˆæ£€æŸ¥è‡ªåŠ¨æ¸…ç†è¿‡æœŸä¸»åŠ›åˆçº¦çš„æ ‡è®°æ˜¯å¦ä¸ºtrue
-	 *	å¦‚æžœä¸ä¸ºtrueï¼Œåˆ™ç›´æŽ¥é€€å‡ºè¯¥é€»è¾‘
+	 *	ÏÈ¼ì²é×Ô¶¯ÇåÀí¹ýÆÚÖ÷Á¦ºÏÔ¼µÄ±ê¼ÇÊÇ·ñÎªtrue
+	 *	Èç¹û²»Îªtrue£¬ÔòÖ±½ÓÍË³ö¸ÃÂß¼­
 	 */
 	if (!_auto_clear)
 		return;
 
-	//å¦‚æžœä¸æ˜¯åˆ†æœˆæœŸè´§åˆçº¦ï¼Œç›´æŽ¥é€€å‡º
+	//Èç¹û²»ÊÇ·ÖÔÂÆÚ»õºÏÔ¼£¬Ö±½ÓÍË³ö
 	if (!CodeHelper::isStdMonthlyFutCode(stdCode))
 		return;
 
 	IHotMgr* hotMgr = _stub->get_hot_mon();
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	//èŽ·å–ä¸Šä¸€æœŸçš„ä¸»åŠ›åˆçº¦
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	//»ñÈ¡ÉÏÒ»ÆÚµÄÖ÷Á¦ºÏÔ¼
 	std::string prevCode = hotMgr->getPrevRawCode(cInfo._exchg, cInfo._product, tradingday);
 
-	//å¦‚æžœå½“å‰åˆçº¦ä¸æ˜¯ä¸Šä¸€æœŸçš„ä¸»åŠ›åˆçº¦ï¼Œåˆ™ç›´æŽ¥é€€å‡º
+	//Èç¹ûµ±Ç°ºÏÔ¼²»ÊÇÉÏÒ»ÆÚµÄÖ÷Á¦ºÏÔ¼£¬ÔòÖ±½ÓÍË³ö
 	if (prevCode != cInfo._code)
 		return;
 
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Prev hot contract of {}.{} on {} is {}", cInfo._exchg, cInfo._product, tradingday, prevCode);
+	WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Prev hot contract of {}.{} on {} is {}", cInfo._exchg, cInfo._product, tradingday, prevCode);
 
-	thread_local static char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", cInfo._exchg, cInfo._product);
+	std::string fullPid = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
-	//å…ˆæ£€æŸ¥æŽ’é™¤åˆ—è¡¨
-	//å¦‚æžœåœ¨æŽ’é™¤åˆ—è¡¨ä¸­ï¼Œåˆ™ç›´æŽ¥é€€å‡º
+	//ÏÈ¼ì²éÅÅ³ýÁÐ±í
+	//Èç¹ûÔÚÅÅ³ýÁÐ±íÖÐ£¬ÔòÖ±½ÓÍË³ö
 	auto it = _clear_excludes.find(fullPid);
 	if(it != _clear_excludes.end())
 	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's in exclude list", stdCode);
+		WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's in exclude list", stdCode);
 		return;
 	}
 
-	//å¦‚æžœåŒ…å«åˆ—è¡¨ä¸ä¸ºç©ºï¼Œå†æ£€æŸ¥æ˜¯å¦åœ¨åŒ…å«åˆ—è¡¨ä¸­
-	//å¦‚æžœä¸ºç©ºï¼Œåˆ™å…¨éƒ¨æ¸…ç†ï¼Œä¸å†è¿›å…¥è¯¥é€»è¾‘
+	//Èç¹û°üº¬ÁÐ±í²»Îª¿Õ£¬ÔÙ¼ì²éÊÇ·ñÔÚ°üº¬ÁÐ±íÖÐ
+	//Èç¹ûÎª¿Õ£¬ÔòÈ«²¿ÇåÀí£¬²»ÔÙ½øÈë¸ÃÂß¼­
 	if(!_clear_includes.empty())
 	{
 		it = _clear_includes.find(fullPid);
 		if (it == _clear_includes.end())
 		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's not in include list", stdCode);
+			WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's not in include list", stdCode);
 			return;
 		}
 	}
 
-	//æœ€åŽå†è¿›è¡Œè‡ªåŠ¨æ¸…ç†
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, will be cleared", stdCode);
+	//×îºóÔÙ½øÐÐ×Ô¶¯ÇåÀí
+	WTSLogger::log_dyn_f("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, will be cleared", stdCode);
 	ExecuteUnitPtr unit = getUnit(stdCode);
 	if (unit)
 	{
@@ -664,4 +510,99 @@ void WtLocalExecuter::on_position(const char* stdCode, bool isLong, double prevo
 	}
 }
 
-#pragma endregion å¤–éƒ¨æŽ¥å£
+#pragma endregion Íâ²¿½Ó¿Ú
+
+
+//////////////////////////////////////////////////////////////////////////
+//WtExecuterFactory
+bool WtExecuterFactory::loadFactories(const char* path)
+{
+	if (!StdFile::exists(path))
+	{
+		WTSLogger::error("Directory %s of executer factory not exists", path);
+		return false;
+	}
+
+	boost::filesystem::path myPath(path);
+	boost::filesystem::directory_iterator endIter;
+	for (boost::filesystem::directory_iterator iter(myPath); iter != endIter; iter++)
+	{
+		if (boost::filesystem::is_directory(iter->path()))
+			continue;
+
+#ifdef _WIN32
+		if (iter->path().extension() != ".dll")
+			continue;
+#else //_UNIX
+		if (iter->path().extension() != ".so")
+			continue;
+#endif
+
+		const std::string& path = iter->path().string();
+
+		DllHandle hInst = DLLHelper::load_library(path.c_str());
+		if (hInst == NULL)
+		{
+			continue;
+		}
+
+		FuncCreateExeFact creator = (FuncCreateExeFact)DLLHelper::get_symbol(hInst, "createExecFact");
+		if (creator == NULL)
+		{
+			DLLHelper::free_library(hInst);
+			continue;
+		}
+
+		ExeFactInfo fInfo;
+		fInfo._module_inst = hInst;
+		fInfo._module_path = iter->path().string();
+		fInfo._creator = creator;
+		fInfo._remover = (FuncDeleteExeFact)DLLHelper::get_symbol(hInst, "deleteExecFact");
+		fInfo._fact = fInfo._creator();
+
+		_factories[fInfo._fact->getName()] = fInfo;
+
+		WTSLogger::info_f("Executer factory {} loaded", fInfo._fact->getName());
+	}
+
+	return true;
+}
+
+ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* factname, const char* unitname)
+{
+	auto it = _factories.find(factname);
+	if (it == _factories.end())
+		return ExecuteUnitPtr();
+
+	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
+	ExecuteUnit* unit = fInfo._fact->createExeUnit(unitname);
+	if(unit == NULL)
+	{
+		WTSLogger::error_f("Createing execution unit failed: {}.{}", factname, unitname);
+		return ExecuteUnitPtr();
+	}
+	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
+}
+
+ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* name)
+{
+	StringVector ay = StrUtil::split(name, ".");
+	if (ay.size() < 2)
+		return ExecuteUnitPtr();
+
+	const char* factname = ay[0].c_str();
+	const char* unitname = ay[1].c_str();
+
+	auto it = _factories.find(factname);
+	if (it == _factories.end())
+		return ExecuteUnitPtr();
+
+	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
+	ExecuteUnit* unit = fInfo._fact->createExeUnit(unitname);
+	if (unit == NULL)
+	{
+		WTSLogger::error_f("Createing execution unit failed: {}", name);
+		return ExecuteUnitPtr();
+	}
+	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
+}

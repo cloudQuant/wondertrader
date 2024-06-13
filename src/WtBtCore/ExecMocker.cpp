@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file ExecMocker.cpp
  * \project	WonderTrader
  *
@@ -50,7 +50,7 @@ bool ExecMocker::init(WTSVariant* cfg)
 	_code = cfg->getCString("code");
 	_period = cfg->getCString("period");
 	_volunit = cfg->getDouble("volunit");
-	_volmode = cfg->getInt32("volmode");	//æ•°é‡æ¨¡å¼ï¼š0-åå¤æ­£è´Ÿï¼Œ-1-ä¸€ç›´å–ï¼Œ+1-ä¸€ç›´ä¹°
+	_volmode = cfg->getInt32("volmode");	//ÊýÁ¿Ä£Ê½£º0-·´¸´Õý¸º£¬-1-Ò»Ö±Âô£¬+1-Ò»Ö±Âò
 
 	_matcher.regisSink(this);
 	_matcher.init(cfg->get("matcher"));
@@ -113,11 +113,11 @@ void ExecMocker::handle_session_end(uint32_t curTDate)
 	_matcher.clear();
 	_undone = 0;
 
-	WTSLogger::info("Total entrust:{}, total quantity:{}, total cancels:{}, total cancel quantity:{}, total signals:{}", 
+	WTSLogger::info_f("Total entrust:{}, total quantity:{}, total cancels:{}, total cancel quantity:{}, total signals:{}", 
 		_ord_cnt, _ord_qty, _cacl_cnt, _cacl_qty, _sig_cnt);
 }
 
-void ExecMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
+void ExecMocker::handle_tick(const char* stdCode, WTSTickData* curTick)
 {
  	if (_last_tick)
 	{
@@ -136,13 +136,19 @@ void ExecMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t
 
 void ExecMocker::handle_init()
 {
-	thread_local static char basePeriod[2] = { 0 };
-	basePeriod[0] = _period[0];
+	std::string basePeriod = "";
 	uint32_t times = 1;
 	if (_period.size() > 1)
+	{
+		basePeriod.append(_period.c_str(), 1);
 		times = strtoul(_period.c_str() + 1, NULL, 10);
+	}
+	else
+	{
+		basePeriod = _period;
+	}
 
-	WTSKlineSlice* kline = _replayer->get_kline_slice(_code.c_str(), basePeriod,  10, times, true);
+	WTSKlineSlice* kline = _replayer->get_kline_slice(_code.c_str(), basePeriod.c_str(),  10, times, true);
 	if (kline)
 		kline->release();
 
@@ -155,7 +161,7 @@ void ExecMocker::handle_init()
 	_sig_time = (uint64_t)_replayer->get_date() * 10000 + _replayer->get_raw_time();
 
 	_exec_unit->set_position(_code.c_str(), _volunit);
-	WTSLogger::info("Target position updated at the beginning: {}", _volunit);
+	WTSLogger::info_f("Target position updated at the beginning: {}", _volunit);
 }
 
 void ExecMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
@@ -185,7 +191,7 @@ void ExecMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 	}
 
 	_exec_unit->set_position(_code.c_str(), _target);
-	WTSLogger::info("Target position updated @{}.{}: {}", uDate, uTime, _volunit);
+	WTSLogger::info_f("Target position updated @{}.{}: {}", uDate, uTime, _volunit);
 	_sig_cnt++;
 }
 
@@ -225,7 +231,7 @@ OrderIDs ExecMocker::buy(const char* stdCode, double price, double qty, bool bFo
 		_ord_qty += qty;
 
 		_undone += (int32_t)qty;
-		WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
+		WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
 	}
 
 	return ret;
@@ -242,7 +248,7 @@ OrderIDs ExecMocker::sell(const char* stdCode, double price, double qty, bool bF
 		_ord_qty += qty;
 	
 		_undone -= (int32_t)qty;
-		WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
+		WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
 	}
 
 	return ret;
@@ -257,7 +263,7 @@ bool ExecMocker::cancel(uint32_t localid)
 	_undone -= change;
 	_cacl_cnt++;
 	_cacl_qty += abs(change);
-	WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
+	WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
 
 	return true;
 }
@@ -270,7 +276,7 @@ OrderIDs ExecMocker::cancel(const char* stdCode, bool isBuy, double qty /*= 0*/)
 		_cacl_cnt++;
 		_cacl_qty += abs(change);
 	});
-	WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
+	WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
 
 	return ret;
 }
@@ -313,7 +319,7 @@ void ExecMocker::handle_order(uint32_t localid, const char* stdCode, bool isBuy,
 			<< "true" << std::endl;
 
 		_undone -= leftover * (isBuy ? 1 : -1);
-		WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
+		WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
 	}
 
 	_exec_unit->on_order(localid, stdCode, isBuy, leftover, price, isCanceled);
@@ -346,8 +352,8 @@ void ExecMocker::handle_trade(uint32_t localid, const char* stdCode, bool isBuy,
 
 	_position += vol* (isBuy?1:-1);
 	_undone -= vol * (isBuy ? 1 : -1);
-	WTSLogger::info("{}, undone orders updated: {}", __FUNCTION__, _undone);
-	WTSLogger::info("Position updated: {}", _position);
+	WTSLogger::info_f("{}, undone orders updated: {}", __FUNCTION__, _undone);
+	WTSLogger::info_f("Position updated: {}", _position);
 
 	_exec_unit->on_trade(localid, stdCode, isBuy, vol, price);
 }

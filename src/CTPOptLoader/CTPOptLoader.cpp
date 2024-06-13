@@ -1,4 +1,4 @@
-ï»¿#include <string>
+#include <string>
 #include <map>
 
 #include "../API/CTPOpt3.5.8/ThostFtdcTraderApi.h"
@@ -8,34 +8,29 @@
 #include "../Share/ModuleHelper.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
-#include "../Share/fmtlib.h"
-
 #include <boost/filesystem.hpp>
 
-#include "../WTSUtils/WTSCfgLoader.h"
-#include "../Includes/WTSVariant.hpp"
-USING_NS_WTP;
-
+#ifdef _WIN32
 #include "../Share/charconv.hpp"
+#endif
 
-// UserApiå¯¹è±¡
+// UserApi¶ÔÏó
 CThostFtdcTraderApi* pUserApi;
 
-// é…ç½®å‚æ•°
-std::string	FRONT_ADDR;	// å‰ç½®åœ°å€
-std::string	BROKER_ID;	// ç»çºªå…¬å¸ä»£ç 
-std::string	INVESTOR_ID;// æŠ•èµ„è€…ä»£ç 
-std::string	PASSWORD;	// ç”¨æˆ·å¯†ç 
-std::string SAVEPATH;	//ä¿å­˜ä½ç½®
+// ÅäÖÃ²ÎÊı
+std::string	FRONT_ADDR;	// Ç°ÖÃµØÖ·
+std::string	BROKER_ID;	// ¾­¼Í¹«Ë¾´úÂë
+std::string	INVESTOR_ID;// Í¶×ÊÕß´úÂë
+std::string	PASSWORD;	// ÓÃ»§ÃÜÂë
+std::string SAVEPATH;	//±£´æÎ»ÖÃ
 std::string APPID;
 std::string AUTHCODE;
-uint32_t	CLASSMASK;	//æœŸæƒ
-bool		ONLYINCFG;	//åªè½åœ°é…ç½®æ–‡ä»¶æœ‰çš„
+uint32_t	CLASSMASK;	//ÆÚÈ¨
 
-std::string COMM_FILE;		//è¾“å‡ºçš„å“ç§æ–‡ä»¶å
-std::string CONT_FILE;		//è¾“å‡ºçš„åˆçº¦æ–‡ä»¶å
+std::string COMM_FILE;		//Êä³öµÄÆ·ÖÖÎÄ¼şÃû
+std::string CONT_FILE;		//Êä³öµÄºÏÔ¼ÎÄ¼şÃû
 
-std::string MODULE_NAME;	//å¤–éƒ¨æ¨¡å—å
+std::string MODULE_NAME;	//Íâ²¿Ä£¿éÃû
 
 typedef std::map<std::string, std::string>	SymbolMap;
 SymbolMap	MAP_NAME;
@@ -44,7 +39,7 @@ SymbolMap	MAP_SESSION;
 typedef CThostFtdcTraderApi* (*CTPCreator)(const char *);
 CTPCreator		g_ctpCreator = NULL;
 
-// è¯·æ±‚ç¼–å·
+// ÇëÇó±àºÅ
 int iRequestID = 0;
 
 #ifdef _MSC_VER
@@ -57,126 +52,36 @@ int iRequestID = 0;
 extern "C"
 {
 #endif
-	EXPORT_FLAG int run(const char* cfgfile, bool bAsync, bool isFile);
+	EXPORT_FLAG int run(const char* cfgfile, bool bAsync);
 #ifdef __cplusplus
 }
 #endif
 
-int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
+int run(const char* cfgfile, bool bAsync)
 {
-	std::string map_files;
+	std::string cfg = cfgfile;
+	IniHelper ini;
+	ini.load(cfg.c_str());
 
-	if (!isFile)
-	{
-		WTSVariant* root = WTSCfgLoader::load_from_content(cfgfile, true);
-		if (root == NULL)
-			return 0;
+	FRONT_ADDR = ini.readString("ctp", "front", "");
+	BROKER_ID	= ini.readString("ctp", "broker", "");
+	INVESTOR_ID = ini.readString("ctp", "user", "");
+	PASSWORD	= ini.readString("ctp", "pass", "");
+	APPID = ini.readString("ctp", "appid", "");
+	AUTHCODE = ini.readString("ctp", "authcode", "");
 
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
+	SAVEPATH	= ini.readString("config", "path", "");
+	CLASSMASK = ini.readUInt("config", "mask", 1 | 2 | 4); //1-ÆÚ»õ,2-ÆÚÈ¨,4-¹ÉÆ±
 
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path");
-		CLASSMASK = cfg->getUInt32("mask"); //1-æœŸè´§,2-æœŸæƒ,4-è‚¡ç¥¨
-
-		COMM_FILE = cfg->getCString("commfile");
-		if (COMM_FILE.empty())
-			COMM_FILE = "commodities.json";
-
-		CONT_FILE = cfg->getCString("contfile");
-		if (CONT_FILE.empty())
-			CONT_FILE = "contracts.json";
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = ctp->getBoolean("onlyincfg");
-
-		MODULE_NAME = cfg->getCString("module");
-		if (MODULE_NAME.empty())
-		{
-#ifdef _WIN32
-			MODULE_NAME = "./soptthosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./soptthosttraderapi_se.so";
-#endif
-		}
-
-		root->release();
-	}
-	else if (StrUtil::endsWith(cfgfile, ".ini"))
-	{
-		IniHelper ini;
-
-		ini.load(cfgfile);
-
-		FRONT_ADDR = ini.readString("ctp", "front", "");
-		BROKER_ID = ini.readString("ctp", "broker", "");
-		INVESTOR_ID = ini.readString("ctp", "user", "");
-		PASSWORD = ini.readString("ctp", "pass", "");
-		APPID = ini.readString("ctp", "appid", "");
-		AUTHCODE = ini.readString("ctp", "authcode", "");
-
-		SAVEPATH = ini.readString("config", "path", "");
-		CLASSMASK = ini.readUInt("config", "mask", 1 | 2 | 4); //1-æœŸè´§,2-æœŸæƒ,4-è‚¡ç¥¨
-
-		COMM_FILE = ini.readString("config", "commfile", "commodities.json");
-		CONT_FILE = ini.readString("config", "contfile", "contracts.json");
-
-		map_files = ini.readString("config", "mapfiles", "");
-		ONLYINCFG = wt_stricmp(ini.readString("config", "onlyincfg", "false").c_str(), "true") == 0;
+	COMM_FILE = ini.readString("config", "commfile", "commodities.json");
+	CONT_FILE = ini.readString("config", "contfile", "contracts.json");
 
 #ifdef _WIN32
-		MODULE_NAME = ini.readString("config", "module", "./soptthosttraderapi_se.dll");
+	MODULE_NAME = ini.readString("config", "module", "soptthosttraderapi_se.dll");
 #else
-		MODULE_NAME = ini.readString("config", "module", "./soptthosttraderapi_se.so");
+	MODULE_NAME = ini.readString("config", "module", "soptthosttraderapi_se.so");
 #endif
-	}
-	else
-	{
-		WTSVariant* root = WTSCfgLoader::load_from_file(cfgfile);
-		if (root == NULL)
-			return 0;
-
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
-
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path");
-		CLASSMASK = cfg->getUInt32("mask"); //1-æœŸè´§,2-æœŸæƒ,4-è‚¡ç¥¨
-
-		COMM_FILE = cfg->getCString("commfile");
-		if (COMM_FILE.empty())
-			COMM_FILE = "commodities.json";
-
-		CONT_FILE = cfg->getCString("contfile");
-		if (CONT_FILE.empty())
-			CONT_FILE = "contracts.json";
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = ctp->getBoolean("onlyincfg");
-
-		MODULE_NAME = cfg->getCString("module");
-		if (MODULE_NAME.empty())
-		{
-#ifdef _WIN32
-			MODULE_NAME = "./soptthosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./soptthosttraderapi_se.so";
-#endif
-		}
-		root->release();
-	}
-
-	if(!StdFile::exists(MODULE_NAME.c_str()))
+	if(!boost::filesystem::exists(MODULE_NAME.c_str()))
 	{
 		MODULE_NAME = getBinDir();
 #ifdef _WIN32
@@ -193,6 +98,7 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 
 	SAVEPATH = StrUtil::standardisePath(SAVEPATH);
 
+	std::string map_files = ini.readString("config", "mapfiles", "");
 	if (!map_files.empty())
 	{
 		StringVector ayFiles = StrUtil::split(map_files, ",");
@@ -208,16 +114,11 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 			int cout = iniMap.readSecKeyValArray("Name", ayKeys, ayVals);
 			for (int i = 0; i < cout; i++)
 			{
-				std::string pName = ayVals[i];
-				bool isUTF8 = EncodingHelper::isUtf8((unsigned char*)pName.c_str(), pName.size());
-				if (!isUTF8)
-					pName = ChartoUTF8(ayVals[i]);
-				//ä¿å­˜çš„æ—¶å€™å…¨éƒ¨è½¬æˆUTF8
-				MAP_NAME[ayKeys[i]] = pName;
+				MAP_NAME[ayKeys[i]] = ayVals[i];
 #ifdef _WIN32
-				printf("Commodity name mapping: %s - %s\r\n", ayKeys[i].c_str(), isUTF8 ? UTF8toChar(ayVals[i]).c_str() : ayVals[i].c_str());
+				printf("Commodity name mapping: %s - %s\r\n", ayKeys[i].c_str(), UTF8toChar(ayVals[i]).c_str());
 #else
-				printf("Commodity name mapping: %s - %s\r\n", ayKeys[i].c_str(), isUTF8 ? ayVals[i].c_str() : ChartoUTF8(ayVals[i]).c_str());
+				printf("Commodity name mapping: %s - %s\r\n", ayKeys[i].c_str(), ayVals[i].c_str());
 #endif
 			}
 
@@ -232,7 +133,7 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 		}
 	}
 
-	// åˆå§‹åŒ–UserApi
+	// ³õÊ¼»¯UserApi
 	DllHandle dllInst = DLLHelper::load_library(MODULE_NAME.c_str());
 	if (dllInst == NULL)
 		printf("Loading module %s failed\r\n", MODULE_NAME.c_str());
@@ -247,18 +148,15 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 #endif
 	if (g_ctpCreator == NULL)
 		printf("Loading CreateFtdcTraderApi failed\r\n");
-
-	std::string flowPath = fmtutil::format("./CTPFlow/{}/{}/", BROKER_ID, INVESTOR_ID);
-	boost::filesystem::create_directories(flowPath.c_str());
-	pUserApi = g_ctpCreator(flowPath.c_str());
+	pUserApi = g_ctpCreator("");			// ´´½¨UserApi	
 	CTraderSpi* pUserSpi = new CTraderSpi();
-	pUserApi->RegisterSpi((CThostFtdcTraderSpi*)pUserSpi);			// æ³¨å†Œäº‹ä»¶ç±»
-	pUserApi->SubscribePublicTopic(THOST_TERT_QUICK);					// æ³¨å†Œå…¬æœ‰æµ
-	pUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);					// æ³¨å†Œç§æœ‰æµ
+	pUserApi->RegisterSpi((CThostFtdcTraderSpi*)pUserSpi);			// ×¢²áÊÂ¼şÀà
+	pUserApi->SubscribePublicTopic(THOST_TERT_QUICK);					// ×¢²á¹«ÓĞÁ÷
+	pUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);					// ×¢²áË½ÓĞÁ÷
 	pUserApi->RegisterFront((char*)FRONT_ADDR.c_str());				// connect
 	pUserApi->Init();
 
-    //å¦‚æœä¸æ˜¯å¼‚æ­¥ï¼Œåˆ™ç­‰å¾…APIè¿”å›
+    //Èç¹û²»ÊÇÒì²½£¬ÔòµÈ´ıAPI·µ»Ø
     if(!bAsync)
         pUserApi->Join();
 

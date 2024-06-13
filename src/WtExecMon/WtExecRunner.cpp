@@ -1,9 +1,6 @@
-ï»¿#include "WtExecRunner.h"
+#include "WtExecRunner.h"
 
 #include "../WtCore/WtHelper.h"
-#include "../WtCore/WtDiffExecuter.h"
-#include "../WtCore/WtDistExecuter.h"
-
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 
@@ -34,9 +31,14 @@ const char* getModuleName()
 
 WtExecRunner::WtExecRunner()
 {
+#if _WIN32
+#pragma message("Signal hooks disabled in WIN32")
+#else
+#pragma message("Signal hooks enabled in UNIX")
 	install_signal_hooks([](const char* message) {
 		WTSLogger::error(message);
 	});
+#endif
 }
 
 bool WtExecRunner::init(const char* logCfg /* = "logcfgexec.json" */, bool isFile /* = true */)
@@ -62,18 +64,19 @@ bool WtExecRunner::init(const char* logCfg /* = "logcfgexec.json" */, bool isFil
 
 bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 {
-	_config = isFile ? WTSCfgLoader::load_from_file(cfgFile) : WTSCfgLoader::load_from_content(cfgFile, false);
+	_config = isFile ? WTSCfgLoader::load_from_file(cfgFile, true) : WTSCfgLoader::load_from_content(cfgFile, false, true);
 	if(_config == NULL)
 	{
 		WTSLogger::log_raw(LL_ERROR, "Loading config file failed");
 		return false;
 	}
 
-	//åŸºç¡€æ•°æ®æ–‡ä»¶
+	//»ù´¡Êý¾ÝÎÄ¼þ
 	WTSVariant* cfgBF = _config->get("basefiles");
+	bool isUTF8 = cfgBF->getBoolean("utf-8");
 	if (cfgBF->get("session"))
 	{
-		_bd_mgr.loadSessions(cfgBF->getCString("session"));
+		_bd_mgr.loadSessions(cfgBF->getCString("session"), isUTF8);
 		WTSLogger::info("Trading sessions loaded");
 	}
 
@@ -82,13 +85,13 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 	{
 		if (cfgItem->type() == WTSVariant::VT_String)
 		{
-			_bd_mgr.loadCommodities(cfgItem->asCString());
+			_bd_mgr.loadCommodities(cfgItem->asCString(), isUTF8);
 		}
 		else if (cfgItem->type() == WTSVariant::VT_Array)
 		{
 			for (uint32_t i = 0; i < cfgItem->size(); i++)
 			{
-				_bd_mgr.loadCommodities(cfgItem->get(i)->asCString());
+				_bd_mgr.loadCommodities(cfgItem->get(i)->asCString(), isUTF8);
 			}
 		}
 	}
@@ -98,13 +101,13 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 	{
 		if (cfgItem->type() == WTSVariant::VT_String)
 		{
-			_bd_mgr.loadContracts(cfgItem->asCString());
+			_bd_mgr.loadContracts(cfgItem->asCString(), isUTF8);
 		}
 		else if (cfgItem->type() == WTSVariant::VT_Array)
 		{
 			for (uint32_t i = 0; i < cfgItem->size(); i++)
 			{
-				_bd_mgr.loadContracts(cfgItem->get(i)->asCString());
+				_bd_mgr.loadContracts(cfgItem->get(i)->asCString(), isUTF8);
 			}
 		}
 	}
@@ -116,19 +119,19 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 	}
 
 
-	//åˆå§‹åŒ–æ•°æ®ç®¡ç†
+	//³õÊ¼»¯Êý¾Ý¹ÜÀí
 	initDataMgr();
 
-	//åˆå§‹åŒ–å¼€å¹³ç­–ç•¥
+	//³õÊ¼»¯¿ªÆ½²ßÂÔ
 	if (!initActionPolicy())
 		return false;
 
-	//åˆå§‹åŒ–è¡Œæƒ…é€šé“
+	//³õÊ¼»¯ÐÐÇéÍ¨µÀ
 	const char* cfgParser = _config->getCString("parsers");
 	if (StdFile::exists(cfgParser))
 	{
-		WTSLogger::info("Reading parser config from {}...", cfgParser);
-		WTSVariant* var = WTSCfgLoader::load_from_file(cfgParser);
+		WTSLogger::info_f("Reading parser config from {}...", cfgParser);
+		WTSVariant* var = WTSCfgLoader::load_from_file(cfgParser, true);
 		if (var)
 		{
 			if (!initParsers(var))
@@ -137,16 +140,16 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 		}
 		else
 		{
-			WTSLogger::error("Loading parser config {} failed", cfgParser);
+			WTSLogger::error_f("Loading parser config {} failed", cfgParser);
 		}
 	}
 
-	//åˆå§‹åŒ–äº¤æ˜“é€šé“
+	//³õÊ¼»¯½»Ò×Í¨µÀ
 	const char* cfgTraders = _config->getCString("traders");
 	if (StdFile::exists(cfgTraders))
 	{
-		WTSLogger::info("Reading trader config from {}...", cfgTraders);
-		WTSVariant* var = WTSCfgLoader::load_from_file(cfgTraders);
+		WTSLogger::info_f("Reading trader config from {}...", cfgTraders);
+		WTSVariant* var = WTSCfgLoader::load_from_file(cfgTraders, true);
 		if (var)
 		{
 			if (!initTraders(var))
@@ -155,15 +158,15 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 		}
 		else
 		{
-			WTSLogger::error("Loading trader config {} failed", cfgTraders);
+			WTSLogger::error_f("Loading trader config {} failed", cfgTraders);
 		}
 	}
 
 	const char* cfgExecuters = _config->getCString("executers");
 	if (StdFile::exists(cfgExecuters))
 	{
-		WTSLogger::info("Reading executer config from {}...", cfgExecuters);
-		WTSVariant* var = WTSCfgLoader::load_from_file(cfgExecuters);
+		WTSLogger::info_f("Reading executer config from {}...", cfgExecuters);
+		WTSVariant* var = WTSCfgLoader::load_from_file(cfgExecuters, true);
 		if (var)
 		{
 			if (!initExecuters(var))
@@ -172,7 +175,7 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 		}
 		else
 		{
-			WTSLogger::error("Loading executer config {} failed", cfgExecuters);
+			WTSLogger::error_f("Loading executer config {} failed", cfgExecuters);
 		}
 	}
 
@@ -211,7 +214,7 @@ bool WtExecRunner::initParsers(WTSVariant* cfgParser)
 		const char* id = cfgItem->getCString("id");
 
 		// By Wesley @ 2021.12.14
-		// å¦‚æžœidä¸ºç©ºï¼Œåˆ™ç”Ÿæˆè‡ªåŠ¨id
+		// Èç¹ûidÎª¿Õ£¬ÔòÉú³É×Ô¶¯id
 		std::string realid = id;
 		if (realid.empty())
 		{
@@ -226,7 +229,7 @@ bool WtExecRunner::initParsers(WTSVariant* cfgParser)
 		count++;
 	}
 
-	WTSLogger::info("{} parsers loaded", count);
+	WTSLogger::info("%u parsers loaded", count);
 
 	return true;
 }
@@ -237,7 +240,7 @@ bool WtExecRunner::initExecuters(WTSVariant* cfgExecuter)
 	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
 		return false;
 
-	//å…ˆåŠ è½½è‡ªå¸¦çš„æ‰§è¡Œå™¨å·¥åŽ‚
+	//ÏÈ¼ÓÔØ×Ô´øµÄÖ´ÐÐÆ÷¹¤³§
 	std::string path = WtHelper::getInstDir() + "executer//";
 	_exe_factory.loadFactories(path.c_str());
 
@@ -249,79 +252,37 @@ bool WtExecRunner::initExecuters(WTSVariant* cfgExecuter)
 			continue;
 
 		const char* id = cfgItem->getCString("id");
-		std::string name = cfgItem->getCString("name");	//local,diff,dist
-		if (name.empty())
-			name = "local";
 
-		if (name == "local")
+		WtExecuterPtr executer(new WtLocalExecuter(&_exe_factory, id, &_data_mgr));
+		executer->setStub(this);
+		if (!executer->init(cfgItem))
+			return false;
+
+		const char* tid = cfgItem->getCString("trader");
+		if (strlen(tid) == 0)
 		{
-			WtLocalExecuter* executer = new WtLocalExecuter(&_exe_factory, id, &_data_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
-			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
-			}
-			else
-			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer %s", tid, id);
-				}
-			}
-
-			executer->setStub(this);
-			_exe_mgr.add_executer(ExecCmdPtr(executer));
-		}
-		else if (name == "diff")
-		{
-			WtDiffExecuter* executer = new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
-			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
-			}
-			else
-			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer %s", tid, id);
-				}
-			}
-
-			executer->setStub(this);
-			_exe_mgr.add_executer(ExecCmdPtr(executer));
+			WTSLogger::error("No Trader configured for Executer %s", id);
 		}
 		else
 		{
-			WtDistExecuter* executer = new WtDistExecuter(id);
-			if (!executer->init(cfgItem))
-				return false;
-
-			executer->setStub(this);
-			_exe_mgr.add_executer(ExecCmdPtr(executer));
+			TraderAdapterPtr trader = _traders.getAdapter(tid);
+			if (trader)
+			{
+				executer->setTrader(trader.get());
+				trader->addSink(executer.get());
+			}
+			else
+			{
+				WTSLogger::error("Trader %s not exists, cannot configured for executer %s", tid, id);
+			}
 		}
+
+		_exe_mgr.add_executer(executer);
+
 		count++;
 	}
 
-	WTSLogger::info("{} executers loaded", count);
+	WTSLogger::info("%u executers loaded", count);
 
 	return true;
 }
@@ -348,7 +309,7 @@ bool WtExecRunner::initTraders(WTSVariant* cfgTrader)
 		count++;
 	}
 
-	WTSLogger::info("{} traders loaded", count);
+	WTSLogger::info("%u traders loaded", count);
 
 	return true;
 }
@@ -375,17 +336,23 @@ WTSSessionInfo* WtExecRunner::get_session_info(const char* sid, bool isCode /* =
 	if (!isCode)
 		return _bd_mgr.getSession(sid);
 
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(sid, NULL);
-	WTSCommodityInfo* cInfo = _bd_mgr.getCommodity(codeInfo._exchg, codeInfo._product);
+	WTSCommodityInfo* cInfo = _bd_mgr.getCommodity(CodeHelper::stdCodeToStdCommID(sid).c_str());
 	if (cInfo == NULL)
 		return NULL;
 
-	return cInfo->getSessionInfo();
+	return _bd_mgr.getSession(cInfo->getSession());
 }
 
-void WtExecRunner::handle_push_quote(WTSTickData* quote)
+void WtExecRunner::handle_push_quote(WTSTickData* quote, uint32_t hotFlag /* = 0 */)
 {
-	if (quote == NULL)
+	WTSContractInfo* cInfo = quote->getContractInfo();
+	if (cInfo == NULL)
+	{
+		cInfo = _bd_mgr.getContract(quote->code(), quote->exchg());
+		quote->setContractInfo(cInfo);
+	}
+
+	if (cInfo == NULL)
 		return;
 
 	uint32_t uDate = quote->actiondate();
@@ -395,9 +362,25 @@ void WtExecRunner::handle_push_quote(WTSTickData* quote)
 	WtHelper::setTime(uDate, curMin, curSec);
 	WtHelper::setTDate(quote->tradingdate());
 
-	_data_mgr.handle_push_quote(quote->code(), quote);
+	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
 
-	_exe_mgr.handle_tick(quote->code(), quote);
+	std::string stdCode;
+	if (commInfo->getCategoty() == CC_FutOption)
+	{
+		stdCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+	}
+	else if (CodeHelper::isMonthlyCode(quote->code()))
+	{
+		stdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+	}
+	else
+	{
+		stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), cInfo->getProduct());
+	}
+	quote->setCode(stdCode.c_str());
+	_data_mgr.handle_push_quote(stdCode.c_str(), quote);
+
+	_exe_mgr.handle_tick(stdCode.c_str(), quote);
 }
 
 void WtExecRunner::release()
@@ -408,13 +391,7 @@ void WtExecRunner::release()
 
 void WtExecRunner::setPosition(const char* stdCode, double targetPos)
 {
-	_positions[stdCode] = targetPos;
-}
-
-void WtExecRunner::commitPositions()
-{
-	_exe_mgr.set_positions(_positions);
-	_positions.clear();
+	_exe_mgr.handle_pos_change(stdCode, targetPos);
 }
 
 bool WtExecRunner::initActionPolicy()
@@ -435,18 +412,16 @@ uint64_t WtExecRunner::get_real_time()
 
 WTSCommodityInfo* WtExecRunner::get_comm_info(const char* stdCode)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	return _bd_mgr.getCommodity(codeInfo._exchg, codeInfo._product);
+	return _bd_mgr.getCommodity(CodeHelper::stdCodeToStdCommID(stdCode).c_str());
 }
 
 WTSSessionInfo* WtExecRunner::get_sess_info(const char* stdCode)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	WTSCommodityInfo* cInfo = _bd_mgr.getCommodity(codeInfo._exchg, codeInfo._product);
+	WTSCommodityInfo* cInfo = _bd_mgr.getCommodity(CodeHelper::stdCodeToStdCommID(stdCode).c_str());
 	if (cInfo == NULL)
 		return NULL;
 
-	return cInfo->getSessionInfo();
+	return _bd_mgr.getSession(cInfo->getSession());
 }
 
 uint32_t WtExecRunner::get_trading_day()

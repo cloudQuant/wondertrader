@@ -1,4 +1,4 @@
-ï»¿#include "WtDataReader.h"
+#include "WtDataReader.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -24,7 +24,9 @@ inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* f
 	if (sink == NULL)
 		return;
 
-	const char* buffer = fmtutil::format(format, args...);
+	static thread_local char buffer[512] = { 0 };
+	memset(buffer, 0, 512);
+	fmt::format_to(buffer, format, args...);
 
 	sink->reader_log(ll, buffer);
 }
@@ -45,7 +47,7 @@ extern "C"
 };
 
 /*
- *	å¤„ç†å—æ•°æ®
+ *	´¦Àí¿éÊı¾İ
  */
 bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
@@ -54,7 +56,7 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 	bool bCmped = header->is_compressed();
 	bool bOldVer = header->is_old_version();
 
-	//å¦‚æœæ—¢æ²¡æœ‰å‹ç¼©ï¼Œä¹Ÿä¸æ˜¯è€ç‰ˆæœ¬ç»“æ„ä½“ï¼Œåˆ™ç›´æ¥è¿”å›
+	//Èç¹û¼ÈÃ»ÓĞÑ¹Ëõ£¬Ò²²»ÊÇÀÏ°æ±¾½á¹¹Ìå£¬ÔòÖ±½Ó·µ»Ø
 	if (!bCmped && !bOldVer)
 	{
 		if (!bKeepHead)
@@ -72,14 +74,14 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 			return false;
 		}
 
-		//å°†æ–‡ä»¶å¤´åé¢çš„æ•°æ®è¿›è¡Œè§£å‹
-		buffer = WTSCmpHelper::uncompress_data(content.data() + BLOCK_HEADERV2_SIZE, (std::size_t)blkV2->_size);
+		//½«ÎÄ¼şÍ·ºóÃæµÄÊı¾İ½øĞĞ½âÑ¹
+		buffer = WTSCmpHelper::uncompress_data(content.data() + BLOCK_HEADERV2_SIZE, (uint32_t)blkV2->_size);
 	}
 	else
 	{
 		if (!bOldVer)
 		{
-			//å¦‚æœä¸æ˜¯è€ç‰ˆæœ¬ï¼Œç›´æ¥è¿”å›
+			//Èç¹û²»ÊÇÀÏ°æ±¾£¬Ö±½Ó·µ»Ø
 			if (!bKeepHead)
 				content.erase(0, BLOCK_HEADER_SIZE);
 			return true;
@@ -158,25 +160,14 @@ void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* 
 	if (cfg == NULL)
 		return ;
 
-	std::string root_dir = cfg->getCString("path");
-	root_dir = StrUtil::standardisePath(root_dir);
-
-	_rt_dir = root_dir + "rt/";
-
-	_his_dir = cfg->getCString("his_path");
-	if(!_his_dir.empty())
-		_his_dir = StrUtil::standardisePath(_his_dir);
-	else
-		_his_dir = root_dir + "his/";
-
-	_adjust_flag = cfg->getUInt32("adjust_flag");
-
-	pipe_reader_log(sink, LL_INFO, "WtDataReader initialized, rt dir is {}, hist dir is {}, adjust_flag is {}", _rt_dir, _his_dir, _adjust_flag);
-
+	_base_dir = cfg->getCString("path");
+	_base_dir = StrUtil::standardisePath(_base_dir);
+	pipe_reader_log(sink, LL_DEBUG, "Storage initialized @ {}", _base_dir);
+	
 	/*
 	 *	By Wesley @ 2021.12.20
-	 *	å…ˆä»extloaderåŠ è½½é™¤æƒå› å­
-	 *	å¦‚æœåŠ è½½å¤±è´¥ï¼Œå¹¶ä¸”é…ç½®äº†é™¤æƒå› å­æ–‡ä»¶ï¼Œå†åŠ è½½é™¤æƒå› å­æ–‡ä»¶
+	 *	ÏÈ´Óextloader¼ÓÔØ³ıÈ¨Òò×Ó
+	 *	Èç¹û¼ÓÔØÊ§°Ü£¬²¢ÇÒÅäÖÃÁË³ıÈ¨Òò×ÓÎÄ¼ş£¬ÔÙ¼ÓÔØ³ıÈ¨Òò×ÓÎÄ¼ş
 	 */
 	bool bLoaded = loadStkAdjFactorsFromLoader();
 
@@ -204,7 +195,7 @@ bool WtDataReader::loadStkAdjFactorsFromLoader()
 			fctrLst.emplace_back(adjFact);
 		}
 
-		//ä¸€å®šè¦æŠŠç¬¬ä¸€æ¡åŠ è¿›å»ï¼Œä¸ç„¶å¦‚æœæ˜¯å‰å¤æƒçš„è¯ï¼Œå¯èƒ½ä¼šæ¼å¤„ç†æœ€æ—©çš„æ•°æ®
+		//Ò»¶¨Òª°ÑµÚÒ»Ìõ¼Ó½øÈ¥£¬²»È»Èç¹ûÊÇÇ°¸´È¨µÄ»°£¬¿ÉÄÜ»áÂ©´¦Àí×îÔçµÄÊı¾İ
 		AdjFactor adjFact;
 		adjFact._date = 19900101;
 		adjFact._factor = 1;
@@ -227,7 +218,7 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 		return false;
 	}
 
-	WTSVariant* doc = WTSCfgLoader::load_from_file(adjfile);
+	WTSVariant* doc = WTSCfgLoader::load_from_file(adjfile, true);
 	if(doc == NULL)
 	{
 		pipe_reader_log(_sink, LL_ERROR, "Loading adjusting factors file {} failed", adjfile);
@@ -247,8 +238,8 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 
 			/*
 			 *	By Wesley @ 2021.12.21
-			 *	å…ˆæ£€æŸ¥codeçš„æ ¼å¼æ˜¯ä¸æ˜¯åŒ…å«PIDï¼Œå¦‚STK.600000
-			 *	å¦‚æœåŒ…å«PIDï¼Œåˆ™ç›´æ¥æ ¼å¼åŒ–ï¼Œå¦‚æœä¸åŒ…å«ï¼Œåˆ™å¼ºåˆ¶ä¸ºSTK
+			 *	ÏÈ¼ì²écodeµÄ¸ñÊ½ÊÇ²»ÊÇ°üº¬PID£¬ÈçSTK.600000
+			 *	Èç¹û°üº¬PID£¬ÔòÖ±½Ó¸ñÊ½»¯£¬Èç¹û²»°üº¬£¬ÔòÇ¿ÖÆÎªSTK
 			 */
 			bool bHasPID = (code.find('.') != std::string::npos);
 
@@ -272,7 +263,7 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 				fct_cnt++;
 			}
 
-			//ä¸€å®šè¦æŠŠç¬¬ä¸€æ¡åŠ è¿›å»ï¼Œä¸ç„¶å¦‚æœæ˜¯å‰å¤æƒçš„è¯ï¼Œå¯èƒ½ä¼šæ¼å¤„ç†æœ€æ—©çš„æ•°æ®
+			//Ò»¶¨Òª°ÑµÚÒ»Ìõ¼Ó½øÈ¥£¬²»È»Èç¹ûÊÇÇ°¸´È¨µÄ»°£¬¿ÉÄÜ»áÂ©´¦Àí×îÔçµÄÊı¾İ
 			AdjFactor adjFact;
 			adjFact._date = 19900101;
 			adjFact._factor = 1;
@@ -291,9 +282,9 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 
 WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = commInfo->getFullPid();
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate, curTime, curSecs;
 	if (etime == 0)
@@ -312,20 +303,18 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
+	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
 
 	bool isToday = (endTDate == curTDate);
 
 	std::string curCode = cInfo._code;
-	if (commInfo->isFuture())
-	{
-		const char* ruleTag = cInfo._ruletag;
-		if (strlen(ruleTag) > 0)
-			curCode = _hot_mgr->getCustomRawCode(ruleTag, stdPID, endTDate);
-	}
+	if (cInfo.isHot() && commInfo->isFuture())
+		curCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, endTDate);
+	else if (cInfo.isSecond() && commInfo->isFuture())
+		curCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, endTDate);
 
-	//æ¯”è¾ƒæ—¶é—´çš„å¯¹è±¡
+	//±È½ÏÊ±¼äµÄ¶ÔÏó
 	WTSTickStruct eTick;
 	eTick.action_date = curDate;
 	eTick.action_time = curTime * 100000 + curSecs;
@@ -347,7 +336,7 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 
 		uint32_t eIdx = pTick - tBlock->_ticks;
 
-		//å¦‚æœå…‰æ ‡å®šä½çš„tickæ—¶é—´æ¯”ç›®æ ‡æ—¶é—´æ‰“, åˆ™å…¨éƒ¨å›é€€ä¸€ä¸ª
+		//Èç¹û¹â±ê¶¨Î»µÄtickÊ±¼ä±ÈÄ¿±êÊ±¼ä´ò, ÔòÈ«²¿»ØÍËÒ»¸ö
 		if (pTick->action_date > eTick.action_date || pTick->action_time>eTick.action_time)
 		{
 			pTick--;
@@ -361,14 +350,13 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		std::string key = StrUtil::printf("%s-%d", stdCode, endTDate);
 
 		auto it = _his_tick_map.find(key);
 		if(it == _his_tick_map.end())
 		{
 			std::stringstream ss;
-			ss << _his_dir << "ticks/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/ticks/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
@@ -419,9 +407,9 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 
 WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = commInfo->getFullPid();
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate, curTime, curSecs;
 	if (etime == 0)
@@ -440,20 +428,18 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
+	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
 
 	bool isToday = (endTDate == curTDate);
 
 	std::string curCode = cInfo._code;
-	if (commInfo->isFuture())
-	{
-		const char* ruleTag = cInfo._ruletag;
-		if (strlen(ruleTag) > 0)
-			curCode = _hot_mgr->getCustomRawCode(ruleTag, stdPID, endTDate);
-	}
+	if (cInfo.isHot() && commInfo->isFuture())
+		curCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, endTDate);
+	else if (cInfo.isSecond() && commInfo->isFuture())
+		curCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, endTDate);
 
-	//æ¯”è¾ƒæ—¶é—´çš„å¯¹è±¡
+	//±È½ÏÊ±¼äµÄ¶ÔÏó
 	WTSOrdQueStruct eTick;
 	eTick.action_date = curDate;
 	eTick.action_time = curTime * 100000 + curSecs;
@@ -475,7 +461,7 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 		uint32_t eIdx = pItem - rtBlock->_queues;
 
-		//å¦‚æœå…‰æ ‡å®šä½çš„tickæ—¶é—´æ¯”ç›®æ ‡æ—¶é—´æ‰“, åˆ™å…¨éƒ¨å›é€€ä¸€ä¸ª
+		//Èç¹û¹â±ê¶¨Î»µÄtickÊ±¼ä±ÈÄ¿±êÊ±¼ä´ò, ÔòÈ«²¿»ØÍËÒ»¸ö
 		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
 		{
 			pItem--;
@@ -489,14 +475,13 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		std::string key = StrUtil::printf("%s-%d", stdCode, endTDate);
 
 		auto it = _his_ordque_map.find(key);
 		if (it == _his_ordque_map.end())
 		{
 			std::stringstream ss;
-			ss << _his_dir << "queue/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/queue/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
@@ -505,7 +490,7 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdQueBlockV2))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²å§”æ‰˜é˜Ÿåˆ—æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename);
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Î¯ÍĞ¶ÓÁĞÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename);
 				hisBlkPair._buffer.clear();
 				return NULL;
 			}
@@ -514,14 +499,14 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisOrdQueBlockV2) + tBlockV2->_size))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²å§”æ‰˜é˜Ÿåˆ—æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename);
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Î¯ÍĞ¶ÓÁĞÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename);
 				return NULL;
 			}
 
-			//éœ€è¦è§£å‹
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//ĞèÒª½âÑ¹
+			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (uint32_t)tBlockV2->_size);
 
-			//å°†åŸæ¥çš„bufferåªä¿ç•™ä¸€ä¸ªå¤´éƒ¨,å¹¶å°†æ‰€æœ‰tickæ•°æ®è¿½åŠ åˆ°å°¾éƒ¨
+			//½«Ô­À´µÄbufferÖ»±£ÁôÒ»¸öÍ·²¿,²¢½«ËùÓĞtickÊı¾İ×·¼Óµ½Î²²¿
 			hisBlkPair._buffer.resize(sizeof(HisOrdQueBlock));
 			hisBlkPair._buffer.append(buf);
 			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
@@ -562,9 +547,9 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = commInfo->getFullPid();
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate, curTime, curSecs;
 	if (etime == 0)
@@ -583,20 +568,18 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
+	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
 
 	bool isToday = (endTDate == curTDate);
 
 	std::string curCode = cInfo._code;
-	if (commInfo->isFuture())
-	{
-		const char* ruleTag = cInfo._ruletag;
-		if (strlen(ruleTag) > 0)
-			curCode = _hot_mgr->getCustomRawCode(ruleTag, stdPID, endTDate);
-	}
+	if (cInfo.isHot() && commInfo->isFuture())
+		curCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, endTDate);
+	else if (cInfo.isSecond() && commInfo->isFuture())
+		curCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, endTDate);
 
-	//æ¯”è¾ƒæ—¶é—´çš„å¯¹è±¡
+	//±È½ÏÊ±¼äµÄ¶ÔÏó
 	WTSOrdDtlStruct eTick;
 	eTick.action_date = curDate;
 	eTick.action_time = curTime * 100000 + curSecs;
@@ -618,7 +601,7 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 		uint32_t eIdx = pItem - rtBlock->_details;
 
-		//å¦‚æœå…‰æ ‡å®šä½çš„tickæ—¶é—´æ¯”ç›®æ ‡æ—¶é—´æ‰“, åˆ™å…¨éƒ¨å›é€€ä¸€ä¸ª
+		//Èç¹û¹â±ê¶¨Î»µÄtickÊ±¼ä±ÈÄ¿±êÊ±¼ä´ò, ÔòÈ«²¿»ØÍËÒ»¸ö
 		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
 		{
 			pItem--;
@@ -632,14 +615,13 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		std::string key = StrUtil::printf("%s-%d", stdCode, endTDate);
 
 		auto it = _his_ordque_map.find(key);
 		if (it == _his_ordque_map.end())
 		{
 			std::stringstream ss;
-			ss << _his_dir << "orders/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/orders/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
@@ -648,7 +630,7 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdDtlBlockV2))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²é€ç¬”å§”æ‰˜æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Öğ±ÊÎ¯ÍĞÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				hisBlkPair._buffer.clear();
 				return NULL;
 			}
@@ -657,14 +639,14 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisOrdDtlBlockV2) + tBlockV2->_size))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²é€ç¬”å§”æ‰˜æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Öğ±ÊÎ¯ÍĞÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				return NULL;
 			}
 
-			//éœ€è¦è§£å‹
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//ĞèÒª½âÑ¹
+			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (uint32_t)tBlockV2->_size);
 
-			//å°†åŸæ¥çš„bufferåªä¿ç•™ä¸€ä¸ªå¤´éƒ¨,å¹¶å°†æ‰€æœ‰tickæ•°æ®è¿½åŠ åˆ°å°¾éƒ¨
+			//½«Ô­À´µÄbufferÖ»±£ÁôÒ»¸öÍ·²¿,²¢½«ËùÓĞtickÊı¾İ×·¼Óµ½Î²²¿
 			hisBlkPair._buffer.resize(sizeof(HisOrdDtlBlock));
 			hisBlkPair._buffer.append(buf);
 			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
@@ -705,9 +687,9 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = commInfo->getFullPid();
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate, curTime, curSecs;
 	if (etime == 0)
@@ -726,20 +708,18 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
+	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
 
 	bool isToday = (endTDate == curTDate);
 
 	std::string curCode = cInfo._code;
-	if (commInfo->isFuture())
-	{
-		const char* ruleTag = cInfo._ruletag;
-		if (strlen(ruleTag) > 0)
-			curCode = _hot_mgr->getCustomRawCode(ruleTag, stdPID, endTDate);
-	}
+	if (cInfo.isHot() && commInfo->isFuture())
+		curCode = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, endTDate);
+	else if (cInfo.isSecond() && commInfo->isFuture())
+		curCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, endTDate);
 
-	//æ¯”è¾ƒæ—¶é—´çš„å¯¹è±¡
+	//±È½ÏÊ±¼äµÄ¶ÔÏó
 	WTSTransStruct eTick;
 	eTick.action_date = curDate;
 	eTick.action_time = curTime * 100000 + curSecs;
@@ -761,7 +741,7 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 		uint32_t eIdx = pItem - rtBlock->_trans;
 
-		//å¦‚æœå…‰æ ‡å®šä½çš„tickæ—¶é—´æ¯”ç›®æ ‡æ—¶é—´æ‰“, åˆ™å…¨éƒ¨å›é€€ä¸€ä¸ª
+		//Èç¹û¹â±ê¶¨Î»µÄtickÊ±¼ä±ÈÄ¿±êÊ±¼ä´ò, ÔòÈ«²¿»ØÍËÒ»¸ö
 		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
 		{
 			pItem--;
@@ -775,14 +755,13 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		std::string key = StrUtil::printf("%s-%d", stdCode, endTDate);
 
 		auto it = _his_ordque_map.find(key);
 		if (it == _his_ordque_map.end())
 		{
 			std::stringstream ss;
-			ss << _his_dir << "trans/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/trans/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
@@ -791,7 +770,7 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisTransBlockV2))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²é€ç¬”æˆäº¤æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Öğ±Ê³É½»Êı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				hisBlkPair._buffer.clear();
 				return NULL;
 			}
@@ -800,14 +779,14 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisTransBlockV2) + tBlockV2->_size))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²é€ç¬”æˆäº¤æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·Öğ±Ê³É½»Êı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				return NULL;
 			}
 
-			//éœ€è¦è§£å‹
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//ĞèÒª½âÑ¹
+			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (uint32_t)tBlockV2->_size);
 
-			//å°†åŸæ¥çš„bufferåªä¿ç•™ä¸€ä¸ªå¤´éƒ¨,å¹¶å°†æ‰€æœ‰tickæ•°æ®è¿½åŠ åˆ°å°¾éƒ¨
+			//½«Ô­À´µÄbufferÖ»±£ÁôÒ»¸öÍ·²¿,²¢½«ËùÓĞtickÊı¾İ×·¼Óµ½Î²²¿
 			hisBlkPair._buffer.resize(sizeof(HisTransBlock));
 			hisBlkPair._buffer.append(buf);
 			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
@@ -847,17 +826,18 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 }
 
 
-bool WtDataReader::cacheFinalBarsFromLoader(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
+bool WtDataReader::cacheFinalBarsFromLoader(const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	if (NULL == _loader)
 		return false;
 
-	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	BarsList& barList = _bars_cache[key];
 	barList._code = stdCode;
 	barList._period = period;
-	barList._exchg = cInfo->_exchg;
+	barList._exchg = cInfo._exchg;
 
 	std::string pname;
 	switch (period)
@@ -884,14 +864,15 @@ bool WtDataReader::cacheFinalBarsFromLoader(void* codeInfo, const std::string& k
 }
 
 
-bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
+bool WtDataReader::cacheIntegratedFutBars(const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
-	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
 
 	std::string pname;
 	switch (period)
@@ -904,32 +885,26 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 	BarsList& barList = _bars_cache[key];
 	barList._code = stdCode;
 	barList._period = period;
-	barList._exchg = cInfo->_exchg;
+	barList._exchg = cInfo._exchg;
 
 	std::vector<std::vector<WTSBarStruct>*> barsSections;
 
 	uint32_t realCnt = 0;
 
-	//const char* hot_flag = cInfo->isHot() ? FILE_SUF_HOT : FILE_SUF_2ND;
-	const char* ruleTag = cInfo->_ruletag;
+	const char* hot_flag = cInfo.isHot() ? FILE_SUF_HOT : FILE_SUF_2ND;
 
-	//å…ˆæŒ‰ç…§HOTä»£ç è¿›è¡Œè¯»å–, å¦‚rb.HOT
+	//ÏÈ°´ÕÕHOT´úÂë½øĞĞ¶ÁÈ¡, Èçrb.HOT
 	std::vector<WTSBarStruct>* hotAy = NULL;
 	uint64_t lastHotTime = 0;
-
 	do
 	{
 		/*
 		 *	By Wesley @ 2021.12.20
-		 *	æœ¬æ¥è¿™é‡Œæ˜¯è¦å…ˆè°ƒç”¨_loader->loadRawHisBarsä»å¤–éƒ¨åŠ è½½å™¨è¯»å–ä¸»åŠ›åˆçº¦æ•°æ®çš„
-		 *	ä½†æ˜¯ä¸Šå±‚ä¼šè°ƒç”¨ä¸€æ¬¡loadFinalHisBarsï¼Œè¿™é‡Œå†è°ƒç”¨loadRawHisBarså°±å†—ä½™äº†ï¼Œæ‰€ä»¥ç›´æ¥è·³è¿‡
+		 *	±¾À´ÕâÀïÊÇÒªÏÈµ÷ÓÃ_loader->loadRawHisBars´ÓÍâ²¿¼ÓÔØÆ÷¶ÁÈ¡Ö÷Á¦ºÏÔ¼Êı¾İµÄ
+		 *	µ«ÊÇÉÏ²ã»áµ÷ÓÃÒ»´ÎloadFinalHisBars£¬ÕâÀïÔÙµ÷ÓÃloadRawHisBars¾ÍÈßÓàÁË£¬ËùÒÔÖ±½ÓÌø¹ı
 		 */
-
 		std::stringstream ss;
-		ss << _his_dir << pname << "/" << cInfo->_exchg << "/" << cInfo->_exchg << "." << cInfo->_product << "_" << ruleTag;
-		if (cInfo->isExright())
-			ss << (cInfo->_exright == 1 ? SUFFIX_QFQ : SUFFIX_HFQ);
-		ss << ".dsb";
+		ss << _base_dir << "his/" << pname << "/" << cInfo._exchg << "/" << cInfo._exchg << "." << cInfo._product << hot_flag << ".dsb";
 		std::string filename = ss.str();
 		if (!StdFile::exists(filename.c_str()))
 			break;
@@ -938,12 +913,12 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		StdFile::read_file_content(filename.c_str(), content);
 		if (content.size() < sizeof(HisKlineBlock))
 		{
-			pipe_reader_log(_sink, LL_ERROR, "å†å²Kçº¿æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename);
+			pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·KÏßÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename);
 			break;
 		}
 		proc_block_data(content, true, false);
-
-		if (content.empty())
+		
+		if(content.empty())
 			break;
 
 		uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
@@ -957,28 +932,23 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		else
 			lastHotTime = hotAy->at(barcnt - 1).date;
 
-		pipe_reader_log(_sink, LL_INFO, "{} items of back {} data of wrapped contract {} directly loaded", barcnt, pname.c_str(), stdCode);
+		pipe_reader_log(_sink,LL_INFO, "{} items of back {} data of wrapped contract {} directly loaded", barcnt, pname.c_str(), stdCode);
 	} while (false);
-	
 
 	HotSections secs;
-	if (strlen(ruleTag) > 0)
+	if (cInfo.isHot())
 	{
-		if (!_hot_mgr->splitCustomSections(ruleTag, cInfo->stdCommID(), 19900102, endTDate, secs))
+		if (!_hot_mgr->splitHotSecions(cInfo._exchg, cInfo._product, 19900102, endTDate, secs))
+			return false;
+	}
+	else if (cInfo.isSecond())
+	{
+		if (!_hot_mgr->splitSecondSecions(cInfo._exchg, cInfo._product, 19900102, endTDate, secs))
 			return false;
 	}
 
 	if (secs.empty())
 		return false;
-
-	//æ ¹æ®å¤æƒç±»å‹ç¡®å®šåŸºç¡€å› å­
-	//å¦‚æœæ˜¯å‰å¤æƒï¼Œåˆ™å†å²æ•°æ®ä¼šå˜å°ï¼Œä»¥æœ€åä¸€ä¸ªå¤æƒå› å­ä¸ºåŸºç¡€å› å­
-	//å¦‚æœæ˜¯åå¤æƒï¼Œåˆ™æ–°æ•°æ®ä¼šå˜å¤§ï¼ŒåŸºç¡€å› å­ä¸º1
-	double baseFactor = 1.0;
-	if (cInfo->_exright == 1)
-		baseFactor = secs.back()._factor;
-	else if (cInfo->_exright == 2)
-		barList._factor = secs.back()._factor;
 
 	bool bAllCovered = false;
 	for (auto it = secs.rbegin(); it != secs.rend(); it++)
@@ -988,17 +958,17 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		uint32_t rightDt = hotSec._e_date;
 		uint32_t leftDt = hotSec._s_date;
 
-		//è¦å…ˆå°†æ—¥æœŸè½¬æ¢ä¸ºè¾¹ç•Œæ—¶é—´
+		//ÒªÏÈ½«ÈÕÆÚ×ª»»Îª±ß½çÊ±¼ä
 		WTSBarStruct sBar, eBar;
 		if (period != KP_DAY)
 		{
-			uint64_t sTime = _base_data_mgr->getBoundaryTime(cInfo->stdCommID(), leftDt, false, true);
-			uint64_t eTime = _base_data_mgr->getBoundaryTime(cInfo->stdCommID(), rightDt, false, false);
+			uint64_t sTime = _base_data_mgr->getBoundaryTime(stdPID.c_str(), leftDt, false, true);
+			uint64_t eTime = _base_data_mgr->getBoundaryTime(stdPID.c_str(), rightDt, false, false);
 
 			sBar.date = leftDt;
 			sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
 
-			if (sBar.time < lastHotTime)	//å¦‚æœè¾¹ç•Œæ—¶é—´å°äºä¸»åŠ›çš„æœ€åä¸€æ ¹Barçš„æ—¶é—´, è¯´æ˜å·²ç»æœ‰äº¤å‰äº†, åˆ™ä¸éœ€è¦å†å¤„ç†äº†
+			if (sBar.time < lastHotTime)	//Èç¹û±ß½çÊ±¼äĞ¡ÓÚÖ÷Á¦µÄ×îºóÒ»¸ùBarµÄÊ±¼ä, ËµÃ÷ÒÑ¾­ÓĞ½»²æÁË, Ôò²»ĞèÒªÔÙ´¦ÀíÁË
 			{
 				bAllCovered = true;
 				sBar.time = lastHotTime + 1;
@@ -1007,13 +977,13 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 			eBar.date = rightDt;
 			eBar.time = ((uint32_t)(eTime / 10000) - 19900000) * 10000 + (uint32_t)(eTime % 10000);
 
-			if (eBar.time <= lastHotTime)	//å³è¾¹ç•Œæ—¶é—´å°äºæœ€åä¸€æ¡Hotæ—¶é—´, è¯´æ˜å…¨éƒ¨äº¤å‰äº†, æ²¡æœ‰å†æ‰¾çš„å¿…è¦äº†
+			if (eBar.time <= lastHotTime)	//ÓÒ±ß½çÊ±¼äĞ¡ÓÚ×îºóÒ»ÌõHotÊ±¼ä, ËµÃ÷È«²¿½»²æÁË, Ã»ÓĞÔÙÕÒµÄ±ØÒªÁË
 				break;
 		}
 		else
 		{
 			sBar.date = leftDt;
-			if (sBar.date < lastHotTime)	//å¦‚æœè¾¹ç•Œæ—¶é—´å°äºä¸»åŠ›çš„æœ€åä¸€æ ¹Barçš„æ—¶é—´, è¯´æ˜å·²ç»æœ‰äº¤å‰äº†, åˆ™ä¸éœ€è¦å†å¤„ç†äº†
+			if (sBar.date < lastHotTime)	//Èç¹û±ß½çÊ±¼äĞ¡ÓÚÖ÷Á¦µÄ×îºóÒ»¸ùBarµÄÊ±¼ä, ËµÃ÷ÒÑ¾­ÓĞ½»²æÁË, Ôò²»ĞèÒªÔÙ´¦ÀíÁË
 			{
 				bAllCovered = true;
 				sBar.date = (uint32_t)lastHotTime + 1;
@@ -1027,14 +997,14 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 
 		/*
 		 *	By Wesley @ 2021.12.20
-		 *	å…ˆä»extloaderè¯»å–åˆ†æœˆåˆçº¦çš„Kçº¿æ•°æ®
-		 *	å¦‚æœæ²¡æœ‰è¯»åˆ°ï¼Œå†ä»æ–‡ä»¶è¯»å–
+		 *	ÏÈ´Óextloader¶ÁÈ¡·ÖÔÂºÏÔ¼µÄKÏßÊı¾İ
+		 *	Èç¹ûÃ»ÓĞ¶Áµ½£¬ÔÙ´ÓÎÄ¼ş¶ÁÈ¡
 		 */
 		bool bLoaded = false;
 		std::string buffer;
 		if (NULL != _loader)
 		{
-			std::string wCode = fmt::format("{}.{}.{}", cInfo->_exchg, cInfo->_product, (char*)curCode + strlen(cInfo->_product));
+			std::string wCode = StrUtil::printf("%s.%s.%s", cInfo._exchg, cInfo._product, (char*)curCode + strlen(cInfo._product));
 			bLoaded = _loader->loadRawHisBars(&buffer, wCode.c_str(), period, [](void* obj, WTSBarStruct* bars, uint32_t count) {
 				std::string* buff = (std::string*)obj;
 				buff->resize(sizeof(WTSBarStruct)*count);
@@ -1045,7 +1015,7 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		if (!bLoaded)
 		{
 			std::stringstream ss;
-			ss << _his_dir << pname << "/" << cInfo->_exchg << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/" << pname << "/" << cInfo._exchg << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				continue;
@@ -1080,9 +1050,9 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		});
 
 		uint32_t sIdx = pBar - firstBar;
-		if ((period == KP_DAY && pBar->date < sBar.date) || (period != KP_DAY && pBar->time < sBar.time))	//æ—©äºè¾¹ç•Œæ—¶é—´
+		if ((period == KP_DAY && pBar->date < sBar.date) || (period != KP_DAY && pBar->time < sBar.time))	//ÔçÓÚ±ß½çÊ±¼ä
 		{
-			//æ—©äºè¾¹ç•Œæ—¶é—´, è¯´æ˜æ²¡æœ‰æ•°æ®äº†, å› ä¸ºlower_boundä¼šè¿”å›å¤§äºç­‰äºç›®æ ‡ä½ç½®çš„æ•°æ®
+			//ÔçÓÚ±ß½çÊ±¼ä, ËµÃ÷Ã»ÓĞÊı¾İÁË, ÒòÎªlower_bound»á·µ»Ø´óÓÚµÈÓÚÄ¿±êÎ»ÖÃµÄÊı¾İ
 			continue;
 		}
 
@@ -1107,31 +1077,6 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 			continue;
 
 		uint32_t curCnt = eIdx - sIdx + 1;
-
-		if(cInfo->isExright())
-		{	
-			double factor = hotSec._factor / baseFactor;
-			for (uint32_t idx = sIdx; idx <= eIdx; idx++)
-			{
-				firstBar[idx].open *= factor;
-				firstBar[idx].high *= factor;
-				firstBar[idx].low *= factor;
-				firstBar[idx].close *= factor;
-
-				if (_adjust_flag & 1)
-					firstBar[idx].vol /= factor;
-
-				if (_adjust_flag & 2)
-					firstBar[idx].money *= factor;
-
-				if (_adjust_flag & 4)
-				{
-					firstBar[idx].hold /= factor;
-					firstBar[idx].add /= factor;
-				}
-			}
-		}		
-
 		std::vector<WTSBarStruct>* tempAy = new std::vector<WTSBarStruct>();
 		tempAy->resize(curCnt);
 		memcpy(tempAy->data(), &firstBar[sIdx], sizeof(WTSBarStruct)*curCnt);
@@ -1169,14 +1114,15 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 	return true;
 }
 
-bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
+bool WtDataReader::cacheAdjustedStkBars(const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
-	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
 
 	std::string pname;
 	switch (period)
@@ -1189,7 +1135,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	BarsList& barList = _bars_cache[key];
 	barList._code = stdCode;
 	barList._period = period;
-	barList._exchg = cInfo->_exchg;
+	barList._exchg = cInfo._exchg;
 
 	std::vector<std::vector<WTSBarStruct>*> barsSections;
 
@@ -1202,12 +1148,12 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	{
 		/*
 		 *	By Wesley @ 2021.12.20
-		 *	æœ¬æ¥è¿™é‡Œæ˜¯è¦å…ˆè°ƒç”¨_loader->loadRawHisBarsä»å¤–éƒ¨åŠ è½½å™¨è¯»å–å¤æƒæ•°æ®çš„
-		 *	ä½†æ˜¯ä¸Šå±‚ä¼šè°ƒç”¨ä¸€æ¬¡loadFinalHisBarsï¼Œè¿™é‡Œå†è°ƒç”¨loadRawHisBarså°±å†—ä½™äº†ï¼Œæ‰€ä»¥ç›´æ¥è·³è¿‡
+		 *	±¾À´ÕâÀïÊÇÒªÏÈµ÷ÓÃ_loader->loadRawHisBars´ÓÍâ²¿¼ÓÔØÆ÷¶ÁÈ¡¸´È¨Êı¾İµÄ
+		 *	µ«ÊÇÉÏ²ã»áµ÷ÓÃÒ»´ÎloadFinalHisBars£¬ÕâÀïÔÙµ÷ÓÃloadRawHisBars¾ÍÈßÓàÁË£¬ËùÒÔÖ±½ÓÌø¹ı
 		 */
-		char flag = cInfo->_exright == 1 ? SUFFIX_QFQ : SUFFIX_HFQ;
+		char flag = cInfo._exright == 1 ? SUFFIX_QFQ : SUFFIX_HFQ;
 		std::stringstream ss;
-		ss << _his_dir << pname << "/" << cInfo->_exchg << "/" << cInfo->_code << flag << ".dsb";
+		ss << _base_dir << "his/" << pname << "/" << cInfo._exchg << "/" << cInfo._code << flag << ".dsb";
 		std::string filename = ss.str();
 		if (!StdFile::exists(filename.c_str()))
 			break;
@@ -1216,7 +1162,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 		StdFile::read_file_content(filename.c_str(), content);
 		if (content.size() < sizeof(HisKlineBlock))
 		{
-			pipe_reader_log(_sink,LL_ERROR, "å†å²Kçº¿æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+			pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·KÏßÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 			break;
 		}
 
@@ -1240,9 +1186,9 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	bool bAllCovered = false;
 	do
 	{
-		const char* curCode = cInfo->_code;
+		const char* curCode = cInfo._code;
 
-		//è¦å…ˆå°†æ—¥æœŸè½¬æ¢ä¸ºè¾¹ç•Œæ—¶é—´
+		//ÒªÏÈ½«ÈÕÆÚ×ª»»Îª±ß½çÊ±¼ä
 		WTSBarStruct sBar;
 		if (period != KP_DAY)
 		{
@@ -1257,12 +1203,12 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 
 		/*
 		 *	By Wesley @ 2021.12.20
-		 *	å…ˆä»extloaderè¯»å–
-		 *	å¦‚æœæ²¡æœ‰è¯»åˆ°ï¼Œå†ä»æ–‡ä»¶è¯»å–
+		 *	ÏÈ´Óextloader¶ÁÈ¡
+		 *	Èç¹ûÃ»ÓĞ¶Áµ½£¬ÔÙ´ÓÎÄ¼ş¶ÁÈ¡
 		 */
 		bool bLoaded = false;
 		std::string buffer;
-		std::string rawCode = fmt::format("{}.{}.{}", cInfo->_exchg, cInfo->_product, curCode);
+		std::string rawCode = StrUtil::printf("%s.%s.%s", cInfo._exchg, cInfo._product, curCode);
 		if (NULL != _loader)
 		{
 			bLoaded = _loader->loadRawHisBars(&buffer, rawCode.c_str(), period, [](void* obj, WTSBarStruct* bars, uint32_t count) {
@@ -1276,7 +1222,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 		if (!bLoaded)
 		{
 			std::stringstream ss;
-			ss << _his_dir << pname << "/" << cInfo->_exchg << "/" << curCode << ".dsb";
+			ss << _base_dir << "his/" << pname << "/" << cInfo._exchg << "/" << curCode << ".dsb";
 			std::string filename = ss.str();
 			if (!StdFile::exists(filename.c_str()))
 				continue;
@@ -1285,7 +1231,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			StdFile::read_file_content(filename.c_str(), content);
 			if (content.size() < sizeof(HisKlineBlock))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²Kçº¿æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·KÏßÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				return false;
 			}
 
@@ -1321,21 +1267,21 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			memcpy(ayRaw->data(), &firstBar[sIdx], sizeof(WTSBarStruct)*curCnt);
 			realCnt += curCnt;
 
-			auto& ayFactors = getAdjFactors(cInfo->_code, cInfo->_exchg, cInfo->_product);
+			auto& ayFactors = getAdjFactors(cInfo._code, cInfo._exchg, cInfo._product);
 			if (!ayFactors.empty())
 			{
-				//åšå¤æƒå¤„ç†
+				//×ö¸´È¨´¦Àí
 				int32_t lastIdx = curCnt;
 				WTSBarStruct bar;
 				firstBar = ayRaw->data();
 
-				//æ ¹æ®å¤æƒç±»å‹ç¡®å®šåŸºç¡€å› å­
-				//å¦‚æœæ˜¯å‰å¤æƒï¼Œåˆ™å†å²æ•°æ®ä¼šå˜å°ï¼Œä»¥æœ€åä¸€ä¸ªå¤æƒå› å­ä¸ºåŸºç¡€å› å­
-				//å¦‚æœæ˜¯åå¤æƒï¼Œåˆ™æ–°æ•°æ®ä¼šå˜å¤§ï¼ŒåŸºç¡€å› å­ä¸º1
+				//¸ù¾İ¸´È¨ÀàĞÍÈ·¶¨»ù´¡Òò×Ó
+				//Èç¹ûÊÇÇ°¸´È¨£¬ÔòÀúÊ·Êı¾İ»á±äĞ¡£¬ÒÔ×îºóÒ»¸ö¸´È¨Òò×ÓÎª»ù´¡Òò×Ó
+				//Èç¹ûÊÇºó¸´È¨£¬ÔòĞÂÊı¾İ»á±ä´ó£¬»ù´¡Òò×ÓÎª1
 				double baseFactor = 1.0;
-				if (cInfo->_exright == 1)
+				if (cInfo._exright == 1)
 					baseFactor = ayFactors.back()._factor;
-				else if (cInfo->_exright == 2)
+				else if (cInfo._exright == 2)
 					barList._factor = ayFactors.back()._factor;
 
 				for (auto it = ayFactors.rbegin(); it != ayFactors.rend(); it++)
@@ -1343,7 +1289,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 					const AdjFactor& adjFact = *it;
 					bar.date = adjFact._date;
 
-					//è°ƒæ•´å› å­
+					//µ÷ÕûÒò×Ó
 					double factor = adjFact._factor / baseFactor;
 
 					WTSBarStruct* pBar = NULL;
@@ -1364,18 +1310,6 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 							pBar->high *= factor;
 							pBar->low *= factor;
 							pBar->close *= factor;
-
-							if (_adjust_flag & 1)
-								pBar->vol /= factor;
-
-							if (_adjust_flag & 2)
-								pBar->money *= factor;
-
-							if (_adjust_flag & 4)
-							{
-								pBar->hold /= factor;
-								pBar->add /= factor;
-							}
 
 							pBar++;
 							curIdx++;
@@ -1418,16 +1352,16 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	return true;
 }
 
-bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
+bool WtDataReader::cacheHisBarsFromFile(const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
-	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
-	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo->_exchg, cInfo->_product);
-	const char* stdPID = commInfo->getFullPid();
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
 
 	std::string pname;
 	switch (period)
@@ -1440,30 +1374,29 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 	BarsList& barList = _bars_cache[key];
 	barList._code = stdCode;
 	barList._period = period;
-	barList._exchg = cInfo->_exchg;
+	barList._exchg = cInfo._exchg;
 
 	std::vector<std::vector<WTSBarStruct>*> barsSections;
 
 	uint32_t realCnt = 0;
-	const char* ruleTag = cInfo->_ruletag;
-	if (strlen(ruleTag) > 0)
+	if (!cInfo.isFlat() && commInfo->isFuture())
 	{
-		//å¦‚æœæ˜¯è¯»å–æœŸè´§ä¸»åŠ›è¿ç»­æ•°æ®
-		return cacheIntegratedBars(cInfo, key, stdCode, period);
+		//Èç¹ûÊÇ¶ÁÈ¡ÆÚ»õÖ÷Á¦Á¬ĞøÊı¾İ
+		return cacheIntegratedFutBars(key, stdCode, period);
 	}
-	else if(cInfo->isExright() && commInfo->isStock())
+	else if(cInfo.isExright() && commInfo->isStock())
 	{
-		//å¦‚æœæ˜¯è¯»å–è‚¡ç¥¨å¤æƒæ•°æ®
-		return cacheAdjustedStkBars(cInfo, key, stdCode, period);
+		//Èç¹ûÊÇ¶ÁÈ¡¹ÉÆ±¸´È¨Êı¾İ
+		return cacheAdjustedStkBars(key, stdCode, period);
 	}
 
 	
-	//ç›´æ¥åŸå§‹æ•°æ®ç›´æ¥åŠ è½½
+	//Ö±½ÓÔ­Ê¼Êı¾İÖ±½Ó¼ÓÔØ
 
 	/*
 	 *	By Wesley @ 2021.12.20
-	 *	å…ˆä»extloaderè¯»å–
-	 *	å¦‚æœæ²¡æœ‰è¯»åˆ°ï¼Œå†ä»æ–‡ä»¶è¯»å–
+	 *	ÏÈ´Óextloader¶ÁÈ¡
+	 *	Èç¹ûÃ»ÓĞ¶Áµ½£¬ÔÙ´ÓÎÄ¼ş¶ÁÈ¡
 	 */
 	bool bLoaded = false;
 	std::string buffer;
@@ -1478,18 +1411,18 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 
 	if (!bLoaded)
 	{
-		//è¯»å–å†å²çš„
+		//¶ÁÈ¡ÀúÊ·µÄ
 		std::stringstream ss;
-		ss << _his_dir << pname << "/" << cInfo->_exchg << "/" << cInfo->_code << ".dsb";
+		ss << _base_dir << "his/" << pname << "/" << cInfo._exchg << "/" << cInfo._code << ".dsb";
 		std::string filename = ss.str();
 		if (StdFile::exists(filename.c_str()))
 		{
-			//å¦‚æœæœ‰æ ¼å¼åŒ–çš„å†å²æ•°æ®æ–‡ä»¶, åˆ™ç›´æ¥è¯»å–
+			//Èç¹ûÓĞ¸ñÊ½»¯µÄÀúÊ·Êı¾İÎÄ¼ş, ÔòÖ±½Ó¶ÁÈ¡
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
 			if (content.size() < sizeof(HisKlineBlock))
 			{
-				pipe_reader_log(_sink,LL_ERROR, "å†å²Kçº¿æ•°æ®æ–‡ä»¶{}å¤§å°æ ¡éªŒå¤±è´¥", filename.c_str());
+				pipe_reader_log(_sink,LL_ERROR, "ÀúÊ·KÏßÊı¾İÎÄ¼ş{}´óĞ¡Ğ£ÑéÊ§°Ü", filename.c_str());
 				return false;
 			}
 
@@ -1540,24 +1473,24 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 
 WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	const char* stdPID = cInfo.stdCommID();
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
+	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	std::string stdPID = StrUtil::printf("%s.%s", cInfo._exchg, cInfo._product);
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	std::string key = StrUtil::printf("%s#%u", stdCode, period);
 	auto it = _bars_cache.find(key);
 	bool bHasHisData = false;
 	if (it == _bars_cache.end())
 	{
 		/*
 		 *	By Wesley @ 2021.12.20
-		 *	å…ˆä»extloaderåŠ è½½æœ€ç»ˆçš„Kçº¿æ•°æ®ï¼ˆå¦‚æœæ˜¯å¤æƒï¼‰
-		 *	å¦‚æœåŠ è½½å¤±è´¥ï¼Œåˆ™å†ä»æ–‡ä»¶åŠ è½½Kçº¿æ•°æ®
+		 *	ÏÈ´Óextloader¼ÓÔØ×îÖÕµÄKÏßÊı¾İ£¨Èç¹ûÊÇ¸´È¨£©
+		 *	Èç¹û¼ÓÔØÊ§°Ü£¬ÔòÔÙ´ÓÎÄ¼ş¼ÓÔØKÏßÊı¾İ
 		 */
-		bHasHisData = cacheFinalBarsFromLoader(&cInfo, key, stdCode, period);
+		bHasHisData = cacheFinalBarsFromLoader(key, stdCode, period);
 
 		if(!bHasHisData)
-			bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
+			bHasHisData = cacheHisBarsFromFile(key, stdCode, period);
 	}
 	else
 	{
@@ -1577,15 +1510,14 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 		curTime = (uint32_t)(etime % 10000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
-
-	BarsList& barsList = _bars_cache[key];
-	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, NULL, 0);;
-	WTSBarStruct* head = NULL;
+	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
+	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
+	
+	WTSBarStruct* hisHead = NULL;
+	WTSBarStruct* rtHead = NULL;
 	uint32_t hisCnt = 0;
 	uint32_t rtCnt = 0;
-	uint32_t totalCnt = 0;
+
 	std::string pname;
 	switch (period)
 	{
@@ -1596,51 +1528,23 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 
 	uint32_t left = count;
 
-	//æ˜¯å¦åŒ…å«å½“å¤©çš„
+	//ÊÇ·ñ°üº¬µ±ÌìµÄ
 	bool bHasToday = (endTDate == curTDate);
 
-	//By Wesley @ 2022.05.28
-	//ä¸éœ€è¦åŒºåˆ†æ˜¯å¦æ˜¯æœŸè´§äº†
-	const char* ruleTag = cInfo._ruletag;
-	if (strlen(ruleTag) > 0)
+	if (cInfo.isHot() && commInfo->isFuture())
 	{
-		barsList._raw_code = _hot_mgr->getCustomRawCode(ruleTag, stdPID, curTDate);
-		pipe_reader_log(_sink, LL_INFO, "{} contract on {} confirmed: {} -> {}", ruleTag, curTDate, stdCode, barsList._raw_code.c_str());
+		_bars_cache[key]._raw_code = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, curTDate);
+		pipe_reader_log(_sink,LL_INFO, "Hot contract on {}  confirmed: {} -> {}", curTDate, stdCode, _bars_cache[key]._raw_code.c_str());
+	}
+	else if (cInfo.isSecond() && commInfo->isFuture())
+	{
+		_bars_cache[key]._raw_code = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, curTDate);
+		pipe_reader_log(_sink,LL_INFO, "Second contract on {} confirmed: {} -> {}", curTDate, stdCode, _bars_cache[key]._raw_code.c_str());
 	}
 	else
 	{
-		barsList._raw_code = cInfo._code;
+		_bars_cache[key]._raw_code = cInfo._code;
 	}
-
-	/*
-	if (commInfo->isFuture())
-	{
-		const char* ruleTag = cInfo._ruletag;
-		if (strlen(ruleTag) > 0)
-		{
-			barsList._raw_code = _hot_mgr->getCustomRawCode(ruleTag, cInfo.stdCommID(), curTDate);
-			pipe_reader_log(_sink, LL_INFO, "{} contract on {} confirmed with rule {}: {} -> {}", ruleTag, curTDate, stdCode, barsList._raw_code.c_str());
-		}
-		//else if (cInfo.isHot())
-		//{
-		//	barsList._raw_code = _hot_mgr->getRawCode(cInfo._exchg, cInfo._product, curTDate);
-		//	pipe_reader_log(_sink, LL_INFO, "Hot contract on {}  confirmed: {} -> {}", curTDate, stdCode, barsList._raw_code.c_str());
-		//}
-		//else if (cInfo.isSecond())
-		//{
-		//	barsList._raw_code = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, curTDate);
-		//	pipe_reader_log(_sink, LL_INFO, "Second contract on {} confirmed: {} -> {}", curTDate, stdCode, barsList._raw_code.c_str());
-		//}
-		else
-		{
-			barsList._raw_code = cInfo._code;
-		}
-	}
-	else
-	{
-		barsList._raw_code = cInfo._code;
-	}
-	*/
 
 	if (bHasToday)
 	{
@@ -1648,15 +1552,15 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 		bar.date = curDate;
 		bar.time = (curDate - 19900000) * 10000 + curTime;
 
-		const char* curCode = barsList._raw_code.c_str();
+		const char* curCode = _bars_cache[key]._raw_code.c_str();
 
-		//è¯»å–å®æ—¶çš„
+		//¶ÁÈ¡ÊµÊ±µÄ
 		RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
-		if (kPair != NULL && kPair->_block && kPair->_block->_size>0)
+		if (kPair != NULL)
 		{
-			//è¯»å–å½“æ—¥çš„æ•°æ®
+			//¶ÁÈ¡µ±ÈÕµÄÊı¾İ
 			WTSBarStruct* pBar = NULL;
-			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b){
 				if (period == KP_DAY)
 					return a.date < b.date;
 				else
@@ -1683,90 +1587,66 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 
 			uint32_t curCnt = (idx - sIdx + 1);
 			left -= (idx - sIdx + 1);
-			hisCnt = bHasHisData ? left : 0;
-			rtCnt = curCnt;
-			//By Wesley @ 2022.05.28
-			//è¿ç»­åˆçº¦ä¹Ÿè¦æ”¯æŒå¤æƒ
-			if(cInfo._exright == 2/* && commInfo->isStock()*/)
+
+			if(cInfo._exright == 2 && commInfo->isStock())
 			{
-				//åå¤æƒæ•°æ®è¦æŠŠæœ€æ–°çš„æ•°æ®è¿›è¡Œå¤æƒå¤„ç†ï¼Œæ‰€ä»¥è¦ä½œä¸ºå†å²æ•°æ®è¿½åŠ åˆ°å°¾éƒ¨
-				//è™½ç„¶åå¤æƒæ•°æ®è¦è¿›è¡Œå¤æƒå¤„ç†ï¼Œä½†æ˜¯å®æ—¶æ•°æ®çš„ä½ç½®æ ‡è®°ä¹Ÿè¦æ›´æ–°åˆ°æœ€æ–°ï¼Œä¸ç„¶OnMinuteEndä¼šä»å¼€ç›˜å¼€å§‹å›æ”¾çš„
-				//å¤æƒæ•°æ®æ˜¯åˆ›å»ºå‰¯æœ¬åä¿®æ”¹
-				if (barsList._rt_cursor == UINT_MAX || idx > barsList._rt_cursor)
+				//ºó¸´È¨Êı¾İÒª°Ñ×îĞÂµÄÊı¾İ½øĞĞ¸´È¨´¦Àí£¬ËùÒÔÒª×÷ÎªÀúÊ·Êı¾İ×·¼Óµ½Î²²¿
+				//ËäÈ»ºó¸´È¨Êı¾İÒª½øĞĞ¸´È¨´¦Àí£¬µ«ÊÇÊµÊ±Êı¾İµÄÎ»ÖÃ±ê¼ÇÒ²Òª¸üĞÂµ½×îĞÂ£¬²»È»OnMinuteEnd»á´Ó¿ªÅÌ¿ªÊ¼»Ø·ÅµÄ
+				_bars_cache[key]._rt_cursor = idx;
+
+				BarsList& barsList = _bars_cache[key];
+				double factor = barsList._factor;
+				uint32_t oldSize = barsList._bars.size();
+				uint32_t newSize = oldSize + curCnt;
+				barsList._bars.resize(newSize);
+				memcpy(&barsList._bars[oldSize], &kPair->_block->_bars[sIdx], sizeof(WTSBarStruct)*curCnt);
+				for(uint32_t thisIdx = oldSize; thisIdx < newSize; thisIdx++)
 				{
-					barsList._rt_cursor = idx;
-					double factor = barsList._factor;
-					uint32_t oldSize = barsList._bars.size();
-					uint32_t newSize = oldSize + curCnt;
-					barsList._bars.resize(newSize);
-					memcpy(&barsList._bars[oldSize], &kPair->_block->_bars[sIdx], sizeof(WTSBarStruct)* curCnt);
-					for(uint32_t thisIdx = oldSize; thisIdx < newSize; thisIdx++)
-					{
-						WTSBarStruct* pBar = &barsList._bars[thisIdx];
-						pBar->open *= factor;
-						pBar->high *= factor;
-						pBar->low *= factor;
-						pBar->close *= factor;
-					}
-				}
-				totalCnt = hisCnt + rtCnt;
-				totalCnt = min(totalCnt, (uint32_t)barsList._bars.size());
-				// å¤æƒåçš„æ•°æ®ç›´æ¥ä»barlistä¸­æˆªå–
-				if (totalCnt > 0)
-				{
-					head = &barsList._bars[barsList._bars.size() - totalCnt];
-					slice->appendBlock(head, totalCnt);
+					WTSBarStruct* pBar = &barsList._bars[thisIdx];
+					pBar->open *= factor;
+					pBar->high *= factor;
+					pBar->low *= factor;
+					pBar->close *= factor;
 				}
 			}
 			else
 			{
-				// æ™®é€šæ•°æ®ç”±å†å²å’Œrtæ‹¼æ¥ï¼Œå…¶ä¸­rtç›´æ¥å¼•ç”¨
-				barsList._rt_cursor = idx;
-				hisCnt = min(hisCnt, (uint32_t)barsList._bars.size());
-				if (hisCnt > 0)
-				{
-					head = &barsList._bars[barsList._bars.size() - hisCnt];
-					slice->appendBlock(head, hisCnt);
-				}
-				// æ·»åŠ rt
-				if (rtCnt > 0)
-				{
-					head = &kPair->_block->_bars[sIdx];
-					slice->appendBlock(head, rtCnt);
-				}
+				_bars_cache[key]._rt_cursor = idx;				
+				rtHead = &kPair->_block->_bars[sIdx];
+				rtCnt = curCnt;
 			}
 		}
-		else
-		{
-			rtCnt = 0;
-			hisCnt = count;
-			hisCnt = min(hisCnt, (uint32_t)barsList._bars.size());
-			head = &barsList._bars[barsList._bars.size() - hisCnt];
-			slice->appendBlock(head, hisCnt);
-		}
 	}
-	else
+
+	if (left > 0 && bHasHisData)
 	{
-		rtCnt = 0;
-		hisCnt = count;
-		hisCnt = min(hisCnt, (uint32_t)barsList._bars.size());
-		head = &barsList._bars[barsList._bars.size() - hisCnt];
-		slice->appendBlock(head, hisCnt);
+		hisCnt = left;
+		//ÀúÊ·Êı¾İ£¬Ö±½Ó´Ó»º´æµÄÀúÊ·Êı¾İÎ²²¿½ØÈ¡
+		BarsList& barList = _bars_cache[key];
+		hisCnt = min(hisCnt, (uint32_t)barList._bars.size());
+		hisHead = &barList._bars[barList._bars.size() - hisCnt];//indexBarFromCache(key, etime, hisCnt, period == KP_DAY);
 	}
 
 	pipe_reader_log(_sink, LL_DEBUG, "His {} bars of {} loaded, {} from history, {} from realtime", PERIOD_NAME[period], stdCode, hisCnt, rtCnt);
-	return slice;
+
+	if (hisCnt + rtCnt > 0)
+	{
+		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, hisHead, hisCnt);
+		if (rtCnt > 0)
+			slice->appendBlock(rtHead, rtCnt);
+		return slice;
+	}
+
+	return NULL;
 }
+
 
 WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, const char* code)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", exchg, code);
+	std::string key = StrUtil::printf("%s.%s", exchg, code);
 
-	thread_local static char path[256] = { 0 };
-	fmtutil::format_to(path, "{}ticks/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
-
-	if (!StdFile::exists(path))
+	std::string path = StrUtil::printf("%srt/ticks/%s/%s.dmb", _base_dir.c_str(), exchg, code);
+	if (!StdFile::exists(path.c_str()))
 		return NULL;
 
 	TickBlockPair& block = _rt_tick_map[key];
@@ -1777,7 +1657,7 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTickBlock*)block._file->addr();
@@ -1785,12 +1665,12 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 	}
 	else if (block._last_cap != block._block->_capacity)
 	{
-		//è¯´æ˜æ–‡ä»¶å¤§å°å·²å˜, éœ€è¦é‡æ–°æ˜ å°„
+		//ËµÃ÷ÎÄ¼ş´óĞ¡ÒÑ±ä, ĞèÒªÖØĞÂÓ³Éä
 		block._file.reset(new BoostMappingFile());
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTickBlock*)block._file->addr();
@@ -1802,13 +1682,10 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 
 WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg, const char* code)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", exchg, code);
+	std::string key = StrUtil::printf("%s.%s", exchg, code);
 
-	thread_local static char path[256] = { 0 };
-	fmtutil::format_to(path, "{}orders/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
-
-	if (!StdFile::exists(path))
+	std::string path = StrUtil::printf("%srt/orders/%s/%s.dmb", _base_dir.c_str(), exchg, code);
+	if (!StdFile::exists(path.c_str()))
 		return NULL;
 
 	OrdDtlBlockPair& block = _rt_orddtl_map[key];
@@ -1819,7 +1696,7 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdDtlBlock*)block._file->addr();
@@ -1827,12 +1704,12 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 	}
 	else if (block._last_cap != block._block->_capacity)
 	{
-		//è¯´æ˜æ–‡ä»¶å¤§å°å·²å˜, éœ€è¦é‡æ–°æ˜ å°„
+		//ËµÃ÷ÎÄ¼ş´óĞ¡ÒÑ±ä, ĞèÒªÖØĞÂÓ³Éä
 		block._file.reset(new BoostMappingFile());
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdDtlBlock*)block._file->addr();
@@ -1844,13 +1721,10 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 
 WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg, const char* code)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", exchg, code);
+	std::string key = StrUtil::printf("%s.%s", exchg, code);
 
-	thread_local static char path[256] = { 0 };
-	fmtutil::format_to(path, "{}queue/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
-
-	if (!StdFile::exists(path))
+	std::string path = StrUtil::printf("%srt/queue/%s/%s.dmb", _base_dir.c_str(), exchg, code);
+	if (!StdFile::exists(path.c_str()))
 		return NULL;
 
 	OrdQueBlockPair& block = _rt_ordque_map[key];
@@ -1861,7 +1735,7 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdQueBlock*)block._file->addr();
@@ -1869,12 +1743,12 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 	}
 	else if (block._last_cap != block._block->_capacity)
 	{
-		//è¯´æ˜æ–‡ä»¶å¤§å°å·²å˜, éœ€è¦é‡æ–°æ˜ å°„
+		//ËµÃ÷ÎÄ¼ş´óĞ¡ÒÑ±ä, ĞèÒªÖØĞÂÓ³Éä
 		block._file.reset(new BoostMappingFile());
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdQueBlock*)block._file->addr();
@@ -1886,13 +1760,10 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 
 WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, const char* code)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", exchg, code);
+	std::string key = StrUtil::printf("%s.%s", exchg, code);
 
-	thread_local static char path[256] = { 0 };
-	fmtutil::format_to(path, "{}trans/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
-
-	if (!StdFile::exists(path))
+	std::string path = StrUtil::printf("%srt/trans/%s/%s.dmb", _base_dir.c_str(), exchg, code);
+	if (!StdFile::exists(path.c_str()))
 		return NULL;
 
 	TransBlockPair& block = _rt_trans_map[key];
@@ -1903,7 +1774,7 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTransBlock*)block._file->addr();
@@ -1911,12 +1782,12 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 	}
 	else if (block._last_cap != block._block->_capacity)
 	{
-		//è¯´æ˜æ–‡ä»¶å¤§å°å·²å˜, éœ€è¦é‡æ–°æ˜ å°„
+		//ËµÃ÷ÎÄ¼ş´óĞ¡ÒÑ±ä, ĞèÒªÖØĞÂÓ³Éä
 		block._file.reset(new BoostMappingFile());
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTransBlock*)block._file->addr();
@@ -1931,8 +1802,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	if (period != KP_Minute1 && period != KP_Minute5)
 		return NULL;
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}.{}", exchg, code);
+	std::string key = StrUtil::printf("%s.%s", exchg, code);
 
 	RTKBlockFilesMap* cache_map = NULL;
 	std::string subdir = "";
@@ -1952,10 +1822,8 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	default: break;
 	}
 
-	thread_local static char path[256] = { 0 };
-	fmtutil::format_to(path, "{}{}/{}/{}.dmb", _rt_dir, subdir, exchg, code);
-
-	if (!StdFile::exists(path))
+	std::string path = StrUtil::printf("%srt/%s/%s/%s.dmb", _base_dir.c_str(), subdir.c_str(), exchg, code);
+	if (!StdFile::exists(path.c_str()))
 		return NULL;
 
 	RTKlineBlockPair& block = (*cache_map)[key];
@@ -1966,35 +1834,36 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTKlineBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
-		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} loaded", subdir.c_str(), exchg, code);
 	}
 	else if (block._last_cap != block._block->_capacity)
 	{
-		//è¯´æ˜æ–‡ä»¶å¤§å°å·²å˜, éœ€è¦é‡æ–°æ˜ å°„
+		//ËµÃ÷ÎÄ¼ş´óĞ¡ÒÑ±ä, ĞèÒªÖØĞÂÓ³Éä
 		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} expanded to {}, remapping...", subdir.c_str(), exchg, code, block._block->_capacity);
 
 		block._file.reset(new BoostMappingFile());
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTKlineBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
-	}	
+	}
+
+	pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} loaded", subdir.c_str(), exchg, code);
 
 	return &block;
 }
 
 void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */)
 {
-	//è¿™é‡Œåº”è¯¥è§¦å‘æ£€æŸ¥
+	//ÕâÀïÓ¦¸Ã´¥·¢¼ì²é
 	uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;
 	if (nowTime <= _last_time)
 		return;
@@ -2010,10 +1879,7 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 				if (kBlk == NULL)
 					continue;
 
-				//ç¡®å®šä¸Šä¸€æ¬¡çš„è¯»å–è¿‡çš„å®æ—¶Kçº¿æ¡æ•°
 				uint32_t preCnt = 0;
-				//å¦‚æœå®æ—¶Kçº¿æ²¡æœ‰åˆå§‹åŒ–è¿‡ï¼Œåˆ™å·²è¯»å–çš„æ¡æ•°ä¸º0
-				//å¦‚æœå·²ç»åˆå§‹åŒ–è¿‡ï¼Œåˆ™å·²è¯»å–çš„æ¡æ•°ä¸ºå…‰æ ‡+1
 				if (barsList._rt_cursor == UINT_MAX)
 					preCnt = 0;
 				else
@@ -2029,8 +1895,8 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 					uint64_t barTime = 199000000000 + nextBar.time;
 					if (barTime <= nowTime)
 					{
-						//å¦‚æœä¸æ˜¯åå¤æƒï¼Œåˆ™ç›´æ¥å›è°ƒonbar
-						//å¦‚æœæ˜¯åå¤æƒï¼Œåˆ™å°†æœ€æ–°barå¤æƒå¤„ç†ä»¥åï¼Œæ·»åŠ åˆ°cacheä¸­ï¼Œå†å›è°ƒonbar
+						//Èç¹û²»ÊÇºó¸´È¨£¬ÔòÖ±½Ó»Øµ÷onbar
+						//Èç¹ûÊÇºó¸´È¨£¬Ôò½«×îĞÂbar¸´È¨´¦ÀíÒÔºó£¬Ìí¼Óµ½cacheÖĞ£¬ÔÙ»Øµ÷onbar
 						if(barsList._factor == DBL_MAX)
 						{
 							_sink->on_bar(barsList._code.c_str(), barsList._period, &nextBar);
@@ -2056,13 +1922,12 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 					preCnt++;
 				}
 
-				//å¦‚æœå·²å¤„ç†çš„Kçº¿æ¡æ•°ä¸ä¸º0ï¼Œåˆ™ä¿®æ”¹å…‰æ ‡ä½ç½®
 				if (preCnt > 0)
 					barsList._rt_cursor = preCnt - 1;
 			}
 		}
-		//è¿™ä¸€æ®µé€»è¾‘æ²¡æœ‰ç”¨äº†ï¼Œåœ¨å®ç›˜ä¸­æ—¥çº¿æ˜¯ä¸ä¼šé—­åˆçš„ï¼Œæ‰€ä»¥ä¹Ÿä¸å­˜åœ¨å½“æ—¥Kçº¿é—­åˆçš„æƒ…å†µ
-		//å®ç›˜ä¸­éƒ½é€šè¿‡ontickå¤„ç†å½“æ—¥å®æ—¶æ•°æ®
+		//ÕâÒ»¶ÎÂß¼­Ã»ÓĞÓÃÁË£¬ÔÚÊµÅÌÖĞÈÕÏßÊÇ²»»á±ÕºÏµÄ£¬ËùÒÔÒ²²»´æÔÚµ±ÈÕKÏß±ÕºÏµÄÇé¿ö
+		//ÊµÅÌÖĞ¶¼Í¨¹ıontick´¦Àíµ±ÈÕÊµÊ±Êı¾İ
 		//else if (barsList._period == KP_DAY)
 		//{
 		//	if (barsList._his_cursor != UINT_MAX && barsList._bars.size() - 1 > barsList._his_cursor)
@@ -2097,7 +1962,7 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 
 double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 0 */)
 {
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	if (!commInfo->isStock())
 		return 1.0;
@@ -2117,13 +1982,13 @@ double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 
 
 	if(it == factList.end())
 	{
-		//æ‰¾ä¸åˆ°ï¼Œåˆ™è¯´æ˜ç›®æ ‡æ—¥æœŸå¤§äºæœ€åä¸€æ¡çš„æ—¥æœŸï¼Œç›´æ¥è¿”å›æœ€åä¸€æ¡é™¤æƒå› å­
+		//ÕÒ²»µ½£¬ÔòËµÃ÷Ä¿±êÈÕÆÚ´óÓÚ×îºóÒ»ÌõµÄÈÕÆÚ£¬Ö±½Ó·µ»Ø×îºóÒ»Ìõ³ıÈ¨Òò×Ó
 		return factList.back()._factor;
 	}
 	else
 	{
-		//å¦‚æœæ‰¾åˆ°äº†ï¼Œä½†æ˜¯å‘½ä¸­çš„æ—¥æœŸå¤§äºç›®æ ‡æ—¥æœŸï¼Œåˆ™ç”¨ä¸Šä¸€æ¡
-		//å¦‚æœç­‰äºç›®æ ‡æ—¥æœŸï¼Œåˆ™ç”¨å‘½ä¸­è¿™ä¸€æ¡
+		//Èç¹ûÕÒµ½ÁË£¬µ«ÊÇÃüÖĞµÄÈÕÆÚ´óÓÚÄ¿±êÈÕÆÚ£¬ÔòÓÃÉÏÒ»Ìõ
+		//Èç¹ûµÈÓÚÄ¿±êÈÕÆÚ£¬ÔòÓÃÃüÖĞÕâÒ»Ìõ
 		if ((*it)._date > date)
 			it--;
 
@@ -2133,14 +1998,14 @@ double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 
 
 const WtDataReader::AdjFactorList& WtDataReader::getAdjFactors(const char* code, const char* exchg, const char* pid)
 {
-	thread_local static char key[20] = { 0 };
-	fmtutil::format_to(key, "{}.{}.{}", exchg, pid, code);
+	char key[20] = { 0 };
+	sprintf(key, "%s.%s.%s", exchg, pid, code);
 
 	auto it = _adj_factors.find(key);
 	if (it == _adj_factors.end())
 	{
 		//By Wesley @ 2021.12.21
-		//å¦‚æœæ²¡æœ‰å¤æƒå› å­ï¼Œå°±ä»extloaderæŒ‰éœ€è¯»ä¸€æ¬¡
+		//Èç¹ûÃ»ÓĞ¸´È¨Òò×Ó£¬¾Í´Óextloader°´Ğè¶ÁÒ»´Î
 		if (_loader)
 		{
 			if(_sink) pipe_reader_log(_sink,LL_INFO, "No adjusting factors of {} cached, searching via extented loader...", key);
@@ -2157,7 +2022,7 @@ const WtDataReader::AdjFactorList& WtDataReader::getAdjFactors(const char* code,
 					fctrLst.emplace_back(adjFact);
 				}
 
-				//ä¸€å®šè¦æŠŠç¬¬ä¸€æ¡åŠ è¿›å»ï¼Œä¸ç„¶å¦‚æœæ˜¯å‰å¤æƒçš„è¯ï¼Œå¯èƒ½ä¼šæ¼å¤„ç†æœ€æ—©çš„æ•°æ®
+				//Ò»¶¨Òª°ÑµÚÒ»Ìõ¼Ó½øÈ¥£¬²»È»Èç¹ûÊÇÇ°¸´È¨µÄ»°£¬¿ÉÄÜ»áÂ©´¦Àí×îÔçµÄÊı¾İ
 				AdjFactor adjFact;
 				adjFact._date = 19900101;
 				adjFact._factor = 1;

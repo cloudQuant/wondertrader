@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 #2. 确定工程名
 PROJECT(ParserXTP LANGUAGES CXX)
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 11)
 
 SET(SRC  
 	${PROJECT_SOURCE_DIR}/ParserXTP.cpp
@@ -17,27 +17,14 @@ INCLUDE_DIRECTORIES(${INCS})
 LINK_DIRECTORIES(${LNKS})
 ADD_LIBRARY(ParserXTP SHARED ${SRC})
 
-IF(MSVC)
+IF (MSVC)
+ELSE (GNUCC)
 	SET(LIBS
-		ws2_32
-		)
-ELSE(GNUCC)
-	IF(WIN32)
-		SET(LIBS
-			dl
-			boost_thread
-			boost_filesystem
-			ws2_32
-			)
-	ELSE(UNIX)
-		SET(LIBS
-			dl
-			boost_thread
-			boost_filesystem
-			)
-	ENDIF()
+		boost_filesystem
+		dl
+	)
+	TARGET_LINK_LIBRARIES(ParserXTP ${LIBS})
 ENDIF()
-TARGET_LINK_LIBRARIES(ParserXTP ${LIBS})
 
 IF (MSVC)
 ELSE (GNUCC)

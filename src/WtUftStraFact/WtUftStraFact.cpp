@@ -1,4 +1,4 @@
-﻿#include "WtUftStraFact.h"
+#include "WtUftStraFact.h"
 #include "WtUftStraDemo.h"
 
 #include <string.h>

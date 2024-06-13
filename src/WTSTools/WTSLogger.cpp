@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file WTSLogger.cpp
  * \project	WonderTrader
  *
@@ -114,22 +114,22 @@ inline void checkDirs(const char* filename)
 		boost::filesystem::create_directories(s.substr(0, pos).c_str());
 }
 
-inline void print_timetag(bool bWithSpace = true)
+static inline void print_timetag(bool bWithSpace = true)
 {
-	uint64_t now = TimeUtils::getLocalTimeNow();
-	time_t t = now / 1000;
+	timeb now;
+	ftime(&now);
 
-	tm * tNow = localtime(&t);
-	fmt::print("[{}.{:02d}.{:02d} {:02d}:{:02d}:{:02d}]", tNow->tm_year + 1900, tNow->tm_mon + 1, tNow->tm_mday, tNow->tm_hour, tNow->tm_min, tNow->tm_sec);
+	tm * tNow = localtime(&(now.time));
+	printf("[%d.%02d.%02d %02d:%02d:%02d]", tNow->tm_year + 1900, tNow->tm_mon + 1, tNow->tm_mday, tNow->tm_hour, tNow->tm_min, tNow->tm_sec);
 	if (bWithSpace)
-		fmt::print(" ");
+		printf(" ");
 }
 
 void WTSLogger::print_message(const char* buffer)
 {
 	print_timetag(true);
-	fmt::print(buffer);
-	fmt::print("\r\n");
+	printf(buffer);
+	printf("\r\n");
 }
 
 void WTSLogger::initLogger(const char* catName, WTSVariant* cfgLogger)
@@ -208,7 +208,7 @@ void WTSLogger::init(const char* propFile /* = "logcfg.json" */, bool isFile /* 
 	if (isFile && !StdFile::exists(propFile))
 		return;
 
-	WTSVariant* cfg = isFile ? WTSCfgLoader::load_from_file(propFile) : WTSCfgLoader::load_from_content(propFile, false);
+	WTSVariant* cfg = isFile ? WTSCfgLoader::load_from_file(propFile, true) : WTSCfgLoader::load_from_content(propFile, false, true);
 	if (cfg == NULL)
 		return;
 
@@ -234,10 +234,6 @@ void WTSLogger::init(const char* propFile /* = "logcfg.json" */, bool isFile /* 
 	}
 
 	m_rootLogger = getLogger("root");
-	if(m_rootLogger == NULL)
-	{
-		throw std::runtime_error("root logger can not be null, please check the config file");
-	}
 	spdlog::set_default_logger(m_rootLogger);
 	spdlog::flush_every(std::chrono::seconds(2));
 
@@ -364,8 +360,8 @@ void WTSLogger::log_raw_by_cat(const char* catName, WTSLogLevel ll, const char* 
 	if (!m_bInited)
 	{
 		print_timetag(true);
-		fmt::print(message);
-		fmt::print("\n");
+		printf(message);
+		printf("\r\n");
 		return;
 	}
 
@@ -406,8 +402,8 @@ void WTSLogger::log_dyn_raw(const char* patttern, const char* catName, WTSLogLev
 	if (!m_bInited)
 	{
 		print_timetag(true);
-		fmt::print(m_buffer);
-		fmt::print("\n");
+		printf(m_buffer);
+		printf("\r\n");
 		return;
 	}
 
@@ -439,7 +435,7 @@ SpdLoggerPtr WTSLogger::getLogger(const char* logger, const char* pattern /* = "
 	SpdLoggerPtr ret = spdlog::get(logger);
 	if (ret == NULL && strlen(pattern) > 0)
 	{
-		//å½“æˆåŠ¨æ€çš„æ—¥å¿—æ¥å¤„ç†
+		//µ±³É¶¯Ì¬µÄÈÕÖ¾À´´¦Àí
 		if (m_mapPatterns == NULL)
 			return SpdLoggerPtr();
 

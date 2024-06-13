@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file ActionPolicyMgr.cpp
  * \project	WonderTrader
  *
@@ -28,7 +28,7 @@ ActionPolicyMgr::~ActionPolicyMgr()
 
 bool ActionPolicyMgr::init(const char* filename)
 {
-	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
+	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename, true);
 	if (cfg == NULL)
 		return false;
 
@@ -60,7 +60,8 @@ bool ActionPolicyMgr::init(const char* filename)
 					aRule._atype = AT_CloseYestoday;
 				else 
 				{
-					WTSLogger::error("Loading action policy failed: unrecognized type {}", action);
+					//WTSLogger::error("¿ªÆ½²ßÂÔ¼ÓÔØÊ§°Ü: Î´Ê¶±ðµÄ¿ªÆ½ÀàÐÍ%s", action);
+					WTSLogger::error("Loading action policy failed: unrecognized type %s", action);
 					continue;
 				}
 
@@ -91,7 +92,7 @@ const ActionRuleGroup& ActionPolicyMgr::getActionRules(const char* pid)
 {
 	std::string gpName = "default";
 
-	{//å…ˆæ‰¾åˆ°å“ç§å¯¹åº”çš„è§„åˆ™ç»„åç§°
+	{//ÏÈÕÒµ½Æ·ÖÖ¶ÔÓ¦µÄ¹æÔò×éÃû³Æ
 		auto it = _comm_rule_map.find(pid);
 		if (it != _comm_rule_map.end())
 			gpName = it->second;
@@ -102,7 +103,8 @@ const ActionRuleGroup& ActionPolicyMgr::getActionRules(const char* pid)
 		if (it == _rules.end())
 		{
 			it = _rules.find("default");
-			WTSLogger::error("Action policy group {} not exists, changed to default group", gpName.c_str());
+			//WTSLogger::error("¿ªÆ½¹æÔò×é%s²»´æÔÚ, ×Ô¶¯ÇÐ»»µ½Ä¬ÈÏ¹æÔò×é", gpName.c_str());
+			WTSLogger::error("Action policy group %s not exists, changed to default group", gpName.c_str());
 		}
 
 		assert(it != _rules.end());

@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file ParserXeleSkt.cpp
  * \project	WonderTrader
  *
@@ -13,7 +13,6 @@
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSContractInfo.hpp"
-#include "../Share/decimal.h"
 
 #include <boost/bind.hpp>
 
@@ -49,14 +48,6 @@ inline uint32_t strToTime(const char* strTime)
 	str[idx] = '\0';
 
 	return strtoul(str, NULL, 10);
-}
-
-inline double checkValid(double val)
-{
-	if (val == DBL_MAX || val == FLT_MAX)
-		return 0;
-
-	return val;
 }
 
 extern "C"
@@ -127,7 +118,7 @@ bool ParserXeleSkt::reconnect()
 		_prepared = true;
 	}
 
-	{//å»ºç«‹å¹¿æ’­é€šé“
+	{//½¨Á¢¹ã²¥Í¨µÀ
 		if (_udp_socket != NULL)
 		{
 			_udp_socket->close();
@@ -176,7 +167,7 @@ bool ParserXeleSkt::prepare()
 		std::size_t reply_length = boost::asio::read(s, boost::asio::buffer(buffer), ec);
 		if (ec)
 		{
-			//æŽ¥æ”¶é”™è¯¯
+			//½ÓÊÕ´íÎó
 			break;
 		}
 
@@ -197,56 +188,52 @@ bool ParserXeleSkt::prepare()
 
 		CXeleShfeSnapShot *p = (CXeleShfeSnapShot *)(content.data() + sizeof(CXeleShfeMarketHead));
 		int instrumentNo = p->InstrumentNo;
+		write_log(_sink, LL_DEBUG, "[ParserXeleSkt] {}-{}", p->InstrumentID, instrumentNo);
 		WTSContractInfo* ct = _bd_mgr->getContract(p->InstrumentID);
 		if (ct != NULL)
 		{
-			auto it = _set_subs.find(ct->getFullCode());
-			if (it != _set_subs.end())
-			{
+			_price_scales[instrumentNo] = p->PriceTick;
 
-				_price_scales[instrumentNo] = p->PriceTick;
+			WTSTickData* tick = WTSTickData::create(p->InstrumentID);
+			tick->setContractInfo(ct);
 
-				WTSTickData* tick = WTSTickData::create(p->InstrumentID);
-				tick->setContractInfo(ct);
+			WTSTickStruct& quote = tick->getTickStruct();
+			wt_strcpy(quote.exchg, ct->getExchg());
 
-				WTSTickStruct& quote = tick->getTickStruct();
-				wt_strcpy(quote.exchg, ct->getExchg());
+			quote.action_date = strToTime(p->ActionDay);
+			quote.action_time = strToTime(p->UpdateTime) * 1000 + p->UpdateMilliSec;
 
-				quote.action_date = strToTime(p->ActionDay);
-				quote.action_time = strToTime(p->UpdateTime) * 1000 + p->UpdateMilliSec;
+			quote.price = p->LastPrice;
+			quote.open = p->OpenPrice;
+			quote.high = p->HighestPrice;
+			quote.low = p->LowestPrice;
+			quote.total_volume = p->Volume;
+			quote.trading_date = quote.action_date;
+			quote.settle_price = p->SettlementPrice;
+			quote.total_turnover = p->Turnover;
 
-				quote.price = checkValid(p->LastPrice);
-				quote.open = checkValid(p->OpenPrice);
-				quote.high = checkValid(p->HighestPrice);
-				quote.low = checkValid(p->LowestPrice);
-				quote.total_volume = p->Volume;
-				quote.trading_date = 0;
-				quote.settle_price = checkValid(p->SettlementPrice);
-				quote.total_turnover = p->Turnover;
+			quote.open_interest = p->OpenInterest;
 
-				quote.open_interest = p->OpenInterest;
+			quote.upper_limit = p->UpperLimitPrice;
+			quote.lower_limit = p->LowerLimitPrice;
 
-				quote.upper_limit = p->UpperLimitPrice;
-				quote.lower_limit = p->LowerLimitPrice;
+			quote.pre_close = p->PreClosePrice;
+			quote.pre_settle = p->PreSettlementPrice;
+			quote.pre_interest = p->PreOpenInterest;
 
-				quote.pre_close = p->PreClosePrice;
-				quote.pre_settle = p->PreSettlementPrice;
-				quote.pre_interest = p->PreOpenInterest;
+			//Î¯Âô¼Û¸ñ
+			quote.ask_prices[0] = p->AskPrice;
+			//Î¯Âò¼Û¸ñ
+			quote.bid_prices[0] = p->BidPrice;
+			//Î¯ÂôÁ¿
+			quote.ask_qty[0] = p->AskVolume;
+			//Î¯ÂòÁ¿
+			quote.bid_qty[0] = p->BidVolume;
 
-				//å§”å–ä»·æ ¼
-				quote.ask_prices[0] = p->AskPrice;
-				//å§”ä¹°ä»·æ ¼
-				quote.bid_prices[0] = p->BidPrice;
-				//å§”å–é‡
-				quote.ask_qty[0] = p->AskVolume;
-				//å§”ä¹°é‡
-				quote.bid_qty[0] = p->BidVolume;
+			_tick_cache->add(instrumentNo, tick, false);
 
-				_tick_cache->add(instrumentNo, tick, false);
-
-				//if (_sink)
-				//	_sink->handleQuote(tick, 1);
-			}
+			if (_sink)
+				_sink->handleQuote(tick, 1);
 		}
 
 		content.erase(0, snap_size);
@@ -264,7 +251,7 @@ bool ParserXeleSkt::connect()
 {
 	if(reconnect())
 	{
-		_thrd_parser.reset(new StdThread(boost::bind(&io_service::run, &_io_service)));
+		_io_service.run();
 	}
 	else
 	{
@@ -397,16 +384,9 @@ void ParserXeleSkt::extract_buffer(uint32_t length)
 				WTSTickStruct& quote = tick->getTickStruct();
 				quote.action_date = actDate;
 				quote.action_time = actTime;
-				if(quote.trading_date == 0)
-				{
-					quote.trading_date = _bd_mgr->calcTradingDate(tick->getContractInfo()->getFullPid(), actDate, actTime / 100000);
-				}
-
 				quote.price = p->LastPrice*scale;
 				quote.high = std::max(quote.high, p->LastPrice*scale);
 				quote.low = std::min(quote.low, p->LastPrice*scale);
-				if (decimal::eq(quote.open, 0))
-					quote.open = quote.price;
 
 				quote.total_volume = p->Volume;
 				quote.total_turnover = (double)p->Turnover;
@@ -416,13 +396,13 @@ void ParserXeleSkt::extract_buffer(uint32_t length)
 				quote.turn_over = 0;
 				quote.diff_interest = 0;
 
-				//å§”å–ä»·æ ¼
+				//Î¯Âô¼Û¸ñ
 				quote.ask_prices[0] = p->AskPrice*scale;
-				//å§”ä¹°ä»·æ ¼
+				//Î¯Âò¼Û¸ñ
 				quote.bid_prices[0] = p->BidPrice*scale;
-				//å§”å–é‡
+				//Î¯ÂôÁ¿
 				quote.ask_qty[0] = p->AskVolume;
-				//å§”ä¹°é‡
+				//Î¯ÂòÁ¿
 				quote.bid_qty[0] = p->BidVolume;
 
 				if (_sink)
@@ -457,15 +437,9 @@ void ParserXeleSkt::extract_buffer(uint32_t length)
 				WTSTickStruct& quote = tick->getTickStruct();
 				quote.action_date = actDate;
 				quote.action_time = actTime;
-				if (quote.trading_date == 0)
-				{
-					quote.trading_date = _bd_mgr->calcTradingDate(tick->getContractInfo()->getFullPid(), actDate, actTime / 100000);
-				}
 				quote.price = p->LastPrice*scale;
 				quote.high = std::max(quote.high, p->LastPrice*scale);
 				quote.low = std::min(quote.low, p->LastPrice*scale);
-				if (decimal::eq(quote.open, 0))
-					quote.open = quote.price;
 
 				quote.total_volume = p->Volume;
 				quote.total_turnover = (double)p->Turnover;
@@ -475,28 +449,28 @@ void ParserXeleSkt::extract_buffer(uint32_t length)
 				quote.turn_over = 0;
 				quote.diff_interest = 0;
 
-				//å§”å–ä»·æ ¼
+				//Î¯Âô¼Û¸ñ
 				quote.ask_prices[0] = p->AskPrice1*scale;
 				quote.ask_prices[1] = p->AskPrice2*scale;
 				quote.ask_prices[2] = p->AskPrice3*scale;
 				quote.ask_prices[3] = p->AskPrice4*scale;
 				quote.ask_prices[4] = p->AskPrice5*scale;
 
-				//å§”ä¹°ä»·æ ¼
+				//Î¯Âò¼Û¸ñ
 				quote.bid_prices[0] = p->BidPrice1*scale;
 				quote.bid_prices[1] = p->BidPrice2*scale;
 				quote.bid_prices[2] = p->BidPrice3*scale;
 				quote.bid_prices[3] = p->BidPrice4*scale;
 				quote.bid_prices[4] = p->BidPrice5*scale;
 
-				//å§”å–é‡
+				//Î¯ÂôÁ¿
 				quote.ask_qty[0] = p->AskVolume1;
 				quote.ask_qty[1] = p->AskVolume2;
 				quote.ask_qty[2] = p->AskVolume3;
 				quote.ask_qty[3] = p->AskVolume4;
 				quote.ask_qty[4] = p->AskVolume5;
 
-				//å§”ä¹°é‡
+				//Î¯ÂòÁ¿
 				quote.bid_qty[0] = p->BidVolume1;
 				quote.bid_qty[1] = p->BidVolume2;
 				quote.bid_qty[2] = p->BidVolume3;

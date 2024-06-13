@@ -1,7 +1,6 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <stdint.h>
-#include <unordered_map>
 
 #include "DataDefine.h"
 
@@ -10,7 +9,6 @@
 
 #include "../Share/BoostMappingFile.hpp"
 #include "../Share/StdUtils.hpp"
-#include "../Share/fmtlib.h"
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -51,7 +49,7 @@ private:
 		~_RTKBlockPair() { delete _mtx; }
 
 	} RTKlineBlockPair;
-	typedef std::unordered_map<std::string, RTKlineBlockPair>	RTKBlockFilesMap;
+	typedef faster_hashmap<std::string, RTKlineBlockPair>	RTKBlockFilesMap;
 
 	typedef struct _TBlockPair
 	{
@@ -71,7 +69,7 @@ private:
 		}
 		~_TBlockPair() { delete _mtx; }
 	} TickBlockPair;
-	typedef std::unordered_map<std::string, TickBlockPair>	TBlockFilesMap;
+	typedef faster_hashmap<std::string, TickBlockPair>	TBlockFilesMap;
 
 	typedef struct _TransBlockPair
 	{
@@ -91,7 +89,7 @@ private:
 		}
 		~_TransBlockPair() { delete _mtx; }
 	} TransBlockPair;
-	typedef std::unordered_map<std::string, TransBlockPair>	TransBlockFilesMap;
+	typedef faster_hashmap<std::string, TransBlockPair>	TransBlockFilesMap;
 
 	typedef struct _OdeDtlBlockPair
 	{
@@ -111,7 +109,7 @@ private:
 		}
 		~_OdeDtlBlockPair() { delete _mtx; }
 	} OrdDtlBlockPair;
-	typedef std::unordered_map<std::string, OrdDtlBlockPair>	OrdDtlBlockFilesMap;
+	typedef faster_hashmap<std::string, OrdDtlBlockPair>	OrdDtlBlockFilesMap;
 
 	typedef struct _OdeQueBlockPair
 	{
@@ -131,7 +129,7 @@ private:
 		}
 		~_OdeQueBlockPair() { delete _mtx; }
 	} OrdQueBlockPair;
-	typedef std::unordered_map<std::string, OrdQueBlockPair>	OrdQueBlockFilesMap;
+	typedef faster_hashmap<std::string, OrdQueBlockPair>	OrdQueBlockFilesMap;
 
 	RTKBlockFilesMap	_rt_min1_map;
 	RTKBlockFilesMap	_rt_min5_map;
@@ -155,7 +153,7 @@ private:
 		}
 	} HisTBlockPair;
 
-	typedef std::unordered_map<std::string, HisTBlockPair>	HisTickBlockMap;
+	typedef faster_hashmap<std::string, HisTBlockPair>	HisTickBlockMap;
 
 	typedef struct _HisTransBlockPair
 	{
@@ -171,7 +169,7 @@ private:
 		}
 	} HisTransBlockPair;
 
-	typedef std::unordered_map<std::string, HisTransBlockPair>	HisTransBlockMap;
+	typedef faster_hashmap<std::string, HisTransBlockPair>	HisTransBlockMap;
 
 	typedef struct _HisOrdDtlBlockPair
 	{
@@ -187,7 +185,7 @@ private:
 		}
 	} HisOrdDtlBlockPair;
 
-	typedef std::unordered_map<std::string, HisOrdDtlBlockPair>	HisOrdDtlBlockMap;
+	typedef faster_hashmap<std::string, HisOrdDtlBlockPair>	HisOrdDtlBlockMap;
 
 	typedef struct _HisOrdQueBlockPair
 	{
@@ -203,7 +201,7 @@ private:
 		}
 	} HisOrdQueBlockPair;
 
-	typedef std::unordered_map<std::string, HisOrdQueBlockPair>	HisOrdQueBlockMap;
+	typedef faster_hashmap<std::string, HisOrdQueBlockPair>	HisOrdQueBlockMap;
 
 	HisTickBlockMap		_his_tick_map;
 	HisOrdDtlBlockMap	_his_orddtl_map;
@@ -218,9 +216,9 @@ private:
 	TransBlockPair* getRTTransBlock(const char* exchg, const char* code);
 
 	/*
-	 *	将历史数据放入缓存
+	 *	����ʷ���ݷ��뻺��
 	 */
-	bool		cacheHisBarsFromFile(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period);
+	bool		cacheHisBarsFromFile(const std::string& key, const char* stdCode, WTSKlinePeriod period);
 
 	uint32_t		readBarsFromCacheByRange(const std::string& key, uint64_t stime, uint64_t etime, std::vector<WTSBarStruct>& ayBars, bool isDay = false);
 	WTSBarStruct*	indexBarFromCacheByRange(const std::string& key, uint64_t stime, uint64_t etime, uint32_t& count, bool isDay = false);
@@ -239,17 +237,11 @@ public:
 	virtual WTSOrdQueSlice*	readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override;
 	virtual WTSTransSlice*	readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override;
 
-	virtual WTSTickSlice*	readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override;
+	virtual WTSTickSlice*	readTickSlicesByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override;
 	virtual WTSKlineSlice*	readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime = 0) override;
 
-	virtual WTSTickSlice*	readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime = 0) override;
+	virtual WTSTickSlice*	readTickSlicesByCount(const char* stdCode, uint32_t count, uint64_t etime = 0) override;
 	virtual WTSKlineSlice*	readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime = 0) override;
-
-	virtual WTSTickSlice*	readTickSliceByDate(const char* stdCode, uint32_t uDate = 0 ) override;
-
-	virtual double		getAdjFactorByDate(const char* stdCode, uint32_t date = 0) override;
-
-	virtual void		clearCache() override;
 
 private:
 	std::string		_base_dir;
@@ -264,31 +256,27 @@ private:
 		std::string		_code;
 		WTSKlinePeriod	_period;
 		std::string		_raw_code;
-		double			_factor;
-
-		_BarsList():_factor(1.0){}
 
 		std::vector<WTSBarStruct>	_bars;
-		std::vector<WTSBarStruct>	_rt_bars;	//如果是后复权，就需要把实时数据拷贝到这里来
 	} BarsList;
 
-	typedef std::unordered_map<std::string, BarsList> BarsCache;
+	typedef faster_hashmap<std::string, BarsList> BarsCache;
 	BarsCache	_bars_cache;
 
-	//除权因子
+	//��Ȩ����
 	typedef struct _AdjFactor
 	{
 		uint32_t	_date;
 		double		_factor;
 	} AdjFactor;
 	typedef std::vector<AdjFactor> AdjFactorList;
-	typedef std::unordered_map<std::string, AdjFactorList>	AdjFactorMap;
+	typedef faster_hashmap<std::string, AdjFactorList>	AdjFactorMap;
 	AdjFactorMap	_adj_factors;
 
 	inline const AdjFactorList& getAdjFactors(const char* code, const char* exchg, const char* pid)
 	{
-		thread_local static char key[20] = { 0 };
-		fmtutil::format_to(key, "{}.{}.{}", exchg, pid, code);
+		char key[20] = { 0 };
+		sprintf(key, "%s.%s.%s", exchg, pid, code);
 		return _adj_factors[key];
 	}
 };

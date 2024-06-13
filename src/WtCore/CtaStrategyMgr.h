@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file CtaStrategyMgr.h
  * \project	WonderTrader
  *
@@ -60,11 +60,11 @@ private:
 		FuncCreateStraFact	_creator;
 		FuncDeleteStraFact	_remover;
 	} StraFactInfo;
-	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
+	typedef faster_hashmap<LongKey, StraFactInfo> StraFactMap;
 
 	StraFactMap	_factories;
 
-	typedef wt_hashmap<std::string, CtaStrategyPtr> StrategyMap;
+	typedef faster_hashmap<LongKey, CtaStrategyPtr> StrategyMap;
 	StrategyMap	_strategies;
 };
 

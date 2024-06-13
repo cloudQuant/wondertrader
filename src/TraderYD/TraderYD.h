@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file TraderYD.h
  * \project	WonderTrader
  *
@@ -22,7 +22,6 @@
 #include "../Share/IniHelper.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
-#include "../Share/WtKVCache.hpp"
 
 USING_NS_WTP;
 
@@ -61,13 +60,13 @@ public:
 public:
 	typedef enum
 	{
-		WS_NOTLOGIN,		//æœªç™»å½•
-		WS_LOGINING,		//æ­£åœ¨ç™»å½•
-		WS_LOGINED,			//å·²ç™»å½•
-		WS_LOGINFAILED,		//ç™»å½•å¤±è´¥
+		WS_NOTLOGIN,		//Î´µÇÂ¼
+		WS_LOGINING,		//ÕıÔÚµÇÂ¼
+		WS_LOGINED,			//ÒÑµÇÂ¼
+		WS_LOGINFAILED,		//µÇÂ¼Ê§°Ü
 		WS_CONFIRM_QRYED,
-		WS_CONFIRMED,		//å·²ç¡®è®¤
-		WS_ALLREADY			//å…¨éƒ¨å°±ç»ª
+		WS_CONFIRMED,		//ÒÑÈ·ÈÏ
+		WS_ALLREADY			//È«²¿¾ÍĞ÷
 	} WrapperState;
 
 
@@ -75,7 +74,7 @@ private:
 	int doLogin();
 
 	//////////////////////////////////////////////////////////////////////////
-	//ITraderApiæ¥å£
+	//ITraderApi½Ó¿Ú
 public:
 	virtual bool init(WTSVariant* params) override;
 
@@ -114,13 +113,10 @@ protected:
 	WTSTradeInfo*	makeTradeRecord(const YDTrade *tradeField, const YDInstrument* instInfo);
 	WTSError*		makeError(int errorno, WTSErroCode ec);
 
-	bool			generateEntrustID(uint32_t orderRef, char* buffer);
+	std::string		generateEntrustID(uint32_t orderRef);
 	bool			extractEntrustID(const char* entrustid, uint32_t &orderRef);
 
-	inline uint32_t		genRequestID()
-	{
-		return m_iRequestID.fetch_add(1) + 1;
-	}
+	uint32_t		genRequestID();
 
 protected:
 	std::string		m_strCfgFile;
@@ -137,7 +133,7 @@ protected:
 	uint64_t		m_uLastQryTime;
 
 	uint32_t					m_lDate;
-	std::atomic<uint32_t>		m_orderRef;		//æŠ¥å•å¼•ç”¨
+	std::atomic<uint32_t>		m_orderRef;		//±¨µ¥ÒıÓÃ
 
 	WrapperState				m_wrapperState;
 
@@ -163,10 +159,6 @@ protected:
 	typedef YDApi* (*YDCreator)(const char *);
 	YDCreator		m_funcCreator;
 
-	//IniHelper		m_iniHelper;
-	//å§”æ‰˜å•æ ‡è®°ç¼“å­˜å™¨
-	WtKVCache		m_eidCache;
-	//è®¢å•æ ‡è®°ç¼“å­˜å™¨
-	WtKVCache		m_oidCache;
+	IniHelper		m_iniHelper;
 };
 

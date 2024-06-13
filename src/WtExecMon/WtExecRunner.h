@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 
 #include "WtSimpDataMgr.h"
 
@@ -22,7 +22,7 @@ public:
 	WtExecRunner();
 
 	/*
-	 *	åˆå§‹åŒ–
+	 *	³õÊ¼»¯
 	 */
 	bool init(const char* logCfg = "logcfgexec.json", bool isFile = true);
 
@@ -34,8 +34,6 @@ public:
 
 	void setPosition(const char* stdCode, double targetPos);
 
-	void commitPositions();
-
 	bool addExeFactories(const char* folder);
 
 	IBaseDataMgr*	get_bd_mgr() { return &_bd_mgr; }
@@ -46,14 +44,14 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	/// <summary>
-	/// å¤„ç†å®æ—¶ä¸»æ¨è¡Œæƒ…
+	/// ´¦ÀíÊµÊ±Ö÷ÍÆĞĞÇé
 	/// </summary>
-	/// <param name="curTick">æœ€æ–°çš„tickæ•°æ®</param>
-	/// <param name="isHot">æ˜¯å¦æ˜¯ä¸»åŠ›åˆçº¦ä»£ç </param>
-	virtual void handle_push_quote(WTSTickData* curTick) override;
+	/// <param name="curTick">×îĞÂµÄtickÊı¾İ</param>
+	/// <param name="isHot">ÊÇ·ñÊÇÖ÷Á¦ºÏÔ¼´úÂë</param>
+	virtual void handle_push_quote(WTSTickData* curTick, uint32_t hotFlag = 0) override;
 
 	///////////////////////////////////////////////////////////////////////////
-	//IExecuterStub æ¥å£
+	//IExecuterStub ½Ó¿Ú
 	virtual uint64_t get_real_time() override;
 	virtual WTSCommodityInfo* get_comm_info(const char* stdCode) override;
 	virtual WTSSessionInfo* get_sess_info(const char* stdCode) override;
@@ -80,7 +78,5 @@ private:
 	WTSBaseDataMgr		_bd_mgr;
 	WTSHotMgr			_hot_mgr;
 	ActionPolicyMgr		_act_policy;
-
-	wt_hashmap<std::string, double> _positions;
 };
 

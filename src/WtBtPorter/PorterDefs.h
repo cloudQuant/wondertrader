@@ -1,4 +1,4 @@
-ï»¿/*!
+/*!
  * \file PorterDefs.h
  * \project	WonderTrader
  *
@@ -24,20 +24,14 @@ USING_NS_WTP;
 
 typedef unsigned long		CtxHandler;
 
-static const WtUInt32	EVENT_ENGINE_INIT		= 1;	//æ¡†æ¶åˆå§‹åŒ–
-static const WtUInt32	EVENT_SESSION_BEGIN		= 2;	//äº¤æ˜“æ—¥å¼€å§‹
-static const WtUInt32	EVENT_SESSION_END		= 3;	//äº¤æ˜“æ—¥ç»“æŸ
-static const WtUInt32	EVENT_ENGINE_SCHDL		= 4;	//æ¡†æ¶è°ƒåº¦
-static const WtUInt32	EVENT_BACKTEST_END		= 5;	//å›æµ‹ç»“æŸ
-
-//æ—¥å¿—çº§åˆ«
-static const WtUInt32	LOG_LEVEL_DEBUG			= 0;
-static const WtUInt32	LOG_LEVEL_INFO			= 1;
-static const WtUInt32	LOG_LEVEL_WARN			= 2;
-static const WtUInt32	LOG_LEVEL_ERROR			= 3;
+static const WtUInt32	EVENT_ENGINE_INIT		= 1;	//¿ò¼Ü³õÊ¼»¯
+static const WtUInt32	EVENT_SESSION_BEGIN		= 2;	//½»Ò×ÈÕ¿ªÊ¼
+static const WtUInt32	EVENT_SESSION_END		= 3;	//½»Ò×ÈÕ½áÊø
+static const WtUInt32	EVENT_ENGINE_SCHDL		= 4;	//¿ò¼Üµ÷¶È
+static const WtUInt32	EVENT_BACKTEST_END		= 5;	//»Ø²â½áÊø
 
 /*
-*	å›è°ƒå‡½æ•°å®šä¹‰
+*	»Øµ÷º¯Êı¶¨Òå
 */
 typedef void(PORTER_FLAG *FuncGetBarsCallback)(CtxHandler cHandle, const char* stdCode, const char* period, WTSBarStruct* bar, WtUInt32 count, bool isLast);
 typedef void(PORTER_FLAG *FuncGetTicksCallback)(CtxHandler cHandle, const char* stdCode, WTSTickStruct* tick, WtUInt32 count, bool isLast);
@@ -47,7 +41,6 @@ typedef void(PORTER_FLAG *FuncStraTickCallback)(CtxHandler cHandle, const char* 
 typedef void(PORTER_FLAG *FuncStraCalcCallback)(CtxHandler cHandle, WtUInt32 uDate, WtUInt32 uTime);
 typedef void(PORTER_FLAG *FuncStraBarCallback)(CtxHandler cHandle, const char* stdCode, const char* period, WTSBarStruct* newBar);
 typedef void(PORTER_FLAG *FuncGetPositionCallback)(CtxHandler cHandle, const char* stdCode, double position, bool isLast);
-typedef void(PORTER_FLAG *FuncStraCondTriggerCallback)(CtxHandler cHandle, const char* stdCode, double target, double price, const char* usertag);
 
 typedef void(PORTER_FLAG *FuncStraOrdQueCallback)(CtxHandler cHandle, const char* stdCode, WTSOrdQueStruct* ordQue);
 typedef void(PORTER_FLAG *FuncGetOrdQueCallback)(CtxHandler cHandle, const char* stdCode, WTSOrdQueStruct* ordQue, WtUInt32 count, bool isLast);
@@ -57,8 +50,8 @@ typedef void(PORTER_FLAG *FuncStraTransCallback)(CtxHandler cHandle, const char*
 typedef void(PORTER_FLAG *FuncGetTransCallback)(CtxHandler cHandle, const char* stdCode, WTSTransStruct* trans, WtUInt32 count, bool isLast);
 
 //////////////////////////////////////////////////////////////////////////
-//HFTå›è°ƒå‡½æ•°
-typedef void(PORTER_FLAG *FuncHftChannelCallback)(CtxHandler cHandle, const char* trader, WtUInt32 evtid);	//äº¤æ˜“é€šé“äº‹ä»¶å›è°ƒ
+//HFT»Øµ÷º¯Êı
+typedef void(PORTER_FLAG *FuncHftChannelCallback)(CtxHandler cHandle, const char* trader, WtUInt32 evtid);	//½»Ò×Í¨µÀÊÂ¼ş»Øµ÷
 typedef void(PORTER_FLAG *FuncHftOrdCallback)(CtxHandler cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag);
 typedef void(PORTER_FLAG *FuncHftTrdCallback)(CtxHandler cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag);
 typedef void(PORTER_FLAG *FuncHftEntrustCallback)(CtxHandler cHandle, WtUInt32 localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag);
@@ -66,7 +59,7 @@ typedef void(PORTER_FLAG *FuncHftEntrustCallback)(CtxHandler cHandle, WtUInt32 l
 typedef void(PORTER_FLAG *FuncEventCallback)(WtUInt32 evtId, WtUInt32 curDate, WtUInt32 curTime);
 
 //////////////////////////////////////////////////////////////////////////
-//å¤–éƒ¨æ•°æ®åŠ è½½æ¨¡å—
+//Íâ²¿Êı¾İ¼ÓÔØÄ£¿é
 typedef bool(PORTER_FLAG *FuncLoadFnlBars)(const char* stdCode, const char* period);
 typedef bool(PORTER_FLAG *FuncLoadRawBars)(const char* stdCode, const char* period);
 typedef bool(PORTER_FLAG *FuncLoadAdjFactors)(const char* stdCode);
