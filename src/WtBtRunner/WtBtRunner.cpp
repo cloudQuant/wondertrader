@@ -21,6 +21,8 @@
 #include "../WTSUtils/WTSCfgLoader.h"
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/StdUtils.hpp"
+#include <iostream>
+#include <chrono>
 
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
@@ -57,7 +59,8 @@ int main()
 		WTSLogger::info_f("Loading configuration file {} failed", filename);
 		return -1;
 	}
-
+	// 获取当前时间作为起始时间点
+	auto start = std::chrono::high_resolution_clock::now();
 	HisDataReplayer replayer;
 	replayer.init(cfg->get("replayer"));
 
@@ -98,6 +101,14 @@ int main()
 	replayer.prepare();
 
 	replayer.run();
+	// 获取当前时间作为结束时间点
+	auto end = std::chrono::high_resolution_clock::now();
+
+	// 计算时间差
+	std::chrono::duration<double> duration = end - start;
+
+	// 输出耗费的时间
+	std::cout << "Time taken: " << duration.count() << " seconds" << std::endl;
 
 	printf("press enter key to exit\r\n");
 	getchar();

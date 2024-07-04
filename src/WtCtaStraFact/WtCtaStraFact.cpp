@@ -1,5 +1,5 @@
 #include "WtCtaStraFact.h"
-#include "WtStraDualThrust.h"
+#include "WtStraTwoMaStrategy.h"
 
 #include <string.h>
 #include <boost/config.hpp>
@@ -34,8 +34,8 @@ WtStraFact::~WtStraFact()
 
 CtaStrategy* WtStraFact::createStrategy(const char* name, const char* id)
 {
-	if (strcmp(name, "DualThrust") == 0)
-		return new WtStraDualThrust(id);
+	if (strcmp(name, "TwoMaStrategy") == 0)
+		return new WtStraTwoMaStrategy(id);
 
 	return NULL;
 }
@@ -54,7 +54,7 @@ bool WtStraFact::deleteStrategy(CtaStrategy* stra)
 
 void WtStraFact::enumStrategy(FuncEnumStrategyCallback cb)
 {
-	cb(FACT_NAME, "DualThrust", false);
+	cb(FACT_NAME, "TwoMaStrategy", false);
 	cb(FACT_NAME, "PairTradingFci", false);
 	cb(FACT_NAME, "CtaXPA", true);
 }
