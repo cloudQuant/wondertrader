@@ -1,10 +1,11 @@
-#include "WtCtaStraFact.h"
+#include "WtCtaStraDualThrustFact.h"
 #include "WtStraDualThrust.h"
+#include <iostream>
 
 #include <string.h>
 #include <boost/config.hpp>
 
-const char* FACT_NAME = "WtCtaStraFact";
+const char* FACT_NAME = "WtCtaStraDualThrustFact";
 
 
 extern "C"
@@ -34,8 +35,12 @@ WtStraFact::~WtStraFact()
 
 CtaStrategy* WtStraFact::createStrategy(const char* name, const char* id)
 {
-	if (strcmp(name, "DualThrust") == 0)
+	std::cout << "name = " << name << " id =" << id << std::endl;
+	if (strcmp(name, "DualThrust") == 0) {
+		std::cout << "DualThrust 创建成功" << std::endl;
 		return new WtStraDualThrust(id);
+	}
+		
 
 	return NULL;
 }

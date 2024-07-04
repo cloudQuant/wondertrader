@@ -67,6 +67,7 @@ int main()
 	WTSVariant* cfgEnv = cfg->get("env");
 	const char* mode = cfgEnv->getCString("mocker");
 	int32_t slippage = cfgEnv->getInt32("slippage");
+	std::cout << "mode = " << mode << " slippage = " << slippage << std::endl;
 	if (strcmp(mode, "cta") == 0)
 	{
 		CtaMocker* mocker = new CtaMocker(&replayer, "cta", slippage);

@@ -12,6 +12,7 @@
 #include "WtHelper.h"
 
 #include <fstream>
+#include <iostream>
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/WTSDataDef.hpp"
@@ -634,7 +635,7 @@ bool HisDataReplayer::prepare()
 
 	if (!_tick_enabled)
 		checkUnbars();
-
+	//std::cout << "begin to run backtest" << std::endl;
 	return true;
 }
 
@@ -643,7 +644,7 @@ void HisDataReplayer::run(bool bNeedDump/* = false*/)
 	if(_task == NULL)
 	{
 		//如果没有时间调度任务,则采用主K线回放的模式
-
+		// std::cout << "main_key = " << _main_key << std::endl;
 		//如果没有确定主K线,则确定一个周期最短的主K线
 		if (_main_key.empty() && !_bars_cache.empty())
 		{

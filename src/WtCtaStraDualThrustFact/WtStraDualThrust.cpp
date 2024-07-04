@@ -1,16 +1,17 @@
 #include "WtStraDualThrust.h"
+#include <iostream>
 
-#include "Includes/ICtaStraCtx.h"
+#include "../Includes/ICtaStraCtx.h"
 
-#include "Includes/WTSContractInfo.hpp"
-#include "Includes/WTSVariant.hpp"
-#include "Includes/WTSDataDef.hpp"
-#include "Share/decimal.h"
+#include "../Includes/WTSContractInfo.hpp"
+#include "../Includes/WTSVariant.hpp"
+#include "../Includes/WTSDataDef.hpp"
+#include "../Share/decimal.h"
 
 extern const char* FACT_NAME;
 
 //By Wesley @ 2022.01.05
-#include "Share/fmtlib.h"
+#include "../Share/fmtlib.h"
 
 WtStraDualThrust::WtStraDualThrust(const char* id)
 	: CtaStrategy(id)
@@ -46,6 +47,11 @@ bool WtStraDualThrust::init(WTSVariant* cfg)
 	_code = cfg->getCString("code");
 
 	_isstk = cfg->getBoolean("stock");
+
+	std::cout << "初始化参数" << std::endl;
+	std::cout << "days = " << _days << std::endl;
+	std::cout << "k1 = " << _k1 << std::endl;
+	std::cout << "k2 = " << _k2 << std::endl;
 
 	return true;
 }
@@ -94,19 +100,20 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t curDate, uint32_t 
 	WTSCommodityInfo* commInfo = ctx->stra_get_comminfo(_code.c_str());
 
 	double curPos = ctx->stra_get_position(_code.c_str()) / trdUnit;
+	// std::cout << "curPos = " << curPos << std::endl;
 	if(decimal::eq(curPos,0))
 	{
 		if(highPx >= upper_bound)
 		{
 			ctx->stra_enter_long(_code.c_str(), 2 * trdUnit, "DT_EnterLong");
 			//向上突破
-			ctx->stra_log_info(fmt::format("向上突破{}>={},多仓进场", highPx, upper_bound).c_str());
+			ctx->stra_log_info(fmt::format("当前时间为 = {} ,向上突破{}>={},多仓进场", kline->at(-1)->time, highPx, upper_bound).c_str());
 		}
 		else if (lowPx <= lower_bound && !_isstk)
 		{
 			ctx->stra_enter_short(_code.c_str(), 2 * trdUnit, "DT_EnterShort");
 			//向下突破
-			ctx->stra_log_info(fmt::format("向下突破{}<={},空仓进场", lowPx, lower_bound).c_str());
+			ctx->stra_log_info(fmt::format("当前时间为 = {} ,向下突破{}<={},空仓进场", kline->at(-1)->time, lowPx, lower_bound).c_str());
 		}
 	}
 	//else if(curPos > 0)
@@ -116,7 +123,7 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t curDate, uint32_t 
 		{
 			//多仓出场
 			ctx->stra_exit_long(_code.c_str(), 2 * trdUnit, "DT_ExitLong");
-			ctx->stra_log_info(fmt::format("向下突破{}<={},多仓出场", lowPx, lower_bound).c_str());
+			ctx->stra_log_info(fmt::format("当前时间为 = {} ,向下突破{}<={},多仓出场", kline->at(-1)->time, lowPx, lower_bound).c_str());
 		}
 	}
 	//else if(curPos < 0)
@@ -126,7 +133,7 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t curDate, uint32_t 
 		{
 			//空仓出场
 			ctx->stra_exit_short(_code.c_str(), 2 * trdUnit, "DT_ExitShort");
-			ctx->stra_log_info(fmt::format("向上突破{}>={},空仓出场", highPx, upper_bound).c_str());
+			ctx->stra_log_info(fmt::format("当前时间为 = {} ,向上突破{}>={},空仓出场", kline->at(-1)->time, highPx, upper_bound).c_str());
 		}
 	}
 
