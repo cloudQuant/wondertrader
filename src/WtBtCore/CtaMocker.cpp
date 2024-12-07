@@ -13,6 +13,7 @@
 
 #include <exception>
 #include <boost/filesystem.hpp>
+#include <iostream>
 
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
@@ -131,15 +132,16 @@ void CtaMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 
 bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 {
+    //std::cout << "run init_cta_factory" << std::endl;
 	if (cfg == NULL)
 		return false;
 
 	const char* module = cfg->getCString("module");
-
+    //std::cout << "init_cta_factory module = " << module << std::endl;
 	DllHandle hInst = DLLHelper::load_library(module);
 	if (hInst == NULL)
 		return false;
-
+    //std::cout << "init_cta_factory load_library succeed = " << std::endl;
 	FuncCreateStraFact creator = (FuncCreateStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
 	if (creator == NULL)
 	{
@@ -152,19 +154,25 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 	_factory._creator = creator;
 	_factory._remover = (FuncDeleteStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
 	_factory._fact = _factory._creator();
-
+    //std::cout << "init_cta_factory get_symbol succeed  " << std::endl;
 	WTSVariant* cfgStra = cfg->get("strategy");
+    //std::cout << "init_cta_factory cfg->get succeed  " << std::endl;
 	if (cfgStra)
 	{
 		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
-		if(_strategy)
+        //std::cout << "init_cta_factory createStrategy succeed  " << std::endl;
+        if(_strategy)
 		{
+            //std::cout << "init_cta_factory _strategy is true  " << std::endl;
 			WTSLogger::info("Strategy %s.%s is created,strategy ID: %s", _factory._fact->getName(), _strategy->getName(), _strategy->id());
 		}
+        //std::cout << "init_cta_factory _strategy is true  " << std::endl;
 		_strategy->init(cfgStra->get("params"));
+        //std::cout << "init_cta_factory _strategy->init succeed  " << std::endl;
 		_name = _strategy->id();
+        //std::cout << "init_cta_factory _name  " << _name << std::endl;
 	}
-
+    //std::cout << "init_cta_factory createStrategy succeed" << std::endl;
 	return true;
 }
 

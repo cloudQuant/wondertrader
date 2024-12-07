@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16.0)
 
 PROJECT(WonderTrader)
 
@@ -81,6 +81,13 @@ ADD_SUBDIRECTORY(WtBtCore)
 #back test c porter for outter libraries
 ADD_SUBDIRECTORY(WtBtPorter)
 ADD_SUBDIRECTORY(WtBtRunner)
+# todo add backtest strategy
+# ADD_SUBDIRECTORY(WtCtaStraArbitrageStrategyFact)
+ADD_SUBDIRECTORY(WtCtaStraDualThrustFact)
+ADD_SUBDIRECTORY(WtCtaStraFact)
+ADD_SUBDIRECTORY(WtCtaStraTwoMaFact)
+# ADD_SUBDIRECTORY(WtCtaStraStatisticalArbitrageFact)
+
 
 ADD_SUBDIRECTORY(ParserUDP)
 ADD_SUBDIRECTORY(TraderCTP)

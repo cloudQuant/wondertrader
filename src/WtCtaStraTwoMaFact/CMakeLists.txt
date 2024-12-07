@@ -2,11 +2,9 @@
 #1. 确定CMake的最低版本需求
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
-set(pybind11_DIR "/home/yun/anaconda3/lib/python3.11/site-packages/pybind11/share/cmake/pybind11")
-find_package(pybind11 REQUIRED)
 #2. 确定工程名
-PROJECT(WtCtaStraArbitrageStrategyFact LANGUAGES CXX)
-SET(CMAKE_CXX_STANDARD 17)
+PROJECT(WtCtaStraTwoMaFact LANGUAGES CXX)
+SET(CMAKE_CXX_STANDARD 11)
 
 #7. 添加源码
 file(GLOB SRCS "*.cpp")
@@ -16,7 +14,7 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE
 
 INCLUDE_DIRECTORIES(${INCS})
 LINK_DIRECTORIES(${LNKS})
-ADD_LIBRARY(WtCtaStraArbitrageStrategyFact SHARED ${SRCS} ${HDRS})
+ADD_LIBRARY(WtCtaStraTwoMaFact SHARED ${SRCS} ${HDRS})
 
 SET(LIBS
 	boost_filesystem
@@ -25,8 +23,8 @@ SET(LIBS
 
 IF (WIN32)
 ELSE (UNIX)
-	TARGET_LINK_LIBRARIES(WtCtaStraArbitrageStrategyFact ${LIBS})
-	SET_TARGET_PROPERTIES(WtCtaStraArbitrageStrategyFact PROPERTIES
+	TARGET_LINK_LIBRARIES(WtCtaStraTwoMaFact ${LIBS})
+	SET_TARGET_PROPERTIES(WtCtaStraTwoMaFact PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		C_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN 1

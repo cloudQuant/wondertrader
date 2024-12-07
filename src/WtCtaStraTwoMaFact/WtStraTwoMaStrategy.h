@@ -34,8 +34,5 @@ private:
 	std::string _code;
 
 	bool		_isstk;
-	// 保存特定变量
-	double pre_short_ma;
-	double pre_long_ma;
 };
 

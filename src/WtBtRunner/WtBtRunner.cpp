@@ -70,10 +70,14 @@ int main()
 	std::cout << "mode = " << mode << " slippage = " << slippage << std::endl;
 	if (strcmp(mode, "cta") == 0)
 	{
+        //std::cout << "begin to run cta mocker, init_cta_factory, register_sink" << std::endl;
 		CtaMocker* mocker = new CtaMocker(&replayer, "cta", slippage);
-		mocker->init_cta_factory(cfg->get("cta"));
+        //std::cout << "succeed to run cta mocker" << std::endl;
+        mocker->init_cta_factory(cfg->get("cta"));
+        //std::cout << "succeed to run init_cta_factory" << std::endl;
 		replayer.register_sink(mocker, "cta");
-	}
+        //std::cout << "succeed to run cta mocker, init_cta_factory, register_sink" << std::endl;
+    }
 	else if (strcmp(mode, "hft") == 0)
 	{
 		HftMocker* mocker = new HftMocker(&replayer, "hft");
