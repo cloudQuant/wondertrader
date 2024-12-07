@@ -132,7 +132,9 @@ ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /*
 
 //////////////////////////////////////////////////////////////////////////
 //ExecuteContext
-#pragma region Context回调接口
+// #pragma region Context回调接口
+// todo 2024-12-07
+#pragma region Context_callback_api
 WTSTickSlice* WtLocalExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_data_mgr == NULL)
@@ -218,12 +220,14 @@ uint64_t WtLocalExecuter::getCurTime()
 	//return TimeUtils::makeTime(_stub->get_date(), _stub->get_raw_time() * 100000 + _stub->get_secs());
 }
 
-#pragma endregion Context回调接口
+#pragma endregion Context_callback_api
 //ExecuteContext
 //////////////////////////////////////////////////////////////////////////
 
 
-#pragma region 外部接口
+// #pragma region 外部接口
+// todo 2024-12-07
+#pragma region external_api
 void WtLocalExecuter::on_position_changed(const char* stdCode, double targetPos)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode);
@@ -510,8 +514,8 @@ void WtLocalExecuter::on_position(const char* stdCode, bool isLong, double prevo
 	}
 }
 
-#pragma endregion 外部接口
-
+// #pragma endregion 外部接口
+#pragma endregion external_api
 
 //////////////////////////////////////////////////////////////////////////
 //WtExecuterFactory

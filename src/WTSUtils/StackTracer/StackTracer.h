@@ -18,6 +18,7 @@
 #endif // _WINDOWS
 
 #include <functional>
+#include <cstdlib>  // todo 2 2024-12-07 Include this header for the 'free' function
 
 typedef std::function<void(const char*)> TracerLogCallback;
 

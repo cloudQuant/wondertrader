@@ -4,3 +4,5 @@ fi
 cd build_all
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
+
+#SpinMutex.hpp
