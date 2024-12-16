@@ -10,6 +10,8 @@
 #pragma once
 #include <limits.h>
 #include <string.h>
+#include <cstddef>   // size_t
+#include <stddef.h>  // size_t
 
 #ifndef NOMINMAX
 #define NOMINMAX

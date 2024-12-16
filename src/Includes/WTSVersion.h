@@ -1,4 +1,7 @@
-﻿#pragma once
+﻿/**
+* 主要用于定义项目的版本信息
+*/
+#pragma once
 
 #define WT_VER_MAJOR 0
 #define WT_VER_MINOR 9

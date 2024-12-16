@@ -8,20 +8,24 @@
  * \brief 时间处理的封装
  */
 #pragma once
-#include <stdint.h>
-#include <sys/timeb.h>
-#ifdef _MSC_VER
-#include <time.h>
-#else
-#include <sys/time.h>
-#endif
-#include <string>
-#include <string.h>
-#include<chrono>
-#include <thread>
-#include <cmath>
 
+#include <cstddef>  // 对于 C++ 语言, NULL
+#include <stddef.h> // 对于 C 语言, NULL
+
+#include <stdint.h>  // 定义了固定宽度的整数类型（如 int64_t）
+#include <sys/timeb.h> // 定义了 ftime 函数，用于获取当前时间（精确到毫秒）。
 #ifdef _MSC_VER
+#include <time.h>  // 定义了时间相关的函数和结构体（如 localtime、mktime 等）
+#else
+#include <sys/time.h>  // 定义了时间相关的函数和结构体（如 localtime、mktime 等）
+#endif
+#include <string> // 提供了 std::string 类型。
+#include <string.h> // 提供了字符串操作函数（如 memset、strftime 等）
+#include <chrono>  // 提供了高精度时间库（如 std::chrono）。
+#include <thread>  // 提供了多线程支持（如 std::thread）。
+#include <cmath>  // 提供了数学函数（如 std::pow）。
+
+#ifdef _MSC_VER   // 定义 Windows 平台相关的时间结构体和宏。
 #define CTIME_BUF_SIZE 64
 
 #define WIN32_LEAN_AND_MEAN
@@ -62,7 +66,7 @@ public:
 	}
 
 	/*
-	 *	获取本地时间，精确到毫秒
+	 *	获取本地时间，精确到毫秒，eg  1734350031606
 	 */
 	static inline int64_t getLocalTimeNow(void)
 	{
@@ -90,6 +94,9 @@ public:
 #endif
 	}
 
+     /*
+       返回当前的时间，包含毫秒：19:53:51,606 不包含毫秒 19:53:51
+      */
 	static inline std::string getLocalTime(bool bIncludeMilliSec = true)
 	{
 		uint64_t ltime = getLocalTimeNow();
@@ -105,6 +112,9 @@ public:
 		return str;
 	}
 
+    /*
+    返回当前的日期和时间，eg  20241216195351
+     */
 	static inline uint64_t getYYYYMMDDhhmmss()
 	{
 		uint64_t ltime = getLocalTimeNow();
@@ -138,6 +148,9 @@ public:
 		time += millitm;
 	}
 
+    /**
+     返回当前的日期，如 20241216
+     */
 	static inline uint32_t getCurDate()
 	{
 		uint64_t ltime = getLocalTimeNow();
@@ -147,7 +160,9 @@ public:
 
 		return date;
 	}
-
+    /*
+    返回当前的星期，如周一返回值是1
+     */
 	static inline uint32_t getWeekDay(uint32_t uDate = 0)
 	{
 		time_t ts = 0;
@@ -169,7 +184,9 @@ public:
 	
 		return tNow->tm_wday;
 	}
-
+    /*
+    返回当前的时间，eg 195351
+     */
 	static inline uint32_t getCurMin()
 	{
 		uint64_t ltime = getLocalTimeNow();

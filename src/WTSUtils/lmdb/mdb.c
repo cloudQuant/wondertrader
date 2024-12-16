@@ -1165,7 +1165,7 @@ struct MDB_txn {
 /** @} */
 	unsigned int	mt_flags;		/**< @ref mdb_txn */
 	/** #dirty_list room: Array size - \#dirty pages visible to this txn.
-	 *	Includes ancestor txns' dirty pages not hidden by other txns'
+	 *	src ancestor txns' dirty pages not hidden by other txns'
 	 *	dirty/spilled pages. Thus commit(nested txn) has room to merge
 	 *	dirty_list into mt_parent after freeing hidden mt_parent pages.
 	 */
