@@ -35,9 +35,15 @@ std::string WtHelper::getCWD()
 	{
 		char   buffer[256];
 #ifdef _MSC_VER
-		_getcwd(buffer, 255);
+		// _getcwd(buffer, 255);
+		if (_getcwd(buffer, sizeof(buffer)) == nullptr) {
+			throw std::runtime_error("Failed to get current working directory on Windows");
+		}
 #else	//UNIX
-		getcwd(buffer, 255);
+		// getcwd(buffer, 255);
+		if (getcwd(buffer, sizeof(buffer)) == nullptr) {
+			throw std::runtime_error("Failed to get current working directory on UNIX");
+		}
 #endif
 		_cwd = StrUtil::standardisePath(buffer);
 	}	

@@ -58,11 +58,17 @@ class TimeUtils
 {
 	
 public:
+//	static inline int64_t getLocalTimeNowOld(void)
+//	{
+//		thread_local static timeb now;
+//		ftime(&now);
+//		return now.time * 1000 + now.millitm;
+//	}
 	static inline int64_t getLocalTimeNowOld(void)
 	{
-		thread_local static timeb now;
-		ftime(&now);
-		return now.time * 1000 + now.millitm;
+		thread_local static struct timespec now;
+		clock_gettime(CLOCK_REALTIME, &now);
+		return static_cast<int64_t>(now.tv_sec) * 1000 + now.tv_nsec / 1000000;
 	}
 
 	/*
