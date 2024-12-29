@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string>
 #include <cstring>
+#include <iconv.h>
 #ifdef _MSC_VER
 #include <windows.h>
 #else

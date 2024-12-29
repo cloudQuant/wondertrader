@@ -20,10 +20,20 @@ public:
 
 			while (flag.load(std::memory_order_relaxed))
 			{
-#ifdef _MSC_VER
-				_mm_pause();
+//#ifdef _MSC_VER
+//				_mm_pause();
+//#else
+//				__builtin_ia32_pause();
+//#endif
+#if defined(_MSC_VER)
+                _mm_pause(); // Windows 平台
+#elif defined(__x86_64__) || defined(__i386__)
+                __builtin_ia32_pause(); // x86 平台
+#elif defined(__aarch64__) || defined(__arm__)
+                asm volatile("yield" ::: "memory"); // ARM 平台
 #else
-				__builtin_ia32_pause();
+                // 其他平台，使用空操作
+                asm volatile("" ::: "memory");
 #endif
 			}
 		}

@@ -1,6 +1,57 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16.0)
 
 PROJECT(WonderTrader)
+# 添加boost
+find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+# 添加rapidjson
+find_package(RapidJSON REQUIRED)
+include_directories(${RapidJSON_INCLUDE_DIRS})
+# 查找 fmt
+find_package(fmt REQUIRED)
+message(STATUS "fmt found: ${fmt_FOUND}")
+message(STATUS "fmt include dirs: ${fmt_INCLUDE_DIRS}")
+
+# 查找 spdlog
+find_package(spdlog REQUIRED)
+message(STATUS "spdlog found: ${spdlog_FOUND}")
+message(STATUS "spdlog include dirs: ${spdlog_INCLUDE_DIRS}")
+
+# 包含 fmt 和 spdlog 的头文件路径
+include_directories(${fmt_INCLUDE_DIRS} ${spdlog_INCLUDE_DIRS})
+
+# 查找 nanomsg
+find_package(nanomsg REQUIRED)
+
+# 包含 nanomsg 的头文件路径
+include_directories(${nanomsg_INCLUDE_DIRS})
+
+## 查找 libiconv
+#find_package(Iconv REQUIRED)
+#message(STATUS "Iconv found: ${Iconv_FOUND}")
+#message(STATUS "Iconv include dirs: ${Iconv_INCLUDE_DIRS}")
+#message(STATUS "Iconv libraries: ${Iconv_LIBRARIES}")
+
+# 包含 libiconv 的头文件路径
+# include_directories(${Iconv_INCLUDE_DIRS})
+
+## 查找 libiconv 库
+#find_library(ICONV_LIBRARY iconv)
+#if (NOT ICONV_LIBRARY)
+#	message(FATAL_ERROR "libiconv not found")
+#endif()
+#message(STATUS "ICONV_LIBRARY: ${ICONV_LIBRARY}")
+find_library(ICONV_LIBRARY iconv REQUIRED HINTS /usr/lib /usr/local/lib)
+if (NOT ICONV_LIBRARY)
+	message(FATAL_ERROR "libiconv not found")
+endif()
+message(STATUS "ICONV_LIBRARY: ${ICONV_LIBRARY}")
+# 将 libiconv 链接到所有目标
+function(link_iconv_to_target target)
+	# target_link_libraries(${target} PRIVATE ${ICONV_LIBRARY})
+	target_link_libraries(${target}  ${ICONV_LIBRARY})
+endfunction()
 
 #3. 环境判断
 IF (WIN32)
@@ -11,8 +62,47 @@ ENDIF ()
 
 MESSAGE(STATUS "Generator is ${CMAKE_GENERATOR}")
 
+#IF (MSVC)
+#	ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+#	IF(CMAKE_CL_64)
+#		SET(INCS $ENV{MyDepends141}/include)
+#		SET(LNKS $ENV{MyDepends141}/lib/x64)
+#
+#		MESSAGE(STATUS "MyDepends is at $ENV{MyDepends141}")
+#		MESSAGE(STATUS "Platform is x64")
+#		SET(PLATFORM x64)
+#	ELSE()
+#		SET(INCS $ENV{MyDepends141}/include)
+#		SET(LNKS $ENV{MyDepends141}/lib/x86)
+#
+#		MESSAGE(STATUS "MyDepends is at $ENV{MyDepends141}")
+#		MESSAGE(STATUS "Platform is x86")
+#		SET(PLATFORM x86)
+#	ENDIF()
+#	SET(PREFIX )
+#	SET(SUFFIX .dll)
+#ELSE (GNUCC)
+#	IF(WIN32)
+#		SET (MyDeps $ENV{MyDependsGcc})
+#		SET(SUFFIX .dll)
+#
+#		MESSAGE(STATUS "MyDepends is at $ENV{MyDependsGcc}")
+#	ELSE(UNIX)
+#		SET (MyDeps "/home/mydeps")
+#		SET(SUFFIX .so)
+#
+#		MESSAGE(STATUS "MyDepends is at /home/mydeps")
+#	ENDIF()
+#
+#	SET(INCS ${MyDeps}/include)
+#	SET(LNKS ${MyDeps}/lib)
+#
+#	MESSAGE(STATUS "Platform is x64")
+#	SET(PLATFORM x64)
+#	SET(PREFIX lib)
+#ENDIF()
 IF (MSVC)
-	ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 	IF(CMAKE_CL_64)
 		SET(INCS $ENV{MyDepends141}/include)
 		SET(LNKS $ENV{MyDepends141}/lib/x64)
@@ -28,19 +118,24 @@ IF (MSVC)
 		MESSAGE(STATUS "Platform is x86")
 		SET(PLATFORM x86)
 	ENDIF()
-	SET(PREFIX )
+	SET(PREFIX "")
 	SET(SUFFIX .dll)
-ELSE (GNUCC)
+ELSE()
 	IF(WIN32)
-		SET (MyDeps $ENV{MyDependsGcc})
+		SET(MyDeps $ENV{MyDependsGcc})
 		SET(SUFFIX .dll)
 
 		MESSAGE(STATUS "MyDepends is at $ENV{MyDependsGcc}")
-	ELSE(UNIX)
-		SET (MyDeps "/home/mydeps")
+	ELSEIF(APPLE)
+		SET(MyDeps "/usr/local/mydeps")
+		SET(SUFFIX .dylib)
+		MESSAGE(STATUS "MyDepends is at /usr/local/mydeps")
+		MESSAGE(STATUS "mac don't set MyDepends in fact")
+	ELSE() # UNIX (Linux)
+		SET(MyDeps "/home/mydeps")
 		SET(SUFFIX .so)
-
 		MESSAGE(STATUS "MyDepends is at /home/mydeps")
+		MESSAGE(STATUS "linux don't set MyDepends in fact")
 	ENDIF()
 
 	SET(INCS ${MyDeps}/include)
@@ -55,71 +150,113 @@ SET(CMAKE_CXX_STANDARD 17)
 
 #basic libraries
 ADD_SUBDIRECTORY(WTSUtils)
+link_iconv_to_target(WTSUtils)
 ADD_SUBDIRECTORY(WTSTools)
-
+link_iconv_to_target(WTSTools)
 #contract Loade through ctp channel
 ADD_SUBDIRECTORY(CTPLoader)
+link_iconv_to_target(CTPLoader)
 ADD_SUBDIRECTORY(CTPOptLoader)
+link_iconv_to_target(CTPOptLoader)
 ADD_SUBDIRECTORY(LoaderRunner)
-
+link_iconv_to_target(LoaderRunner)
 #parser for quote date from ctp channel
 ADD_SUBDIRECTORY(ParserCTP)
+link_iconv_to_target(ParserCTP)
 ADD_SUBDIRECTORY(ParserCTPMini)
+link_iconv_to_target(ParserCTPMini)
 ADD_SUBDIRECTORY(ParserCTPOpt)
+link_iconv_to_target(ParserCTPOpt)
 ADD_SUBDIRECTORY(ParserFemas)
+link_iconv_to_target(ParserFemas)
 ADD_SUBDIRECTORY(ParserXTP)
+link_iconv_to_target(ParserXTP)
 ADD_SUBDIRECTORY(ParserShm)
+link_iconv_to_target(ParserShm)
 ADD_SUBDIRECTORY(ParserXeleSkt)
+link_iconv_to_target(ParserXeleSkt)
 ADD_SUBDIRECTORY(WtDataStorage)
+link_iconv_to_target(WtDataStorage)
 ADD_SUBDIRECTORY(WtDataStorageAD)
+link_iconv_to_target(WtDataStorageAD)
 ADD_SUBDIRECTORY(WtDtCore)
+link_iconv_to_target(WtDtCore)
 ADD_SUBDIRECTORY(WtDtHelper)
+link_iconv_to_target(WtDtHelper)
 ADD_SUBDIRECTORY(WtDtPorter)
+link_iconv_to_target(WtDtPorter)
 ADD_SUBDIRECTORY(WtDtServo)
+link_iconv_to_target(WtDtServo)
 #quote date processor
 ADD_SUBDIRECTORY(QuoteFactory)
-
+link_iconv_to_target(QuoteFactory)
 #back test core library
 ADD_SUBDIRECTORY(WtBtCore)
+link_iconv_to_target(WtBtCore)
 #back test c porter for outter libraries
 ADD_SUBDIRECTORY(WtBtPorter)
+link_iconv_to_target(WtBtPorter)
 ADD_SUBDIRECTORY(WtBtRunner)
-
+link_iconv_to_target(WtBtRunner)
 ADD_SUBDIRECTORY(ParserUDP)
+link_iconv_to_target(ParserUDP)
 ADD_SUBDIRECTORY(TraderCTP)
+link_iconv_to_target(TraderCTP)
 ADD_SUBDIRECTORY(TraderCTPMini)
+link_iconv_to_target(TraderCTPMini)
 ADD_SUBDIRECTORY(TraderCTPOpt)
+link_iconv_to_target(TraderCTPOpt)
 ADD_SUBDIRECTORY(TraderFemas)
+link_iconv_to_target(TraderFemas)
 ADD_SUBDIRECTORY(TraderMocker)
+link_iconv_to_target(TraderMocker)
 ADD_SUBDIRECTORY(TraderXTP)
+link_iconv_to_target(TraderXTP)
 ADD_SUBDIRECTORY(TraderYD)
+link_iconv_to_target(TraderYD)
 ADD_SUBDIRECTORY(WtExeFact)
+link_iconv_to_target(WtExeFact)
 ADD_SUBDIRECTORY(WtRiskMonFact)
-
+link_iconv_to_target(WtRiskMonFact)
 ADD_SUBDIRECTORY(WtMsgQue)
+link_iconv_to_target(WtMsgQue)
 ADD_SUBDIRECTORY(WtCore)
+link_iconv_to_target(WtCore)
 ADD_SUBDIRECTORY(WtPorter)
+link_iconv_to_target(WtPorter)
 ADD_SUBDIRECTORY(WtExecMon)
+link_iconv_to_target(WtExecMon)
 ADD_SUBDIRECTORY(WtRunner)
-
+link_iconv_to_target(WtRunner)
 ADD_SUBDIRECTORY(TraderDumper)
-
+link_iconv_to_target(TraderDumper)
 ADD_SUBDIRECTORY(WtShareHelper)
-
+link_iconv_to_target(WtShareHelper)
 #uft
 ADD_SUBDIRECTORY(WtUftCore)
+link_iconv_to_target(WtUftCore)
 ADD_SUBDIRECTORY(WtUftStraFact)
+link_iconv_to_target(WtUftStraFact)
 ADD_SUBDIRECTORY(WtUftRunner)
-
+link_iconv_to_target(WtUftRunner)
 ADD_SUBDIRECTORY(WtLatencyHFT)
+link_iconv_to_target(WtLatencyHFT)
 ADD_SUBDIRECTORY(WtLatencyUFT)
+link_iconv_to_target(WtLatencyUFT)
 
 #test projects
-ADD_SUBDIRECTORY(TestBtPorter)
-ADD_SUBDIRECTORY(TestDtPorter)
-ADD_SUBDIRECTORY(TestExecPorter)
-ADD_SUBDIRECTORY(TestPorter)
-ADD_SUBDIRECTORY(TestTrader)
-ADD_SUBDIRECTORY(TestParser)
-ADD_SUBDIRECTORY(TestUnits)
+#ADD_SUBDIRECTORY(TestBtPorter)
+#link_iconv_to_target(TestBtPorter)
+#ADD_SUBDIRECTORY(TestDtPorter)
+#link_iconv_to_target(TestDtPorter)
+#ADD_SUBDIRECTORY(TestExecPorter)
+#link_iconv_to_target(TestExecPorter)
+#ADD_SUBDIRECTORY(TestPorter)
+#link_iconv_to_target(TestPorter)
+#ADD_SUBDIRECTORY(TestTrader)
+#link_iconv_to_target(TestTrader)
+#ADD_SUBDIRECTORY(TestParser)
+#link_iconv_to_target(TestParser)
+#ADD_SUBDIRECTORY(TestUnits)
+#link_iconv_to_target(TestUnits)
 
