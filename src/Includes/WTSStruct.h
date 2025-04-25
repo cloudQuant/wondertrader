@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WTSStruct.h
  * \project	WonderTrader
  *
@@ -6,6 +6,9 @@
  * \date 2020/03/30
  * 
  * \brief Wt基础结构体定义
+ * 
+ * 本文件定义了WonderTrader框架中使用的基础数据结构，包括K线数据、Tick数据、
+ * 委托队列、委托明细、成交明细等市场数据相关的结构体
  */
 #pragma once
 #include <memory>
@@ -19,11 +22,14 @@
 
 NS_WTP_BEGIN
 
+// 按1字节对齐，用于旧版本结构体，确保向前兼容
 #pragma pack(push, 1)
 
+// 旧版K线数据结构体，按照1字节对齐方式定义，保留向前兼容性
 struct WTSBarStructOld
 {
 public:
+	// 构造函数，初始化结构体所有成员为0
 	WTSBarStructOld()
 	{
 		memset(this, 0, sizeof(WTSBarStructOld));
@@ -43,10 +49,11 @@ public:
 	int32_t		add;	//增仓
 };
 
+// 旧版Tick数据结构体，按照1字节对齐方式定义，保留向前兼容性
 struct WTSTickStructOld
 {
-	char		exchg[10];
-	char		code[MAX_INSTRUMENT_LENGTH];
+	char		exchg[10];                  // 交易所代码
+	char		code[MAX_INSTRUMENT_LENGTH]; // 合约代码
 
 	double		price;				//最新价
 	double		open;				//开盘价
@@ -87,11 +94,14 @@ struct WTSTickStructOld
 
 //By Wesley @ 2021.12.31
 //新的结构体，全部改成8字节对齐的方式
+//注意：8字节对齐可以提高内存访问效率，尤其在64位系统上
 #pragma pack(push, 8)
 
+// 新版K线数据结构体，采用8字节对齐方式定义，提高访问效率
 struct WTSBarStruct
 {
 public:
+	// 构造函数，初始化结构体所有成员为0
 	WTSBarStruct()
 	{
 		memset(this, 0, sizeof(WTSBarStruct));
@@ -123,6 +133,7 @@ public:
 
 	//By Wesley @ 2021.12.30
 	//直接复制老结构体
+	// 重载赋值运算符，支持从旧版结构体向新版结构体的转换
 	WTSBarStruct& operator = (const WTSBarStructOld& bar)
 	{
 		date = bar.date;
@@ -143,10 +154,11 @@ public:
 	}
 };
 
+// 新版Tick数据结构体，采用8字节对齐方式定义，所有数值类型均使用double提高精度
 struct WTSTickStruct
 {
-	char		exchg[MAX_EXCHANGE_LENGTH];
-	char		code[MAX_INSTRUMENT_LENGTH];
+	char		exchg[MAX_EXCHANGE_LENGTH];       // 交易所代码
+	char		code[MAX_INSTRUMENT_LENGTH];      // 合约代码
 
 	double		price;				//最新价
 	double		open;				//开盘价
@@ -182,6 +194,7 @@ struct WTSTickStruct
 		memset(this, 0, sizeof(WTSTickStruct));
 	}
 
+	// 重载赋值运算符，支持从旧版Tick结构体向新版结构体的转换
 	WTSTickStruct& operator = (const WTSTickStructOld& tick)
 	{
 		strncpy(exchg, tick.exchg, MAX_EXCHANGE_LENGTH);
@@ -223,10 +236,11 @@ struct WTSTickStruct
 	}
 };
 
+// 委托队列数据结构体，存储单条委托队列数据
 struct WTSOrdQueStruct
 {
-	char		exchg[MAX_EXCHANGE_LENGTH];
-	char		code[MAX_INSTRUMENT_LENGTH];
+	char		exchg[MAX_EXCHANGE_LENGTH];       // 交易所代码
+	char		code[MAX_INSTRUMENT_LENGTH];      // 合约代码
 
 	uint32_t	trading_date;		//交易日,如20140327
 	uint32_t	action_date;		//自然日期,如20140327
@@ -244,10 +258,11 @@ struct WTSOrdQueStruct
 	}
 };
 
+// 委托明细数据结构体，存储单条委托明细数据
 struct WTSOrdDtlStruct
 {
-	char		exchg[MAX_EXCHANGE_LENGTH];
-	char		code[MAX_INSTRUMENT_LENGTH];
+	char		exchg[MAX_EXCHANGE_LENGTH];       // 交易所代码
+	char		code[MAX_INSTRUMENT_LENGTH];      // 合约代码
 
 	uint32_t		trading_date;		//交易日,如20140327
 	uint32_t		action_date;		//自然日期,如20140327
@@ -265,10 +280,11 @@ struct WTSOrdDtlStruct
 	}
 };
 
+// 成交明细数据结构体，存储单条成交明细数据
 struct WTSTransStruct
 {
-	char		exchg[MAX_EXCHANGE_LENGTH];
-	char		code[MAX_INSTRUMENT_LENGTH];
+	char		exchg[MAX_EXCHANGE_LENGTH];       // 交易所代码
+	char		code[MAX_INSTRUMENT_LENGTH];      // 合约代码
 
 	uint32_t	trading_date;		//交易日,如20140327
 	uint32_t	action_date;		//自然日期,如20140327
