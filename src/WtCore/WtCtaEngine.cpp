@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtCtaEngine.cpp
  * \project	WonderTrader
  *
@@ -6,6 +6,11 @@
  * \date 2020/03/30
  * 
  * \brief 
+ * 
+ * WtCtaEngine类的实现文件，实现了CTA策略引擎的各项功能
+ * CTA（Commodity Trading Advisor）策略引擎是WonderTrader框架中的核心组件之一
+ * 负责协调多个CTA策略的运行，处理行情数据和交易信号
+ * 实现了定时器、交易执行等功能
  */
 #define WIN32_LEAN_AND_MEAN
 
@@ -31,13 +36,24 @@
 #include <rapidjson/prettywriter.h>
 namespace rj = rapidjson;
 
+/**
+ * @brief WtCtaEngine类的构造函数
+ * 
+ * 初始化CTA策略引擎，将定时器指针设置为NULL
+ */
 WtCtaEngine::WtCtaEngine()
 	: _tm_ticker(NULL)
 {
 	
 }
 
-
+/**
+ * @brief WtCtaEngine类的析构函数
+ * 
+ * 清理CTA策略引擎的资源，包括：
+ * 1. 释放定时器资源
+ * 2. 释放配置对象资源
+ */
 WtCtaEngine::~WtCtaEngine()
 {
 	if (_tm_ticker)
@@ -50,6 +66,15 @@ WtCtaEngine::~WtCtaEngine()
 		_cfg->release();
 }
 
+/**
+ * @brief 启动CTA策略引擎
+ * 
+ * 该方法完成以下工作：
+ * 1. 创建并初始化CTA实时定时器
+ * 2. 将运行中的策略信息保存到marker.json文件中
+ * 3. 启动定时器
+ * 4. 启动风控监控器（如果配置了的话）
+ */
 void WtCtaEngine::run()
 {
 	_tm_ticker = new WtCtaRtTicker(this);
@@ -102,9 +127,23 @@ void WtCtaEngine::run()
 
 	if (_risk_mon)
 		_risk_mon->self()->run();
-
 }
 
+/**
+ * @brief 初始化CTA策略引擎
+ * 
+ * 该方法完成以下工作：
+ * 1. 调用父类WtEngine的init方法初始化基本组件
+ * 2. 保存配置对象
+ * 3. 设置过滤器管理器
+ * 4. 根据配置创建线程池
+ * 
+ * @param cfg 配置对象
+ * @param bdMgr 基础数据管理器
+ * @param dataMgr 数据管理器
+ * @param hotMgr 主力合约管理器
+ * @param notifier 事件通知器，默认为NULL
+ */
 void WtCtaEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHotMgr* hotMgr, EventNotifier* notifier /* = NULL */)
 {
 	WtEngine::init(cfg, bdMgr, dataMgr, hotMgr, notifier);
@@ -122,12 +161,27 @@ void WtCtaEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, I
 	WTSLogger::info("Engine task poolsize is {}", poolsize);
 }
 
+/**
+ * @brief 添加策略上下文
+ * 
+ * 将策略上下文添加到策略映射表中，以便引擎管理和调度
+ * 
+ * @param ctx 策略上下文指针
+ */
 void WtCtaEngine::addContext(CtaContextPtr ctx)
 {
 	uint32_t sid = ctx->id();
 	_ctx_map[sid] = ctx;
 }
 
+/**
+ * @brief 获取策略上下文
+ * 
+ * 根据策略ID从策略映射表中获取对应的策略上下文
+ * 
+ * @param id 策略ID
+ * @return CtaContextPtr 策略上下文指针，如果未找到则返回空指针
+ */
 CtaContextPtr WtCtaEngine::getContext(uint32_t id)
 {
 	auto it = _ctx_map.find(id);
@@ -137,6 +191,15 @@ CtaContextPtr WtCtaEngine::getContext(uint32_t id)
 	return it->second;
 }
 
+/**
+ * @brief 引擎初始化回调函数
+ * 
+ * 该方法在引擎初始化时被调用，主要完成以下工作：
+ * 1. 清除缓存的目标仓位
+ * 2. 调用每个策略上下文的初始化方法
+ * 3. 处理策略的初始持仓，并应用过滤器
+ * 4. 将初始持仓信息传递给执行器
+ */
 void WtCtaEngine::on_init()
 {
 	//wt_hashmap<std::string, double> target_pos;
@@ -208,6 +271,15 @@ void WtCtaEngine::on_init()
 		_evt_listener->on_initialize_event();
 }
 
+/**
+ * @brief 交易日开始回调函数
+ * 
+ * 该方法在每个交易日开始时被调用，主要完成以下工作：
+ * 1. 记录交易日开始的日志
+ * 2. 遍历所有策略上下文，调用其on_session_begin方法
+ * 3. 触发交易日开始事件
+ * 4. 将引擎标记为就绪状态
+ */
 void WtCtaEngine::on_session_begin()
 {
 	WTSLogger::info("Trading day {} begun", _cur_tdate);
@@ -223,6 +295,15 @@ void WtCtaEngine::on_session_begin()
 	_ready = true;
 }
 
+/**
+ * @brief 交易日结束回调函数
+ * 
+ * 该方法在每个交易日结束时被调用，主要完成以下工作：
+ * 1. 调用父类的on_session_end方法
+ * 2. 遍历所有策略上下文，调用其on_session_end方法
+ * 3. 记录交易日结束日志
+ * 4. 触发交易日结束事件
+ */
 void WtCtaEngine::on_session_end()
 {
 	WtEngine::on_session_end();
@@ -238,6 +319,19 @@ void WtCtaEngine::on_session_end()
 		_evt_listener->on_session_event(_cur_tdate, false);
 }
 
+/**
+ * @brief 定时调度回调函数
+ * 
+ * 该方法由定时器定期调用，是策略运行的核心驱动函数，主要完成以下工作：
+ * 1. 加载过滤器并清除缓存的目标仓位
+ * 2. 调用策略的on_schedule方法进行策略计算
+ * 3. 收集各策略的目标仓位并应用过滤器
+ * 4. 处理风控检查和仓位调整
+ * 5. 将目标仓位传递给执行器
+ * 
+ * @param curDate 当前日期，格式为YYYYMMDD
+ * @param curTime 当前时间，格式为HHMMSS
+ */
 void WtCtaEngine::on_schedule(uint32_t curDate, uint32_t curTime)
 {
 	//去检查一下过滤器
@@ -411,13 +505,34 @@ void WtCtaEngine::on_schedule(uint32_t curDate, uint32_t curTime)
 		_evt_listener->on_schedule_event(curDate, curTime);
 }
 
-
+/**
+ * @brief 处理推送的行情数据
+ * 
+ * 该方法接收外部推送的行情数据，并将其转发给定时器的on_tick方法处理
+ * 
+ * @param newTick 新的行情tick数据
+ */
 void WtCtaEngine::handle_push_quote(WTSTickData* newTick)
 {
 	if (_tm_ticker)
 		_tm_ticker->on_tick(newTick);
 }
 
+/**
+ * @brief 处理仓位变化
+ * 
+ * 该方法处理策略仓位的变化，主要完成以下工作：
+ * 1. 应用仓位过滤器
+ * 2. 处理主力合约换月
+ * 3. 计算目标仓位
+ * 4. 应用风控比例
+ * 5. 更新信号并保存数据
+ * 6. 将目标仓位传递给执行器
+ * 
+ * @param straName 策略名称
+ * @param stdCode 标准化合约代码
+ * @param diffPos 仓位变化量
+ */
 void WtCtaEngine::handle_pos_change(const char* straName, const char* stdCode, double diffPos)
 {
 	//这里是持仓增量,所以不用处理未过滤的情况,因为增量情况下,不会改变目标diffQty
@@ -472,6 +587,19 @@ void WtCtaEngine::handle_pos_change(const char* straName, const char* stdCode, d
 		_exec_mgr.handle_pos_change(realCode.c_str(), targetPos, diffPos, execid.c_str());
 }
 
+/**
+ * @brief 处理tick数据
+ * 
+ * 该方法接收外部推送的tick数据，主要完成以下工作：
+ * 1. 调用父类的on_tick方法
+ * 2. 将tick数据传递给数据管理器
+ * 3. 将tick数据传递给执行器
+ * 4. 根据复权模式处理tick数据
+ * 5. 将处理后的tick数据分发给订阅的策略
+ * 
+ * @param stdCode 标准化合约代码
+ * @param curTick 新的tick数据
+ */
 void WtCtaEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 {
 	WtEngine::on_tick(stdCode, curTick);
@@ -621,6 +749,16 @@ void WtCtaEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 	
 }
 
+/**
+ * @brief 处理K线闭合事件
+ * 
+ * 该方法接收外部推送的K线闭合事件，并将其转发给订阅的策略上下文
+ * 
+ * @param stdCode 标准化合约代码
+ * @param period K线周期，如m1、m5、d1等
+ * @param times K线倍数
+ * @param newBar 新的K线数据
+ */
 void WtCtaEngine::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	thread_local static char key[64] = { 0 };
@@ -655,22 +793,54 @@ void WtCtaEngine::on_bar(const char* stdCode, const char* period, uint32_t times
 	WTSLogger::info("KBar [{}] @ {} closed", key, period[0] == 'd' ? newBar->date : newBar->time);
 }
 
+/**
+ * @brief 检查当前是否在交易时段内
+ * 
+ * 该方法通过调用定时器的is_in_trading方法来判断当前是否处于交易时段
+ * 
+ * @return true 如果当前在交易时段内
+ * @return false 如果当前不在交易时段内
+ */
 bool WtCtaEngine::isInTrading()
 {
 	return _tm_ticker->is_in_trading();
 }
 
+/**
+ * @brief 将时间转换为分钟数
+ * 
+ * 该方法通过调用定时器的time_to_mins方法来将时间转换为分钟数
+ * 
+ * @param uTime 时间，格式为HHMMSS
+ * @return uint32_t 转换后的分钟数
+ */
 uint32_t WtCtaEngine::transTimeToMin(uint32_t uTime)
 {
 	return _tm_ticker->time_to_mins(uTime);
 }
 
+/**
+ * @brief 获取品种信息
+ * 
+ * 根据标准化合约代码获取对应的品种信息
+ * 
+ * @param stdCode 标准化合约代码
+ * @return WTSCommodityInfo* 品种信息指针
+ */
 WTSCommodityInfo* WtCtaEngine::get_comm_info(const char* stdCode)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	return _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
 }
 
+/**
+ * @brief 获取交易时段信息
+ * 
+ * 根据标准化合约代码获取对应的交易时段信息
+ * 
+ * @param stdCode 标准化合约代码
+ * @return WTSSessionInfo* 交易时段信息指针，如果未找到对应的品种信息则返回NULL
+ */
 WTSSessionInfo* WtCtaEngine::get_sess_info(const char* stdCode)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -681,23 +851,65 @@ WTSSessionInfo* WtCtaEngine::get_sess_info(const char* stdCode)
 	return cInfo->getSessionInfo();
 }
 
+/**
+ * @brief 获取当前的实时时间戳
+ * 
+ * 根据当前日期和时间生成一个64位的时间戳
+ * 
+ * @return uint64_t 64位时间戳
+ */
 uint64_t WtCtaEngine::get_real_time()
 {
 	return TimeUtils::makeTime(_cur_date, _cur_raw_time * 100000 + _cur_secs);
 }
 
+/**
+ * @brief 通知图表标记
+ * 
+ * 通过事件通知器发送图表标记信息，用于在图表上显示特定的标记
+ * 
+ * @param time 时间戳
+ * @param straId 策略ID
+ * @param price 价格
+ * @param icon 图标
+ * @param tag 标签
+ */
 void WtCtaEngine::notify_chart_marker(uint64_t time, const char* straId, double price, const char* icon, const char* tag)
 {
 	if (_notifier)
 		_notifier->notify_chart_marker(time, straId, price, icon, tag);
 }
 
+/**
+ * @brief 通知图表指标
+ * 
+ * 通过事件通知器发送图表指标信息，用于在图表上绘制指标线
+ * 
+ * @param time 时间戳
+ * @param straId 策略ID
+ * @param idxName 指标名称
+ * @param lineName 线条名称
+ * @param val 指标值
+ */
 void WtCtaEngine::notify_chart_index(uint64_t time, const char* straId, const char* idxName, const char* lineName, double val)
 {
 	if (_notifier)
 		_notifier->notify_chart_index(time, straId, idxName, lineName, val);
 }
 
+/**
+ * @brief 通知交易信息
+ * 
+ * 通过事件通知器发送交易信息，用于记录和显示交易执行情况
+ * 
+ * @param straId 策略ID
+ * @param stdCode 标准化合约代码
+ * @param isLong 是否为多头，true为多头，false为空头
+ * @param isOpen 是否为开仓，true为开仓，false为平仓
+ * @param curTime 当前时间戳
+ * @param price 成交价格
+ * @param userTag 用户标签
+ */
 void WtCtaEngine::notify_trade(const char* straId, const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, const char* userTag)
 {
 	if (_notifier)
