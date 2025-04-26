@@ -6,6 +6,10 @@
  * \date 2020/03/30
  * 
  * \brief 
+ * 
+ * WtEngine是WonderTrader核心交易引擎的基类，实现了交易引擎的基础功能
+ * 包括行情数据订阅和处理、交易信号处理、持仓管理、风控接口、资金管理等
+ * 是整个交易框架的核心组件，为CTA策略引擎、SEL选股引擎和HFT高频引擎提供基础支持
  */
 #include "WtEngine.h"
 #include "WtDtMgr.h"
@@ -36,23 +40,34 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
+/**
+ * @brief WtEngine类的构造函数
+ * @details 初始化交易引擎的基本参数，包括资金对象、风控比例、时间等
+ *          获取当前系统时间并设置为引擎初始时间
+ */
 WtEngine::WtEngine()
-	: _port_fund(NULL)
-	, _risk_volscale(1.0)
-	, _risk_date(0)
-	, _terminated(false)
-	, _evt_listener(NULL)
-	, _adapter_mgr(NULL)
-	, _notifier(NULL)
-	, _fund_udt_span(0)
-	, _ready(false)
+	: _port_fund(NULL)        // 资金对象指针初始化为空
+	, _risk_volscale(1.0)     // 风控仓位比例初始化为1.0（即100%）
+	, _risk_date(0)           // 风控日期初始化为0
+	, _terminated(false)      // 终止标志初始化为false
+	, _evt_listener(NULL)     // 事件监听器初始化为空
+	, _adapter_mgr(NULL)      // 适配器管理器初始化为空
+	, _notifier(NULL)         // 通知器初始化为空
+	, _fund_udt_span(0)       // 资金更新时间间隔初始化为0
+	, _ready(false)           // 就绪标志初始化为false
 {
+	// 获取当前系统日期和时间
 	TimeUtils::getDateTime(_cur_date, _cur_time);
+	// 提取当前时间中的秒数部分
 	_cur_secs = _cur_time % 100000;
+	// 将当前时间转换为HHMM格式（去掉秒数）
 	_cur_time /= 100000;
+	// 保存原始时间格式
 	_cur_raw_time = _cur_time;
+	// 初始化交易日期为当前日期
 	_cur_tdate = _cur_date;
 
+	// 设置全局时间，供其他模块使用
 	WtHelper::setTime(_cur_date, _cur_time, _cur_secs);
 }
 
@@ -412,18 +427,38 @@ uint32_t WtEngine::getTradingDate()
 	return _cur_tdate;
 }
 
+/**
+ * @brief 检查当前是否在交易时段内
+ * @details 检查当前时间是否在交易时段内，这是一个虚函数，在基类中始终返回false
+ *          子类需要重写该函数来实现具体的交易时段检查逻辑
+ * 
+ * @return bool 当前是否在交易时段内，基类中始终返回false
+ */
 bool WtEngine::isInTrading()
 {
 	return false;
 }
 
+/**
+ * @brief 设置仓位风控比例
+ * @details 设置交易引擎的仓位风控比例，该比例用于调整所有仓位的大小
+ *          例如，当比例为0.5时，实际仓位将是理论仓位的0.5倍
+ *          该函数还会更新风控日期并保存数据
+ * 
+ * @param scale 新的仓位风控比例，范围通常在0-1之间
+ */
 void WtEngine::setVolScale(double scale)
 {
+	// 保存旧的风控比例以便记录日志
 	double oldScale = _risk_volscale;
+	// 设置新的风控比例
 	_risk_volscale = scale;
+	// 更新风控日期为当前交易日期
 	_risk_date = _cur_tdate;
 
+	// 记录风控比例更新日志
 	WTSLogger::log_by_cat("risk", LL_INFO, "Position risk scale updated: {} - > {}", oldScale, scale);
+	// 保存数据到持久化存储
 	save_datas();
 }
 
@@ -1389,42 +1424,66 @@ void WtEngine::load_fees(const char* filename)
 	WTSLogger::info("{} fee templates loaded", _fee_map.size());
 }
 
+/**
+ * @brief 计算交易手续费
+ * @details 根据合约代码、价格、数量和开平仓类型计算交易手续费
+ *          支持按手数和按金额两种计算方式，并根据开平仓类型使用不同的费率
+ *          如果找不到对应合约的手续费模板，则返回0.0
+ * 
+ * @param stdCode 标准化合约代码
+ * @param price 交易价格
+ * @param qty 交易数量
+ * @param offset 开平仓类型：0-开仓，1-平仓，2-平今仓
+ * @return double 计算得到的手续费，保留两位小数
+ */
 double WtEngine::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
 {
+	// 解析标准化合约代码，获取商品ID
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	const char* stdPID = codeInfo.stdCommID();
+	// 从手续费映射表中查找对应商品的手续费模板
 	auto it = _fee_map.find(stdPID);
+	// 如果找不到对应的手续费模板，记录警告并返回0.0
 	if (it == _fee_map.end())
 	{
 		WTSLogger::warn("Fee template of {} not found, return 0.0 as default", stdPID);
 		return 0.0;
 	}
 
+	// 初始化返回值
 	double ret = 0.0;
+	// 获取商品信息
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(stdPID);
+	// 获取手续费项
 	const FeeItem& fItem = it->second;
+	// 如果是按手数计算手续费
 	if(fItem._by_volume)
 	{
+		// 根据开平仓类型选择不同的费率
 		switch (offset)
 		{
-		case 0: ret = fItem._open*qty; break;
-		case 1: ret = fItem._close*qty; break;
-		case 2: ret = fItem._close_today*qty; break;
-		default: ret = 0.0; break;
+		case 0: ret = fItem._open*qty; break;        // 开仓手续费 = 开仓费率 * 数量
+		case 1: ret = fItem._close*qty; break;       // 平仓手续费 = 平仓费率 * 数量
+		case 2: ret = fItem._close_today*qty; break; // 平今仓手续费 = 平今费率 * 数量
+		default: ret = 0.0; break;                   // 默认情况返回0.0
 		}
 	}
+	// 如果是按金额计算手续费
 	else
 	{
+		// 计算交易金额 = 价格 * 数量 * 合约乘数
 		double amount = price*qty*commInfo->getVolScale();
+		// 根据开平仓类型选择不同的费率
 		switch (offset)
 		{
-		case 0: ret = fItem._open*amount; break;
-		case 1: ret = fItem._close*amount; break;
-		case 2: ret = fItem._close_today*amount; break;
-		default: ret = 0.0; break;
+		case 0: ret = fItem._open*amount; break;        // 开仓手续费 = 开仓费率 * 交易金额
+		case 1: ret = fItem._close*amount; break;       // 平仓手续费 = 平仓费率 * 交易金额
+		case 2: ret = fItem._close_today*amount; break; // 平今仓手续费 = 平今费率 * 交易金额
+		default: ret = 0.0; break;                      // 默认情况返回0.0
 		}
 	}
 
+	// 将手续费四舍五入到两位小数
 	return (int32_t)(ret * 100 + 0.5) / 100.0;
 }
 
