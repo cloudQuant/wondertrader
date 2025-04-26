@@ -1,12 +1,15 @@
-﻿/*!
+/*!
  * \file WtEngine.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief WonderTrader核心交易引擎类头文件。
+ * \details 定义了WtEngine类及其相关成员，是WonderTrader框架的核心组件，负责管理策略、行情、订单、资金、风控等核心交易逻辑。
+ * 本文件为新手提供了清晰的接口和结构说明，便于快速理解和上手。
  */
+
 #pragma once
 #include <queue>
 #include <functional>
@@ -27,41 +30,117 @@
 
 
 NS_WTP_BEGIN
+/**
+ * @class WTSSessionInfo
+ * @brief 会话信息类
+ */
 class WTSSessionInfo;
+/**
+ * @class WTSCommodityInfo
+ * @brief 品种信息类
+ */
 class WTSCommodityInfo;
+/**
+ * @class WTSContractInfo
+ * @brief 合约信息类
+ */
 class WTSContractInfo;
 
+/**
+ * @class IBaseDataMgr
+ * @brief 基础数据管理器接口
+ */
 class IBaseDataMgr;
+/**
+ * @class IHotMgr
+ * @brief 主力管理器接口
+ */
 class IHotMgr;
 
+/**
+ * @class WTSVariant
+ * @brief 变量类
+ */
 class WTSVariant;
 
+/**
+ * @class WTSTickData
+ * @brief Tick数据类
+ */
 class WTSTickData;
+/**
+ * @struct WTSBarStruct
+ * @brief K线数据结构体
+ */
 struct WTSBarStruct;
+/**
+ * @class WTSTickSlice
+ * @brief Tick数据切片类
+ */
 class WTSTickSlice;
+/**
+ * @class WTSKlineSlice
+ * @brief K线数据切片类
+ */
 class WTSKlineSlice;
+/**
+ * @class WTSPortFundInfo
+ * @brief 组合资金信息类
+ */
 class WTSPortFundInfo;
 
+/**
+ * @class WtDtMgr
+ * @brief 数据管理器类
+ */
 class WtDtMgr;
+/**
+ * @class TraderAdapterMgr
+ * @brief 适配器管理器类
+ */
 class TraderAdapterMgr;
 
+/**
+ * @class EventNotifier
+ * @brief 事件通知器类
+ */
 class EventNotifier;
 
+/**
+ * @typedef TaskItem
+ * @brief 任务项类型定义
+ */
 typedef std::function<void()>	TaskItem;
 
+/**
+ * @class WtRiskMonWrapper
+ * @brief 风控监控器包装类
+ */
 class WtRiskMonWrapper
 {
 public:
-	WtRiskMonWrapper(WtRiskMonitor* mon, IRiskMonitorFact* fact) :_mon(mon), _fact(fact){}
-	~WtRiskMonWrapper()
-	{
-		if (_mon)
-		{
-			_fact->deleteRiskMonotor(_mon);
-		}
-	}
+    /**
+     * @brief 构造函数
+     * @param mon 风控监控器指针
+     * @param fact 风控监控器工厂指针
+     */
+    WtRiskMonWrapper(WtRiskMonitor* mon, IRiskMonitorFact* fact) :_mon(mon), _fact(fact){}
+    /**
+     * @brief 析构函数
+     */
+    ~WtRiskMonWrapper()
+    {
+        if (_mon)
+        {
+            _fact->deleteRiskMonotor(_mon);
+        }
+    }
 
-	WtRiskMonitor* self(){ return _mon; }
+    /**
+     * @brief 获取风控监控器指针
+     * @return 风控监控器指针
+     */
+    WtRiskMonitor* self(){ return _mon; }
 
 
 private:
@@ -257,34 +336,53 @@ protected:
 	FeeMap		_fee_map;
 	
 
-	WTSPortFundInfo*	_port_fund;
+	    /**
+     * @brief 组合资金信息指针
+     * @details 用于记录当前交易组合的资金状况，包括动态权益、可用资金等
+     */
+    WTSPortFundInfo*	_port_fund;
 
 	//////////////////////////////////////////////////////////////////////////
-	//持仓数据
+	/**
+     * @brief 持仓明细信息结构体
+     * @details 记录每一笔持仓的详细信息，如方向、价格、数量、开仓时间等
+     */
 	typedef struct _DetailInfo
 	{
-		bool		_long;
-		double		_price;
-		double		_volume;
-		uint64_t	_opentime;
-		uint32_t	_opentdate;
-		double		_profit;
+		bool		_long;      ///< 持仓方向，true为多头，false为空头
+		double		_price;     ///< 开仓价格
+		double		_volume;    ///< 持仓数量
+		uint64_t	_opentime;  ///< 开仓时间戳
+		uint32_t	_opentdate; ///< 开仓日期
+		double		_profit;    ///< 当前持仓的浮动盈亏
 
+		/**
+         * @brief 构造函数
+         * @details 初始化所有成员变量为0
+         */
 		_DetailInfo()
 		{
 			memset(this, 0, sizeof(_DetailInfo));
 		}
 	} DetailInfo;
 
+	/**
+     * @brief 持仓信息结构体
+     * @details 记录某一合约的总持仓、已实现盈亏、浮动盈亏及持仓明细
+     */
 	typedef struct _PosInfo
 	{
-		double		_volume;
-		double		_closeprofit;
-		double		_dynprofit;
-		SpinMutex	_mtx;
+		double		_volume;        ///< 当前总持仓数量
+		double		_closeprofit;   ///< 已实现平仓盈亏
+		double		_dynprofit;     ///< 当前浮动盈亏
+		SpinMutex	_mtx;           ///< 持仓互斥锁，用于多线程保护
 
-		std::vector<DetailInfo> _details;
+		std::vector<DetailInfo> _details; ///< 持仓明细列表
 
+		/**
+         * @brief 构造函数
+         * @details 初始化持仓数量、已实现盈亏和浮动盈亏为0
+         */
 		_PosInfo()
 		{
 			_volume = 0;
@@ -292,44 +390,73 @@ protected:
 			_dynprofit = 0;
 		}
 	} PosInfo;
-	typedef std::shared_ptr<PosInfo> PosInfoPtr;
-	typedef wt_hashmap<std::string, PosInfoPtr> PositionMap;
-	PositionMap		_pos_map;
+	typedef std::shared_ptr<PosInfo> PosInfoPtr;  ///< 持仓信息智能指针
+	typedef wt_hashmap<std::string, PosInfoPtr> PositionMap;  ///< 合约持仓映射表
+	PositionMap		_pos_map;  ///< 当前所有合约的持仓映射表
 
 	//////////////////////////////////////////////////////////////////////////
-	//
+	/**
+     * @brief 合约价格映射表类型
+     * @details 用于存储各合约的最新价格
+     */
 	typedef wt_hashmap<std::string, double> PriceMap;
-	PriceMap		_price_map;
+	PriceMap		_price_map;  ///< 当前合约价格映射表
 
-	//后台任务线程, 把风控和资金, 持仓更新都放到这个线程里去
-	typedef std::queue<TaskItem>	TaskQueue;
-	StdThreadPtr	_thrd_task;
-	TaskQueue		_task_queue;
-	StdUniqueMutex	_mtx_task;
-	StdCondVariable	_cond_task;
-	bool			_terminated;
+	/**
+     * @brief 后台任务线程相关成员
+     * @details 用于异步处理风控、资金、持仓等更新任务
+     */
+	typedef std::queue<TaskItem>	TaskQueue;  ///< 任务队列类型
+	StdThreadPtr	_thrd_task;    ///< 后台任务线程指针
+	TaskQueue		_task_queue;   ///< 任务队列
+	StdUniqueMutex	_mtx_task;     ///< 任务队列互斥锁
+	StdCondVariable	_cond_task;    ///< 任务队列条件变量
+	bool			_terminated;   ///< 任务线程终止标志
 
+	/**
+     * @brief 风控工厂信息结构体
+     * @details 记录风控动态库、工厂对象及其创建/销毁方法
+     */
 	typedef struct _RiskMonFactInfo
 	{
-		std::string		_module_path;
-		DllHandle		_module_inst;
-		IRiskMonitorFact*	_fact;
-		FuncCreateRiskMonFact	_creator;
-		FuncDeleteRiskMonFact	_remover;
+		std::string		_module_path;  ///< 风控动态库路径
+		DllHandle		_module_inst;  ///< 动态库实例句柄
+		IRiskMonitorFact*	_fact;  ///< 风控工厂对象指针
+		FuncCreateRiskMonFact	_creator;  ///< 创建工厂方法指针
+		FuncDeleteRiskMonFact	_remover;  ///< 销毁工厂方法指针
 	} RiskMonFactInfo;
-	RiskMonFactInfo	_risk_fact;
-	WtRiskMonPtr	_risk_mon;
-	double			_risk_volscale;
-	uint32_t		_risk_date;
+	RiskMonFactInfo	_risk_fact;  ///< 当前风控工厂信息
+	WtRiskMonPtr	_risk_mon;  ///< 风控实例智能指针
+	double			_risk_volscale;  ///< 风控用合约乘数
+	uint32_t		_risk_date;  ///< 风控日期
 
+	/**
+     * @brief 交易适配器管理器指针
+     * @details 用于管理不同交易接口的适配器
+     */
 	TraderAdapterMgr*	_adapter_mgr;
 
+	/**
+     * @brief 交易日志文件指针
+     * @details 用于记录交易执行详情
+     */
 	BoostFilePtr	_trade_logs;
+	/**
+     * @brief 平仓日志文件指针
+     * @details 用于记录平仓执行详情
+     */
 	BoostFilePtr	_close_logs;
 
+	/**
+     * @brief 复权因子缓存表
+     * @details 缓存各合约的复权因子，提高计算效率
+     */
 	wt_hashmap<std::string, double>	_factors_cache;
 
-	//用于标记是否可以推送tickle
+	/**
+     * @brief 系统就绪标志
+     * @details 标记引擎是否已完成初始化，可以推送tick数据
+     */
 	bool			_ready;
 };
 NS_WTP_END
