@@ -1,11 +1,14 @@
-﻿/*!
+/*!
 * \file MfStraBaseCtx.cpp
 * \project	WonderTrader
 *
 * \author Wesley
 * \date 2020/03/30
 *
-* \brief
+* \brief 选股策略基础上下文实现文件
+* \details 该文件实现了选股策略的基础上下文类，提供了策略运行所需的各种核心功能，
+*          包括持仓管理、信号生成、资金计算、日志记录等。选股策略是WonderTrader中
+*          用于股票市场的策略类型，专注于股票池的管理和调整。
 */
 #include "SelStraBaseCtx.h"
 #include "WtSelEngine.h"
@@ -26,6 +29,13 @@
 
 namespace rj = rapidjson;
 
+/**
+* @brief 生成选股策略上下文ID
+* @return 返回唯一的上下文ID
+* @details 通过原子操作生成唯一的上下文ID，起始值为3000
+*          每次调用此函数都会返回一个新的ID值（当前值），并将内部计数器加1
+*          这确保了每个选股策略实例都有唯一的标识符
+*/
 inline uint32_t makeSelCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 3000 };
@@ -33,6 +43,14 @@ inline uint32_t makeSelCtxId()
 }
 
 
+/**
+* @brief 选股策略基础上下文类构造函数
+* @param engine 选股引擎指针
+* @param name 策略名称
+* @param slippage 滑点设置
+* @details 初始化选股策略上下文，设置策略名称、引擎指针和滑点，
+*          并初始化所有内部状态变量，通过makeSelCtxId生成唯一的上下文ID
+*/
 SelStraBaseCtx::SelStraBaseCtx(WtSelEngine* engine, const char* name, int32_t slippage)
 	: ISelStraCtx(name)
 	, _engine(engine)
@@ -48,10 +66,20 @@ SelStraBaseCtx::SelStraBaseCtx(WtSelEngine* engine, const char* name, int32_t sl
 }
 
 
+/**
+* @brief 选股策略基础上下文类析构函数
+* @details 负责清理选股策略上下文实例，释放相关资源
+*/
 SelStraBaseCtx::~SelStraBaseCtx()
 {
 }
 
+/**
+* @brief 初始化策略输出文件
+* @details 创建并初始化策略所需的所有日志输出文件，包括交易日志、平仓日志、资金日志、信号日志和持仓日志
+*          所有输出文件都采用CSV格式，放置在以策略名称命名的专用文件夹中
+*          如果是初次创建文件，会写入CSV标题行；如果文件已存在，则将文件指针移动到末尾追加内容
+*/
 void SelStraBaseCtx::init_outputs()
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -135,6 +163,16 @@ void SelStraBaseCtx::init_outputs()
 	}
 }
 
+/**
+ * @brief 记录信号日志
+ * @param stdCode 标准合约代码
+ * @param target 目标仓位
+ * @param price 信号价格
+ * @param gentime 信号生成时间
+ * @param usertag 用户标签，默认为空字符串
+ * @details 将信号信息写入信号日志文件，格式为CSV
+ *          包含字段：合约代码、目标仓位、信号价格、生成时间和用户标签
+ */
 void SelStraBaseCtx::log_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag /* = "" */)
 {
 	if (_sig_logs)
@@ -145,6 +183,19 @@ void SelStraBaseCtx::log_signal(const char* stdCode, double target, double price
 	}
 }
 
+/**
+ * @brief 记录交易日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头
+ * @param isOpen 是否为开仓
+ * @param curTime 当前时间
+ * @param price 成交价格
+ * @param qty 成交数量
+ * @param userTag 用户标签
+ * @param fee 手续费
+ * @details 将交易信息写入交易日志文件，格式为CSV
+ *          包含字段：合约代码、时间、方向(LONG/SHORT)、动作(OPEN/CLOSE)、价格、数量、用户标签和手续费
+ */
 void SelStraBaseCtx::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag, double fee)
 {
 	if (_trade_logs)
@@ -155,6 +206,22 @@ void SelStraBaseCtx::log_trade(const char* stdCode, bool isLong, bool isOpen, ui
 	}
 }
 
+/**
+ * @brief 记录平仓日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头
+ * @param openTime 开仓时间
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间
+ * @param closepx 平仓价格
+ * @param qty 平仓数量
+ * @param profit 平仓盈亏
+ * @param totalprofit 累计盈亏，默认为0
+ * @param enterTag 开仓标签，默认为空字符串
+ * @param exitTag 平仓标签，默认为空字符串
+ * @details 将平仓信息写入平仓日志文件，格式为CSV
+ *          包含字段：合约代码、方向、开仓时间、开仓价格、平仓时间、平仓价格、数量、盈亏、累计盈亏、开仓标签和平仓标签
+ */
 void SelStraBaseCtx::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty,
 	double profit, double totalprofit /* = 0 */, const char* enterTag /* = "" */, const char* exitTag /* = "" */)
 {
@@ -168,6 +235,13 @@ void SelStraBaseCtx::log_close(const char* stdCode, bool isLong, uint64_t openTi
 	}
 }
 
+/**
+ * @brief 保存用户自定义数据
+ * @details 将用户自定义数据保存到JSON文件中，文件名格式为"ud_策略名.json"
+ *          每次调用此函数时，会将_user_datas映射中的所有键值对写入文件
+ *          文件保存在WtHelper::getStraUsrDatDir()指定的目录中
+ *          使用RapidJSON库将数据序列化为JSON格式
+ */
 void SelStraBaseCtx::save_userdata()
 {
 	//ini.save(filename.c_str());
@@ -196,6 +270,13 @@ void SelStraBaseCtx::save_userdata()
 	}
 }
 
+/**
+ * @brief 加载用户自定义数据
+ * @details 从JSON文件中加载用户自定义数据到_user_datas映射中
+ *          文件名格式为"ud_策略名.json"，位于WtHelper::getStraUsrDatDir()指定的目录
+ *          如果文件不存在或内容为空，则不进行任何操作
+ *          使用RapidJSON库解析JSON格式的数据，并将每个键值对加载到_user_datas映射中
+ */
 void SelStraBaseCtx::load_userdata()
 {
 	std::string filename = WtHelper::getStraUsrDatDir();
@@ -483,6 +564,17 @@ void SelStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
 
 //////////////////////////////////////////////////////////////////////////
 //回调函数
+/**
+ * @brief K线数据回调函数
+ * @param stdCode 标准合约代码
+ * @param period 周期标识
+ * @param times 周期倍数
+ * @param newBar 新K线数据指针
+ * @details 当新的K线数据到达时调用此函数，将调用on_bar_close处理K线闭合事件
+ *          首先检查newBar是否为空，如果为空则直接返回
+ *          然后生成实际周期标识（包含周期和倍数）和唯一键
+ *          最后标记K线已闭合，并调用on_bar_close函数
+ */
 void SelStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (newBar == NULL)
@@ -500,6 +592,14 @@ void SelStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t ti
 	on_bar_close(stdCode, realPeriod, newBar);
 }
 
+/**
+ * @brief 策略初始化回调函数
+ * @details 在策略初始化时调用，完成以下初始化工作：
+ *          1. 调用init_outputs()初始化所有输出文件
+ *          2. 调用load_data()加载策略数据，包括持仓、资金和信号信息
+ *          3. 调用load_userdata()加载用户自定义数据
+ *          这些初始化操作确保策略在开始运行前加载必要的数据和设置
+ */
 void SelStraBaseCtx::on_init()
 {
 	init_outputs();
@@ -1064,6 +1164,14 @@ void SelStraBaseCtx::stra_log_error(const char* message)
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载用户数据
+ * @param key 数据键名
+ * @param defVal 默认值，当键不存在时返回，默认为空字符串
+ * @return 返回与键关联的值，如果键不存在则返回默认值
+ * @details 从_user_datas映射中检索指定键的值
+ *          这是策略代码用来访问用户数据的主要接口
+ */
 const char* SelStraBaseCtx::stra_load_user_data(const char* key, const char* defVal /*= ""*/)
 {
 	auto it = _user_datas.find(key);
@@ -1073,6 +1181,14 @@ const char* SelStraBaseCtx::stra_load_user_data(const char* key, const char* def
 	return defVal;
 }
 
+/**
+ * @brief 保存用户数据
+ * @param key 数据键名
+ * @param val 数据值
+ * @details 将指定的键值对保存到_user_datas映射中，并标记数据已修改
+ *          这是策略代码用来存储用户数据的主要接口
+ *          注意：调用此函数后，数据不会立即写入文件，而是在策略调度结束或交易日结束时保存
+ */
 void SelStraBaseCtx::stra_save_user_data(const char* key, const char* val)
 {
 	_user_datas[key] = val;
