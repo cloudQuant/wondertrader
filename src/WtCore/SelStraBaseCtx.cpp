@@ -308,6 +308,14 @@ void SelStraBaseCtx::load_userdata()
 	}
 }
 
+/**
+ * @brief 加载策略数据
+ * @param flag 加载标志，默认为0xFFFFFFFF（加载所有数据）
+ * @details 从JSON文件中加载策略数据，包括资金信息、持仓信息和信号信息
+ *          文件名格式为"策略名.json"，位于WtHelper::getStraDataDir()指定的目录
+ *          如果文件不存在或内容为空，或者JSON解析出错，则直接返回
+ *          该函数会对过期合约进行特殊处理，忽略其持仓和信号
+ */
 void SelStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 {
 	std::string filename = WtHelper::getStraDataDir();
@@ -458,6 +466,15 @@ void SelStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 	}
 }
 
+/**
+ * @brief 保存策略数据
+ * @param flag 保存标志，默认为0xFFFFFFFF（保存所有数据）
+ * @details 将策略数据保存到JSON文件中，包括持仓数据、资金数据和信号数据
+ *          文件名格式为"策略名.json"，位于WtHelper::getStraDataDir()指定的目录
+ *          使用RapidJSON库将数据序列化为JSON格式
+ *          持仓数据包含总量、平仓盈亏、动态盈亏、冻结仓位等信息
+ *          每个持仓还包含详细信息，如方向、价格、最高价、最低价等
+ */
 void SelStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
 {
 	rj::Document root(rj::kObjectType);
@@ -610,6 +627,16 @@ void SelStraBaseCtx::on_init()
 	load_userdata();
 }
 
+/**
+ * @brief 更新动态盈亏
+ * @param stdCode 标准合约代码
+ * @param price 最新价格
+ * @details 根据最新价格更新指定合约持仓的动态盈亏
+ *          如果持仓量为0，则动态盈亏为0
+ *          否则遍历所有持仓明细，计算每一笔的盈亏并累计
+ *          同时更新每笔持仓的最大盈利、最大亏损、最高价和最低价
+ *          最后更新策略总的动态盈亏
+ */
 void SelStraBaseCtx::update_dyn_profit(const char* stdCode, double price)
 {
 	auto it = _pos_map.find(stdCode);
@@ -653,6 +680,18 @@ void SelStraBaseCtx::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
+/**
+ * @brief Tick数据回调函数
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据指针
+ * @param bEmitStrategy 是否触发策略回调，默认为true
+ * @details 当新的Tick数据到达时调用此函数，完成以下处理：
+ *          1. 更新合约的最新价格到价格映射中
+ *          2. 检查并触发待执行的信号（如果在交易时间内）
+ *          3. 更新合约的动态盈亏
+ *          4. 调用用户定义的tick更新回调函数（如果bEmitStrategy为true）
+ *          5. 如果用户数据已修改，则保存用户数据
+ */
 void SelStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
 {
 	_price_map[stdCode] = newTick->price();
@@ -686,6 +725,21 @@ void SelStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEm
 	}
 }
 
+/**
+ * @brief 定时调度回调函数
+ * @param curDate 当前日期，格式为YYYYMMDD
+ * @param curTime 当前时间，格式为HHMMSS
+ * @param fireTime 触发时间
+ * @return 调度是否成功
+ * @details 在定时调度时调用，执行策略调度逻辑，完成以下处理：
+ *          1. 记录当前的日期和时间，并标记进入调度状态
+ *          2. 保存策略数据（包括浮动盈亏）
+ *          3. 调用用户定义的策略调度函数
+ *          4. 清理无效持仓（新信号中不存在的持仓）
+ *          5. 记录调度统计信息（调度次数和计算时间）
+ *          6. 如果用户数据已修改，则保存用户数据
+ *          7. 标记调度结束
+ */
 bool SelStraBaseCtx::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime)
 {
 	_schedule_date = curDate;
@@ -734,6 +788,14 @@ bool SelStraBaseCtx::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fi
 	return true;
 }
 
+/**
+ * @brief 交易日开始回调函数
+ * @param uTDate 交易日，格式为YYYYMMDD
+ * @details 在每个交易日开始时调用，完成以下处理：
+ *          1. 释放过期的冻结持仓（冻结日期早于当前交易日的持仓）
+ *          2. 如果用户数据已修改，则保存用户数据
+ *          这个函数主要处理T+1交易规则下的冻结仓位释放
+ */
 void SelStraBaseCtx::on_session_begin(uint32_t uTDate)
 {
 	//每个交易日开始，要把冻结持仓置零
@@ -757,6 +819,14 @@ void SelStraBaseCtx::on_session_begin(uint32_t uTDate)
 	}
 }
 
+/**
+ * @brief 枚举所有持仓和信号
+ * @param cb 持仓回调函数，类型为FuncEnumSelPositionCallBack
+ * @details 对所有持仓和信号进行枚举，并调用回调函数
+ *          首先收集所有实际持仓信息，然后收集所有信号信息
+ *          如果同一合约既有持仓又有信号，信号会覆盖持仓
+ *          最后对每个合约调用回调函数，传入合约代码和目标仓位
+ */
 void SelStraBaseCtx::enum_position(FuncEnumSelPositionCallBack cb)
 {
 	wt_hashmap<std::string, double> desPos;
@@ -780,6 +850,16 @@ void SelStraBaseCtx::enum_position(FuncEnumSelPositionCallBack cb)
 	}
 }
 
+/**
+ * @brief 交易日结束回调函数
+ * @param uTDate 交易日，格式为YYYYMMDD
+ * @details 在每个交易日结束时调用，完成以下处理：
+ *          1. 计算总平仓盈亏和总动态盈亏
+ *          2. 记录每个非零持仓的日志，包括合约、数量、平仓盈亏和动态盈亏
+ *          3. 记录资金日志，包括总平仓盈亏、总动态盈亏、净值和手续费
+ *          4. 保存策略数据
+ *          5. 如果用户数据已修改，则保存用户数据
+ */
 void SelStraBaseCtx::on_session_end(uint32_t uTDate)
 {
 	uint32_t curDate = uTDate;//_engine->get_trading_date();
