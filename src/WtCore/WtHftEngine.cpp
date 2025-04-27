@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file WtHftEngine.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 高频交易引擎实现文件
+ * \details 本文件实现了WonderTrader高频交易引擎类(WtHftEngine)
+ *          高频交易引擎负责管理和执行高频交易策略
+ *          包括接收市场数据、处理订单和成交信息、管理策略上下文等
  */
 #define WIN32_LEAN_AND_MEAN
 
@@ -29,6 +32,10 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
+/**
+ * @brief 高频交易引擎构造函数
+ * @details 初始化高频交易引擎对象，将配置和定时器成员设置为空
+ */
 WtHftEngine::WtHftEngine()
 	: _cfg(NULL)
 	, _tm_ticker(NULL)
@@ -36,6 +43,10 @@ WtHftEngine::WtHftEngine()
 }
 
 
+/**
+ * @brief 高频交易引擎析构函数
+ * @details 清理高频交易引擎资源，包括停止并释放定时器、释放配置对象
+ */
 WtHftEngine::~WtHftEngine()
 {
 	if (_tm_ticker)
@@ -49,6 +60,15 @@ WtHftEngine::~WtHftEngine()
 		_cfg->release();
 }
 
+/**
+ * @brief 初始化高频交易引擎
+ * @param cfg 配置项
+ * @param bdMgr 基础数据管理器
+ * @param dataMgr 数据管理器
+ * @param hotMgr 主力合约管理器
+ * @param notifier 事件通知器，默认为空
+ * @details 初始化高频交易引擎，首先调用基类的init函数，然后保存并增加配置对象的引用计数
+ */
 void WtHftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHotMgr* hotMgr, EventNotifier* notifier /* = NULL */)
 {
 	WtEngine::init(cfg, bdMgr, dataMgr, hotMgr, notifier);
@@ -57,6 +77,14 @@ void WtHftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, I
 	_cfg->retain();
 }
 
+/**
+ * @brief 启动高频交易引擎
+ * @details 启动高频交易引擎的运行，包括以下步骤：
+ *          1. 初始化所有高频策略上下文
+ *          2. 创建并初始化高频实时定时器
+ *          3. 将运行中的策略和交易通道信息写入marker.json文件
+ *          4. 启动定时器开始运行
+ */
 void WtHftEngine::run()
 {
 	for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
@@ -106,12 +134,26 @@ void WtHftEngine::run()
 	_tm_ticker->run();
 }
 
+/**
+ * @brief 处理推送的行情数据
+ * @param newTick 新的Tick数据
+ * @details 将推送的行情数据转发给高频实时定时器进行处理
+ *          如果定时器存在，则调用定时器的on_tick函数
+ */
 void WtHftEngine::handle_push_quote(WTSTickData* newTick)
 {
 	if (_tm_ticker)
 		_tm_ticker->on_tick(newTick);
 }
 
+/**
+ * @brief 处理推送的委托明细数据
+ * @param curOrdDtl 当前委托明细数据
+ * @details 将推送的委托明细数据分发给订阅了该合约的策略
+ *          首先获取合约代码，然后查找订阅该合约的策略列表
+ *          对于每个订阅的策略，调用其on_order_detail函数处理委托明细数据
+ *          注意：Level2数据一般用于HFT场景，不做复权处理
+ */
 void WtHftEngine::handle_push_order_detail(WTSOrdDtlData* curOrdDtl)
 {
 	const char* stdCode = curOrdDtl->code();
@@ -135,6 +177,14 @@ void WtHftEngine::handle_push_order_detail(WTSOrdDtlData* curOrdDtl)
 	}
 }
 
+/**
+ * @brief 处理推送的委托队列数据
+ * @param curOrdQue 当前委托队列数据
+ * @details 将推送的委托队列数据分发给订阅了该合约的策略
+ *          首先获取合约代码，然后查找订阅该合约的策略列表
+ *          对于每个订阅的策略，调用其on_order_queue函数处理委托队列数据
+ *          注意：Level2数据一般用于HFT场景，不做复权处理
+ */
 void WtHftEngine::handle_push_order_queue(WTSOrdQueData* curOrdQue)
 {
 	const char* stdCode = curOrdQue->code();
@@ -158,6 +208,14 @@ void WtHftEngine::handle_push_order_queue(WTSOrdQueData* curOrdQue)
 	}
 }
 
+/**
+ * @brief 处理推送的成交明细数据
+ * @param curTrans 当前成交明细数据
+ * @details 将推送的成交明细数据分发给订阅了该合约的策略
+ *          首先获取合约代码，然后查找订阅该合约的策略列表
+ *          对于每个订阅的策略，调用其on_transaction函数处理成交明细数据
+ *          注意：Level2数据一般用于HFT场景，不做复权处理
+ */
 void WtHftEngine::handle_push_transaction(WTSTransData* curTrans)
 {
 	const char* stdCode = curTrans->code();
@@ -181,6 +239,14 @@ void WtHftEngine::handle_push_transaction(WTSTransData* curTrans)
 	}
 }
 
+/**
+ * @brief 订阅委托明细数据
+ * @param sid 策略ID
+ * @param stdCode 标准合约代码
+ * @details 为指定策略订阅指定合约的委托明细数据
+ *          首先处理合约代码，如果带有复权后缀（+或-），则去除后缀
+ *          然后将策略ID添加到该合约的订阅列表中，订阅标记设置为0（无复权）
+ */
 void WtHftEngine::sub_order_detail(uint32_t sid, const char* stdCode)
 {
 	std::size_t length = strlen(stdCode);
@@ -191,6 +257,14 @@ void WtHftEngine::sub_order_detail(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, 0);
 }
 
+/**
+ * @brief 订阅委托队列数据
+ * @param sid 策略ID
+ * @param stdCode 标准合约代码
+ * @details 为指定策略订阅指定合约的委托队列数据
+ *          首先处理合约代码，如果带有复权后缀（+或-），则去除后缀
+ *          然后将策略ID添加到该合约的订阅列表中，订阅标记设置为0（无复权）
+ */
 void WtHftEngine::sub_order_queue(uint32_t sid, const char* stdCode)
 {
 	std::size_t length = strlen(stdCode);
@@ -201,6 +275,14 @@ void WtHftEngine::sub_order_queue(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, 0);
 }
 
+/**
+ * @brief 订阅成交明细数据
+ * @param sid 策略ID
+ * @param stdCode 标准合约代码
+ * @details 为指定策略订阅指定合约的成交明细数据
+ *          首先处理合约代码，如果带有复权后缀（+或-），则去除后缀
+ *          然后将策略ID添加到该合约的订阅列表中，订阅标记设置为0（无复权）
+ */
 void WtHftEngine::sub_transaction(uint32_t sid, const char* stdCode)
 {
 	std::size_t length = strlen(stdCode);
@@ -211,6 +293,14 @@ void WtHftEngine::sub_transaction(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, 0);
 }
 
+/**
+ * @brief Tick数据回调函数
+ * @param stdCode 标准合约代码
+ * @param curTick 当前Tick数据
+ * @details 当新的Tick数据到达时调用，处理并分发给相关策略
+ *          首先调用基类的on_tick函数，然后将数据推送给数据管理器
+ *          最后根据订阅情况将数据分发给相关策略，并处理不同的复权模式
+ */
 void WtHftEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 {
 	WtEngine::on_tick(stdCode, curTick);
@@ -277,6 +367,16 @@ void WtHftEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 	}
 }
 
+/**
+ * @brief K线数据回调函数
+ * @param stdCode 标准合约代码
+ * @param period 周期标识，如"m1"表示1分钟，"d1"表示日线
+ * @param times 周期倍数
+ * @param newBar 新的K线数据
+ * @details 当新的K线数据生成时调用，处理并分发给订阅了该K线的策略
+ *          首先根据合约代码、周期和倍数生成唯一的订阅键
+ *          然后遍历订阅了该K线的策略，调用其on_bar函数处理K线数据
+ */
 void WtHftEngine::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	thread_local static char key[64] = { 0 };
@@ -295,6 +395,15 @@ void WtHftEngine::on_bar(const char* stdCode, const char* period, uint32_t times
 	}
 }
 
+/**
+ * @brief 交易日开始回调函数
+ * @details 在每个交易日开始时调用，执行交易日开始时的相关操作
+ *          1. 记录交易日开始日志
+ *          2. 调用基类的on_session_begin函数
+ *          3. 通知所有策略上下文交易日开始
+ *          4. 通知事件监听器交易日开始事件
+ *          5. 将引擎状态设置为就绪
+ */
 void WtHftEngine::on_session_begin()
 {
 	WTSLogger::info("Trading day {} begun", _cur_tdate);
@@ -312,6 +421,14 @@ void WtHftEngine::on_session_begin()
 	_ready = true;
 }
 
+/**
+ * @brief 交易日结束回调函数
+ * @details 在每个交易日结束时调用，执行交易日结束时的相关操作
+ *          1. 调用基类的on_session_end函数
+ *          2. 通知所有策略上下文交易日结束
+ *          3. 记录交易日结束日志
+ *          4. 通知事件监听器交易日结束事件
+ */
 void WtHftEngine::on_session_end()
 {
 	WtEngine::on_session_end();
@@ -327,6 +444,13 @@ void WtHftEngine::on_session_end()
 		_evt_listener->on_session_event(_cur_tdate, false);
 }
 
+/**
+ * @brief 分钟结束回调函数
+ * @param curDate 当前日期，格式YYYYMMDD
+ * @param curTime 当前时间，格式HHMMSS或HHMMSS000
+ * @details 在每分钟结束时调用，执行分钟结束时的相关操作
+ *          注意：当前版本已去掉高频策略的on_schedule调用，实际上这个函数不执行任何操作
+ */
 void WtHftEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 {
 	//已去掉高频策略的on_schedule
@@ -337,12 +461,25 @@ void WtHftEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 	//}
 }
 
+/**
+ * @brief 添加高频策略上下文
+ * @param ctx 高频策略上下文指针
+ * @details 将高频策略上下文添加到引擎中进行管理
+ *          首先获取策略上下文的ID，然后将其添加到策略映射表中
+ */
 void WtHftEngine::addContext(HftContextPtr ctx)
 {
 	uint32_t sid = ctx->id();
 	_ctx_map[sid] = ctx;
 }
 
+/**
+ * @brief 获取高频策略上下文
+ * @param id 策略ID
+ * @return HftContextPtr 高频策略上下文指针
+ * @details 根据策略ID获取对应的高频策略上下文
+ *          如果策略ID不存在，则返回空指针
+ */
 HftContextPtr WtHftEngine::getContext(uint32_t id)
 {
 	auto it = _ctx_map.find(id);
