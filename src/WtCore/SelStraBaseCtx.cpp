@@ -1314,21 +1314,49 @@ double SelStraBaseCtx::stra_get_day_price(const char* stdCode, int flag /* = 0 *
 	return 0.0;
 }
 
+/**
+ * @brief 获取当前交易日
+ * @return 返回当前交易日，格式为YYYYMMDD
+ * @details 从引擎中获取当前的交易日期
+ *          交易日是指当前的交易日期，可能与自然日不同
+ *          例如，夜盘交易时，交易日是指下一个交易日
+ */
 uint32_t SelStraBaseCtx::stra_get_tdate()
 {
 	return _engine->get_trading_date();
 }
 
+/**
+ * @brief 获取当前日期
+ * @return 返回当前日期，格式为YYYYMMDD
+ * @details 获取当前的日期，根据是否在调度中返回不同的值
+ *          如果在调度中，返回调度日期；否则返回引擎当前日期
+ *          与交易日不同，这个函数返回的是实际的自然日期
+ */
 uint32_t SelStraBaseCtx::stra_get_date()
 {
 	return _is_in_schedule ? _schedule_date : _engine->get_date();
 }
 
+/**
+ * @brief 获取当前时间
+ * @return 返回当前时间，格式为HHMMSS
+ * @details 获取当前的时间，根据是否在调度中返回不同的值
+ *          如果在调度中，返回调度时间；否则返回引擎当前分钟时间
+ *          这个函数通常用于获取当前策略运行的时间点
+ */
 uint32_t SelStraBaseCtx::stra_get_time()
 {
 	return _is_in_schedule ? _schedule_time : _engine->get_min_time();
 }
 
+/**
+ * @brief 获取资金数据
+ * @param flag 资金数据标志，0表示总资金（0号资金 = 平仓盈亏 + 浮动盈亏 - 手续费），1表示平仓盈亏，2表示浮动盈亏，3表示手续费
+ * @return 返回指定类型的资金数据
+ * @details 获取策略的资金数据，根据flag参数返回不同类型的资金信息
+ *          这个函数在策略中通常用于获取资金状况信息，进行风控计算或统计分析
+ */
 double SelStraBaseCtx::stra_get_fund_data(int flag)
 {
 	switch (flag)
@@ -1346,21 +1374,50 @@ double SelStraBaseCtx::stra_get_fund_data(int flag)
 	}
 }
 
+/**
+ * @brief 记录信息级别日志
+ * @param message 日志消息内容
+ * @details 记录信息级别的日志消息
+ *          消息将以策略名称为标识，以INFO级别记录
+ *          这个函数在策略中通常用于记录一般信息，如策略初始化、交易信号等
+ */
 void SelStraBaseCtx::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录调试级别日志
+ * @param message 日志消息内容
+ * @details 记录调试级别的日志消息
+ *          消息将以策略名称为标识，以DEBUG级别记录
+ *          这个函数在策略中通常用于记录详细的调试信息，如中间计算结果、变量值等
+ */
 void SelStraBaseCtx::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录警告级别日志
+ * @param message 日志消息内容
+ * @details 记录警告级别的日志消息
+ *          消息将以策略名称为标识，以WARN级别记录
+ *          这个函数在策略中通常用于记录可能存在问题的警告信息，如参数超过预期范围、数据异常等
+ */
 void SelStraBaseCtx::stra_log_warn(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message);
 }
 
+/**
+ * @brief 记录错误级别日志
+ * @param message 日志消息内容
+ * @details 记录错误级别的日志消息
+ *          消息将以策略名称为标识，以ERROR级别记录
+ *          这个函数在策略中通常用于记录严重错误信息，如计算失败、交易失败等
+ *          错误日志通常需要特别关注，因为它们可能表示策略运行出现了严重问题
+ */
 void SelStraBaseCtx::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
@@ -1397,6 +1454,14 @@ void SelStraBaseCtx::stra_save_user_data(const char* key, const char* val)
 	_ud_modified = true;
 }
 
+/**
+ * @brief 获取合约的首次入场时间
+ * @param stdCode 标准合约代码
+ * @return 返回首次入场时间，格式为YYYYMMDDHHMM，如果没有持仓则返回0
+ * @details 获取指定合约的首次入场时间
+ *          首次入场时间指的是当前持仓明细中最早的入场时间
+ *          这个函数在策略中通常用于获取持仓时间，计算持仓周期等
+ */
 uint64_t SelStraBaseCtx::stra_get_first_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1410,6 +1475,14 @@ uint64_t SelStraBaseCtx::stra_get_first_entertime(const char* stdCode)
 	return pInfo._details[0]._opentime;
 }
 
+/**
+ * @brief 获取合约的最后入场标签
+ * @param stdCode 标准合约代码
+ * @return 返回最后入场标签，如果没有持仓则返回空字符串
+ * @details 获取指定合约的最后入场标签
+ *          最后入场标签指的是当前持仓明细中第一笔入场的用户标签
+ *          这个函数在策略中通常用于获取入场原因或入场标识
+ */
 const char* SelStraBaseCtx::stra_get_last_entertag(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1424,6 +1497,14 @@ const char* SelStraBaseCtx::stra_get_last_entertag(const char* stdCode)
 }
 
 
+/**
+ * @brief 获取合约的最后出场时间
+ * @param stdCode 标准合约代码
+ * @return 返回最后出场时间，格式为YYYYMMDDHHMM，如果没有持仓则返回0
+ * @details 获取指定合约的最后出场时间
+ *          最后出场时间指的是当前持仓的最后一次减仓或平仓的时间
+ *          这个函数在策略中通常用于获取上次出场时间，计算出场间隔等
+ */
 uint64_t SelStraBaseCtx::stra_get_last_exittime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1434,6 +1515,14 @@ uint64_t SelStraBaseCtx::stra_get_last_exittime(const char* stdCode)
 	return pInfo._last_exittime;
 }
 
+/**
+ * @brief 获取合约的最后入场时间
+ * @param stdCode 标准合约代码
+ * @return 返回最后入场时间，格式为YYYYMMDDHHMM，如果没有持仓则返回0
+ * @details 获取指定合约的最后入场时间
+ *          最后入场时间指的是当前持仓明细中最后一笔入场的时间
+ *          这个函数在策略中通常用于获取最近入场时间，计算持仓时间等
+ */
 uint64_t SelStraBaseCtx::stra_get_last_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1447,6 +1536,14 @@ uint64_t SelStraBaseCtx::stra_get_last_entertime(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentime;
 }
 
+/**
+ * @brief 获取合约的最后入场价格
+ * @param stdCode 标准合约代码
+ * @return 返回最后入场价格，如果没有持仓则返回0
+ * @details 获取指定合约的最后入场价格
+ *          最后入场价格指的是当前持仓明细中最后一笔入场的价格
+ *          这个函数在策略中通常用于获取最近入场价格，计算盈亏等
+ */
 double SelStraBaseCtx::stra_get_last_enterprice(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1460,6 +1557,17 @@ double SelStraBaseCtx::stra_get_last_enterprice(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._price;
 }
 
+/**
+ * @brief 获取合约的持仓量
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只返回有效仓位（总仓位 - 冻结仓位），默认为false
+ * @param userTag 用户标签，如果指定了用户标签，则只返回对应标签的持仓量，默认为空字符串
+ * @return 返回持仓量，如果没有持仓则返回0
+ * @details 获取指定合约的持仓量，完成以下处理：
+ *          1. 如果没有指定用户标签，则返回总持仓量或有效持仓量（根据bOnlyValid参数）
+ *          2. 如果指定了用户标签，则遍历所有持仓明细，返回匹配标签的持仓量
+ *          这个函数在策略中通常用于获取当前持仓状态，进行仓位管理和风控计算
+ */
 double SelStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, const char* userTag /* = "" */)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1492,6 +1600,15 @@ double SelStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /*
 	return 0;
 }
 
+/**
+ * @brief 获取合约的持仓平均价格
+ * @param stdCode 标准合约代码
+ * @return 返回持仓平均价格，如果没有持仓则返回0
+ * @details 获取指定合约的持仓平均价格，计算方式如下：
+ *          1. 遍历所有持仓明细，计算总金额（每笔持仓的价格 * 数量的总和）
+ *          2. 总金额除以总持仓量，得到平均价格
+ *          这个函数在策略中通常用于获取当前持仓的平均成本，计算盈亏等
+ */
 double SelStraBaseCtx::stra_get_position_avgpx(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1512,6 +1629,14 @@ double SelStraBaseCtx::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+/**
+ * @brief 获取合约的持仓浮动盈亏
+ * @param stdCode 标准合约代码
+ * @return 返回持仓浮动盈亏，如果没有持仓则返回0
+ * @details 获取指定合约的持仓浮动盈亏
+ *          浮动盈亏是指根据当前市场价格计算的未实现盈亏
+ *          这个函数在策略中通常用于获取当前持仓的盈亏状况，进行风控管理
+ */
 double SelStraBaseCtx::stra_get_position_profit(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1522,6 +1647,15 @@ double SelStraBaseCtx::stra_get_position_profit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细入场时间
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @return 返回指定标签的持仓明细入场时间，格式为YYYYMMDDHHMM，如果没有匹配的持仓则返回0
+ * @details 获取指定合约和标签的持仓明细入场时间
+ *          遍历所有持仓明细，找到匹配标签的明细并返回其入场时间
+ *          这个函数在策略中通常用于获取特定标签的持仓入场时间，计算持仓周期等
+ */
 uint64_t SelStraBaseCtx::stra_get_detail_entertime(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1541,6 +1675,15 @@ uint64_t SelStraBaseCtx::stra_get_detail_entertime(const char* stdCode, const ch
 	return 0;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细成本价格
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @return 返回指定标签的持仓明细成本价格，如果没有匹配的持仓则返回0
+ * @details 获取指定合约和标签的持仓明细成本价格
+ *          遍历所有持仓明细，找到匹配标签的明细并返回其成本价格
+ *          这个函数在策略中通常用于获取特定标签的持仓成本，计算盈亏等
+ */
 double SelStraBaseCtx::stra_get_detail_cost(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1560,6 +1703,21 @@ double SelStraBaseCtx::stra_get_detail_cost(const char* stdCode, const char* use
 	return 0.0;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细盈亏信息
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @param flag 盈亏标志，0表示当前盈亏，1表示最大盈利，-1表示最大亏损，2表示最高价格，-2表示最低价格，默认为0
+ * @return 返回指定标签的持仓明细盈亏信息，如果没有匹配的持仓则返回0
+ * @details 获取指定合约和标签的持仓明细盈亏信息
+ *          遍历所有持仓明细，找到匹配标签的明细，根据flag参数返回不同类型的盈亏信息：
+ *          - flag=0：返回当前盈亏
+ *          - flag=1：返回最大盈利
+ *          - flag=-1：返回最大亏损
+ *          - flag=2：返回最高价格
+ *          - flag=-2：返回最低价格
+ *          这个函数在策略中通常用于获取特定标签的持仓盈亏信息，进行风控管理
+ */
 double SelStraBaseCtx::stra_get_detail_profit(const char* stdCode, const char* userTag, int flag /* = 0 */)
 {
 	auto it = _pos_map.find(stdCode);
