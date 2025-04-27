@@ -489,16 +489,46 @@ HftContextPtr WtHftEngine::getContext(uint32_t id)
 	return it->second;
 }
 
+/**
+ * @brief 获取委托队列切片数据
+ * @param sid 策略ID
+ * @param code 合约代码
+ * @param count 请求的数据条数
+ * @return WTSOrdQueSlice* 委托队列切片数据指针
+ * @details 获取指定合约的委托队列切片数据，用于策略分析
+ *          直接调用数据管理器的相应函数获取数据
+ *          注意：返回的数据需要由调用者负责释放
+ */
 WTSOrdQueSlice* WtHftEngine::get_order_queue_slice(uint32_t sid, const char* code, uint32_t count)
 {
 	return _data_mgr->get_order_queue_slice(code, count);
 }
 
+/**
+ * @brief 获取委托明细切片数据
+ * @param sid 策略ID
+ * @param code 合约代码
+ * @param count 请求的数据条数
+ * @return WTSOrdDtlSlice* 委托明细切片数据指针
+ * @details 获取指定合约的委托明细切片数据，用于策略分析
+ *          直接调用数据管理器的相应函数获取数据
+ *          注意：返回的数据需要由调用者负责释放
+ */
 WTSOrdDtlSlice* WtHftEngine::get_order_detail_slice(uint32_t sid, const char* code, uint32_t count)
 {
 	return _data_mgr->get_order_detail_slice(code, count);
 }
 
+/**
+ * @brief 获取成交明细切片数据
+ * @param sid 策略ID
+ * @param code 合约代码
+ * @param count 请求的数据条数
+ * @return WTSTransSlice* 成交明细切片数据指针
+ * @details 获取指定合约的成交明细切片数据，用于策略分析
+ *          直接调用数据管理器的相应函数获取数据
+ *          注意：返回的数据需要由调用者负责释放
+ */
 WTSTransSlice* WtHftEngine::get_transaction_slice(uint32_t sid, const char* code, uint32_t count)
 {
 	return _data_mgr->get_transaction_slice(code, count);
