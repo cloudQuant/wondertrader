@@ -1,4 +1,4 @@
-﻿#include "WtSelEngine.h"
+#include "WtSelEngine.h"
 #include "WtDtMgr.h"
 #include "WtSelTicker.h"
 #include "TraderAdapter.h"
@@ -462,12 +462,29 @@ void WtSelEngine::handle_pos_change(const char* straName, const char* stdCode, d
 		_exec_mgr.handle_pos_change(realCode.c_str(), targetPos, diffQty, execid.c_str());
 }
 
+/**
+ * @brief 获取商品信息
+ * @param stdCode 标准化合约代码
+ * @return 商品信息对象指针，如果未找到则返回空指针
+ * @details 根据标准化合约代码获取对应的商品信息
+ *          首先解析标准化合约代码，提取交易所和品种信息
+ *          然后从基础数据管理器中查找并返回对应的商品信息
+ */
 WTSCommodityInfo* WtSelEngine::get_comm_info(const char* stdCode)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	return _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
 }
 
+/**
+ * @brief 获取交易时段信息
+ * @param stdCode 标准化合约代码
+ * @return 交易时段信息对象指针，如果未找到则返回空指针
+ * @details 根据标准化合约代码获取相应的交易时段信息
+ *          首先解析标准化合约代码，提取交易所和品种信息
+ *          然后使用基础数据管理器获取商品信息
+ *          最后从商品信息中获取并返回交易时段信息
+ */
 WTSSessionInfo* WtSelEngine::get_sess_info(const char* stdCode)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -478,6 +495,13 @@ WTSSessionInfo* WtSelEngine::get_sess_info(const char* stdCode)
 	return cInfo->getSessionInfo();
 }
 
+/**
+ * @brief 获取当前实时时间
+ * @return 封装为64位无符号整数的时间戳
+ * @details 将当前日期和时间组合成时间戳
+ *          通过TimeUtils提供的makeTime函数，将日期和时间转换为64位整数格式
+ *          时间部分由当前原始时间和秒数计算得到
+ */
 uint64_t WtSelEngine::get_real_time()
 {
 	return TimeUtils::makeTime(_cur_date, _cur_raw_time * 100000 + _cur_secs);
