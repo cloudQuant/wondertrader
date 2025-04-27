@@ -900,6 +900,13 @@ void SelStraBaseCtx::on_session_end(uint32_t uTDate)
 //////////////////////////////////////////////////////////////////////////
 //策略接口
 #pragma region "策略接口"
+/**
+ * @brief 获取合约当前价格
+ * @param stdCode 标准合约代码
+ * @return 合约当前价格，如果不存在则返回0
+ * @details 首先从内部价格映射中查找，如果找不到则从引擎中获取
+ *          这个函数是策略用来获取合约当前价格的主要接口
+ */
 double SelStraBaseCtx::stra_get_price(const char* stdCode)
 {
 	auto it = _price_map.find(stdCode);
@@ -912,6 +919,18 @@ double SelStraBaseCtx::stra_get_price(const char* stdCode)
 	return 0.0;
 }
 
+/**
+ * @brief 设置合约目标仓位
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位数量，正数表示多头，负数表示空头
+ * @param userTag 用户标签，默认为空字符串
+ * @details 设置策略中合约的目标仓位，完成以下处理：
+ *          1. 检查合约信息是否存在
+ *          2. 检查合约是否支持做空
+ *          3. 检查目标仓位是否与当前仓位一致
+ *          4. 如果是T+1合约，检查目标仓位是否小于冻结仓位
+ *          5. 最后调用append_signal生成信号
+ */
 void SelStraBaseCtx::stra_set_position(const char* stdCode, double qty, const char* userTag /* = "" */)
 {
 	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
@@ -948,6 +967,18 @@ void SelStraBaseCtx::stra_set_position(const char* stdCode, double qty, const ch
 	append_signal(stdCode, qty, userTag);
 }
 
+/**
+ * @brief 添加交易信号
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位数量，正数表示多头，负数表示空头
+ * @param userTag 用户标签，默认为空字符串
+ * @details 生成并添加交易信号，完成以下处理：
+ *          1. 获取当前合约价格
+ *          2. 创建或更新信号信息，包括目标仓位、信号价格、用户标签、生成时间等
+ *          3. 根据当前是否在调度中设置触发标记
+ *          4. 记录信号日志
+ *          5. 保存策略数据
+ */
 void SelStraBaseCtx::append_signal(const char* stdCode, double qty, const char* userTag /* = "" */)
 {
 	double curPx = _price_map[stdCode];
@@ -964,6 +995,24 @@ void SelStraBaseCtx::append_signal(const char* stdCode, double qty, const char* 
 	save_data();
 }
 
+/**
+ * @brief 实际设置仓位
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位数量
+ * @param userTag 用户标签，默认为空字符串
+ * @param bTriggered 是否已触发，默认为false
+ * @details 实际执行仓位调整操作，完成以下处理：
+ *          1. 如果目标仓位与当前仓位相同，直接返回
+ *          2. 计算仓位差值并获取合约信息
+ *          3. 如果当前持仓和目标仓位方向一致，则增加仓位
+ *             - 如果是T+1合约，更新冻结仓位
+ *             - 考虑滑点调整成交价
+ *             - 添加仓位明细并记录交易日志
+ *          4. 如果持仓方向和目标仓位方向不一致，则需要平仓
+ *             - 考虑滑点调整成交价
+ *             - 逐个处理持仓明细，计算平仓盈亏
+ *             - 记录平仓日志
+ */
 void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, bool bTriggered /* = false */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
@@ -1112,6 +1161,20 @@ void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 	_engine->handle_pos_change(_name.c_str(), stdCode, diff);
 }
 
+/**
+ * @brief 获取K线切片数据
+ * @param stdCode 标准合约代码
+ * @param period 周期标识，如"m1"表示1分钟，"d1"表示日线
+ * @param count 请求的K线数量
+ * @return 返回K线切片指针，如果数据不存在则返回nullptr
+ * @details 获取指定合约的K线数据，完成以下处理：
+ *          1. 根据合约和周期生成唯一键
+ *          2. 解析周期标识，提取基础周期和周期倍数
+ *          3. 根据周期类型确定结束时间
+ *          4. 从引擎中获取K线切片
+ *          5. 标记K线未闭合
+ *          6. 如果成功获取切片，更新合约的最新价格
+ */
 WTSKlineSlice* SelStraBaseCtx::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
 	thread_local static char key[64] = { 0 };
@@ -1146,16 +1209,42 @@ WTSKlineSlice* SelStraBaseCtx::stra_get_bars(const char* stdCode, const char* pe
 	return kline;
 }
 
+/**
+ * @brief 获取Tick切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的Tick数量
+ * @return 返回Tick切片指针，如果数据不存在则返回nullptr
+ * @details 从引擎中获取指定合约的Tick数据
+ *          这个函数是策略用来获取合约实时Tick数据的主要接口
+ *          返回的是最新的count个Tick数据组成的切片
+ */
 WTSTickSlice* SelStraBaseCtx::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	return _engine->get_tick_slice(_context_id, stdCode, count);
 }
 
+/**
+ * @brief 获取最新的Tick数据
+ * @param stdCode 标准合约代码
+ * @return 返回最新的Tick数据指针，如果数据不存在则返回nullptr
+ * @details 从引擎中获取指定合约的最新Tick数据
+ *          这个函数是策略用来获取合约最新市场数据的快捷方式
+ *          与获取切片不同，这个函数只返回单个最新的Tick数据
+ */
 WTSTickData* SelStraBaseCtx::stra_get_last_tick(const char* stdCode)
 {
 	return _engine->get_last_tick(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅合约的Tick数据
+ * @param stdCode 标准合约代码
+ * @details 订阅指定合约的Tick数据，完成以下处理：
+ *          1. 将合约代码添加到本地订阅集合中
+ *          2. 通知引擎订阅该合约的Tick数据
+ *          3. 记录日志
+ *          订阅后，引擎会将合约的Tick数据通过on_tick函数回调给策略
+ */
 void SelStraBaseCtx::stra_sub_ticks(const char* stdCode)
 {
 	/*
@@ -1169,21 +1258,54 @@ void SelStraBaseCtx::stra_sub_ticks(const char* stdCode)
 	log_info("Market data subscribed: {}", stdCode);
 }
 
+/**
+ * @brief 获取合约品种信息
+ * @param stdCode 标准合约代码
+ * @return 返回合约品种信息指针，如果不存在则返回nullptr
+ * @details 从引擎中获取指定合约的品种信息
+ *          品种信息包含合约的交易单位、点值、手续费率、交易时间等重要参数
+ *          策略可以使用这些信息进行交易决策和风控计算
+ */
 WTSCommodityInfo* SelStraBaseCtx::stra_get_comminfo(const char* stdCode)
 {
 	return _engine->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取合约的原始代码
+ * @param stdCode 标准合约代码
+ * @return 返回合约的原始代码
+ * @details 从引擎中获取指定标准合约代码对应的原始代码
+ *          标准合约代码是系统内部使用的统一格式代码，而原始代码是交易所或数据源的原始代码
+ *          在某些场景下，策略可能需要知道合约的原始代码，例如输出日志或调试信息
+ */
 std::string SelStraBaseCtx::stra_get_rawcode(const char* stdCode)
 {
 	return _engine->get_rawcode(stdCode);
 }
 
+/**
+ * @brief 获取合约的交易时段信息
+ * @param stdCode 标准合约代码
+ * @return 返回交易时段信息指针，如果不存在则返回nullptr
+ * @details 从引擎中获取指定合约的交易时段信息
+ *          交易时段信息包含开盘时间、收盘时间、交易时段等重要参数
+ *          策略可以使用这些信息确定交易时间和交易规则
+ */
 WTSSessionInfo* SelStraBaseCtx::stra_get_sessinfo(const char* stdCode)
 {
 	return _engine->get_session_info(stdCode, true);
 }
 
+/**
+ * @brief 获取合约的日线价格
+ * @param stdCode 标准合约代码
+ * @param flag 价格标志，0表示收盘价，1表示开盘价，2表示最高价，3表示最低价，默认为0
+ * @return 返回指定类型的日线价格，如果不存在则返回0
+ * @details 从引擎中获取指定合约的日线价格
+ *          根据flag参数可以获取不同类型的价格，如收盘价、开盘价、最高价和最低价
+ *          这个函数在策略中通常用于获取前一交易日的价格信息
+ */
 double SelStraBaseCtx::stra_get_day_price(const char* stdCode, int flag /* = 0 */)
 {
 	if (_engine)
