@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file CtaStraBaseCtx.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief CTA策略基础上下文实现文件
+ * \details 实现了CTA策略的基础上下文类，为策略提供交易接口、数据访问、信号处理、
+ *          持仓管理以及图表和日志输出等功能，是策略与交易引擎之间的桥梁
  */
 #include "CtaStraBaseCtx.h"
 #include "WtCtaEngine.h"
@@ -26,6 +28,10 @@ namespace rj = rapidjson;
 
 #include "../WTSTools/WTSLogger.h"
 
+/**
+ * @brief 条件判断操作符名称数组
+ * @details 用于策略条件表达式的比较操作符映射，如等于、大于、小于等
+ */
 const char* CMP_ALG_NAMES[] =
 {
 	"＝",
@@ -35,6 +41,10 @@ const char* CMP_ALG_NAMES[] =
 	"<="
 };
 
+/**
+ * @brief 策略动作名称数组
+ * @details 用于标识策略执行的具体动作，如开多、平多、开空、平空、同步
+ */
 const char* ACTION_NAMES[] =
 {
 	"OL",
@@ -45,6 +55,10 @@ const char* ACTION_NAMES[] =
 };
 
 
+/**
+ * @brief 生成唯一的策略上下文ID
+ * @return 返回自增的上下文ID，保证每个策略实例唯一
+ */
 inline uint32_t makeCtaCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 1 };
@@ -52,6 +66,13 @@ inline uint32_t makeCtaCtxId()
 }
 
 
+/**
+ * @brief CtaStraBaseCtx构造函数
+ * @param engine CTA引擎实例，提供策略运行环境
+ * @param name 策略名称
+ * @param slippage 滑点值，模拟交易成本
+ * @note 初始化策略上下文，设置相关参数
+ */
 CtaStraBaseCtx::CtaStraBaseCtx(WtCtaEngine* engine, const char* name, int32_t slippage)
 	: ICtaStraCtx(name)
 	, _engine(engine)
@@ -67,10 +88,19 @@ CtaStraBaseCtx::CtaStraBaseCtx(WtCtaEngine* engine, const char* name, int32_t sl
 }
 
 
+/**
+ * @brief CtaStraBaseCtx析构函数
+ * @note 释放策略上下文资源
+ */
 CtaStraBaseCtx::~CtaStraBaseCtx()
 {
 }
 
+/**
+ * @brief 初始化日志输出文件
+ * @details 创建trades.csv、closes.csv、funds.csv等日志文件，用于记录策略运行过程中的交易、资金、信号等信息。
+ * @note 日志文件有助于策略回测和实盘分析。
+ */
 void CtaStraBaseCtx::init_outputs()
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -184,6 +214,15 @@ void CtaStraBaseCtx::init_outputs()
 	}
 }
 
+/**
+ * @brief 记录交易信号日志
+ * @param stdCode 标准化合约代码
+ * @param target 信号目标仓位
+ * @param price 信号价格
+ * @param gentime 信号生成时间戳
+ * @param usertag 用户自定义标签
+ * @note 写入signals.csv，便于策略信号追踪和复盘分析
+ */
 void CtaStraBaseCtx::log_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag /* = "" */)
 {
 	if (_sig_logs)
@@ -194,6 +233,19 @@ void CtaStraBaseCtx::log_signal(const char* stdCode, double target, double price
 	}
 }
 
+/**
+ * @brief 记录单笔交易明细
+ * @param stdCode 标准化合约代码
+ * @param isLong 多空方向，true为多头，false为空头
+ * @param isOpen 开平仓标志，true为开仓，false为平仓
+ * @param curTime 交易时间戳
+ * @param price 成交价格
+ * @param qty 成交数量
+ * @param userTag 用户自定义标签
+ * @param fee 手续费
+ * @param barNo K线编号
+ * @note 写入trades.csv，便于交易明细统计和回测分析
+ */
 void CtaStraBaseCtx::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag /* = "" */, double fee /* = 0.0 */, uint32_t barNo /* = 0 */)
 {
 	if (_trade_logs)
@@ -206,6 +258,23 @@ void CtaStraBaseCtx::log_trade(const char* stdCode, bool isLong, bool isOpen, ui
 	_engine->notify_trade(this->name(),stdCode, isLong, isOpen, curTime, price, userTag);
 }
 
+/**
+ * @brief 记录平仓明细日志
+ * @param stdCode 标准化合约代码
+ * @param isLong 多空方向，true为多头，false为空头
+ * @param openTime 开仓时间戳
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间戳
+ * @param closepx 平仓价格
+ * @param qty 平仓数量
+ * @param profit 本次平仓盈亏
+ * @param totalprofit 累计平仓盈亏
+ * @param enterTag 开仓信号标签
+ * @param exitTag 平仓信号标签
+ * @param openBarNo 开仓K线编号
+ * @param closeBarNo 平仓K线编号
+ * @note 写入closes.csv，便于完整记录每笔交易生命周期
+ */
 void CtaStraBaseCtx::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double totalprofit /* = 0 */, 
 	const char* enterTag /* = "" */, const char* exitTag /* = "" */, uint32_t openBarNo /* = 0 */, uint32_t closeBarNo /* = 0 */)
 {
@@ -218,6 +287,11 @@ void CtaStraBaseCtx::log_close(const char* stdCode, bool isLong, uint64_t openTi
 		_close_logs->write_file(ss.str());
 	}
 }
+/**
+ * @brief 保存用户自定义数据到JSON文件
+ * @details 将_user_datas映射写入ud_[策略名].json，持久化策略状态
+ * @note 策略退出或定期保存用户数据时调用
+ */
 void CtaStraBaseCtx::save_userdata()
 {
 	rj::Document root(rj::kObjectType);
@@ -245,6 +319,11 @@ void CtaStraBaseCtx::save_userdata()
 	}
 }
 
+/**
+ * @brief 从JSON文件加载用户自定义数据
+ * @details 读取用户数据文件ud_[策略名].json，将内容解析为_user_datas映射
+ * @note 文件不存在或解析错误时自动跳过
+ */
 void CtaStraBaseCtx::load_userdata()
 {
 	std::string filename = WtHelper::getStraUsrDatDir();
@@ -276,6 +355,12 @@ void CtaStraBaseCtx::load_userdata()
 	}
 }
 
+/**
+ * @brief 加载策略历史数据
+ * @param flag 数据加载标志（按位控制资金、持仓、信号等子模块）
+ * @details 从[name].json读取策略资金、持仓及明细，并恢复到运行上下文
+ * @note 在策略初始化或回测开始阶段调用
+ */
 void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 {
 	std::string filename = WtHelper::getStraDataDir();
@@ -494,6 +579,12 @@ void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 	}
 }
 
+/**
+ * @brief 保存策略数据到JSON文件
+ * @param flag 数据保存标志，按位控制不同模块的保存
+ * @details 将策略的持仓、资金、信号等数据写入[name].json
+ * @note 策略退出或定期保存时调用，保证数据持久化
+ */
 void CtaStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
 {
 	rj::Document root(rj::kObjectType);
@@ -646,6 +737,15 @@ void CtaStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
 
 //////////////////////////////////////////////////////////////////////////
 //回调函数
+/**
+ * @brief K线周期回调函数
+ * @param stdCode 标准化合约代码
+ * @param period K线周期，如m1、m5、d1等
+ * @param times 周期倍数，用于复合周期，如m1周期时times=2表示2分钟
+ * @param newBar 新K线数据结构指针
+ * @details 当新的K线周期到来时触发，用于处理K线周期事件
+ * @note 策略可以在此函数中实现周期性的数据分析和交易决策
+ */
 void CtaStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (newBar == NULL)
@@ -667,6 +767,11 @@ void CtaStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t ti
 		log_debug("Main KBars {} closed", key);
 }
 
+/**
+ * @brief 策略初始化函数
+ * @details 完成策略初始化所需的各项工作，包括初始化日志输出、加载历史数据和用户数据
+ * @note 在策略实例创建后自动调用，是策略生命周期的入口点
+ */
 void CtaStraBaseCtx::on_init()
 {
 	init_outputs();
@@ -678,6 +783,11 @@ void CtaStraBaseCtx::on_init()
 	load_userdata();
 }
 
+/**
+ * @brief 导出图表信息到JSON
+ * @details 将策略中设置的K线、指标、线条等图表元素导出为JSON格式
+ * @note 用于图表展示和策略可视化分析
+ */
 void CtaStraBaseCtx::dump_chart_info()
 {
 	rj::Document root(rj::kObjectType);
@@ -751,6 +861,13 @@ void CtaStraBaseCtx::dump_chart_info()
 	StdFile::write_file_content(filename.c_str(), sb.GetString());
 }
 
+/**
+ * @brief 更新合约浮动盈亏
+ * @param stdCode 标准化合约代码
+ * @param price 最新价格
+ * @details 根据当前行情更新指定合约的浮动盈亏，并跟踪最大盈利、最大亏损、最高价和最低价
+ * @note 在每次行情更新时调用，会同时更新策略总的浮动盈亏
+ */
 void CtaStraBaseCtx::update_dyn_profit(const char* stdCode, double price)
 {
 	auto it = _pos_map.find(stdCode);
@@ -794,6 +911,14 @@ void CtaStraBaseCtx::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
+/**
+ * @brief Tick数据回调函数
+ * @param stdCode 标准化合约代码
+ * @param newTick 新到的Tick数据
+ * @param bEmitStrategy 是否触发策略回调
+ * @details 处理实时行情数据，包括更新价格缓存、检查信号触发、更新浮动盈亏、检查条件单
+ * @note 每次收到新的Tick数据时触发，是策略实时响应市场的主要入口
+ */
 void CtaStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
 {
 	_price_map[stdCode] = newTick->price();
@@ -936,6 +1061,14 @@ void CtaStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEm
 	}
 }
 
+/**
+ * @brief 策略定时调度函数
+ * @param curDate 当前日期，格式YYYYMMDD
+ * @param curTime 当前时间，格式HHMMSS
+ * @return 是否成功触发策略计算
+ * @details 根据K线周期定时触发策略计算，处理主周期更新和条件单清理
+ * @note 策略引擎定时调用，是策略周期性计算的入口点
+ */
 bool CtaStraBaseCtx::on_schedule(uint32_t curDate, uint32_t curTime)
 {
 	_is_in_schedule = true;//开始调度, 修改标记
@@ -1017,6 +1150,12 @@ bool CtaStraBaseCtx::on_schedule(uint32_t curDate, uint32_t curTime)
 	return emmited;
 }
 
+/**
+ * @brief 交易日开始事件回调
+ * @param uTDate 交易日期，格式YYYYMMDD
+ * @details 在每个交易日开始时触发，清理过期的冻结持仓
+ * @note 用于处理跨交易日的持仓状态更新，确保冻结仓位在新交易日释放
+ */
 void CtaStraBaseCtx::on_session_begin(uint32_t uTDate)
 {
 	//每个交易日开始，要把冻结持仓置零
@@ -1040,6 +1179,13 @@ void CtaStraBaseCtx::on_session_begin(uint32_t uTDate)
 	}
 }
 
+/**
+ * @brief 枚举当前策略所有持仓
+ * @param cb 持仓处理回调函数，用于接收并处理每个持仓信息
+ * @param bForExecute 是否为执行模式，如果为true则会标记信号为已触发
+ * @details 遍历所有的实际持仓和信号持仓，并将每个持仓信息通过回调函数返回
+ * @note 使用互斥锁保证线程安全，避免组合轧差同步与信号同时触发导致的问题
+ */
 void CtaStraBaseCtx::enum_position(FuncEnumCtaPosCallBack cb, bool bForExecute /* = false */)
 {
 	/* By HeJ @ 2023.03.14
@@ -1072,6 +1218,12 @@ void CtaStraBaseCtx::enum_position(FuncEnumCtaPosCallBack cb, bool bForExecute /
 	}
 }
 
+/**
+ * @brief 交易日结束事件回调
+ * @param uTDate 交易日期，格式YYYYMMDD
+ * @details 在每个交易日结束时触发，记录当日持仓和资金状况，保存策略数据
+ * @note 用于日结算和数据持久化，确保策略状态正确保存
+ */
 void CtaStraBaseCtx::on_session_end(uint32_t uTDate)
 {
 	uint32_t curDate = uTDate;//_engine->get_trading_date();
@@ -1110,6 +1262,13 @@ void CtaStraBaseCtx::on_session_end(uint32_t uTDate)
 	}
 }
 
+/**
+ * @brief 获取指定合约的条件单列表
+ * @param stdCode 标准化合约代码
+ * @return 返回指定合约的条件单列表引用
+ * @details 根据合约代码获取相应的条件单列表，如果不存在则创建新的空列表
+ * @note 内部函数，用于条件单管理，被各个交易接口调用
+ */
 CondList& CtaStraBaseCtx::get_cond_entrusts(const char* stdCode)
 {
 	CondList& ce = _condtions[stdCode];
@@ -1118,6 +1277,16 @@ CondList& CtaStraBaseCtx::get_cond_entrusts(const char* stdCode)
 
 //////////////////////////////////////////////////////////////////////////
 //策略接口
+/**
+ * @brief 策略开多接口
+ * @param stdCode 标准化合约代码
+ * @param qty 开仓数量
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，当行情价格低于此价格时触发，默认0表示市价单
+ * @param stopprice 止损价，当行情价格高于此价格时触发，默认0表示市价单
+ * @details 策略开多入场接口，支持市价单和条件单两种模式
+ * @note 如果当前持空，则会先平空再开多；如果已有多仓，则会增加多仓
+ */
 void CtaStraBaseCtx::stra_enter_long(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
@@ -1170,6 +1339,16 @@ void CtaStraBaseCtx::stra_enter_long(const char* stdCode, double qty, const char
 	}
 }
 
+/**
+ * @brief 策略开空接口
+ * @param stdCode 标准化合约代码
+ * @param qty 开仓数量
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，当行情价格高于此价格时触发，默认0表示市价单
+ * @param stopprice 止损价，当行情价格低于此价格时触发，默认0表示市价单
+ * @details 策略开空入场接口，支持市价单和条件单两种模式
+ * @note 需要先检查合约是否支持做空；如果当前持多，则会先平多再开空；如果已有空仓，则会增加空仓
+ */
 void CtaStraBaseCtx::stra_enter_short(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
@@ -1228,6 +1407,16 @@ void CtaStraBaseCtx::stra_enter_short(const char* stdCode, double qty, const cha
 	}
 }
 
+/**
+ * @brief 策略平多接口
+ * @param stdCode 标准化合约代码
+ * @param qty 平仓数量
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，当行情价格低于此价格时触发，默认0表示市价单
+ * @param stopprice 止损价，当行情价格高于此价格时触发，默认0表示市价单
+ * @details 策略平多出场接口，支持市价单和条件单两种模式
+ * @note 会自动判断是否是收盘时段，收盘时会读取全部持仓，否则只读取可平仓位
+ */
 void CtaStraBaseCtx::stra_exit_long(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
@@ -1279,6 +1468,16 @@ void CtaStraBaseCtx::stra_exit_long(const char* stdCode, double qty, const char*
 	}
 }
 
+/**
+ * @brief 策略平空接口
+ * @param stdCode 标准化合约代码
+ * @param qty 平仓数量
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，当行情价格高于此价格时触发，默认0表示市价单
+ * @param stopprice 止损价，当行情价格低于此价格时触发，默认0表示市价单
+ * @details 策略平空出场接口，支持市价单和条件单两种模式
+ * @note 会自动判断是否是收盘时段，收盘时会读取全部持仓，否则只读取可平仓位
+ */
 void CtaStraBaseCtx::stra_exit_short(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
@@ -1331,6 +1530,13 @@ void CtaStraBaseCtx::stra_exit_short(const char* stdCode, double qty, const char
 	}
 }
 
+/**
+ * @brief 获取合约最新价格
+ * @param stdCode 标准化合约代码
+ * @return 合约最新价格，如果不存在则返回0
+ * @details 先从价格缓存中获取，如果缓存中不存在则从引擎中获取
+ * @note 策略计算和交易决策时经常需要查询最新价格
+ */
 double CtaStraBaseCtx::stra_get_price(const char* stdCode)
 {
 	auto it = _price_map.find(stdCode);
@@ -1351,6 +1557,16 @@ double CtaStraBaseCtx::stra_get_day_price(const char* stdCode, int flag /* = 0 *
 	return 0.0;
 }
 
+/**
+ * @brief 设置目标仓位
+ * @param stdCode 标准化合约代码
+ * @param qty 目标仓位量，正数表示多头，负数表示空头，0表示平仓
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，默认0表示市价单
+ * @param stopprice 止损价，默认0表示市价单
+ * @details 设置策略目标仓位，对外的通用持仓设置接口，自动处理多空切换、开平逻辑
+ * @note 支持市价单和条件单两种模式，内部调用append_signal或者添加条件单
+ */
 void CtaStraBaseCtx::stra_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice /* = 0.0 */, double stopprice /* = 0.0 */)
 {
 	_engine->sub_tick(id(), stdCode);
@@ -1394,6 +1610,15 @@ void CtaStraBaseCtx::stra_set_position(const char* stdCode, double qty, const ch
 	}
 }
 
+/**
+ * @brief 添加交易信号
+ * @param stdCode 标准化合约代码
+ * @param qty 目标仓位量，正数表示多头，负数表示空头
+ * @param userTag 用户自定义标签
+ * @param sigType 信号类型（0-定时计算信号，1-实时行情触发信号，2-条件单触发信号）
+ * @details 生成交易信号并记录到信号映射表中，同时写入信号日志
+ * @note 内部函数，由各种交易接口调用，用于生成统一的交易信号
+ */
 void CtaStraBaseCtx::append_signal(const char* stdCode, double qty, const char* userTag /* = "" */, uint32_t sigType)
 {
 	double curPx = _price_map[stdCode];
@@ -1410,6 +1635,15 @@ void CtaStraBaseCtx::append_signal(const char* stdCode, double qty, const char* 
 	save_data();
 }
 
+/**
+ * @brief 设置策略持仓量
+ * @param stdCode 标准化合约代码
+ * @param qty 目标持仓量，正数表示多头，负数表示空头
+ * @param userTag 用户自定义标签，用于跟踪交易来源
+ * @param bFireAtOnce 是否立即触发仓位变更通知
+ * @details 核心交易执行函数，计算仓位差值并生成交易明细、更新资金信息
+ * @note 内部使用互斥锁保证线程安全，处理开仓、平仓、反手等多种交易情况
+ */
 void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, bool bFireAtOnce /* = false */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
@@ -1576,6 +1810,16 @@ void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 	}
 }
 
+/**
+ * @brief 获取合约历史K线数据
+ * @param stdCode 标准化合约代码
+ * @param period K线周期，如m1、5m、d1等
+ * @param count 请求的K线数量
+ * @param isMain 是否为主K线，默认为false
+ * @return 返回K线数据切片指针，如果得不到则返回NULL
+ * @details 策略获取历史K线数据的主要接口，每个策略只能有一个主K线设置
+ * @note 主K线会影响策略的计算周期，只有当主K线更新时策略才会执行
+ */
 WTSKlineSlice* CtaStraBaseCtx::stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain /* = false */)
 {
 	thread_local static char key[64] = { 0 };
@@ -1647,6 +1891,14 @@ WTSKlineSlice* CtaStraBaseCtx::stra_get_bars(const char* stdCode, const char* pe
 	return kline;
 }
 
+/**
+ * @brief 获取合约Tick数据
+ * @param stdCode 标准化合约代码
+ * @param count 请求的Tick数量
+ * @return 返回Tick数据切片指针，如果得不到则返回NULL
+ * @details 获取指定合约的历史Tick数据，同时自动订阅该合约的行情
+ * @note 当策略需要基于Tick级别数据进行决策时使用
+ */
 WTSTickSlice* CtaStraBaseCtx::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	WTSTickSlice* ret = _engine->get_tick_slice(_context_id, stdCode, count);
@@ -1656,11 +1908,24 @@ WTSTickSlice* CtaStraBaseCtx::stra_get_ticks(const char* stdCode, uint32_t count
 	return ret;
 }
 
+/**
+ * @brief 获取合约最新的Tick数据
+ * @param stdCode 标准化合约代码
+ * @return 返回Tick数据指针，如果得不到则返回NULL
+ * @details 从引擎中获取指定合约的最新Tick数据
+ * @note 这个函数常用于实时获取行情数据，与stra_get_ticks不同，只返回最新一条
+ */
 WTSTickData* CtaStraBaseCtx::stra_get_last_tick(const char* stdCode)
 {
 	return _engine->get_last_tick(_context_id, stdCode);
 }
 
+/**
+ * @brief 主动订阅合约的Tick数据
+ * @param code 标准化合约代码
+ * @details 将合约编码添加到订阅列表中并通知引擎订阅相应的Tick数据
+ * @note 当策略需要实时监控某些合约的行情，但不一定要交易该合约时使用
+ */
 void CtaStraBaseCtx::stra_sub_ticks(const char* code)
 {
 	/*
@@ -1674,6 +1939,13 @@ void CtaStraBaseCtx::stra_sub_ticks(const char* code)
 	log_info("Market data subscribed: {}", code);
 }
 
+/**
+ * @brief 订阅K线事件通知
+ * @param stdCode 标准化合约代码
+ * @param period K线周期，如m1、5m、d1等
+ * @details 将指定合约和周期的K线标记为需要通知的状态
+ * @note 当策略需要在某些周期的K线更新时收到通知进行响应时使用
+ */
 void CtaStraBaseCtx::stra_sub_bar_events(const char* stdCode, const char* period)
 {
 	thread_local static char key[64] = { 0 };
@@ -1683,31 +1955,70 @@ void CtaStraBaseCtx::stra_sub_bar_events(const char* stdCode, const char* period
 	tag._notify = true;
 }
 
+/**
+ * @brief 获取合约品种信息
+ * @param stdCode 标准化合约代码
+ * @return 返回品种信息指针，如果不存在则返回NULL
+ * @details 从引擎中获取指定合约的品种信息，包含手续费、合约乘数、交易时段等
+ * @note 策略计算手续费、判断交易时间、确定是否可以做空时使用
+ */
 WTSCommodityInfo* CtaStraBaseCtx::stra_get_comminfo(const char* stdCode)
 {
 	return _engine->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取合约原始代码
+ * @param stdCode 标准化合约代码
+ * @return 返回合约原始代码字符串
+ * @details 将标准化合约代码转换为原始交易所代码
+ * @note 当需要将内部的标准化代码转换为交易所原始代码时使用
+ */
 std::string CtaStraBaseCtx::stra_get_rawcode(const char* stdCode)
 {
 	return _engine->get_rawcode(stdCode);
 }
 
+/**
+ * @brief 获取当前交易日期
+ * @return 返回交易日期数值，格式YYYYMMDD
+ * @details 从引擎中获取当前的交易日期
+ * @note 交易日期与自然日期不同，对于夜盘品种，晚上的交易属于下一个交易日
+ */
 uint32_t CtaStraBaseCtx::stra_get_tdate()
 {
 	return _engine->get_trading_date();
 }
 
+/**
+ * @brief 获取当前自然日期
+ * @return 返回自然日期数值，格式YYYYMMDD
+ * @details 从引擎中获取当前的日历日期
+ * @note 自然日期是指实际日历日期，与交易日期不同
+ */
 uint32_t CtaStraBaseCtx::stra_get_date()
 {
 	return _engine->get_date();
 }
 
+/**
+ * @brief 获取当前交易时间
+ * @return 返回当前时间数值，格式HHMM（小时分钟）
+ * @details 从引擎中获取当前的分钟时间
+ * @note 主要用于策略判断当前交易时间点，进行时间相关的交易决策
+ */
 uint32_t CtaStraBaseCtx::stra_get_time()
 {
 	return _engine->get_min_time();
 }
 
+/**
+ * @brief 获取资金相关数据
+ * @param flag 资金数据标记，0-总盈亏（0包含实现盈亏、浮动盈亏和费用），1-实现盈亏，2-浮动盈亏，3-手续费
+ * @return 返回策略相应的资金数据
+ * @details 根据传入的标记返回不同类型的资金数据信息
+ * @note 常用于策略统计和风险控制，监控策略盈亏状况
+ */
 double CtaStraBaseCtx::stra_get_fund_data(int flag )
 {
 	switch (flag)
@@ -1725,26 +2036,58 @@ double CtaStraBaseCtx::stra_get_fund_data(int flag )
 	}
 }
 
+/**
+ * @brief 记录信息级别的日志
+ * @param message 日志信息内容
+ * @details 将信息级别的日志写入策略日志文件
+ * @note 信息级别日志用于记录策略的一般性操作和状态信息
+ */
 void CtaStraBaseCtx::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录调试级别的日志
+ * @param message 日志信息内容
+ * @details 将调试级别的日志写入策略日志文件
+ * @note 调试级别日志用于记录详细的运行信息，日志量较大，仅在调试时使用
+ */
 void CtaStraBaseCtx::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录警告级别的日志
+ * @param message 日志信息内容
+ * @details 将警告级别的日志写入策略日志文件
+ * @note 警告级别日志用于记录策略中的异常情况和需要注意的问题
+ */
 void CtaStraBaseCtx::stra_log_warn(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message);
 }
 
+/**
+ * @brief 记录错误级别的日志
+ * @param message 日志信息内容
+ * @details 将错误级别的日志写入策略日志文件
+ * @note 错误级别日志用于记录策略运行中的严重问题和异常，需要立即关注和处理
+ */
 void CtaStraBaseCtx::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载策略用户数据
+ * @param key 数据键名
+ * @param defVal 默认值，当指定键不存在时返回
+ * @return 返回指定键名对应的数据值，如果不存在则返回默认值
+ * @details 从策略的用户数据存储中根据键名检索数据
+ * @note 用于存储和检索策略相关的自定义设置和运行状态
+ */
 const char* CtaStraBaseCtx::stra_load_user_data(const char* key, const char* defVal /*= ""*/)
 {
 	auto it = _user_datas.find(key);
@@ -1754,12 +2097,26 @@ const char* CtaStraBaseCtx::stra_load_user_data(const char* key, const char* def
 	return defVal;
 }
 
+/**
+ * @brief 保存策略用户数据
+ * @param key 数据键名
+ * @param val 数据值
+ * @details 将指定的键值对保存到策略的用户数据存储中
+ * @note 保存数据时会标记数据已修改状态，策略调度完成后会自动存盘
+ */
 void CtaStraBaseCtx::stra_save_user_data(const char* key, const char* val)
 {
 	_user_datas[key] = val;
 	_ud_modified = true;
 }
 
+/**
+ * @brief 获取合约首次入场时间
+ * @param stdCode 标准化合约代码
+ * @return 返回合约首次入场时间，如果没有持仓则返回0
+ * @details 获取指定合约当前持仓的首次入场时间
+ * @note 可用于计算持仓时间并制定基于时间的交易策略
+ */
 uint64_t CtaStraBaseCtx::stra_get_first_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1773,6 +2130,13 @@ uint64_t CtaStraBaseCtx::stra_get_first_entertime(const char* stdCode)
 	return pInfo._details[0]._opentime;
 }
 
+/**
+ * @brief 获取合约最近一次入场的标签
+ * @param stdCode 标准化合约代码
+ * @return 返回最近入场的标签字符串，如果没有持仓则返回空字符串
+ * @details 获取指定合约当前持仓的最后一笔明细的入场标签
+ * @note 可用于跟踪和识别不同策略信号生成的交易
+ */
 const char* CtaStraBaseCtx::stra_get_last_entertag(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1787,6 +2151,13 @@ const char* CtaStraBaseCtx::stra_get_last_entertag(const char* stdCode)
 }
 
 
+/**
+ * @brief 获取合约最近一次出场时间
+ * @param stdCode 标准化合约代码
+ * @return 返回最近一次出场时间，如果没有持仓或未出场过则返回0
+ * @details 获取指定合约的最后一次平仓时间
+ * @note 可用于识别交易频率和计算交易间隔，在再入场判断中非常有用
+ */
 uint64_t CtaStraBaseCtx::stra_get_last_exittime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1797,6 +2168,13 @@ uint64_t CtaStraBaseCtx::stra_get_last_exittime(const char* stdCode)
 	return pInfo._last_exittime;
 }
 
+/**
+ * @brief 获取合约最后一次入场时间
+ * @param stdCode 标准化合约代码
+ * @return 返回最近一次入场时间，如果没有持仓则返回0
+ * @details 获取指定合约当前持仓的最后一笔明细的开仓时间
+ * @note 与stra_get_first_entertime不同，这个函数返回最后一笔明细的开仓时间，而非第一笔
+ */
 uint64_t CtaStraBaseCtx::stra_get_last_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1810,6 +2188,13 @@ uint64_t CtaStraBaseCtx::stra_get_last_entertime(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentime;
 }
 
+/**
+ * @brief 获取合约最后一次入场价格
+ * @param stdCode 标准化合约代码
+ * @return 返回最近一次入场价格，如果没有持仓则返回0
+ * @details 获取指定合约当前持仓的最后一笔明细的开仓价格
+ * @note 在做出场决策时，经常需要知道开仓价格以计算收益或止损点
+ */
 double CtaStraBaseCtx::stra_get_last_enterprice(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1823,6 +2208,15 @@ double CtaStraBaseCtx::stra_get_last_enterprice(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._price;
 }
 
+/**
+ * @brief 获取合约持仓量
+ * @param stdCode 标准化合约代码
+ * @param bOnlyValid 是否只返回有效持仓（即非冻结部分），默认为false
+ * @param userTag 用户自定义标签，如果非空则只返回指定标签的持仓
+ * @return 持仓数量，正数表示多头，负数表示空头
+ * @details 获取指定合约的持仓量，包括未触发信号的仓位和实际持仓
+ * @note 当userTag非空时，bOnlyValid参数无效；对空头持仓，冻结仓位始终为0
+ */
 double CtaStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, const char* userTag /* = "" */)
 {
 	double totalPos = 0;
@@ -1866,6 +2260,13 @@ double CtaStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /*
 	return 0;
 }
 
+/**
+ * @brief 获取持仓均价
+ * @param stdCode 标准化合约代码
+ * @return 持仓均价，无持仓时返回0
+ * @details 计算指定合约的所有明细持仓的加权平均价
+ * @note 必须有实际持仓才会返回有效均价，否则返回0
+ */
 double CtaStraBaseCtx::stra_get_position_avgpx(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1886,6 +2287,13 @@ double CtaStraBaseCtx::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+/**
+ * @brief 获取持仓浮动盈亏
+ * @param stdCode 标准化合约代码
+ * @return 浮动盈亏值，无持仓或不存在时返回0
+ * @details 返回指定合约的当前浮动盈亏（未实现盈亏）
+ * @note 浮动盈亏基于当前行情价格计算，会随行情波动而变化
+ */
 double CtaStraBaseCtx::stra_get_position_profit(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1896,6 +2304,14 @@ double CtaStraBaseCtx::stra_get_position_profit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取指定标签持仓明细的入场时间
+ * @param stdCode 标准化合约代码
+ * @param userTag 用户自定义标签
+ * @return 返回指定标签的入场时间，如果不存在则返回0
+ * @details 根据用户标签查找对应的持仓明细，并返回其入场时间
+ * @note 当需要跟踪特定信号生成的持仓时间时非常有用
+ */
 uint64_t CtaStraBaseCtx::stra_get_detail_entertime(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1915,6 +2331,14 @@ uint64_t CtaStraBaseCtx::stra_get_detail_entertime(const char* stdCode, const ch
 	return 0;
 }
 
+/**
+ * @brief 获取指定标签持仓明细的开仓成本
+ * @param stdCode 标准化合约代码
+ * @param userTag 用户自定义标签
+ * @return 返回指定标签的开仓成本（入场价格），如果不存在则返回0
+ * @details 根据用户标签查找对应的持仓明细，并返回其开仓价格
+ * @note 当需要计算特定信号生成的持仓收益率或止盈止损点时非常有用
+ */
 double CtaStraBaseCtx::stra_get_detail_cost(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1934,6 +2358,15 @@ double CtaStraBaseCtx::stra_get_detail_cost(const char* stdCode, const char* use
 	return 0.0;
 }
 
+/**
+ * @brief 获取指定标签持仓明细的盈亏
+ * @param stdCode 标准化合约代码
+ * @param userTag 用户自定义标签
+ * @param flag 盈亏标记，0-当前盈亏，1-最大盈利，2-最大亏损
+ * @return 返回指定标签的交易盈亏，如果不存在则返回0
+ * @details 根据用户标签和盈亏标记查找对应的持仓明细，并返回其盈亏情况
+ * @note 可用于分析特定信号生成的持仓盈亏状况和最大回撤信息
+ */
 double CtaStraBaseCtx::stra_get_detail_profit(const char* stdCode, const char* userTag, int flag /* = 0 */)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1965,12 +2398,27 @@ double CtaStraBaseCtx::stra_get_detail_profit(const char* stdCode, const char* u
 	return 0.0;
 }
 
+/**
+ * @brief 设置打印图表的K线信息
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @details 设置策略在输出图表时使用的合约和周期
+ * @note 当需要不同于主K线的图表展示时使用，如果不调用则使用主K线
+ */
 void CtaStraBaseCtx::set_chart_kline(const char* stdCode, const char* period)
 {
 	_chart_code = stdCode;
 	_chart_period = period;
 }
 
+/**
+ * @brief 在图表上添加标记
+ * @param price 标记的价格位置
+ * @param icon 标记图标类型
+ * @param tag 标记的描述文字
+ * @details 将特定标记添加到图表上，常用于标记交易信号、实际交易点或者重要的分析点
+ * @note 仅在定时调度期间可以添加标记，否则会报错
+ */
 void CtaStraBaseCtx::add_chart_mark(double price, const char* icon, const char* tag)
 {
 	if (!_is_in_schedule)
@@ -1992,6 +2440,13 @@ void CtaStraBaseCtx::add_chart_mark(double price, const char* icon, const char* 
 	_engine->notify_chart_marker(curTime, _name.c_str(), price, icon, tag);
 }
 
+/**
+ * @brief 注册图表指标
+ * @param idxName 指标名称
+ * @param indexType 指标类型
+ * @details 在图表上创建一个新的指标，用于后续添加多条指标线
+ * @note 必须先注册指标，才能通过register_index_line添加指标线
+ */
 void CtaStraBaseCtx::register_index(const char* idxName, uint32_t indexType)
 {
 	ChartIndex& cIndex = _chart_indice[idxName];
@@ -1999,6 +2454,15 @@ void CtaStraBaseCtx::register_index(const char* idxName, uint32_t indexType)
 	cIndex._indexType = indexType;
 }
 
+/**
+ * @brief 注册指标线
+ * @param idxName 指标名称，必须先用register_index注册
+ * @param lineName 指标线名称
+ * @param lineType 指标线类型
+ * @return 注册成功返回true，失败返回false
+ * @details 在已注册的指标上创建一条新的指标线
+ * @note 必须先用register_index注册指标，才能添加指标线
+ */
 bool CtaStraBaseCtx::register_index_line(const char* idxName, const char* lineName, uint32_t lineType)
 {
 	auto it = _chart_indice.find(idxName);
@@ -2015,6 +2479,15 @@ bool CtaStraBaseCtx::register_index_line(const char* idxName, const char* lineNa
 	return true;
 }
 
+/**
+ * @brief 添加指标线基准值
+ * @param idxName 指标名称
+ * @param lineName 指标线名称
+ * @param val 基准值
+ * @return 添加成功返回true，失败返回false
+ * @details 为指定的指标线设置一个基准值，用于绘制参考线
+ * @note 通常用于绘制水平线或上下轨等静态线
+ */
 bool CtaStraBaseCtx::add_index_baseline(const char* idxName, const char* lineName, double val)
 {
 	auto it = _chart_indice.find(idxName);
@@ -2029,6 +2502,15 @@ bool CtaStraBaseCtx::add_index_baseline(const char* idxName, const char* lineNam
 	return true;
 }
 
+/**
+ * @brief 设置指标线数据点值
+ * @param idxName 指标名称
+ * @param lineName 指标线名称
+ * @param val 数据值
+ * @return 设置成功返回true，失败返回false
+ * @details 为指定的指标线添加当前时间点的数据值
+ * @note 仅在定时调度期间可以添加指标数据，用于绘制动态指标线
+ */
 bool CtaStraBaseCtx::set_index_value(const char* idxName, const char* lineName, double val)
 {
 	if (!_is_in_schedule)
@@ -2066,4 +2548,3 @@ bool CtaStraBaseCtx::set_index_value(const char* idxName, const char* lineName, 
 
 	return true;
 }
-
