@@ -353,6 +353,12 @@ void WtDtMgr::handle_push_quote(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 获取实时Tick数据
+ * @param code 合约代码
+ * @return WTSTickData* Tick数据指针，调用者需要负责释放
+ * @details 获取指定合约的实时Tick数据，如果缓存不存在则返回NULL
+ */
 WTSTickData* WtDtMgr::grab_last_tick(const char* code)
 {
 	if (_rt_tick_map == NULL)
@@ -366,6 +372,13 @@ WTSTickData* WtDtMgr::grab_last_tick(const char* code)
 	return curTick;
 }
 
+/**
+ * @brief 获取复权因子
+ * @param stdCode 标准化合约代码
+ * @param uDate 交易日期
+ * @return double 复权因子
+ * @details 获取指定合约在指定日期的复权因子，如果数据读取器不存在则返回1.0
+ */
 double WtDtMgr::get_adjusting_factor(const char* stdCode, uint32_t uDate)
 {
 	if (_reader)
@@ -374,6 +387,11 @@ double WtDtMgr::get_adjusting_factor(const char* stdCode, uint32_t uDate)
 	return 1.0;
 }
 
+/**
+ * @brief 获取复权标志
+ * @return uint32_t 复权标志
+ * @details 获取复权标志，如果数据读取器不存在则返回0
+ */
 uint32_t WtDtMgr::get_adjusting_flag()
 {
 	static uint32_t flag = UINT_MAX;
@@ -388,6 +406,14 @@ uint32_t WtDtMgr::get_adjusting_flag()
 	return flag;
 }
 
+/**
+ * @brief 获取指定合约的实时Tick数据切片
+ * @param stdCode 标准化合约代码
+ * @param count 需要获取的Tick数量
+ * @param etime 事件时间戳
+ * @return WTSTickSlice* Tick数据切片指针，调用者需要负责释放
+ * @details 获取指定合约在指定时间范围内的实时Tick数据切片
+ */
 WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_reader == NULL)
@@ -489,6 +515,14 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 	return slice;
 }
 
+/**
+ * @brief 获取指定合约的实时订单队列数据切片
+ * @param stdCode 标准化合约代码
+ * @param count 需要获取的订单队列数量
+ * @param etime 事件时间戳
+ * @return WTSOrdQueSlice* 订单队列数据切片指针，调用者需要负责释放
+ * @details 获取指定合约在指定时间范围内的实时订单队列数据切片
+ */
 WTSOrdQueSlice* WtDtMgr::get_order_queue_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_reader == NULL)
@@ -497,6 +531,14 @@ WTSOrdQueSlice* WtDtMgr::get_order_queue_slice(const char* stdCode, uint32_t cou
 	return _reader->readOrdQueSlice(stdCode, count, etime);
 }
 
+/**
+ * @brief 获取指定合约的实时订单明细数据切片
+ * @param stdCode 标准化合约代码
+ * @param count 需要获取的订单明细数量
+ * @param etime 事件时间戳
+ * @return WTSOrdDtlSlice* 订单明细数据切片指针，调用者需要负责释放
+ * @details 获取指定合约在指定时间范围内的实时订单明细数据切片
+ */
 WTSOrdDtlSlice* WtDtMgr::get_order_detail_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_reader == NULL)
@@ -505,6 +547,14 @@ WTSOrdDtlSlice* WtDtMgr::get_order_detail_slice(const char* stdCode, uint32_t co
 	return _reader->readOrdDtlSlice(stdCode, count, etime);
 }
 
+/**
+ * @brief 获取指定合约的实时成交数据切片
+ * @param stdCode 标准化合约代码
+ * @param count 需要获取的成交数量
+ * @param etime 事件时间戳
+ * @return WTSTransSlice* 成交数据切片指针，调用者需要负责释放
+ * @details 获取指定合约在指定时间范围内的实时成交数据切片
+ */
 WTSTransSlice* WtDtMgr::get_transaction_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_reader == NULL)
