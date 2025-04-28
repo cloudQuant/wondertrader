@@ -1,4 +1,14 @@
-﻿#include "WtDataReader.h"
+/*!
+ * \file WtDataReader.cpp
+ * \brief 数据读取模块实现文件
+ * \author Wesley
+ * \date 2020/03/30
+ * 
+ * \details
+ * 从不同的数据存储引擎中读取K线、订单簿、成交明细等数据的具体实现
+ */
+
+#include "WtDataReader.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -18,6 +28,17 @@ namespace rj = rapidjson;
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+
+/*!
+ * \brief 日志输出函数
+ * \param sink 日志输出接口
+ * \param ll 日志级别
+ * \param format 日志格式字符串
+ * \param args 日志格式字符串参数
+ * 
+ * \details
+ * 将日志信息输出到指定的接口
+ */
 template<typename... Args>
 inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -29,14 +50,26 @@ inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* f
 	sink->reader_log(ll, buffer);
 }
 
+/*!
+ * \brief 导出C接口
+ * \details 提供创建和删除数据读取器的C接口函数，用于动态库加载
+ */
 extern "C"
 {
+	/*!
+	 * \brief 创建数据读取器实例
+	 * \return 数据读取器接口指针
+	 */
 	EXPORT_FLAG IDataReader* createDataReader()
 	{
 		IDataReader* ret = new WtDataReader();
 		return ret;
 	}
 
+	/*!
+	 * \brief 删除数据读取器实例
+	 * \param reader 数据读取器接口指针
+	 */
 	EXPORT_FLAG void deleteDataReader(IDataReader* reader)
 	{
 		if (reader != NULL)
@@ -44,8 +77,15 @@ extern "C"
 	}
 };
 
-/*
- *	处理块数据
+/*!
+ * \brief 处理数据块内容
+ * \param content 数据块内容，传入传出参数
+ * \param isBar 是否为K线数据，true为K线数据，false为Tick数据
+ * \param bKeepHead 是否保留数据块头部，默认为true
+ * \return 处理是否成功
+ * 
+ * \details
+ * 处理数据块的压缩和版本转换，包括解压缩和旧版本数据结构的转换
  */
 bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
@@ -136,6 +176,10 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 }
 
 
+/*!
+ * \brief 构造函数
+ * \details 初始化数据读取器对象，设置初始参数
+ */
 WtDataReader::WtDataReader()
 	: _last_time(0)
 	, _base_data_mgr(NULL)
@@ -144,10 +188,23 @@ WtDataReader::WtDataReader()
 }
 
 
+/*!
+ * \brief 析构函数
+ * \details 清理数据读取器对象的资源
+ */
 WtDataReader::~WtDataReader()
 {
 }
 
+/*!
+ * \brief 初始化数据读取器
+ * \param cfg 配置项指针，包含路径和复权设置
+ * \param sink 数据读取器接收器指针，用于回调和日志输出
+ * \param loader 历史数据加载器指针，默认为NULL
+ * 
+ * \details
+ * 根据配置初始化数据读取器，设置数据目录和加载除权因子
+ */
 void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader /* = NULL */)
 {
 	IDataReader::init(cfg, sink, loader);
@@ -186,6 +243,13 @@ void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* 
 		pipe_reader_log(sink, LL_INFO, "No adjusting factor file configured, loading skipped");
 }
 
+/*!
+ * \brief 从数据加载器中加载股票复权因子
+ * \return 是否成功加载复权因子
+ * 
+ * \details
+ * 通过历史数据加载器接口加载所有股票的复权因子
+ */
 bool WtDataReader::loadStkAdjFactorsFromLoader()
 {
 	if (NULL == _loader)
@@ -219,6 +283,14 @@ bool WtDataReader::loadStkAdjFactorsFromLoader()
 	return ret;
 }
 
+/*!
+ * \brief 从文件中加载股票复权因子
+ * \param adjfile 复权因子文件路径
+ * \return 是否成功加载复权因子
+ * 
+ * \details
+ * 从指定的JSON格式文件中加载股票复权因子
+ */
 bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 {
 	if(!StdFile::exists(adjfile))
@@ -289,6 +361,16 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 	return true;
 }
 
+/*!
+ * \brief 读取Tick数据切片
+ * \param stdCode 标准化合约代码
+ * \param count 要读取的Tick数量
+ * \param etime 结束时间，默认为0表示当前时间
+ * \return Tick数据切片指针，如果读取失败则返回NULL
+ * 
+ * \details
+ * 根据标准化合约代码、数量和结束时间读取Tick数据切片
+ */
 WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -417,6 +499,16 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 	}
 }
 
+/*!
+ * \brief 读取委托队列数据切片
+ * \param stdCode 标准化合约代码
+ * \param count 要读取的委托队列数量
+ * \param etime 结束时间，默认为0表示当前时间
+ * \return 委托队列数据切片指针，如果读取失败则返回NULL
+ * 
+ * \details
+ * 根据标准化合约代码、数量和结束时间读取委托队列数据切片
+ */
 WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -560,6 +652,16 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 	}
 }
 
+/*!
+ * \brief 读取委托明细数据切片
+ * \param stdCode 标准化合约代码
+ * \param count 要读取的委托明细数量
+ * \param etime 结束时间，默认为0表示当前时间
+ * \return 委托明细数据切片指针，如果读取失败则返回NULL
+ * 
+ * \details
+ * 根据标准化合约代码、数量和结束时间读取委托明细数据切片
+ */
 WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -703,6 +805,16 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 	}
 }
 
+/*!
+ * \brief 读取成交数据切片
+ * \param stdCode 标准化合约代码
+ * \param count 要读取的成交数量
+ * \param etime 结束时间，默认为0表示当前时间
+ * \return 成交数据切片指针，如果读取失败则返回NULL
+ * 
+ * \details
+ * 根据标准化合约代码、数量和结束时间读取成交数据切片
+ */
 WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -847,6 +959,17 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 }
 
 
+/*!
+ * \brief 从数据加载器中缓存最终K线数据
+ * \param codeInfo 合约信息
+ * \param key 缓存键
+ * \param stdCode 标准化合约代码
+ * \param period K线周期
+ * \return 是否成功缓存数据
+ * 
+ * \details
+ * 通过历史数据加载器接口加载并缓存最终K线数据
+ */
 bool WtDataReader::cacheFinalBarsFromLoader(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	if (NULL == _loader)
@@ -884,6 +1007,17 @@ bool WtDataReader::cacheFinalBarsFromLoader(void* codeInfo, const std::string& k
 }
 
 
+/*!
+ * \brief 缓存集成的K线数据
+ * \param codeInfo 合约信息
+ * \param key 缓存键
+ * \param stdCode 标准化合约代码
+ * \param period K线周期
+ * \return 是否成功缓存数据
+ * 
+ * \details
+ * 将不同周期的K线数据整合并缓存，支持复权处理
+ */
 bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -1169,6 +1303,17 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 	return true;
 }
 
+/*!
+ * \brief 缓存复权后的股票K线数据
+ * \param codeInfo 合约信息
+ * \param key 缓存键
+ * \param stdCode 标准化合约代码
+ * \param period K线周期
+ * \return 是否成功缓存数据
+ * 
+ * \details
+ * 对股票K线数据进行复权处理并缓存
+ */
 bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -1418,6 +1563,17 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	return true;
 }
 
+/*!
+ * \brief 从文件中缓存历史K线数据
+ * \param codeInfo 合约信息
+ * \param key 缓存键
+ * \param stdCode 标准化合约代码
+ * \param period K线周期
+ * \return 是否成功缓存数据
+ * 
+ * \details
+ * 从历史数据文件中读取K线数据并缓存
+ */
 bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -1538,6 +1694,17 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 	return true;
 }
 
+/*!
+ * \brief 读取K线数据切片
+ * \param stdCode 标准化合约代码
+ * \param period K线周期
+ * \param count 要读取的K线数量
+ * \param etime 结束时间，默认为0表示当前时间
+ * \return K线数据切片指针，如果读取失败则返回NULL
+ * 
+ * \details
+ * 根据标准化合约代码、周期、数量和结束时间读取K线数据切片
+ */
 WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -1758,6 +1925,15 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 	return slice;
 }
 
+/*!
+ * \brief 获取实时Tick数据块
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 实时Tick数据块对指针，如果不存在则返回NULL
+ * 
+ * \details
+ * 根据交易所和合约代码获取实时Tick数据块
+ */
 WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, const char* code)
 {
 	thread_local static char key[64] = { 0 };
@@ -1800,6 +1976,15 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 	return &block;
 }
 
+/*!
+ * \brief 获取实时委托明细数据块
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 实时委托明细数据块对指针，如果不存在则返回NULL
+ * 
+ * \details
+ * 根据交易所和合约代码获取实时委托明细数据块
+ */
 WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg, const char* code)
 {
 	thread_local static char key[64] = { 0 };
@@ -1842,6 +2027,15 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 	return &block;
 }
 
+/*!
+ * \brief 获取实时委托队列数据块
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 实时委托队列数据块对指针，如果不存在则返回NULL
+ * 
+ * \details
+ * 根据交易所和合约代码获取实时委托队列数据块
+ */
 WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg, const char* code)
 {
 	thread_local static char key[64] = { 0 };
@@ -1884,6 +2078,15 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 	return &block;
 }
 
+/*!
+ * \brief 获取实时成交数据块
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 实时成交数据块对指针，如果不存在则返回NULL
+ * 
+ * \details
+ * 根据交易所和合约代码获取实时成交数据块
+ */
 WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, const char* code)
 {
 	thread_local static char key[64] = { 0 };
@@ -1926,6 +2129,16 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 	return &block;
 }
 
+/*!
+ * \brief 获取实时K线数据块
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param period K线周期
+ * \return 实时K线数据块对指针，如果不存在则返回NULL
+ * 
+ * \details
+ * 根据交易所、合约代码和周期获取实时K线数据块
+ */
 WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg, const char* code, WTSKlinePeriod period)
 {
 	if (period != KP_Minute1 && period != KP_Minute5)
@@ -1992,6 +2205,15 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	return &block;
 }
 
+/*!
+ * \brief 分钟结束回调
+ * \param uDate 日期，格式YYYYMMDD
+ * \param uTime 时间，格式HHMMSS或HHMM
+ * \param endTDate 结束交易日，默认为0
+ * 
+ * \details
+ * 在每分钟结束时调用，用于更新实时数据和触发回调
+ */
 void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */)
 {
 	//这里应该触发检查
@@ -2095,6 +2317,15 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 	_last_time = nowTime;
 }
 
+/*!
+ * \brief 根据日期获取复权因子
+ * \param stdCode 标准化合约代码
+ * \param date 日期，默认为0表示当前日期
+ * \return 复权因子，如果不存在则返回1.0
+ * 
+ * \details
+ * 根据标准化合约代码和日期获取对应的复权因子
+ */
 double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -2131,6 +2362,16 @@ double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 
 	}
 }
 
+/*!
+ * \brief 获取复权因子列表
+ * \param code 合约代码
+ * \param exchg 交易所代码
+ * \param pid 品种ID
+ * \return 复权因子列表的常量引用
+ * 
+ * \details
+ * 根据合约代码、交易所和品种ID获取复权因子列表
+ */
 const WtDataReader::AdjFactorList& WtDataReader::getAdjFactors(const char* code, const char* exchg, const char* pid)
 {
 	thread_local static char key[20] = { 0 };
