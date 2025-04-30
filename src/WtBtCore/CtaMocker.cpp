@@ -840,6 +840,16 @@ void CtaMocker::handle_replay_done()
 	this->on_bactest_end();
 }
 
+/**
+ * @brief 处理Tick数据
+ * @details 处理合约的Tick数据，实现以下功能：
+ *          1. 执行信号表中的交易信号
+ *          2. 更新浮动盈亏
+ *          3. 检查并触发满足条件的条件单
+ * @param stdCode 标准合约代码
+ * @param last_px 上一次的价格
+ * @param cur_px 当前最新价格
+ */
 void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 {
 	{
@@ -1043,6 +1053,14 @@ void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 }
 
 
+/**
+ * @brief 处理Tick数据事件
+ * @details 实现IDataSink接口的handle_tick方法，在收到新的Tick数据时调用
+ *          记录当前价格并调用proc_tick函数处理Tick数据
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据结构指针
+ * @param pxType 价格类型，默认为0，表示使用最新价
+ */
 void CtaMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t pxType /* = 0 */)
 {
 	double cur_px = newTick->price();
@@ -1118,6 +1136,13 @@ void CtaMocker::on_init()
 	WTSLogger::info("CTA Strategy initialized with {} slippage: {}", _ratio_slippage?"ratio":"absolute", _slippage);
 }
 
+/**
+ * @brief 更新浮动盈亏
+ * @details 根据最新的价格更新指定合约的浮动盈亏和总浮动盈亏
+ *          同时更新持仓明细中的最高价、最低价、最大盈利和最大亏损
+ * @param stdCode 标准合约代码
+ * @param price 当前最新价格
+ */
 void CtaMocker::update_dyn_profit(const char* stdCode, double price)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1450,6 +1475,16 @@ CondList& CtaMocker::get_cond_entrusts(const char* stdCode)
 
 //////////////////////////////////////////////////////////////////////////
 //策略接口
+/**
+ * @brief 策略多头开仓接口
+ * @details 策略调用此接口执行多头开仓操作，可以设置限价或止损价
+ *          如果设置了限价或止损价，则会生成条件单，否则直接执行市价单
+ * @param stdCode 标准合约代码
+ * @param qty 开仓数量
+ * @param userTag 用户自定义标签，用于标记交易的特殊含义，默认为空字符串
+ * @param limitprice 限价，如果大于0，则表示以不高于该价格的价格成交
+ * @param stopprice 止损价，如果大于0，则表示当价格不低于该价格时触发开仓
+ */
 void CtaMocker::stra_enter_long(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -1495,6 +1530,17 @@ void CtaMocker::stra_enter_long(const char* stdCode, double qty, const char* use
 	}
 }
 
+/**
+ * @brief 策略空头开仓接口
+ * @details 策略调用此接口执行空头开仓操作，可以设置限价或止损价
+ *          如果设置了限价或止损价，则会生成条件单，否则直接执行市价单
+ *          注意：只有允许做空的合约才能执行空头开仓
+ * @param stdCode 标准合约代码
+ * @param qty 开仓数量
+ * @param userTag 用户自定义标签，用于标记交易的特殊含义，默认为空字符串
+ * @param limitprice 限价，如果大于0，则表示以不低于该价格的价格成交
+ * @param stopprice 止损价，如果大于0，则表示当价格不高于该价格时触发开仓
+ */
 void CtaMocker::stra_enter_short(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -1547,6 +1593,17 @@ void CtaMocker::stra_enter_short(const char* stdCode, double qty, const char* us
 	}
 }
 
+/**
+ * @brief 策略多头平仓接口
+ * @details 策略调用此接口执行多头平仓操作，可以设置限价或止损价
+ *          如果设置了限价或止损价，则会生成条件单，否则直接执行市价单
+ *          如果当前没有多头仓位，则不会执行任何操作
+ * @param stdCode 标准合约代码
+ * @param qty 平仓数量，如果大于当前持仓量，则平仓全部
+ * @param userTag 用户自定义标签，用于标记交易的特殊含义，默认为空字符串
+ * @param limitprice 限价，如果大于0，则表示以不低于该价格的价格成交
+ * @param stopprice 止损价，如果大于0，则表示当价格不高于该价格时触发平仓
+ */
 void CtaMocker::stra_exit_long(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice, double stopprice)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -1731,6 +1788,16 @@ void CtaMocker::stra_set_position(const char* stdCode, double qty, const char* u
 	}
 }
 
+/**
+ * @brief 添加交易信号
+ * @details 将交易信号添加到信号队列中，并记录信号日志
+ *          信号将在下一个Tick到来时被处理并执行对应的交易
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位，正数表示多头仓位，负数表示空头仓位
+ * @param userTag 用户自定义标签，用于标记信号的特殊含义，默认为空字符串
+ * @param price 期望交易价格，默认为0.0，表示使用当前市场价格
+ * @param sigType 信号类型，0表示普通信号，2表示条件单触发信号，默认为0
+ */
 void CtaMocker::append_signal(const char* stdCode, double qty, const char* userTag /* = "" */, double price /* = 0.0 */, uint32_t sigType /* = 0 */)
 {
 	double curPx = _price_map[stdCode];
@@ -1748,6 +1815,15 @@ void CtaMocker::append_signal(const char* stdCode, double qty, const char* userT
 	//save_data();
 }
 
+/**
+ * @brief 设置仓位
+ * @details 根据目标仓位和当前仓位计算需要调整的仓位，并执行相应的开仓或平仓操作
+ *          处理了滑点、手续费、冻结仓位等因素，并记录交易日志和平仓日志
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位，正数表示多头仓位，负数表示空头仓位
+ * @param price 交易价格，默认为0.0，表示使用当前市场价格
+ * @param userTag 用户自定义标签，用于标记交易的特殊含义，默认为空字符串
+ */
 void CtaMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
