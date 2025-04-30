@@ -1,11 +1,12 @@
-﻿/*!
+/*!
  * \file TraderAdapter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 交易适配器实现文件
+ * \details 该文件实现了交易适配器相关的功能，包括订单管理、持仓管理、交易执行和风控等核心功能
  */
 #include "EventNotifier.h"
 #include "WtLocalExecuter.h"
@@ -38,18 +39,29 @@
 
 namespace rj = rapidjson;
 
+/**
+ * @brief 生成本地订单ID
+ * @details 基于当前时间生成唯一的本地订单ID，确保在程序运行期间不会重复
+ * @return 返回生成的唯一订单ID
+ */
 uint32_t makeLocalOrderID()
 {
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
+	//多加一个1000000是为了防止程序反复重启导致ID重复的问题
 	if (_auto_order_id == 0)
-	{
-		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
-		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
-	}
+		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - 946656000) * 100 + 1000000);
 
 	return _auto_order_id.fetch_add(1);
 }
 
+/**
+ * @brief 格式化交易动作代码
+ * @details 根据交易方向和开平标志生成简短的交易动作代码
+ * @param dType 交易方向类型(多/空)
+ * @param oType 开平标志类型(开仓/平仓/平今)
+ * @return 返回格式化后的交易动作代码
+ * @note 返回的代码含义：OL-开多，CL-平多，CNL-平今多，OS-开空，CS-平空，CNS-平今空
+ */
 inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 {
 	if(dType == WDT_LONG)
@@ -72,27 +84,46 @@ inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 	}
 }
 
+/**
+ * @brief 交易适配器构造函数
+ * @details 初始化交易适配器的成员变量，设置默认状态
+ * @param caster 事件通知器指针，用于广播交易相关事件，默认为NULL
+ */
 TraderAdapter::TraderAdapter(EventNotifier* caster /* = NULL */)
 	: _id("")
 	, _cfg(NULL)
-	, _state(AS_NOTLOGIN)
 	, _trader_api(NULL)
+	, _bd_mgr(NULL)
+	, _policy_mgr(NULL)
+	, _state(AS_NOTLOGIN)
 	, _orders(NULL)
-	, _stat_map(NULL)
-	, _risk_mon_enabled(false)
-	, _save_data(false)
+	, _trading_day(0)
 	, _notifier(caster)
-	, _ignore_sefmatch(false)
+	, _stat_map(NULL)
+	, _save_data(false)
+	, _risk_mon_enabled(false)
 {
 }
 
-
+/**
+ * @brief 交易适配器析构函数
+ * @details 释放交易适配器占用的资源，主要是统计数据映射表
+ */
 TraderAdapter::~TraderAdapter()
 {
 	if (_stat_map)
 		_stat_map->release();
 }
 
+/**
+ * @brief 初始化交易适配器
+ * @details 根据传入的参数初始化交易适配器，包括加载风控参数、创建交易API实例等
+ * @param id 适配器ID
+ * @param params 初始化参数
+ * @param bdMgr 基础数据管理器
+ * @param policyMgr 动作策略管理器
+ * @return 初始化是否成功
+ */
 bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
 	if (params == NULL)
@@ -203,6 +234,15 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 	return true;
 }
 
+/**
+ * @brief 使用外部API初始化交易适配器
+ * @details 使用外部传入的交易API实例初始化交易适配器，而不是通过动态加载的方式
+ * @param id 适配器ID
+ * @param api 外部交易API实例
+ * @param bdMgr 基础数据管理器
+ * @param policyMgr 动作策略管理器
+ * @return 初始化是否成功
+ */
 bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
 	if (api == NULL)
@@ -231,6 +271,10 @@ bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr
 	return true;
 }
 
+/**
+ * @brief 初始化数据保存功能
+ * @details 创建交易数据保存目录和文件，用于记录交易和订单日志
+ */
 void TraderAdapter::initSaveData()
 {
 	/*std::string folder = WtHelper::getOutputDir();
@@ -274,6 +318,13 @@ void TraderAdapter::initSaveData()
 	_rt_data_file = folder + "rtdata.json";
 }
 
+/**
+ * @brief 记录成交日志
+ * @details 将成交信息写入CSV日志文件
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param trdInfo 成交信息
+ */
 void TraderAdapter::logTrade(uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo)
 {
 	if (_trades_log == NULL || trdInfo == NULL)
@@ -285,6 +336,13 @@ void TraderAdapter::logTrade(uint32_t localid, const char* stdCode, WTSTradeInfo
 		trdInfo->getVolume(), trdInfo->getPrice(), trdInfo->getTradeID(), trdInfo->getRefOrder()));
 }
 
+/**
+ * @brief 记录订单日志
+ * @details 将订单信息写入CSV日志文件
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param ordInfo 订单信息
+ */
 void TraderAdapter::logOrder(uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo)
 {
 	if (_orders_log == NULL || ordInfo == NULL)
@@ -297,6 +355,11 @@ void TraderAdapter::logOrder(uint32_t localid, const char* stdCode, WTSOrderInfo
 		ordInfo->getOrderID(), ordInfo->getOrderState()==WOS_Canceled?"TRUE":"FALSE", ordInfo->getStateMsg()));
 }
 
+/**
+ * @brief 保存实时数据
+ * @details 将实时数据保存到JSON文件
+ * @param ayFunds 资金信息数组，默认为NULL
+ */
 void TraderAdapter::saveData(WTSArray* ayFunds /* = NULL */)
 {
 	rj::Document root(rj::kObjectType);
@@ -386,6 +449,12 @@ void TraderAdapter::saveData(WTSArray* ayFunds /* = NULL */)
 	}
 }
 
+/**
+ * @brief 获取风控参数
+ * @details 根据标准化合约代码获取对应的风控参数，如果没有特定合约的风控参数，则返回默认参数
+ * @param stdCode 标准化合约代码
+ * @return 风控参数指针
+ */
 const TraderAdapter::RiskParams* TraderAdapter::getRiskParams(const char* stdCode)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
@@ -398,6 +467,11 @@ const TraderAdapter::RiskParams* TraderAdapter::getRiskParams(const char* stdCod
 	return &it->second;
 }
 
+/**
+ * @brief 运行交易适配器
+ * @details 注册交易回调并连接交易服务器
+ * @return 是否成功运行
+ */
 bool TraderAdapter::run()
 {
 	if (_trader_api == NULL)
@@ -413,6 +487,10 @@ bool TraderAdapter::run()
 	return true;
 }
 
+/**
+ * @brief 释放交易适配器资源
+ * @details 取消注册交易回调并释放交易API资源
+ */
 void TraderAdapter::release()
 {
 	if (_trader_api)
@@ -422,6 +500,14 @@ void TraderAdapter::release()
 	}
 }
 
+/**
+ * @brief 获取持仓量
+ * @details 根据标准化合约代码和标志获取持仓量
+ * @param stdCode 标准化合约代码
+ * @param bValidOnly 是否只返回可用持仓
+ * @param flag 持仓标志，1-多头持仓，2-空头持仓，3-净持仓(多-空)
+ * @return 持仓量
+ */
 double TraderAdapter::getPosition(const char* stdCode, bool bValidOnly, int32_t flag /* = 3 */)
 {
 	auto it = _positions.find(stdCode);
@@ -448,6 +534,11 @@ double TraderAdapter::getPosition(const char* stdCode, bool bValidOnly, int32_t 
 	return ret;
 }
 
+/**
+ * @brief 枚举所有持仓
+ * @details 枚举所有标的的持仓信息，并通过回调函数返回
+ * @param cb 持仓枚举回调函数
+ */
 void TraderAdapter::enumPosition(FuncEnumChnlPosCallBack cb)
 {
 	for(auto& v : _positions)
@@ -461,6 +552,12 @@ void TraderAdapter::enumPosition(FuncEnumChnlPosCallBack cb)
 	}
 }
 
+/**
+ * @brief 获取订单信息
+ * @details 根据标准化合约代码获取对应的订单信息，如果代码为空则返回所有订单
+ * @param stdCode 标准化合约代码，如果为空则返回所有订单
+ * @return 订单映射表指针
+ */
 OrderMap* TraderAdapter::getOrders(const char* stdCode)
 {
 	if (_orders == NULL)
@@ -481,6 +578,12 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 	return ret;
 }
 
+/**
+ * @brief 执行委托
+ * @details 将委托发送到交易服务器并生成本地订单ID
+ * @param entrust 委托信息
+ * @return 生成的本地订单ID，如果为0表示委托失败
+ */
 uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 {
 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
@@ -511,6 +614,13 @@ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 	return localid;
 }
 
+/**
+ * @brief 更新未完成数量
+ * @details 更新指定合约的未完成交易数量
+ * @param stdCode 标准化合约代码
+ * @param qty 数量变化，正值表示增加，负值表示减少
+ * @param bOuput 是否输出日志，默认为false
+ */
 void TraderAdapter::updateUndone(const char* stdCode, double qty, bool bOuput /* = false */)
 {
 	double& undone = _undone_qty[stdCode];
@@ -521,18 +631,36 @@ void TraderAdapter::updateUndone(const char* stdCode, double qty, bool bOuput /*
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] {} qty of undone order updated, {} -> {}", _id.c_str(), stdCode, oldQty, undone);
 }
 
+/**
+ * @brief 获取合约信息
+ * @details 从基础数据管理器中获取指定合约的信息
+ * @param stdCode 标准化合约代码
+ * @return 合约信息指针
+ */
 WTSContractInfo* TraderAdapter::getContract(const char* stdCode)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
 	return _bd_mgr->getContract(cInfo._code, cInfo._exchg);
 }
 
+/**
+ * @brief 获取品种信息
+ * @details 从基础数据管理器中获取指定合约对应的品种信息
+ * @param stdCode 标准化合约代码
+ * @return 品种信息指针
+ */
 WTSCommodityInfo* TraderAdapter::getCommodify(const char* stdCode)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
 	return _bd_mgr->getCommodity(cInfo._exchg, cInfo._product);
 }
 
+/**
+ * @brief 检查撤单限制
+ * @details 根据风控参数检查指定合约的撤单限制，包括总撤单次数和撤单频率
+ * @param stdCode 标准化合约代码
+ * @return 是否允许撤单
+ */
 bool TraderAdapter::checkCancelLimits(const char* stdCode)
 {
 	if (!_risk_mon_enabled)
@@ -587,6 +715,12 @@ bool TraderAdapter::checkCancelLimits(const char* stdCode)
 	return true;
 }
 
+/**
+ * @brief 检查是否允许交易
+ * @details 检查指定合约是否允许交易，主要是检查是否在排除列表中
+ * @param stdCode 标准化合约代码
+ * @return 是否允许交易
+ */
 bool TraderAdapter::isTradeEnabled(const char* stdCode) const
 {
 	if (!_risk_mon_enabled)
@@ -598,6 +732,12 @@ bool TraderAdapter::isTradeEnabled(const char* stdCode) const
 	return true;
 }
 
+/**
+ * @brief 检查下单限制
+ * @details 根据风控参数检查指定合约的下单限制，包括总下单次数和下单频率
+ * @param stdCode 标准化合约代码
+ * @return 是否允许下单
+ */
 bool TraderAdapter::checkOrderLimits(const char* stdCode)
 {
 	if (!_risk_mon_enabled)
@@ -652,6 +792,17 @@ bool TraderAdapter::checkOrderLimits(const char* stdCode)
 	return true;
 }
 
+/**
+ * @brief 买入操作
+ * @details 执行买入操作，根据当前持仓情况决定是开仓还是平仓
+ * @param stdCode 标准化合约代码
+ * @param price 买入价格
+ * @param qty 买入数量
+ * @param flag 买入标志
+ * @param bForceClose 是否强制平仓
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID集合
+ */
 OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
@@ -945,6 +1096,17 @@ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int f
 	return ret;
 }
 
+/**
+ * @brief 卖出操作
+ * @details 执行卖出操作，根据当前持仓情况决定是开仓还是平仓
+ * @param stdCode 标准化合约代码
+ * @param price 卖出价格
+ * @param qty 卖出数量
+ * @param flag 卖出标志
+ * @param bForceClose 是否强制平仓
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID集合
+ */
 OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
@@ -1233,6 +1395,12 @@ OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int 
 	return ret;
 }
 
+/**
+ * @brief 执行撤单操作
+ * @details 根据订单信息执行撤单操作
+ * @param ordInfo 订单信息
+ * @return 是否撤单成功
+ */
 bool TraderAdapter::doCancel(WTSOrderInfo* ordInfo)
 {
 	if (ordInfo == NULL || !ordInfo->isAlive())
@@ -1260,6 +1428,12 @@ bool TraderAdapter::doCancel(WTSOrderInfo* ordInfo)
 	return isSent;
 }
 
+/**
+ * @brief 撤销指定订单
+ * @details 根据本地订单ID撤销订单
+ * @param localid 本地订单ID
+ * @return 是否撤单成功
+ */
 bool TraderAdapter::cancel(uint32_t localid)
 {
 	if (_orders == NULL || _orders->size() == 0)
@@ -1282,6 +1456,14 @@ bool TraderAdapter::cancel(uint32_t localid)
 	return bRet;
 }
 
+/**
+ * @brief 撤销指定合约的订单
+ * @details 根据合约代码、买卖方向和数量撤销订单
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入订单
+ * @param qty 撤单数量，默认为0（全部撤销）
+ * @return 撤销的订单ID集合
+ */
 OrderIDs TraderAdapter::cancel(const char* stdCode, bool isBuy, double qty /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
@@ -1320,6 +1502,16 @@ OrderIDs TraderAdapter::cancel(const char* stdCode, bool isBuy, double qty /* = 
 	return ret;
 }
 
+/**
+ * @brief 开多仓
+ * @details 执行开多仓操作
+ * @param stdCode 标准化合约代码
+ * @param price 价格
+ * @param qty 数量
+ * @param flag 标志
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID
+ */
 uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo /* = NULL */)
 {
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
@@ -1338,6 +1530,16 @@ uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, 
 	return ret;
 }
 
+/**
+ * @brief 开空仓
+ * @details 执行开空仓操作
+ * @param stdCode 标准化合约代码
+ * @param price 价格
+ * @param qty 数量
+ * @param flag 标志
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID
+ */
 uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo /* = NULL */)
 {
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
@@ -1356,6 +1558,17 @@ uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty,
 	return ret;
 }
 
+/**
+ * @brief 平多仓
+ * @details 执行平多仓操作
+ * @param stdCode 标准化合约代码
+ * @param price 价格
+ * @param qty 数量
+ * @param isToday 是否平今仓
+ * @param flag 标志
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID
+ */
 uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty, bool isToday, int flag, WTSContractInfo* cInfo /* = NULL */)
 {
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
@@ -1374,6 +1587,17 @@ uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty,
 	return ret;
 }
 
+/**
+ * @brief 平空仓
+ * @details 执行平空仓操作
+ * @param stdCode 标准化合约代码
+ * @param price 价格
+ * @param qty 数量
+ * @param isToday 是否平今仓
+ * @param flag 标志
+ * @param cInfo 合约信息，默认为NULL
+ * @return 订单ID
+ */
 uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty, bool isToday, int flag, WTSContractInfo* cInfo /* = NULL */)
 {
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
@@ -1394,6 +1618,12 @@ uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty
 
 
 #pragma region "ITraderSpi接口"
+/**
+ * @brief 处理交易事件
+ * @details 处理交易连接和断开事件，并执行相应的操作
+ * @param e 交易事件类型
+ * @param ec 事件代码
+ */
 void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
 {
 	if(e == WTE_Connect)
@@ -1415,6 +1645,13 @@ void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
 	}
 }
 
+/**
+ * @brief 登录结果回调
+ * @details 处理交易账户登录结果，如果登录成功则查询持仓信息
+ * @param bSucc 是否登录成功
+ * @param msg 登录结果消息
+ * @param tradingdate 交易日期
+ */
 void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingdate)
 {
 	if(!bSucc)
@@ -1434,11 +1671,21 @@ void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingd
 	}
 }
 
+/**
+ * @brief 登出回调
+ * @details 处理交易账户登出事件
+ */
 void TraderAdapter::onLogout()
 {
 	
 }
 
+/**
+ * @brief 委托响应回调
+ * @details 处理委托下单的响应结果，如果有错误则记录日志并更新未完成数量
+ * @param entrust 委托信息
+ * @param err 错误信息
+ */
 void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 {
 	if (err && err->getErrorCode() != WEC_NONE)
@@ -1503,6 +1750,11 @@ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 	}
 }
 
+/**
+ * @brief 账户资金响应回调
+ * @details 处理账户资金查询的响应结果，保存数据并通知监听器
+ * @param ayAccounts 账户资金信息数组
+ */
 void TraderAdapter::onRspAccount(WTSArray* ayAccounts)
 {
 	if (_save_data)
@@ -1534,6 +1786,11 @@ void TraderAdapter::onRspAccount(WTSArray* ayAccounts)
 	}
 }
 
+/**
+ * @brief 持仓响应回调
+ * @details 处理持仓查询的响应结果，更新本地持仓数据并通知监听器
+ * @param ayPositions 持仓信息数组
+ */
 void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 {
 	if (ayPositions && ayPositions->size() > 0)
@@ -1593,6 +1850,11 @@ void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 	}
 }
 
+/**
+ * @brief 订单响应回调
+ * @details 处理订单查询的响应结果，更新本地订单数据
+ * @param ayOrders 订单信息数组
+ */
 void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 {
 	if (ayOrders)
@@ -1719,6 +1981,12 @@ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 	}
 }
 
+/**
+ * @brief 打印持仓信息
+ * @details 将合约的持仓信息输出到日志中，包括多空方向的昨仓和今仓数量及可用数量
+ * @param code 合约代码
+ * @param pItem 持仓项目
+ */
 void TraderAdapter::printPosition(const char* code, const PosItem& pItem)
 {
 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] {} position updated, long:{}[{}]|{}[{}], short:{}[{}]|{}[{}]",
@@ -1726,6 +1994,11 @@ void TraderAdapter::printPosition(const char* code, const PosItem& pItem)
 		pItem.s_prevol, pItem.s_preavail, pItem.s_newvol, pItem.s_newavail);
 }
 
+/**
+ * @brief 成交响应回调
+ * @details 处理成交查询的响应结果，更新本地成交数据
+ * @param ayTrades 成交信息数组
+ */
 void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 {
 	if (ayTrades)
@@ -1803,6 +2076,13 @@ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 	}
 }
 
+/**
+ * @brief 检查自成交
+ * @details 通过检查成交单号和关联订单号来判断是否发生自成交，如果发生自成交则记录并禁止该合约的交易
+ * @param stdCode 标准化合约代码
+ * @param tInfo 成交信息
+ * @return 是否发生自成交
+ */
 bool TraderAdapter::checkSelfMatch(const char* stdCode, WTSTradeInfo* tInfo)
 {
 	if (tInfo == NULL)
@@ -1840,6 +2120,12 @@ bool TraderAdapter::checkSelfMatch(const char* stdCode, WTSTradeInfo* tInfo)
 	return false;
 }
 
+/**
+ * @brief 订单状态转换为名称
+ * @details 将订单状态枚举值转换为简短的字符串表示，便于日志输出
+ * @param woState 订单状态枚举值
+ * @return 订单状态的字符串表示
+ */
 inline const char* stateToName(WTSOrderState woState)
 {
 	if (woState == WOS_AllTraded)
@@ -1858,6 +2144,11 @@ inline const char* stateToName(WTSOrderState woState)
 		return "Error";
 }
 
+/**
+ * @brief 订单推送回调
+ * @details 处理交易服务器主动推送的订单状态变化，更新本地订单数据
+ * @param orderInfo 订单信息
+ */
 void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 {
 	if (orderInfo == NULL)
@@ -2131,6 +2422,11 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 		_notifier->notify(id(), localid, stdCode.c_str(), orderInfo);
 }
 
+/**
+ * @brief 成交推送回调
+ * @details 处理交易服务器主动推送的成交信息，更新本地持仓和成交数据
+ * @param tradeRecord 成交记录
+ */
 void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 {
 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
@@ -2251,6 +2547,12 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 	_trader_api->queryAccount();
 }
 
+/**
+ * @brief 交易错误回调
+ * @details 处理交易过程中发生的错误，记录错误日志并通知事件
+ * @param err 错误信息
+ * @param pData 附加数据，默认为NULL
+ */
 void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
 {
 	if(err)
@@ -2260,16 +2562,31 @@ void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
 		_notifier->notify(id(), fmt::format("Trading channel error: {}", err->getMessage()).c_str());
 }
 
+/**
+ * @brief 获取基础数据管理器
+ * @details 返回当前交易适配器使用的基础数据管理器
+ * @return 基础数据管理器指针
+ */
 IBaseDataMgr* TraderAdapter::getBaseDataMgr()
 {
 	return _bd_mgr;
 }
 
+/**
+ * @brief 处理交易日志
+ * @details 将交易日志输出到日志系统
+ * @param ll 日志级别
+ * @param message 日志消息
+ */
 void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
 {
 	WTSLogger::log_dyn_raw("trader", _id.c_str(), ll, message);
 }
 
+/**
+ * @brief 查询资金
+ * @details 在适配器就绪后查询账户资金信息
+ */
 void TraderAdapter::queryFund()
 {
 	if (_state != AS_ALLREADY)
@@ -2283,6 +2600,13 @@ void TraderAdapter::queryFund()
 
 //////////////////////////////////////////////////////////////////////////
 //CTPWrapperMgr
+/**
+ * @brief 添加交易适配器
+ * @details 将交易适配器添加到管理器中，并检查名称是否重复
+ * @param tname 交易适配器名称
+ * @param adapter 交易适配器指针
+ * @return 是否添加成功
+ */
 bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 {
 	if (adapter == NULL || strlen(tname) == 0)
@@ -2300,6 +2624,12 @@ bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 	return true;
 }
 
+/**
+ * @brief 获取交易适配器
+ * @details 根据名称获取对应的交易适配器
+ * @param tname 交易适配器名称
+ * @return 交易适配器指针，如果不存在则返回空指针
+ */
 TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 {
 	auto it = _adapters.find(tname);
@@ -2311,6 +2641,10 @@ TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 	return TraderAdapterPtr();
 }
 
+/**
+ * @brief 运行所有交易适配器
+ * @details 启动所有交易适配器并输出日志
+ */
 void TraderAdapterMgr::run()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
@@ -2321,6 +2655,10 @@ void TraderAdapterMgr::run()
 	WTSLogger::info("{} trading channels started", _adapters.size());
 }
 
+/**
+ * @brief 释放所有交易适配器资源
+ * @details 释放所有交易适配器并清空适配器列表
+ */
 void TraderAdapterMgr::release()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
@@ -2331,6 +2669,10 @@ void TraderAdapterMgr::release()
 	_adapters.clear();
 }
 
+/**
+ * @brief 刷新所有交易适配器的资金信息
+ * @details 对所有交易适配器执行资金查询操作
+ */
 void TraderAdapterMgr::refresh_funds()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
