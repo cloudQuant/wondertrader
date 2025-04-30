@@ -1197,6 +1197,13 @@ void CtaMocker::on_bar_close(const char* code, const char* period, WTSBarStruct*
 		_strategy->on_bar(this, code, period, newBar);
 }
 
+/**
+ * @brief Tick数据更新回调函数
+ * @details 当合约的Tick数据更新时，该函数被调用
+ *          如果该合约已经被订阅，则将新的Tick数据传递给策略的on_tick回调
+ * @param code 合约代码
+ * @param newTick 新的Tick数据指针
+ */
 void CtaMocker::on_tick_updated(const char* code, WTSTickData* newTick)
 {
 	auto it = _tick_subs.find(code);
@@ -1706,6 +1713,12 @@ void CtaMocker::stra_exit_short(const char* stdCode, double qty, const char* use
 	}
 }
 
+/**
+ * @brief 获取合约当前价格
+ * @details 获取指定合约的当前最新价格，由回放器提供
+ * @param stdCode 标准合约代码
+ * @return 当前最新价格，如果回放器不可用则返回0.0
+ */
 double CtaMocker::stra_get_price(const char* stdCode)
 {
 	if (_replayer)
@@ -2060,6 +2073,13 @@ WTSTickData* CtaMocker::stra_get_last_tick(const char* stdCode)
 	return _replayer->get_last_tick(stdCode);
 }
 
+/**
+ * @brief 订阅合约的Tick数据
+ * @details 策略调用此接口订阅指定合约的Tick数据
+ *          订阅后的Tick数据会通过on_tick回调函数传递给策略
+ *          主动订阅的Tick会在本地记录，在回调时进行检查
+ * @param code 合约代码
+ */
 void CtaMocker::stra_sub_ticks(const char* code)
 {
 	/*
@@ -2081,26 +2101,56 @@ void CtaMocker::stra_sub_bar_events(const char* stdCode, const char* period)
 	tag._notify = true;
 }
 
+/**
+ * @brief 获取合约品种信息
+ * @details 根据标准合约代码获取对应的品种信息
+ *          品种信息包含合约乘数、最小变动单位、手续费率等信息
+ * @param stdCode 标准合约代码
+ * @return 合约品种信息指针
+ */
 WTSCommodityInfo* CtaMocker::stra_get_comminfo(const char* stdCode)
 {
 	return _replayer->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取合约原始代码
+ * @details 根据标准合约代码获取原始交易所合约代码
+ *          标准合约代码是系统内部统一格式，原始代码是交易所实际使用的代码
+ * @param stdCode 标准合约代码
+ * @return 原始交易所合约代码
+ */
 std::string CtaMocker::stra_get_rawcode(const char* stdCode)
 {
 	return _replayer->get_rawcode(stdCode);
 }
 
+/**
+ * @brief 获取当前交易日期
+ * @details 获取当前回测的交易日期，格式为YYYYMMDD，例妈20220101
+ *          交易日期与自然日期不同，夜盘交易属于下一个交易日
+ * @return 当前交易日期
+ */
 uint32_t CtaMocker::stra_get_tdate()
 {
 	return _replayer->get_trading_date();
 }
 
+/**
+ * @brief 获取当前回测日期
+ * @details 获取当前回测的日期，格式为YYYYMMDD，例妈20220101
+ * @return 当前回测日期
+ */
 uint32_t CtaMocker::stra_get_date()
 {
 	return _replayer->get_date();
 }
 
+/**
+ * @brief 获取当前回测时间
+ * @details 获取当前回测的时间，格式为HHMM，例如1430表示14点30分
+ * @return 当前回测时间
+ */
 uint32_t CtaMocker::stra_get_time()
 {
 	return _replayer->get_min_time();
@@ -2123,21 +2173,45 @@ double CtaMocker::stra_get_fund_data(int flag)
 	}
 }
 
+/**
+ * @brief 记录策略信息日志
+ * @details 记录信息级别的策略日志，用于记录策略运行过程中的重要信息
+ *          日志将以策略名称为标识记录到日志系统中
+ * @param message 日志消息内容
+ */
 void CtaMocker::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录策略调试日志
+ * @details 记录调试级别的策略日志，用于记录策略运行过程中的详细调试信息
+ *          日志将以策略名称为标识记录到日志系统中
+ * @param message 日志消息内容
+ */
 void CtaMocker::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录策略警告日志
+ * @details 记录警告级别的策略日志，用于记录策略运行过程中的警告信息
+ *          日志将以策略名称为标识记录到日志系统中
+ * @param message 日志消息内容
+ */
 void CtaMocker::stra_log_warn(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message);
 }
 
+/**
+ * @brief 记录策略错误日志
+ * @details 记录错误级别的策略日志，用于记录策略运行过程中的错误信息
+ *          日志将以策略名称为标识记录到日志系统中
+ * @param message 日志消息内容
+ */
 void CtaMocker::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
