@@ -49,7 +49,10 @@ uint32_t makeLocalOrderID()
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
 	//多加一个1000000是为了防止程序反复重启导致ID重复的问题
 	if (_auto_order_id == 0)
-		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - 946656000) * 100 + 1000000);
+	{
+		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
+		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+	}
 
 	return _auto_order_id.fetch_add(1);
 }
@@ -92,16 +95,14 @@ inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 TraderAdapter::TraderAdapter(EventNotifier* caster /* = NULL */)
 	: _id("")
 	, _cfg(NULL)
-	, _trader_api(NULL)
-	, _bd_mgr(NULL)
-	, _policy_mgr(NULL)
 	, _state(AS_NOTLOGIN)
+	, _trader_api(NULL)
 	, _orders(NULL)
-	, _trading_day(0)
-	, _notifier(caster)
 	, _stat_map(NULL)
-	, _save_data(false)
 	, _risk_mon_enabled(false)
+	, _save_data(false)
+	, _notifier(caster)
+	, _ignore_sefmatch(false)
 {
 }
 
