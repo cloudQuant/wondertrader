@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file CtaMocker.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief CTA策略回测模拟器头文件
+ * \details 该文件定义了CTA策略回测模拟器，用于模拟策略在历史数据上的运行过程。
+ *          模拟器实现了ICtaStraCtx和IDataSink接口，可以处理历史数据并执行策略逻辑。
+ *          通过该模拟器，可以对CTA策略进行回测、调试和优化。
  */
 #pragma once
 #include <sstream>
@@ -32,26 +35,38 @@ USING_NS_WTP;
 class HisDataReplayer;
 class CtaStrategy;
 
-const char COND_ACTION_OL = 0;	//开多
-const char COND_ACTION_CL = 1;	//平多
-const char COND_ACTION_OS = 2;	//开空
-const char COND_ACTION_CS = 3;	//平空
-const char COND_ACTION_SP = 4;	//直接设置仓位
+/**
+ * @brief 条件单动作类型常量定义
+ * @details 定义了各种条件单的动作类型，用于标识不同的交易操作
+ */
+const char COND_ACTION_OL = 0;	///<开多，建立多头仓位
+const char COND_ACTION_CL = 1;	///<平多，平掉多头仓位
+const char COND_ACTION_OS = 2;	///<开空，建立空头仓位
+const char COND_ACTION_CS = 3;	///<平空，平掉空头仓位
+const char COND_ACTION_SP = 4;	///<直接设置仓位，不区分多空
 
+/**
+ * @brief 条件委托结构体
+ * @details 定义了条件委托的各个属性，用于实现条件单功能
+ *          条件单是指当满足特定条件时触发的交易指令
+ */
 typedef struct _CondEntrust
 {
-	WTSCompareField _field;
-	WTSCompareType	_alg;
-	double			_target;
+	WTSCompareField _field;    ///< 比较字段，指定比较的是什么数据字段
+	WTSCompareType	_alg;     ///< 比较算法，指定如何进行比较（大于、小于等）
+	double			_target;    ///< 目标值，比较的目标数值
 
-	double			_qty;
+	double			_qty;       ///< 委托数量
 
-	char			_action;	//0-开多,1-平多,2-开空,3-平空
+	char			_action;    ///< 委托动作：0-开多,1-平多,2-开空,3-平空,4-设置仓位
 
-	char			_code[MAX_INSTRUMENT_LENGTH];
-	char			_usertag[32];
+	char			_code[MAX_INSTRUMENT_LENGTH];  ///< 标的码，合约代码
+	char			_usertag[32];                  ///< 用户标记，用于标识不同的委托
 
-
+	/**
+	 * @brief 构造函数
+	 * @details 初始化条件委托结构体，将所有成员设置为0
+	 */
 	_CondEntrust()
 	{
 		memset(this, 0, sizeof(_CondEntrust));
@@ -59,10 +74,25 @@ typedef struct _CondEntrust
 
 } CondEntrust;
 
+/**
+ * @brief 条件委托列表类型
+ * @details 定义了条件委托的列表类型，用于存储多个条件委托
+ */
 typedef std::vector<CondEntrust>	CondList;
+
+/**
+ * @brief 条件委托映射类型
+ * @details 定义了从合约代码到条件委托列表的映射，用于按合约管理条件委托
+ */
 typedef wt_hashmap<std::string, CondList>	CondEntrustMap;
 
 
+/**
+ * @brief CTA策略回测模拟器类
+ * @details 实现了ICtaStraCtx和IDataSink接口，用于模拟策略在历史数据上的运行过程。
+ *          该类是CTA策略回测的核心组件，负责处理历史数据、执行策略逻辑、模拟交易和记录回测结果。
+ *          通过该类，可以对CTA策略进行全面的回测、调试和优化。
+ */
 class CtaMocker : public ICtaStraCtx, public IDataSink
 {
 public:
