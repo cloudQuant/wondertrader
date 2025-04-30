@@ -1,11 +1,17 @@
-﻿/*!
+/*!
  * \file CtaMocker.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief CTA策略回测模拟器实现文件
+ * \details 本文件实现了CTA策略回测模拟器的核心功能，包括：
+ *          1. 实现ICtaStraCtx接口，提供策略交易上下文
+ *          2. 实现IDataSink接口，处理历史数据回放
+ *          3. 模拟交易执行和持仓管理
+ *          4. 记录回测过程中的交易、信号和资金数据
+ *          5. 导出回测结果和图表数据
  */
 #include "CtaMocker.h"
 #include "WtHelper.h"
@@ -48,6 +54,11 @@ const char* ACTION_NAMES[] =
 };
 
 
+/**
+ * @brief 生成唯一的上下文ID
+ * @details 使用原子操作生成递增的上下文ID，确保每个策略实例有唯一标识
+ * @return 返回新生成的上下文ID
+ */
 inline uint32_t makeCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 1 };
@@ -55,6 +66,16 @@ inline uint32_t makeCtxId()
 }
 
 
+/**
+ * @brief CtaMocker类构造函数
+ * @details 初始化CTA策略回测模拟器，设置各种参数和初始状态
+ * @param replayer 历史数据回放器指针，用于提供回测所需的历史数据
+ * @param name 策略名称，用于标识策略
+ * @param slippage 滑点设置，用于模拟实际交易中的滑点影响，默认为0
+ * @param persistData 是否持久化数据，如果为true则会保存回测结果，默认为true
+ * @param notifier 事件通知器指针，用于发送事件通知，默认为NULL
+ * @param isRatioSlp 是否为比例滑点，如果为true则slippage为万分比，默认为false
+ */
 CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippage /* = 0 */, bool persistData /* = true */, EventNotifier* notifier /* = NULL */, bool isRatioSlp /* = false */)
 	: ICtaStraCtx(name)
 	, _replayer(replayer)
@@ -79,10 +100,22 @@ CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 }
 
 
+/**
+ * @brief CtaMocker类析构函数
+ * @details 清理CtaMocker实例占用的资源
+ */
 CtaMocker::~CtaMocker()
 {
 }
 
+/**
+ * @brief 导出策略数据
+ * @details 将策略的持仓、资金、信号等数据导出到JSON文件中，便于后续分析和展示
+ *          主要导出以下几类数据：
+ *          1. 持仓数据：包括各合约的持仓量、平仓盈亏、浮动盈亏等
+ *          2. 资金数据：包括总盈亏、总浮动盈亏、总手续费等
+ *          3. 信号数据：包括各合约的交易信号
+ */
 void CtaMocker::dump_stradata()
 {
 	rj::Document root(rj::kObjectType);
@@ -223,6 +256,14 @@ void CtaMocker::dump_stradata()
 	}
 }
 
+/**
+ * @brief 导出图表数据
+ * @details 将回测过程中生成的图表数据导出到JSON和CSV文件中，便于后续分析和可视化展示
+ *          主要导出以下几类数据：
+ *          1. K线数据：包括合约代码和周期信息
+ *          2. 指标数据：包括各指标的名称、类型、线条和基准线等
+ *          3. 标记数据：包括交易标记点的时间、价格、图标和标签等
+ */
 void CtaMocker::dump_chartdata()
 {
 	rj::Document root(rj::kObjectType);
@@ -336,6 +377,17 @@ void CtaMocker::dump_chartdata()
 	}
 }
 
+/**
+ * @brief 导出回测输出数据
+ * @details 将回测过程中生成的各类日志数据导出到CSV文件中，便于后续分析
+ *          主要导出以下几类数据：
+ *          1. 交易日志：记录每笔交易的合约、时间、方向、价格、数量等
+ *          2. 平仓日志：记录每笔平仓的详细信息，包括开仓时间、平仓时间、盈亏等
+ *          3. 资金日志：记录每日资金变化情况
+ *          4. 信号日志：记录策略生成的交易信号
+ *          5. 持仓日志：记录每日持仓情况
+ *          6. 用户数据：将用户自定义数据导出到JSON文件
+ */
 void CtaMocker::dump_outputs()
 {
 	if (!_persist_data)
@@ -391,17 +443,58 @@ void CtaMocker::dump_outputs()
 	}
 }
 
+/**
+ * @brief 记录交易信号
+ * @details 将策略生成的交易信号记录到信号日志中，便于后续分析和展示
+ * @param stdCode 标准合约代码
+ * @param target 目标仓位，正数表示多头仓位，负数表示空头仓位
+ * @param price 信号价格，即信号产生时的参考价格
+ * @param gentime 信号产生时间
+ * @param usertag 用户自定义标签，用于标记信号的特殊含义，默认为空字符串
+ */
 void CtaMocker::log_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag /* = "" */)
 {
 	_sig_logs << stdCode << "," << target << "," << price << "," << gentime << "," << usertag << "\n";
 }
 
+/**
+ * @brief 记录交易明细
+ * @details 将策略执行过程中的交易明细记录到交易日志中，便于后续分析和回测评估
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头交易，true表示多头，false表示空头
+ * @param isOpen 是否为开仓交易，true表示开仓，false表示平仓
+ * @param curTime 交易发生时间
+ * @param price 交易价格
+ * @param qty 交易数量
+ * @param userTag 用户自定义标签，用于标记交易的特殊含义
+ * @param fee 交易手续费
+ * @param barNo K线序号，标记交易发生在哪一根K线上
+ */
 void CtaMocker::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag, double fee, uint32_t barNo)
 {
 	_trade_logs << stdCode << "," << curTime << "," << (isLong ? "LONG" : "SHORT") << "," << (isOpen ? "OPEN" : "CLOSE") 
 		<< "," << price << "," << qty << "," << userTag << "," << fee << "," << barNo << "\n";
 }
 
+/**
+ * @brief 记录平仓信息
+ * @details 将策略执行过程中的平仓信息记录到平仓日志中，包含开仓和平仓的完整过程数据
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头交易，true表示多头，false表示空头
+ * @param openTime 开仓时间
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间
+ * @param closepx 平仓价格
+ * @param qty 交易数量
+ * @param profit 平仓盈亏
+ * @param maxprofit 最大浮盈
+ * @param maxloss 最大浮亏
+ * @param totalprofit 累计盈亏，默认为0
+ * @param enterTag 开仓标签，默认为空字符串
+ * @param exitTag 平仓标签，默认为空字符串
+ * @param openBarNo 开仓K线序号，默认为0
+ * @param closeBarNo 平仓K线序号，默认为0
+ */
 void CtaMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss, 
 	double totalprofit /* = 0 */, const char* enterTag /* = "" */, const char* exitTag /* = "" */, uint32_t openBarNo /* = 0 */, uint32_t closeBarNo /* = 0 */)
 {
@@ -410,6 +503,12 @@ void CtaMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 		<< totalprofit << "," << enterTag << "," << exitTag << "," << openBarNo << "," << closeBarNo << "\n";
 }
 
+/**
+ * @brief 初始化CTA策略工厂
+ * @details 加载策略工厂动态库，并初始化策略工厂实例，为后续创建和管理策略做准备
+ * @param cfg 配置项，包含策略工厂动态库路径等信息
+ * @return 返回初始化是否成功，true表示成功，false表示失败
+ */
 bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 {
 	if (cfg == NULL)
@@ -449,6 +548,12 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 	return true;
 }
 
+/**
+ * @brief 加载增量回测数据
+ * @details 从指定目录加载增量回测数据，包括交易日志、平仓日志、资金日志、信号日志、持仓日志等
+ *          增量回测允许继续之前的回测结果，而不需要重新计算所有历史数据
+ * @param incremental_backtest_base 增量回测数据的基础目录名
+ */
 void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -621,31 +726,71 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 
 //////////////////////////////////////////////////////////////////////////
 //IDataSink
+/**
+ * @brief 处理初始化事件
+ * @details 实现IDataSink接口的handle_init方法，在回测引擎初始化时调用
+ *          调用策略的on_init方法，允许策略进行初始化操作
+ */
 void CtaMocker::handle_init()
 {
 	this->on_init();
 }
 
+/**
+ * @brief 处理K线关闭事件
+ * @details 实现IDataSink接口的handle_bar_close方法，在新的K线完成时调用
+ *          调用策略的on_bar方法，将新的K线数据传递给策略进行处理
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如"m1"、"d1"等
+ * @param times 周期倍数，如对应的周期是分钟线，则表示多少分钟
+ * @param newBar 新的K线数据结构指针
+ */
 void CtaMocker::handle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	this->on_bar(stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 处理定时事件
+ * @details 实现IDataSink接口的handle_schedule方法，在定时器触发时调用
+ *          调用策略的on_schedule方法，允许策略执行定时任务
+ * @param uDate 当前日期，格式为YYYYMMDD
+ * @param uTime 当前时间，格式为HHMMSS或HHMMSS000
+ */
 void CtaMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 {
 	this->on_schedule(uDate, uTime);
 }
 
+/**
+ * @brief 处理交易日开始事件
+ * @details 实现IDataSink接口的handle_session_begin方法，在每个交易日开始时调用
+ *          调用策略的on_session_begin方法，允许策略执行交易日开始时的初始化操作
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ */
 void CtaMocker::handle_session_begin(uint32_t curTDate)
 {
 	this->on_session_begin(curTDate);
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @details 实现IDataSink接口的handle_session_end方法，在每个交易日结束时调用
+ *          调用策略的on_session_end方法，允许策略执行交易日结束时的清理操作
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ */
 void CtaMocker::handle_session_end(uint32_t curTDate)
 {
 	this->on_session_end(curTDate);
 }
 
+/**
+ * @brief 处理交易小节结束事件
+ * @details 实现IDataSink接口的handle_section_end方法，在交易小节结束时调用
+ *          清理价格缓存数据，防止小节之间的跳空引起计算错误，主要针对夜盘交易
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @param curTime 当前时间，格式为HHMMSS或HHMMSS000
+ */
 void CtaMocker::handle_section_end(uint32_t curTDate, uint32_t curTime)
 {
 	/*
@@ -656,6 +801,11 @@ void CtaMocker::handle_section_end(uint32_t curTDate, uint32_t curTime)
 	_price_map.clear();
 }
 
+/**
+ * @brief 处理回放完成事件
+ * @details 实现IDataSink接口的handle_replay_done方法，在历史数据回放完成时调用
+ *          导出策略数据、图表数据和输出数据，完成回测结果的保存
+ */
 void CtaMocker::handle_replay_done()
 {
 	_in_backtest = false;
