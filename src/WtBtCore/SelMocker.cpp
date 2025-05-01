@@ -265,67 +265,68 @@ void SelMocker::dump_outputs()
  */
 void SelMocker::log_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag /* = "" */)
 {
-	_sig_logs << fmt::format("{},{},{},{},{},{}\n", gentime, stdCode, price, target, usertag, _strategy->id());
+	_sig_logs << stdCode << "," << target << "," << price << "," << gentime << "," << usertag << "\n";
 }
-
+	
 /**
- * @brief 记录交易记录
+ * @brief 记录交易信息
  * @param stdCode 标准合约代码
- * @param isLong 是否为多头，true表示多头，false表示空头
- * @param isOpen 是否为开仓，true表示开仓，false表示平仓
+ * @param isLong 是否为多头持仓，true表示多头，false表示空头
+ * @param isOpen 是否为开仓操作，true表示开仓，false表示平仓
  * @param curTime 交易时间
  * @param price 交易价格
  * @param qty 交易数量
  * @param userTag 用户标签
  * @param fee 交易费用
- * @details 记录交易明细到日志流中
- *          记录格式为：时间,合约代码,方向(LONG/SHORT),操作(OPEN/CLOSE),价格,数量,标签,费用
- *          这些日志用于后续生成trades.csv文件
+ * @details 记录交易明细到日志流中，用于生成trades.csv文件
+ *          记录格式为：合约代码,时间,方向(LONG/SHORT),操作(OPEN/CLOSE),价格,数量,标签,费用
+ *          这些交易记录对于回测分析和策略评估非常重要
  */
 void SelMocker::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag, double fee)
 {
-	_trade_logs << fmt::format("{},{},{},{},{},{},{},{}\n", curTime, stdCode, isLong ? "LONG" : "SHORT", isOpen ? "OPEN" : "CLOSE", price, qty, userTag, fee);
+	_trade_logs << stdCode << "," << curTime << "," << (isLong ? "LONG" : "SHORT") << "," << (isOpen ? "OPEN" : "CLOSE") << "," << price << "," << qty << "," << userTag << "," << fee << "\n";
 }
 
 /**
- * @brief 记录平仓记录
+ * @brief 记录平仓信息
  * @param stdCode 标准合约代码
- * @param isLong 是否为多头，true表示多头，false表示空头
+ * @param isLong 是否为多头持仓，true表示多头，false表示空头
  * @param openTime 开仓时间
  * @param openpx 开仓价格
  * @param closeTime 平仓时间
  * @param closepx 平仓价格
  * @param qty 交易数量
  * @param profit 交易盈亏
- * @param maxprofit 最大盈利
- * @param maxloss 最大亏损
- * @param totalprofit 总盈亏，默认为0
+ * @param maxprofit 持仓期间最大盈利
+ * @param maxloss 持仓期间最大亏损
+ * @param totalprofit 策略总盈亏，默认为0
  * @param enterTag 开仓标签，默认为空字符串
  * @param exitTag 平仓标签，默认为空字符串
- * @param openBarNo 开仓操作K线编号，默认为0
- * @param closeBarNo 平仓操作K线编号，默认为0
- * @details 记录平仓明细到日志流中，包含开平仓信息和盈亏统计
- *          记录格式包括：平仓时间,合约代码,方向,开仓时间,开仓价,平仓价,数量,盈亏,最大盈利,最大亏损,总盈亏等
- *          这些日志用于后续生成closes.csv文件，进行策略统计分析
+ * @param openBarNo 开仓K线编号，默认为0
+ * @param closeBarNo 平仓K线编号，默认为0
+ * @details 记录平仓的详细信息到日志流中，用于生成closes.csv文件
+ *          包含开平仓时间价格、盈亏信息、最大盈亏、最大亏损等数据
+ *          这些数据对于分析策略的持仓周期和盈亏特征非常有价值
  */
 void SelMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss,
 	double totalprofit /* = 0 */, const char* enterTag /* = "" */, const char* exitTag /* = "" */, uint32_t openBarNo/* = 0*/, uint32_t closeBarNo/* = 0*/)
 {
-	_close_logs << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", closeTime, stdCode, isLong ? "LONG" : "SHORT", openTime, openpx, closepx, qty, profit, maxprofit, maxloss,
-		totalprofit, enterTag, exitTag, openBarNo, closeBarNo);
+	_close_logs << stdCode << "," << (isLong ? "LONG" : "SHORT") << "," << openTime << "," << openpx
+		<< "," << closeTime << "," << closepx << "," << qty << "," << profit << "," << maxprofit << "," << maxloss << ","
+		<< totalprofit << "," << enterTag << "," << exitTag << "," << openBarNo << "," << closeBarNo << "\n";
 }
 
 /**
  * @brief 初始化选股策略工厂
- * @param cfg 策略配置
+ * @param cfg 策略配置参数
  * @return 初始化是否成功
- * @details 根据配置初始化选股策略工厂，主要流程如下：
+ * @details 根据配置初始化选股策略工厂，主要完成以下工作：
  *          1. 检查配置是否有效
- *          2. 判断是否启用策略动态链接库
- *          3. 加载策略动态链接库并获取工厂创建函数
- *          4. 创建策略工厂实例
- *          5. 创建具体的策略实例并进行初始化
- *          这个函数是选股策略模拟器的关键初始化函数
+ *          2. 加载策略动态链接库
+ *          3. 获取动态链接库中的工厂创建函数
+ *          4. 使用工厂函数创建选股策略工厂实例
+ *          5. 根据具体配置创建策略实例并初始化
+ *          这是选股策略回测模拟器的关键初始化函数
  */
 bool SelMocker::init_sel_factory(WTSVariant* cfg)
 {
@@ -1278,11 +1279,7 @@ WTSSessionInfo* SelMocker::stra_get_sessinfo(const char* stdCode)
 	return _replayer->get_session_info(stdCode, true);
 }
 
-/**
- * @brief 获取当前交易日期
- * @details 返回当前回测的交易日期，格式为YYYYMMDD
- * @return 交易日期整数
- */
+
 /**
  * @brief 获取当前交易日
  * @return 返回当前交易日，格式YYYYMMDD
@@ -1295,11 +1292,7 @@ uint32_t SelMocker::stra_get_tdate()
 	return _replayer->get_trading_date();
 }
 
-/**
- * @brief 获取当前自然日期
- * @details 返回当前回测的自然日期，格式为YYYYMMDD
- * @return 自然日期整数
- */
+
 /**
  * @brief 获取当前日历日期
  * @return 返回当前日历日期，格式YYYYMMDD
@@ -1322,12 +1315,7 @@ uint32_t SelMocker::stra_get_time()
 	return _replayer->get_min_time();
 }
 
-/**
- * @brief 获取资金数据
- * @details 根据标志获取不同类型的资金数据
- * @param flag 数据标志，0-总收益（平仓盈亏+浮动盈亏-手续费），1-平仓盈亏，2-浮动盈亏，3-手续费
- * @return 对应类型的资金数据
- */
+
 /**
  * @brief 获取资金数据
  * @param flag 资金数据标志，0-总盈亏，1-平仓盈亏，2-浮动盈亏，3-总手续费
