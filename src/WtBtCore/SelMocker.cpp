@@ -53,6 +53,10 @@ SelMocker::~SelMocker()
 {
 }
 
+/**
+ * @brief 将策略数据导出到JSON文件
+ * @details 将选股策略的关键数据（持仓信息、资金信息、信号信息等）序列化为JSON格式并写入文件
+ */
 void SelMocker::dump_stradata()
 {
 	rj::Document root(rj::kObjectType);
