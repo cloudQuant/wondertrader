@@ -1,11 +1,18 @@
 /*!
-* \file MfMocker.cpp
+* \file SelMocker.cpp
 * \project	WonderTrader
 *
 * \author Wesley
 * \date 2020/03/30
 *
-* \brief
+* \brief 选股策略回测模拟器实现
+* \details 该文件实现了WonderTrader中的选股策略回测模拟器，
+*          负责模拟选股策略的执行、信号处理、仓位管理以及回测结果的计算与导出。
+*          主要功能包括：
+*          1. 处理各类事件（K线、Tick、调度等）
+*          2. 管理策略持仓和信号
+*          3. 计算动态盈亏
+*          4. 生成回测报告和输出结果
 */
 #include "SelMocker.h"
 #include "WtHelper.h"
@@ -26,6 +33,13 @@
 #include <rapidjson/prettywriter.h>
 namespace rj = rapidjson;
 
+/**
+ * @brief 生成选股策略上下文ID
+ * @return 返回新生成的上下文ID
+ * @details 该函数用于立选股策略上下文对象生成唯一的ID
+ *          使用原子变量保证线程安全，从3000开始递增
+ *          每个选股策略实例都会分配一个唯一的上下文ID
+ */
 inline uint32_t makeSelCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 3000 };
@@ -33,6 +47,16 @@ inline uint32_t makeSelCtxId()
 }
 
 
+/**
+ * @brief 选股策略模拟器构造函数
+ * @param replayer 历史数据回放器指针
+ * @param name 策略名称
+ * @param slippage 滑点数值，默认为0
+ * @param isRatioSlp 是否为比例滑点，默认为false
+ * @details 初始化选股策略模拟器对象，设置基本参数和初始状态
+ *          初始化所有计数器和标志位，并生成唯一的上下文ID
+ *          滑点参数用于模拟实际交易中的滑点成本
+ */
 SelMocker::SelMocker(HisDataReplayer* replayer, const char* name, int32_t slippage /* = 0 */, bool isRatioSlp /* = false */)
 	: ISelStraCtx(name)
 	, _replayer(replayer)
@@ -49,6 +73,11 @@ SelMocker::SelMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 }
 
 
+/**
+ * @brief 选股策略模拟器析构函数
+ * @details 析构选股策略模拟器对象，负责资源清理
+ *          在当前版本中，所有的资源都由外部管理，所以析构函数为空
+ */
 SelMocker::~SelMocker()
 {
 }
@@ -159,6 +188,16 @@ void SelMocker::dump_stradata()
 }
 
 
+/**
+ * @brief 导出策略回测结果
+ * @details 将选股策略的回测结果导出到CSV文件，包括以下文件：
+ *          1. trades.csv - 交易明细，包含合约、时间、方向、操作、价格、数量、标签和费用
+ *          2. closes.csv - 平仓记录，包含合约、开仓时间、平仓时间、开仓价、平仓价等
+ *          3. signals.csv - 信号记录，包含合约、时间、价格、仓位变化、标签
+ *          4. positions.csv - 持仓汇总，包含日期、合约、持仓量、平仓盈亏和浮动盈亏
+ *          5. funds.csv - 资金汇总，包含日期、总盈亏、浮动盈亏、净值和交易费用
+ *          这些文件可以用于后续的分析和生成回测报告
+ */
 void SelMocker::dump_outputs()
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -213,24 +252,81 @@ void SelMocker::dump_outputs()
 	}
 }
 
+/**
+ * @brief 记录策略信号
+ * @param stdCode 标准合约代码
+ * @param target 目标仓位
+ * @param price 信号价格
+ * @param gentime 信号生成时间
+ * @param usertag 用户标签，默认为空字符串
+ * @details 将策略生成的信号记录到日志流中
+ *          记录格式为：时间,合约代码,价格,目标仓位,用户标签,策略ID
+ *          这些日志用于后续生成signals.csv文件
+ */
 void SelMocker::log_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag /* = "" */)
 {
-	_sig_logs << stdCode << "," << target << "," << price << "," << gentime << "," << usertag << "\n";
+	_sig_logs << fmt::format("{},{},{},{},{},{}\n", gentime, stdCode, price, target, usertag, _strategy->id());
 }
 
+/**
+ * @brief 记录交易记录
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头，true表示多头，false表示空头
+ * @param isOpen 是否为开仓，true表示开仓，false表示平仓
+ * @param curTime 交易时间
+ * @param price 交易价格
+ * @param qty 交易数量
+ * @param userTag 用户标签
+ * @param fee 交易费用
+ * @details 记录交易明细到日志流中
+ *          记录格式为：时间,合约代码,方向(LONG/SHORT),操作(OPEN/CLOSE),价格,数量,标签,费用
+ *          这些日志用于后续生成trades.csv文件
+ */
 void SelMocker::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag, double fee)
 {
-	_trade_logs << stdCode << "," << curTime << "," << (isLong ? "LONG" : "SHORT") << "," << (isOpen ? "OPEN" : "CLOSE") << "," << price << "," << qty << "," << userTag << "," << fee << "\n";
+	_trade_logs << fmt::format("{},{},{},{},{},{},{},{}\n", curTime, stdCode, isLong ? "LONG" : "SHORT", isOpen ? "OPEN" : "CLOSE", price, qty, userTag, fee);
 }
 
+/**
+ * @brief 记录平仓记录
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头，true表示多头，false表示空头
+ * @param openTime 开仓时间
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间
+ * @param closepx 平仓价格
+ * @param qty 交易数量
+ * @param profit 交易盈亏
+ * @param maxprofit 最大盈利
+ * @param maxloss 最大亏损
+ * @param totalprofit 总盈亏，默认为0
+ * @param enterTag 开仓标签，默认为空字符串
+ * @param exitTag 平仓标签，默认为空字符串
+ * @param openBarNo 开仓操作K线编号，默认为0
+ * @param closeBarNo 平仓操作K线编号，默认为0
+ * @details 记录平仓明细到日志流中，包含开平仓信息和盈亏统计
+ *          记录格式包括：平仓时间,合约代码,方向,开仓时间,开仓价,平仓价,数量,盈亏,最大盈利,最大亏损,总盈亏等
+ *          这些日志用于后续生成closes.csv文件，进行策略统计分析
+ */
 void SelMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss,
 	double totalprofit /* = 0 */, const char* enterTag /* = "" */, const char* exitTag /* = "" */, uint32_t openBarNo/* = 0*/, uint32_t closeBarNo/* = 0*/)
 {
-	_close_logs << stdCode << "," << (isLong ? "LONG" : "SHORT") << "," << openTime << "," << openpx
-		<< "," << closeTime << "," << closepx << "," << qty << "," << profit << "," << maxprofit << "," << maxloss << ","
-		<< totalprofit << "," << enterTag << "," << exitTag << "," << openBarNo << "," << closeBarNo << "\n";
+	_close_logs << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", closeTime, stdCode, isLong ? "LONG" : "SHORT", openTime, openpx, closepx, qty, profit, maxprofit, maxloss,
+		totalprofit, enterTag, exitTag, openBarNo, closeBarNo);
 }
 
+/**
+ * @brief 初始化选股策略工厂
+ * @param cfg 策略配置
+ * @return 初始化是否成功
+ * @details 根据配置初始化选股策略工厂，主要流程如下：
+ *          1. 检查配置是否有效
+ *          2. 判断是否启用策略动态链接库
+ *          3. 加载策略动态链接库并获取工厂创建函数
+ *          4. 创建策略工厂实例
+ *          5. 创建具体的策略实例并进行初始化
+ *          这个函数是选股策略模拟器的关键初始化函数
+ */
 bool SelMocker::init_sel_factory(WTSVariant* cfg)
 {
 	if (cfg == NULL)
@@ -445,6 +541,19 @@ void SelMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 
 //////////////////////////////////////////////////////////////////////////
 //回调函数
+/**
+ * @brief 处理K线数据回调
+ * @param stdCode 标准合约代码
+ * @param period 周期标识（如'd'表示日线，'m'表示分钟线）
+ * @param times 周期倍数
+ * @param newBar 新的K线数据
+ * @details 处理新到达K线数据的核心函数，主要功能包括：
+ *          1. 检验新K线数据是否有效
+ *          2. 根据周期类型构造真实周期标识（例如'd1'表示日线，'m5'表示5分钟线）
+ *          3. 生成唯一的K线标识键，并更新K线标签信息
+ *          4. 调用on_bar_close函数处理已完成K线
+ *          这个函数是连接K线数据库和策略回调的关键桥梁
+ */
 void SelMocker::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (newBar == NULL)
@@ -464,6 +573,14 @@ void SelMocker::on_bar(const char* stdCode, const char* period, uint32_t times, 
 	on_bar_close(stdCode, realPeriod.c_str(), newBar);
 }
 
+/**
+ * @brief 策略初始化回调
+ * @details 当策略模拟器初始化时调用此函数，主要功能包括：
+ *          1. 检查策略实例是否存在
+ *          2. 如果策略实例存在，则调用策略的on_init方法进行初始化
+ *          3. 记录滑点设置日志信息
+ *          这个函数是选股策略模拟器启动时的第一个回调函数
+ */
 void SelMocker::on_init()
 {
 	if (_strategy)
@@ -531,6 +648,15 @@ void SelMocker::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
+/**
+ * @brief Tick数据回调函数
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @param bEmitStrategy 是否触发策略回调，默认为true
+ * @details 当新的Tick数据到达时调用此函数
+ *          注意：自2022.04.19版本起，此函数的核心逻辑已迁移到handle_tick函数中
+ *          这个函数当前仅保留为历史兼容目的，不再包含实际处理逻辑
+ */
 void SelMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
 {
 	//By Wesley @ 2022.04.19
@@ -542,9 +668,9 @@ void SelMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStr
  * @param code 标准合约代码
  * @param period 周期标识
  * @param newBar 新的K线数据
- * @details 当新的K线完成时调用此函数，将K线数据传递给策略实例
+ * @details 当新的K线完成关闭时调用此函数，将K线数据传递给策略实例
  *          检查策略实例是否存在，如果存在则调用策略的on_bar方法
- *          作为实际将K线数据传递给用户策略的桥梁函数
+ *          这个函数是连接模拟器和用户策略的核心中介函数
  */
 void SelMocker::on_bar_close(const char* code, const char* period, WTSBarStruct* newBar)
 {
@@ -1021,12 +1147,18 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 }
 
 /**
- * @brief 获取K线切片
- * @details 获取指定合约、指定周期的K线切片数据
+ * @brief 获取K线切片数据
  * @param stdCode 标准合约代码
- * @param period K线周期，如"m1"表示1分钟，"d1"表示日线
- * @param count 请求的K线数量
- * @return 返回K线切片指针，如果不存在则返回NULL
+ * @param period 周期标识，如'd'表示日线，'m5'表示5分钟线
+ * @param count 请求的K线条数
+ * @return 返回K线切片指针，如果数据不存在则返回NULL
+ * @details 获取指定合约的历史K线数据，主要流程如下：
+ *          1. 生成K线标识键
+ *          2. 提取基础周期和倍数
+ *          3. 从回测器获取K线切片数据
+ *          4. 更新K线标签状态
+ *          5. 更新合约最新价格和时间
+ *          这个函数是策略获取历史K线数据的主要接口
  */
 WTSKlineSlice* SelMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
@@ -1074,11 +1206,28 @@ WTSKlineSlice* SelMocker::stra_get_bars(const char* stdCode, const char* period,
 	return kline;
 }
 
+/**
+ * @brief 获取Tick切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的Tick数据条数
+ * @return 返回Tick切片指针，如果数据不存在则返回NULL
+ * @details 获取指定合约的历史Tick数据切片
+ *          这个函数直接从回测器中获取Tick切片数据
+ *          策略可以使用这个接口分析高频数据和循序信息
+ */
 WTSTickSlice* SelMocker::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取最新Tick数据
+ * @param stdCode 标准合约代码
+ * @return 返回最新的Tick数据指针，如果数据不存在则返回NULL
+ * @details 获取指定合约的最新Tick数据
+ *          策略可以通过这个接口获取合约的实时行情数据
+ *          包括最新价、买卖相关价格、成交量、深度数据等
+ */
 WTSTickData* SelMocker::stra_get_last_tick(const char* stdCode)
 {
 	return _replayer->get_last_tick(stdCode);
@@ -1134,6 +1283,13 @@ WTSSessionInfo* SelMocker::stra_get_sessinfo(const char* stdCode)
  * @details 返回当前回测的交易日期，格式为YYYYMMDD
  * @return 交易日期整数
  */
+/**
+ * @brief 获取当前交易日
+ * @return 返回当前交易日，格式YYYYMMDD
+ * @details 该函数返回回测器中的当前交易日期
+ *          交易日是结算日，用于持仓和资金的结算
+ *          策略可以通过这个接口获取当前的交易日期
+ */
 uint32_t SelMocker::stra_get_tdate()
 {
 	return _replayer->get_trading_date();
@@ -1143,6 +1299,13 @@ uint32_t SelMocker::stra_get_tdate()
  * @brief 获取当前自然日期
  * @details 返回当前回测的自然日期，格式为YYYYMMDD
  * @return 自然日期整数
+ */
+/**
+ * @brief 获取当前日历日期
+ * @return 返回当前日历日期，格式YYYYMMDD
+ * @details 该函数返回回测器中的当前日历日期
+ *          日历日期可能与交易日不同，如周末的交易日为周五，但日历日可能是周六或周日
+ *          策略开发者可以通过这个接口获取当前模拟的日历日期
  */
 uint32_t SelMocker::stra_get_date()
 {
@@ -1164,6 +1327,17 @@ uint32_t SelMocker::stra_get_time()
  * @details 根据标志获取不同类型的资金数据
  * @param flag 数据标志，0-总收益（平仓盈亏+浮动盈亏-手续费），1-平仓盈亏，2-浮动盈亏，3-手续费
  * @return 对应类型的资金数据
+ */
+/**
+ * @brief 获取资金数据
+ * @param flag 资金数据标志，0-总盈亏，1-平仓盈亏，2-浮动盈亏，3-总手续费
+ * @return 返回对应的资金数据
+ * @details 该函数返回策略的各类资金数据，根据传入的flag参数返回不同类型的资金信息：
+ *          0 - 总盈亏（平仓盈亏 + 浮动盈亏 - 手续费）
+ *          1 - 平仓盈亏（已实现的盈亏）
+ *          2 - 浮动盈亏（未实现的持仓盈亏）
+ *          3 - 总手续费
+ *          策略可以通过这个接口监控策略的盈亏情况
  */
 double SelMocker::stra_get_fund_data(int flag)
 {
@@ -1477,10 +1651,11 @@ uint64_t SelMocker::stra_get_detail_entertime(const char* stdCode, const char* u
 
 /**
  * @brief 获取仓位明细的开仓成本
- * @details 获取指定合约和用户标签的仓位明细的开仓价格
  * @param stdCode 标准合约代码
  * @param userTag 用户标签
  * @return 返回开仓价格，如果没有找到对应的仓位明细则返回0
+ * @details 获取指定合约和用户标签的仓位明细的开仓价格
+ *          为策略提供细粒度成本管理，可以组合userTag实现多元信号管理
  */
 double SelMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 {
@@ -1503,11 +1678,13 @@ double SelMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 
 /**
  * @brief 获取仓位明细的利润信息
- * @details 根据标志获取指定合约和用户标签的仓位明细的不同利润信息
  * @param stdCode 标准合约代码
  * @param userTag 用户标签
  * @param flag 标志：0-当前盈亏，1-最大盈利，-1-最大亏损，2-最高价格，-2-最低价格，默认为0
  * @return 返回对应的利润信息，如果没有找到对应的仓位明细则返回0
+ * @details 根据标志获取指定合约和用户标签的仓位明细的不同利润信息
+ *          flag为0返回当前盈亏，flag为1返回最大盈利，flag为-1返回最大亏损
+ *          flag为2返回持仓期间最高价格，flag为-2返回持仓期间最低价格
  */
 double SelMocker::stra_get_detail_profit(const char* stdCode, const char* userTag, int flag /* = 0 */)
 {
