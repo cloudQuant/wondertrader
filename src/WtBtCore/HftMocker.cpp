@@ -687,17 +687,38 @@ void HftMocker::on_trans_updated(const char* stdCode, WTSTransData* newTrans)
 		_strategy->on_transaction(this, stdCode, newTrans);
 }
 
+/**
+ * @brief 获取策略上下文ID
+ * @return 当前策略实例的上下文ID
+ * @details 返回在构造函数中生成的唯一策略上下文ID
+ *          该ID用于在回测引擎中唯一标识当前策略实例
+ */
 uint32_t HftMocker::id()
 {
 	return _context_id;
 }
 
+/**
+ * @brief 策略初始化回调
+ * @details 触发策略实例的on_init函数进行初始化
+ *          如果策略实例存在，调用其on_init函数进行策略初始化
+ *          策略可以在此函数中设置各种初始参数和状态
+ */
 void HftMocker::on_init()
 {
 	if (_strategy)
 		_strategy->on_init(this);
 }
 
+/**
+ * @brief 交易日开始时调用的函数
+ * @param curTDate 当前交易日，格式YYYYMMDD
+ * @details 在每个交易日开始时执行的操作，包括：
+ *          1. 重置所有标的冻结持仓为零，解除前一交易日的冻结持仓
+ *          2. 记录持仓重置日志
+ *          3. 触发策略的on_session_begin回调
+ *          这是实现T+1交易规则的关键函数之一
+ */
 void HftMocker::on_session_begin(uint32_t curTDate)
 {
 	//每个交易日开始，要把冻结持仓置零
@@ -716,6 +737,16 @@ void HftMocker::on_session_begin(uint32_t curTDate)
 		_strategy->on_session_begin(this, curTDate);
 }
 
+/**
+ * @brief 交易日结束时调用的函数
+ * @param curTDate 当前交易日，格式YYYYMMDD
+ * @details 在每个交易日结束时执行的操作，包括：
+ *          1. 统计各标的的平仓盈亏和浮动盈亏
+ *          2. 将非空持仓的标的信息记录到持仓日志
+ *          3. 将资金信息记录到资金日志，包括平仓盈亏、浮动盈亏、动态权盈和手续费
+ *          4. 触发策略的on_session_end回调
+ *          这个函数主要用于每日结束时的持仓和资金统计，以及日志记录
+ */
 void HftMocker::on_session_end(uint32_t curTDate)
 {
 	uint32_t curDate = curTDate;// _replayer->get_trading_date();
@@ -745,6 +776,14 @@ void HftMocker::on_session_end(uint32_t curTDate)
 		_strategy->on_session_end(this, curTDate);
 }
 
+/**
+ * @brief 获取指定合约的未完成委托数量
+ * @param stdCode 标准合约代码
+ * @return 未完成的买卖委托净数量，买单为正，卖单为负
+ * @details 遍历当前订单表，统计指定合约的所有未完成订单数量
+ *          计算方式是将所有买单的未成交数量取正，卖单的未成交数量取负，然后相加
+ *          返回的数值可用于人工智能策略中估计当前的总体委托方向和数量
+ */
 double HftMocker::stra_get_undone(const char* stdCode)
 {
 	double ret = 0;
@@ -760,6 +799,18 @@ double HftMocker::stra_get_undone(const char* stdCode)
 	return ret;
 }
 
+/**
+ * @brief 根据本地订单ID撤销单个订单
+ * @param localid 要撤销的订单的本地ID
+ * @return 撤单请求是否成功发送，始终返回true
+ * @details 将撤单操作作为任务添加到任务队列中执行，实现异步撤单
+ *          任务中的操作包括：
+ *          1. 从订单列表中找到对应的订单
+ *          2. 将订单的剩余数量置为0
+ *          3. 触发on_order回调，标记订单已撤销
+ *          4. 从订单列表中删除该订单
+ *          所有操作都使用锁保护，确保线程安全
+ */
 bool HftMocker::stra_cancel(uint32_t localid)
 {
 	postTask([this, localid](){
@@ -786,6 +837,20 @@ bool HftMocker::stra_cancel(uint32_t localid)
 	return true;
 }
 
+/**
+ * @brief 根据合约代码和买卖方向批量撤单
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买单，true表示买单，false表示卖单
+ * @param qty 要撤销的数量，默认为0，表示撤销全部符合条件的订单
+ * @return 所有被撤销的订单ID列表
+ * @details 批量撤销指定合约和方向的未完成订单
+ *          操作流程：
+ *          1. 遍历所有订单，找出匹配的合约和方向
+ *          2. 依次撤销这些订单并记录订单ID
+ *          3. 如果指定了数量，会在累计撤销数量达到指定值时停止
+ *          4. 返回已撤销的订单ID列表
+ *          这个函数在需要批量撤销指定合约的所有委托或指定数量委托时非常有用
+ */
 OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* = 0 */)
 {
 	OrderIDs ret;
@@ -809,6 +874,23 @@ OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* =
 	return ret;
 }
 
+/**
+ * @brief 策略买入下单接口
+ * @param stdCode 标准合约代码
+ * @param price 委托价格，如果为0则表示市价单
+ * @param qty 委托数量
+ * @param userTag 用户自定义标签，可用于订单跟踪
+ * @param flag 标志，默认为0
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return 订单ID列表，包含新下单的本地ID
+ * @details 处理策略的买入请求，实现流程：
+ *          1. 验证合约信息和下单数量
+ *          2. 生成本地订单ID并创建订单信息
+ *          3. 将订单信息添加到订单列表中
+ *          4. 异步发送下单确认通知
+ *          5. 返回订单ID列表
+ *          该函数是策略交易的核心接口之一，用于发起买入操作
+ */
 OrderIDs HftMocker::stra_buy(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -998,6 +1080,24 @@ bool HftMocker::procOrder(uint32_t localid)
 	return false;
 }
 
+/**
+ * @brief 策略卖出下单接口
+ * @param stdCode 标准合约代码
+ * @param price 委托价格，如果为0则表示市价单
+ * @param qty 委托数量
+ * @param userTag 用户自定义标签，可用于订单跟踪
+ * @param flag 标志，默认为0
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return 订单ID列表，包含新下单的本地ID
+ * @details 处理策略的卖出请求，实现流程：
+ *          1. 验证合约信息和下单数量
+ *          2. 对于不能做空的合约，检查是否有足够的可用持仓
+ *          3. 生成本地订单ID并创建订单信息
+ *          4. 将订单信息添加到订单列表中
+ *          5. 异步发送下单确认通知
+ *          6. 返回订单ID列表
+ *          该函数与stra_buy类似，但增加了对不可做空合约的持仓检查
+ */
 OrderIDs HftMocker::stra_sell(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -1050,16 +1150,43 @@ OrderIDs HftMocker::stra_sell(const char* stdCode, double price, double qty, con
 	return ids;
 }
 
+/**
+ * @brief 获取合约品种信息
+ * @param stdCode 标准合约代码
+ * @return 对应的品种信息对象指针
+ * @details 从回放器中获取指定合约的品种信息
+ *          品种信息包括手续费率、交易时段、合约单位等重要参数
+ *          策略可以通过该函数查询品种信息以进行交易决策
+ */
 WTSCommodityInfo* HftMocker::stra_get_comminfo(const char* stdCode)
 {
 	return _replayer->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取合约的原始代码
+ * @param stdCode 标准合约代码
+ * @return 对应的原始合约代码
+ * @details 从标准化的合约代码获取原始的合约代码
+ *          在WonderTrader中，所有合约都会标准化为统一格式，而原始代码是各交易所原始的合约代码
+ *          此功能在需要与外部系统对接或显示原始代码时非常有用
+ */
 std::string HftMocker::stra_get_rawcode(const char* stdCode)
 {
 	return _replayer->get_rawcode(stdCode);
 }
 
+/**
+ * @brief 获及k线历史数据
+ * @param stdCode 标准合约代码
+ * @param period 周期字符串，如"m1"表示1分钟，"d1"表示日线
+ * @param count 请求的K线条数
+ * @return K线切片数据指针，包含请求的K线数据
+ * @details 从回放器中获取指定合约的K线切片数据
+ *          周期格式为单个字符加数字，比如“m5”表礨5分钟线，“d1”表示日线
+ *          函数分离出基础周期和倍数，然后调用回放器的接口获及数据
+ *          K线数据是策略分析和判断的重要依据
+ */
 WTSKlineSlice* HftMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
 	thread_local static char basePeriod[2] = { 0 };
@@ -1071,26 +1198,72 @@ WTSKlineSlice* HftMocker::stra_get_bars(const char* stdCode, const char* period,
 	return _replayer->get_kline_slice(stdCode, basePeriod, count, times);
 }
 
+/**
+ * @brief 获取Tick历史数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的Tick数量
+ * @return Tick切片数据指针，包含指定数量的最新Tick数据
+ * @details 从回放器中获取指定合约的Tick历史数据
+ *          Tick数据包含买一价、卖一价、最新价、成交量等实时行情信息
+ *          高频策略可以基于Tick数据进行快速响应和大量交易决策
+ */
 WTSTickSlice* HftMocker::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取委托队列历史数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的委托队列数量
+ * @return 委托队列切片数据指针，包含指定数量的委托队列数据
+ * @details 从回放器中获取指定合约的委托队列历史数据
+ *          委托队列数据包含各个价位上的委托数量排队情况，可以看到买卖双方的充足程度
+ *          高频交易可以使用委托队列信息分析市场深度和价格层的压力
+ */
 WTSOrdQueSlice* HftMocker::stra_get_order_queue(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_order_queue_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取逆序明细历史数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的逆序明细数量
+ * @return 逆序明细切片数据指针，包含指定数量的逆序明细数据
+ * @details 从回放器中获取指定合约的逆序明细历史数据
+ *          逆序明细数据包含交易所额外提供的委托明细信息，如委托价格、方向、时间等
+ *          高频策略可以利用这些数据深入分析市场的微观结构和订单流
+ */
 WTSOrdDtlSlice* HftMocker::stra_get_order_detail(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_order_detail_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取逐笔成交历史数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的逐笔成交数量
+ * @return 逐笔成交切片数据指针，包含指定数量的逐笔成交数据
+ * @details 从回放器中获取指定合约的逐笔成交历史数据
+ *          逐笔成交数据包含每笔成交的价格、数量、方向、时间等详细信息
+ *          高频策略可以通过逐笔成交数据分析市场的短期趋势和交易活跃度
+ */
 WTSTransSlice* HftMocker::stra_get_transaction(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_transaction_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取最新的Tick数据
+ * @param stdCode 标准合约代码
+ * @return 最新的Tick数据指针，如果找不到则返回NULL
+ * @details 获取指定合约的最新Tick数据，查找顺序为：
+ *          1. 先从本地缓存_ticks中查找，如果找到则增加引用计数并返回
+ *          2. 如果本地缓存中没有，则从回放器中获取
+ *          这个函数在高频策略中经常使用，用于获取合约的最新行情
+ *          注意返回的Tick数据需要手动释放引用计数
+ */
 WTSTickData* HftMocker::stra_get_last_tick(const char* stdCode)
 {
 	if (_ticks != NULL)
@@ -1108,6 +1281,17 @@ WTSTickData* HftMocker::stra_get_last_tick(const char* stdCode)
 	return _replayer->get_last_tick(stdCode);
 }
 
+/**
+ * @brief 获取合约持仓量
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只返回可用持仓，默认为false返回总持仓
+ * @param flag 标志参数，默认为3，暂时未使用
+ * @return 合约持仓量，正数表示多头持仓，负数表示空头持仓
+ * @details 获取指定合约的持仓情况：
+ *          1. 如果bOnlyValid为true，则返回总持仓减去冻结持仓，主要用于交易权限检查
+ *          2. 如果bOnlyValid为false，则返回总持仓数量
+ *          注意关于冻结持仓的约定：空头持仓的_frozen应为0，只有多头持仓收到影响
+ */
 double HftMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = false*/, int flag/* = 3*/)
 {
 	const PosInfo& pInfo = _pos_map[stdCode];
@@ -1121,6 +1305,15 @@ double HftMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = fal
 	return pInfo._volume;
 }
 
+/**
+ * @brief 获取指定合约的持仓动态盈亏
+ * @param stdCode 标准合约代码
+ * @return 当前持仓的浮动盈亏，如果无持仓则返回0
+ * @details 查询指定合约当前持仓的浮动盈亏情况
+ *          首先从持仓映射表中查找指定合约的持仓信息
+ *          如果找到则返回其动态盈亏值，否则返回0
+ *          此值在update_dyn_profit函数中更新，每次收到新Tick时计算
+ */
 double HftMocker::stra_get_position_profit(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1131,6 +1324,18 @@ double HftMocker::stra_get_position_profit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取指定合约的持仓平均价格
+ * @param stdCode 标准合约代码
+ * @return 当前持仓的平均成本价，如果无持仓则返回0
+ * @details 计算指定合约当前持仓的平均成本价
+ *          计算流程：
+ *          1. 从持仓映射表中查找指定合约的持仓信息
+ *          2. 如果找不到或持仓量为0，则返回0
+ *          3. 遍历所有持仓明细，将每笔持仓的价格*数量累计
+ *          4. 将总金额除以总持仓量得到平均价格
+ *          这个函数对于分析持仓的盈亏状况和正确设置止损价非常重要
+ */
 double HftMocker::stra_get_position_avgpx(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1151,26 +1356,64 @@ double HftMocker::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+/**
+ * @brief 获取合约当前价格
+ * @param stdCode 标准合约代码
+ * @return 合约当前价格
+ * @details 从回放器中获取指定合约的当前价格
+ *          这个函数在计算盈亏和执行交易决策时经常使用
+ *          当前价格通常是指最新成交价
+ */
 double HftMocker::stra_get_price(const char* stdCode)
 {
 	return _replayer->get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取当前交易日期
+ * @return 当前交易日期，格式YYYYMMDD
+ * @details 从回放器中获取当前回测的交易日期
+ *          策略可以使用此函数获取日期信息进行交易决策
+ *          比如判断是否为月初、月底或特定日期
+ */
 uint32_t HftMocker::stra_get_date()
 {
 	return _replayer->get_date();
 }
 
+/**
+ * @brief 获取当前交易时间
+ * @return 当前交易时间，格式HHMMSS
+ * @details 从回放器中获取当前回测的原始交易时间
+ *          策略可以使用此函数获取时间信息进行交易决策
+ *          比如判断是否在开盘、收盘或中午休市时段
+ */
 uint32_t HftMocker::stra_get_time()
 {
 	return _replayer->get_raw_time();
 }
 
+/**
+ * @brief 获取当前的秒数
+ * @return 当前秒数，范围0-59
+ * @details 从回放器中获取当前回测的秒数
+ *          与get_time函数配合使用，可以获取更精细的时间信息
+ *          特别适用于高频交易中需要精确秒级时间的场景
+ */
 uint32_t HftMocker::stra_get_secs()
 {
 	return _replayer->get_secs();
 }
 
+/**
+ * @brief 订阅合约的Tick数据
+ * @param stdCode 标准合约代码
+ * @details 订阅指定合约的Tick数据，包含两个操作：
+ *          1. 将合约代码插入到本地的订阅集合中记录
+ *          2. 通知回放器订阅该合约的Tick数据
+ *          当收到Tick数据时，on_tick_updated函数会先检查该合约是否在订阅列表中
+ *          这是策略获取实时行情数据的必要步骤
+ */
 void HftMocker::stra_sub_ticks(const char* stdCode)
 {
 	/*
@@ -1183,16 +1426,40 @@ void HftMocker::stra_sub_ticks(const char* stdCode)
 	_replayer->sub_tick(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅合约的委托队列数据
+ * @param stdCode 标准合约代码
+ * @details 订阅指定合约的委托队列数据
+ *          通知回放器订阅该合约的委托队列数据
+ *          委托队列数据包含各个价位的委托排队情况，在高频策略中可用于分析市场深度
+ *          查看各价位的流动性和供需关系
+ */
 void HftMocker::stra_sub_order_queues(const char* stdCode)
 {
 	_replayer->sub_order_queue(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅合约的逆序明细数据
+ * @param stdCode 标准合约代码
+ * @details 订阅指定合约的逆序明细数据
+ *          通知回放器订阅该合约的逆序明细数据
+ *          逆序明细包含的是交易所发布的逻辑时间排序的委托数据
+ *          高频策略可以基于这些数据进行市场微观结构分析
+ */
 void HftMocker::stra_sub_order_details(const char* stdCode)
 {
 	_replayer->sub_order_detail(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅合约的逐笔成交数据
+ * @param stdCode 标准合约代码
+ * @details 订阅指定合约的逐笔成交数据
+ *          通知回放器订阅该合约的逐笔成交数据
+ *          逐笔成交数据包含市场上实际成交的每笔详细信息
+ *          高频策略可以基于这些数据分析市场的交易方向和活跃度
+ */
 void HftMocker::stra_sub_transactions(const char* stdCode)
 {
 	_replayer->sub_transaction(_context_id, stdCode);
