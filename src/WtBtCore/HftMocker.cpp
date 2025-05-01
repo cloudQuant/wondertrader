@@ -1541,26 +1541,63 @@ void HftMocker::stra_sub_transactions(const char* stdCode)
 	_replayer->sub_transaction(_context_id, stdCode);
 }
 
+/**
+ * @brief 记录信息级别的日志
+ * @param message 要记录的日志消息
+ * @details 将指定的消息以INFO级别记录到策略日志中
+ *          使用策略名称作为日志标签，便于区分不同策略的日志
+ *          这是策略中记录一般信息的标准方法
+ */
 void HftMocker::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录调试级别的日志
+ * @param message 要记录的调试消息
+ * @details 将指定的消息以DEBUG级别记录到策略日志中
+ *          调试日志通常用于记录策略运行过程中的详细信息
+ *          这些信息对于调试策略问题非常有用
+ */
 void HftMocker::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录警告级别的日志
+ * @param message 要记录的警告消息
+ * @details 将指定的消息以WARN级别记录到策略日志中
+ *          警告日志用于记录可能影响策略正常运行但不会导致策略失败的情况
+ *          例如参数设置不合理、市场数据异常等
+ */
 void HftMocker::stra_log_warn(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message);
 }
 
+/**
+ * @brief 记录错误级别的日志
+ * @param message 要记录的错误消息
+ * @details 将指定的消息以ERROR级别记录到策略日志中
+ *          错误日志用于记录可能导致策略无法正常运行的严重问题
+ *          例如下单失败、持仓计算错误等
+ */
 void HftMocker::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载用户自定义数据
+ * @param key 数据的键名
+ * @param defVal 默认值，当键不存在时返回此值，默认为空字符串
+ * @return 与键关联的值，如果键不存在则返回默认值
+ * @details 从用户数据映射中获取指定键对应的值
+ *          用户数据是策略在不同运行周期之间保存状态的重要机制
+ *          例如可以保存上一次交易的价格、数量或其他需要持久化的信息
+ */
 const char* HftMocker::stra_load_user_data(const char* key, const char* defVal /*= ""*/)
 {
 	auto it = _user_datas.find(key);
@@ -1570,12 +1607,32 @@ const char* HftMocker::stra_load_user_data(const char* key, const char* defVal /
 	return defVal;
 }
 
+/**
+ * @brief 保存用户自定义数据
+ * @param key 数据的键名
+ * @param val 要保存的值
+ * @details 将指定的键值对保存到用户数据映射中
+ *          同时标记用户数据已被修改，确保在回测结束时将数据写入文件
+ *          这是策略在不同运行周期之间传递信息的标准方法
+ */
 void HftMocker::stra_save_user_data(const char* key, const char* val)
 {
 	_user_datas[key] = val;
 	_ud_modified = true;
 }
 
+/**
+ * @brief 输出回测结果到文件
+ * @details 将回测过程中收集的各种数据输出到CSV和JSON文件中
+ *          输出的文件包括：
+ *          1. trades.csv - 交易记录，包含每笔交易的详细信息
+ *          2. closes.csv - 平仓记录，包含每笔平仓的详细信息和盈亏
+ *          3. funds.csv - 资金记录，包含每日的资金状况
+ *          4. signals.csv - 信号记录，包含策略产生的交易信号
+ *          5. positions.csv - 持仓记录，包含每日的持仓情况
+ *          6. ud_[策略名].json - 用户数据，包含策略保存的自定义数据
+ *          这些文件保存在输出目录下以策略名命名的文件夹中
+ */
 void HftMocker::dump_outputs()
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -1630,12 +1687,46 @@ void HftMocker::dump_outputs()
 	}
 }
 
+/**
+ * @brief 记录交易日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头，true为多头，false为空头
+ * @param isOpen 是否为开仓，true为开仓，false为平仓
+ * @param curTime 交易时间
+ * @param price 成交价格
+ * @param qty 成交数量
+ * @param fee 交易手续费
+ * @param userTag 用户标签，默认为空字符串
+ * @details 将交易记录添加到交易日志中
+ *          记录的信息包括合约代码、交易时间、方向、开平标志、价格、数量、手续费和用户标签
+ *          这些日志将在回测结束时写入trades.csv文件
+ */
 void HftMocker::log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, double fee, const char* userTag/* = ""*/)
 {
 	_trade_logs << stdCode << "," << curTime << "," << (isLong ? "LONG" : "SHORT") << "," << (isOpen ? "OPEN" : "CLOSE")
 		<< "," << price << "," << qty << "," << fee << "," << userTag << "\n";
 }
 
+/**
+ * @brief 记录平仓日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头，true为多头，false为空头
+ * @param openTime 开仓时间
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间
+ * @param closepx 平仓价格
+ * @param qty 平仓数量
+ * @param profit 平仓盈亏
+ * @param maxprofit 最大浮盈
+ * @param maxloss 最大浮亏
+ * @param totalprofit 总平仓盈亏，默认为0
+ * @param enterTag 开仓标签，默认为空字符串
+ * @param exitTag 平仓标签，默认为空字符串
+ * @details 将平仓记录添加到平仓日志中
+ *          记录的信息包括合约代码、方向、开平时间、价格、数量、盈亏和标签等
+ *          这些日志将在回测结束时写入closes.csv文件
+ *          平仓日志对于分析策略的盈亏表现和交易效率非常重要
+ */
 void HftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss,
 	double totalprofit /* = 0 */, const char* enterTag/* = ""*/, const char* exitTag/* = ""*/)
 {
