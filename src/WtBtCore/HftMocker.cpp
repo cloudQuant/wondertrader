@@ -273,6 +273,16 @@ void HftMocker::postTask(Task task)
 	//}
 }
 
+/**
+ * @brief 初始化高频策略工厂
+ * @param cfg 策略工厂配置参数
+ * @return 初始化是否成功，true表示成功，false表示失败
+ * @details 根据配置对象初始化高频交易策略工厂
+ *          首先加载配置的交易参数，如是否使用新价成交、错单率等
+ *          然后加载指定的策略工厂动态库，获取工厂创建函数和删除函数
+ *          最后创建并初始化策略实例
+ *          这个函数是策略回测的关键步骤，确保策略模块可以正确运行
+ */
 bool HftMocker::init_hft_factory(WTSVariant* cfg)
 {
     if (cfg == NULL)
@@ -932,12 +942,38 @@ OrderIDs HftMocker::stra_buy(const char* stdCode, double price, double qty, cons
 	return ids;
 }
 
+/**
+ * @brief 订单状态变化回调函数
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买单，true为买单，false为卖单
+ * @param totalQty 订单总数量
+ * @param leftQty 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤单，默认为false
+ * @param userTag 用户标签，默认为空字符串
+ * @details 当订单状态发生变化时，此函数会被调用并将订单状态变化通知给策略
+ *          当订单成交、撤单或部分成交时都会触发此回调
+ *          策略可以基于该回调函数捕捉订单状态变化并进行相应处理
+ */
 void HftMocker::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */, const char* userTag /* = "" */)
 {
 	if(_strategy)
 		_strategy->on_order(this, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
 
+/**
+ * @brief 订单成交回调函数
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买单成交，true为买单，false为卖单
+ * @param vol 成交数量
+ * @param price 成交价格
+ * @param userTag 用户标签，默认为空字符串
+ * @details 当订单成交时，此函数会被调用并处理成交后的持仓变化
+ *          首先获取当前合约的持仓信息，计算成交后的最新持仓量
+ *          然后将成交信息通知给策略实例
+ */
 void HftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag/* = ""*/)
 {
 	const PosInfo& posInfo = _pos_map[stdCode];
@@ -947,18 +983,45 @@ void HftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, doub
 		_strategy->on_trade(this, localid, stdCode, isBuy, vol, price, userTag);
 }
 
+/**
+ * @brief 委托回报回调函数
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param bSuccess 委托下单是否成功
+ * @param message 委托回报消息
+ * @param userTag 用户标签，默认为空字符串
+ * @details 当委托下单得到回报时，此函数会被调用并通知策略
+ *          委托回报包含订单是否提交成功及相关的回报信息
+ *          策略可以根据委托成功与否调整交易逻辑
+ */
 void HftMocker::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag/* = ""*/)
 {
 	if (_strategy)
 		_strategy->on_entrust(localid, bSuccess, message, userTag);
 }
 
+/**
+ * @brief 交易通道就绪回调函数
+ * @details 当交易通道准备就绪可以使用时，此函数会被调用
+ *          通知策略可以开始正常交易操作
+ *          该函数在策略初始化完成或通道重连后触发
+ */
 void HftMocker::on_channel_ready()
 {
 	if (_strategy)
 		_strategy->on_channel_ready(this);
 }
 
+/**
+ * @brief 更新持仓的动态盈亏
+ * @param stdCode 标准合约代码
+ * @param newTick 最新的Tick行情数据
+ * @details 根据最新的行情数据计算并更新指定合约的浮动盈亏
+ *          首先查找合约的持仓信息，如果持仓量为0则盈亏为0
+ *          否则根据持仓方向选择对应的价格（多头用买一价，空头用卖一价）
+ *          遍历所有持仓明细，计算每一笔持仓的当前盈亏，并累计总动态盈亏
+ *          同时记录每笔持仓的最大盈利和最大亏损
+ */
 void HftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 {
 	auto it = _pos_map.find(stdCode);
@@ -994,6 +1057,19 @@ void HftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 处理订单模拟成交
+ * @param localid 本地订单ID
+ * @return 处理结果，true表示处理成功，false表示订单不存在
+ * @details 模拟订单的成交过程，包含以下步骤：
+ *          1. 查找指定订单ID对应的订单信息
+ *          2. 根据错单率决定订单是否随机撤销
+ *          3. 对于新下的订单，通知订单已提交成功
+ *          4. 根据当前行情和市场状况决定订单是否可以成交
+ *          5. 如果可以成交，根据成交规则生成成交数量和价格
+ *          6. 触发订单和成交回调
+ *          该函数是高频策略回测模拟器中的核心函数之一
+ */
 bool HftMocker::procOrder(uint32_t localid)
 {
 	auto it = _orders.find(localid);
@@ -1568,6 +1644,19 @@ void HftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 		<< totalprofit << "," << enterTag << "," << exitTag << "\n";
 }
 
+/**
+ * @brief 设置合约持仓量
+ * @param stdCode 标准合约代码
+ * @param qty 要设置的持仓量，正数表示多头持仓，负数表示空头持仓
+ * @param price 成交价格，默认为0，表示使用当前行情价格
+ * @param userTag 用户自定义标签，默认为空字符串
+ * @details 该函数处理合约持仓变化的核心逻辑，包括开仓、平仓和持仓量调整
+ *          首先获取当前合约的持仓信息和当前时间
+ *          如果指定价格为0，则使用当前合约行情的价格
+ *          如果新持仓量与当前持仓量相等，则直接返回
+ *          根据新的持仓量和当前持仓量的差异，实现开仓、平仓或反手等操作
+ *          该函数会更新持仓明细、计算交易费用并记录成交日志
+ */
 void HftMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /*= ""*/)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
