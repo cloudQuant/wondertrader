@@ -5,7 +5,9 @@
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 高频交易策略回测模拟器实现文件
+ * \details 实现了高频交易策略回测模拟器，包括订单处理、成交模拟、持仓管理等功能
+ *          提供了高频策略多品种、多合约的回测功能，实现了完整的交易模拟和策略运行环境
  */
 #include "HftMocker.h"
 #include "WtHelper.h"
@@ -27,6 +29,12 @@
 #include <rapidjson/prettywriter.h>
 namespace rj = rapidjson;
 
+/**
+ * @brief 生成序列号自增的本地订单ID
+ * @return 新生成的订单ID
+ * @details 基于当前时间和原子操作生成唯一的序列号递增的订单ID
+ *          第一次调用时会初始化基准值，之后每次调用递增返回
+ */
 uint32_t makeLocalOrderID()
 {
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
@@ -39,6 +47,13 @@ uint32_t makeLocalOrderID()
 	return _auto_order_id.fetch_add(1);
 }
 
+/**
+ * @brief 将交易量随机分拆为多个订单量
+ * @param vol 要分拆的总交易量
+ * @return 分拆后的交易量列表
+ * @details 将指定的交易量随机分拆为多个小单，模拟实际交易中的拆单行为
+ *          分拆量在最小交易量到最大交易量之间随机生成。如果总量小于等于最小量则不分拆
+ */
 std::vector<uint32_t> splitVolume(uint32_t vol)
 {
 	if (vol == 0) return std::move(std::vector<uint32_t>());
@@ -73,6 +88,16 @@ std::vector<uint32_t> splitVolume(uint32_t vol)
 	return std::move(ret);
 }
 
+/**
+ * @brief 将浮点型交易量随机分拆为多个订单量
+ * @param vol 要分拆的总交易量
+ * @param minQty 最小分拆量，默认为1.0
+ * @param maxQty 最大分拆量，默认为100.0
+ * @param qtyTick 交易量单位进位，默认为1.0
+ * @return 分拆后的交易量列表
+ * @details 将浮点型交易量随机分拆为多个小单，支持自定义最小最大交易量及进位数
+ *          分拆量在最小交易量到最大交易量之间随机生成，并按照进位单位取整
+ */
 std::vector<double> splitVolume(double vol, double minQty = 1.0, double maxQty = 100.0, double qtyTick = 1.0)
 {
 	auto length = (std::size_t)round((maxQty - minQty)/qtyTick) + 1;
@@ -103,18 +128,38 @@ std::vector<double> splitVolume(double vol, double minQty = 1.0, double maxQty =
 	return std::move(ret);
 }
 
+/**
+ * @brief 生成随机数
+ * @param maxVal 随机数的最大值，默认为10000
+ * @return 生成的随机数值
+ * @details 基于当前分钟数设置随机种子，生成一个0到maxVal-1之间的随机整数
+ *          用于在回测中模拟各种随机事件
+ */
 uint32_t genRand(uint32_t maxVal = 10000)
 {
 	srand(TimeUtils::getCurMin());
 	return rand() % maxVal;
 }
 
+/**
+ * @brief 生成高频策略上下文ID
+ * @return 新生成的上下文ID
+ * @details 基于原子操作生成递增的高频策略上下文ID，起始值为6000
+ *          用于区分不同的高频策略实例
+ */
 inline uint32_t makeHftCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 6000 };
 	return _auto_context_id.fetch_add(1);
 }
 
+/**
+ * @brief 高频策略模拟器构造函数
+ * @param replayer 历史数据回放器指针
+ * @param name 策略名称
+ * @details 初始化高频策略回测模拟器，设置各项必要的初始参数和内部状态
+ *          包括创建商品信息和数据缓存容器，以及生成唯一的上下文ID
+ */
 HftMocker::HftMocker(HisDataReplayer* replayer, const char* name)
 	: IHftStraCtx(name)
 	, _replayer(replayer)
@@ -134,6 +179,11 @@ HftMocker::HftMocker(HisDataReplayer* replayer, const char* name)
 }
 
 
+/**
+ * @brief 高频策略模拟器析构函数
+ * @details 清理高频策略模拟器的资源，释放策略实例和各种容器
+ *          包括从工厂中删除策略实例，释放商品信息和Tick缓存
+ */
 HftMocker::~HftMocker()
 {
 	if(_strategy)
@@ -147,6 +197,12 @@ HftMocker::~HftMocker()
 	_ticks = NULL;
 }
 
+/**
+ * @brief 处理任务队列中的任务
+ * @details 从任务队列中按顺序取出并执行任务，直到队列为空
+ *          整个处理过程由控制锁保护，确保在执行任务时不会被其他线程中断
+ *          当任务队列为空时直接返回
+ */
 void HftMocker::procTask()
 {
 	if (_tasks.empty())
@@ -171,6 +227,13 @@ void HftMocker::procTask()
 	_mtx_control.unlock();
 }
 
+/**
+ * @brief 添加任务到任务队列
+ * @param task 要添加的任务函数
+ * @details 将任务函数添加到任务队列中，等待后续处理
+ *          使用互斥锁确保在多线程环境下安全地添加任务
+ *          注释的代码是之前的多线程处理方式，当前已简化为单线程模式
+ */
 void HftMocker::postTask(Task task)
 {
 	{
@@ -212,90 +275,156 @@ void HftMocker::postTask(Task task)
 
 bool HftMocker::init_hft_factory(WTSVariant* cfg)
 {
-	if (cfg == NULL)
-		return false;
+    if (cfg == NULL)
+        return false;
 
-	const char* module = cfg->getCString("module");
-	
-	_use_newpx = cfg->getBoolean("use_newpx");
-	_error_rate = cfg->getUInt32("error_rate");
-	_match_this_tick = cfg->getBoolean("match_this_tick");
+    const char* module = cfg->getCString("module");
+    
+    _use_newpx = cfg->getBoolean("use_newpx");
+    _error_rate = cfg->getUInt32("error_rate");
+    _match_this_tick = cfg->getBoolean("match_this_tick");
 
-	log_info("HFT match params: use_newpx-{}, error_rate-{}, match_this_tick-{}", _use_newpx, _error_rate, _match_this_tick);
+    log_info("HFT match params: use_newpx-{}, error_rate-{}, match_this_tick-{}", _use_newpx, _error_rate, _match_this_tick);
 
-	DllHandle hInst = DLLHelper::load_library(module);
-	if (hInst == NULL)
-		return false;
+    DllHandle hInst = DLLHelper::load_library(module);
+    if (hInst == NULL)
+        return false;
 
-	FuncCreateHftStraFact creator = (FuncCreateHftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	if (creator == NULL)
-	{
-		DLLHelper::free_library(hInst);
-		return false;
-	}
+    FuncCreateHftStraFact creator = (FuncCreateHftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
+    if (creator == NULL)
+    {
+        DLLHelper::free_library(hInst);
+        return false;
+    }
 
-	_factory._module_inst = hInst;
-	_factory._module_path = module;
-	_factory._creator = creator;
-	_factory._remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	_factory._fact = _factory._creator();
+    _factory._module_inst = hInst;
+    _factory._module_path = module;
+    _factory._creator = creator;
+    _factory._remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
+    _factory._fact = _factory._creator();
 
-	WTSVariant* cfgStra = cfg->get("strategy");
-	if(cfgStra)
-	{
-		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
-		_strategy->init(cfgStra->get("params"));
-		_name = _strategy->id();
-	}
-	return true;
+    WTSVariant* cfgStra = cfg->get("strategy");
+    if(cfgStra)
+    {
+        _strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
+        _strategy->init(cfgStra->get("params"));
+        _name = _strategy->id();
+    }
+    return true;
 }
-
+/**
+ * @brief 处理递过来的造市数据
+ * @param stdCode 标准合约代码
+ * @param curTick 当前Tick数据
+ * @param pxType 价格类型
+ * @details 调用on_tick函数处理收到的造市数据
+ *          这是报价处理的入口函数，由外部模块触发
+ */
 void HftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
 {
 	on_tick(stdCode, curTick);
 }
 
+/**
+ * @brief 处理递过来的逆序数据
+ * @param stdCode 标准合约代码
+ * @param curOrdDtl 当前逆序数据
+ * @details 调用on_order_detail函数处理收到的逆序数据
+ *          逆序数据指逻辑上按时间顺序排列的成交条件
+ */
 void HftMocker::handle_order_detail(const char* stdCode, WTSOrdDtlData* curOrdDtl)
 {
 	on_order_detail(stdCode, curOrdDtl);
 }
 
+/**
+ * @brief 处理递过来的委托队列数据
+ * @param stdCode 标准合约代码
+ * @param curOrdQue 当前委托队列数据
+ * @details 调用on_order_queue函数处理收到的委托队列数据
+ *          委托队列包含买卖相应价格的等待委托数量
+ */
 void HftMocker::handle_order_queue(const char* stdCode, WTSOrdQueData* curOrdQue)
 {
 	on_order_queue(stdCode, curOrdQue);
 }
 
+/**
+ * @brief 处理递过来的逐笔成交数据
+ * @param stdCode 标准合约代码
+ * @param curTrans 当前逐笔成交数据
+ * @details 调用on_transaction函数处理收到的逐笔成交数据
+ *          逐笔成交数据是市场中实际成交的明细信息
+ */
 void HftMocker::handle_transaction(const char* stdCode, WTSTransData* curTrans)
 {
 	on_transaction(stdCode, curTrans);
 }
 
+/**
+ * @brief 处理递过来的K线关闭数据
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param times 周期基数
+ * @param newBar 新的K线数据
+ * @details 调用on_bar函数处理K线关闭事件
+ *          用于在K线但登完成时触发策略的处理逻辑
+ */
 void HftMocker::handle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	on_bar(stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 处理初始化事件
+ * @details 先调用on_init函数进行初始化，然后调用on_channel_ready函数通知通道准备完毕
+ *          该函数在回测开始前触发，用于策略实例的初始化工作
+ */
 void HftMocker::handle_init()
 {
 	on_init();
 	on_channel_ready();
 }
 
+/**
+ * @brief 处理定时调度事件
+ * @param uDate 当前日期，格式YYYYMMDD
+ * @param uTime 当前时间，格式HHMMSS或HHMMSS.mmm(毫秒)
+ * @details 当前实现中已经注释了on_schedule函数的调用
+ *          该函数原本用于按时间触发策略的调度事件
+ */
 void HftMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 {
 	//on_schedule(uDate, uTime);
 }
 
+/**
+ * @brief 处理交易日开始事件
+ * @param curTDate 当前交易日，格式YYYYMMDD
+ * @details 调用on_session_begin函数处理一个交易日开始的事件
+ *          用于在新交易日开始时进行必要的初始化工作
+ */
 void HftMocker::handle_session_begin(uint32_t curTDate)
 {
 	on_session_begin(curTDate);
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @param curTDate 当前交易日，格式YYYYMMDD
+ * @details 调用on_session_end函数处理一个交易日结束的事件
+ *          用于在交易日结束时进行清算、统计等操作
+ */
 void HftMocker::handle_session_end(uint32_t curTDate)
 {
 	on_session_end(curTDate);
 }
 
+/**
+ * @brief 处理回测完成事件
+ * @details 回测完成时执行的操作，包括输出结果并触发策略的回测结束事件
+ *          先调用dump_outputs函数输出回测结果，然后触发on_bactest_end事件
+ */
 void HftMocker::handle_replay_done()
 {
 	dump_outputs();
@@ -303,12 +432,27 @@ void HftMocker::handle_replay_done()
 	this->on_bactest_end();
 }
 
+/**
+ * @brief 处理K线数据回调
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param times 周期基数
+ * @param newBar 新的K线数据
+ * @details 将K线数据事件转发给策略实例的on_bar函数处理
+ *          如果策略实例不存在，则不做任何处理
+ */
 void HftMocker::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (_strategy)
 		_strategy->on_bar(this, stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 启用或禁用计算钩子
+ * @param bEnabled 是否启用钩子，默认为true
+ * @details 设置钩子的有效性状态，并记录日志
+ *          钩子机制用于在交易计算过程中插入控制逻辑，实现逻辑更新与执行的分离
+ */
 void HftMocker::enable_hook(bool bEnabled /* = true */)
 {
 	_hook_valid = bEnabled;
@@ -316,6 +460,11 @@ void HftMocker::enable_hook(bool bEnabled /* = true */)
 	WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calculating hook {}", bEnabled ? "enabled" : "disabled");
 }
 
+/**
+ * @brief 安装计算钩子
+ * @details 标记钩子已经安装，并记录相应日志
+ *          安装钩子后，在处理行情数据时会触发钩子机制
+ */
 void HftMocker::install_hook()
 {
 	_has_hook = true;
@@ -323,6 +472,13 @@ void HftMocker::install_hook()
 	WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "HFT hook installed");
 }
 
+/**
+ * @brief 推进一个Tick的计算
+ * @details 实现计算线程与控制线程的同步通信机制
+ *          如果钩子未安装，直接返回不做处理
+ *          通知计算线程进行计算，并等待计算完成通知
+ *          完成后重置状态标记，为下一次计算做准备
+ */
 void HftMocker::step_tick()
 {
 	if (!_has_hook)
@@ -340,6 +496,17 @@ void HftMocker::step_tick()
 	}
 }
 
+/**
+ * @brief 处理Tick数据
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @details 实现完整的Tick数据处理逻辑：
+ *          1. 更新合约最新价格和动态盈亏
+ *          2. 根据_match_this_tick选项决定处理顺序：
+ *             - 如果为true，先触发策略的on_tick回调，再处理订单
+ *             - 如果为false，先处理订单，再触发策略的on_tick回调
+ *          3. 支持钩子机制，实现计算线程和数据线程的分离同步
+ */
 void HftMocker::on_tick(const char* stdCode, WTSTickData* newTick)
 {
 	_price_map[stdCode] = newTick->price();
@@ -428,6 +595,13 @@ void HftMocker::on_tick(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief Tick数据更新时触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @details 检查合约是否在订阅列表中，如果在则调用策略的on_tick函数
+ *          这是将Tick数据传递给策略进行处理的关键函数
+ */
 void HftMocker::on_tick_updated(const char* stdCode, WTSTickData* newTick)
 {
 	auto it = _tick_subs.find(stdCode);
@@ -438,33 +612,75 @@ void HftMocker::on_tick_updated(const char* stdCode, WTSTickData* newTick)
 		_strategy->on_tick(this, stdCode, newTick);
 }
 
+/**
+ * @brief 处理委托队列数据
+ * @param stdCode 标准合约代码
+ * @param newOrdQue 新的委托队列数据
+ * @details 调用on_ordque_updated函数进行进一步处理
+ *          这是委托队列数据处理的入口函数
+ */
 void HftMocker::on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	on_ordque_updated(stdCode, newOrdQue);
 }
 
+/**
+ * @brief 委托队列数据更新时触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newOrdQue 新的委托队列数据
+ * @details 如果策略实例存在，则调用策略的on_order_queue函数
+ *          将委托队列数据转发给策略对象处理
+ */
 void HftMocker::on_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	if (_strategy)
 		_strategy->on_order_queue(this, stdCode, newOrdQue);
 }
 
+/**
+ * @brief 处理逆序数据
+ * @param stdCode 标准合约代码
+ * @param newOrdDtl 新的逆序数据
+ * @details 调用on_orddtl_updated函数进行进一步处理
+ *          这是逆序数据处理的入口函数
+ */
 void HftMocker::on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	on_orddtl_updated(stdCode, newOrdDtl);
 }
 
+/**
+ * @brief 逆序数据更新时触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newOrdDtl 新的逆序数据
+ * @details 如果策略实例存在，则调用策略的on_order_detail函数
+ *          将逆序数据转发给策略对象处理
+ */
 void HftMocker::on_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	if (_strategy)
 		_strategy->on_order_detail(this, stdCode, newOrdDtl);
 }
 
+/**
+ * @brief 处理逐笔成交数据
+ * @param stdCode 标准合约代码
+ * @param newTrans 新的逐笔成交数据
+ * @details 调用on_trans_updated函数进行进一步处理
+ *          这是逐笔成交数据处理的入口函数
+ */
 void HftMocker::on_transaction(const char* stdCode, WTSTransData* newTrans)
 {
 	on_trans_updated(stdCode, newTrans);
 }
 
+/**
+ * @brief 逐笔成交数据更新时触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newTrans 新的逐笔成交数据
+ * @details 如果策略实例存在，则调用策略的on_transaction函数
+ *          将逐笔成交数据转发给策略对象处理
+ */
 void HftMocker::on_trans_updated(const char* stdCode, WTSTransData* newTrans)
 {
 	if (_strategy)
@@ -902,7 +1118,7 @@ double HftMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = fal
 		return pInfo._volume - pInfo._frozen;
 	}
 	else
-		return pInfo._volume;
+	return pInfo._volume;
 }
 
 double HftMocker::stra_get_position_profit(const char* stdCode)
