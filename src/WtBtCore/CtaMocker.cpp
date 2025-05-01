@@ -1108,6 +1108,16 @@ void CtaMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 
 //////////////////////////////////////////////////////////////////////////
 //回调函数
+/**
+ * @brief K线数据回调函数
+ * @details 当新的K线数据生成时，该函数被调用
+ *          用于处理K线闭合事件，并在需要时触发策略的on_bar回调
+ *          通过_kline_tags记录K线状态，标记K线是否已闭合
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如"m"(分钟)、"d"(日)等
+ * @param times 周期倍数，如5表示5分钟K线
+ * @param newBar 新的K线数据指针
+ */
 void CtaMocker::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (newBar == NULL)
@@ -1186,11 +1196,27 @@ void CtaMocker::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
+/**
+ * @brief Tick数据处理函数
+ * @details 处理新到达的Tick数据
+ *          注意：此函数的逻辑已全部迁移到handle_tick函数中，此处仅保留函数接口
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据指针
+ * @param bEmitStrategy 是否触发策略回调，默认为true
+ */
 void CtaMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
 {
 	//这个逻辑全部迁移到handle_tick里去了
 }
 
+/**
+ * @brief K线闭合回调函数
+ * @details 当K线闭合时，该函数被调用
+ *          该函数会将K线数据传递给策略的on_bar回调函数
+ * @param code 合约代码
+ * @param period K线周期，如"m1"(一分钟)、"d1"(日线)等
+ * @param newBar 新的K线数据指针
+ */
 void CtaMocker::on_bar_close(const char* code, const char* period, WTSBarStruct* newBar)
 {
 	if (_strategy)
@@ -1392,6 +1418,13 @@ bool CtaMocker::on_schedule(uint32_t curDate, uint32_t curTime)
 }
 
 
+/**
+ * @brief 处理交易日开始事件
+ * @details 在每个交易日开始时调用，执行交易日初始化操作
+ *          包括重置冻结持仓、清空价格缓存等
+ *          并调用策略的on_session_begin方法
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ */
 void CtaMocker::on_session_begin(uint32_t curTDate)
 {
 	_cur_tdate = curTDate;
@@ -1441,6 +1474,13 @@ void CtaMocker::enum_position(FuncEnumCtaPosCallBack cb, bool bForExecute)
 	}
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @details 在每个交易日结束时调用，执行交易日收尾操作
+ *          计算并记录当日的资金信息，包括总盈亏、浮动盈亏、手续费等
+ *          并调用策略的on_session_end方法
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ */
 void CtaMocker::on_session_end(uint32_t curTDate)
 {
 	if (_strategy)
@@ -1474,6 +1514,13 @@ void CtaMocker::on_session_end(uint32_t curTDate)
 			_fund_info._total_profit + _fund_info._total_dynprofit - _fund_info._total_fees, _fund_info._total_fees);
 }
 
+/**
+ * @brief 获取条件委托列表
+ * @details 获取指定合约的条件委托列表，如果不存在则创建新的列表
+ *          条件委托用于实现条件单功能，当满足特定条件时触发交易
+ * @param stdCode 标准合约代码
+ * @return 条件委托列表的引用
+ */
 CondList& CtaMocker::get_cond_entrusts(const char* stdCode)
 {
 	CondList& ce = _condtions[stdCode];
@@ -2555,12 +2602,28 @@ double CtaMocker::stra_get_detail_profit(const char* stdCode, const char* userTa
 	return 0.0;
 }
 
+/**
+ * @brief 设置图表K线
+ * @details 设置图表展示的合约和K线周期
+ *          用于确定回测图表的主图显示内容
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如"m1"、"d1"等
+ */
 void CtaMocker::set_chart_kline(const char* stdCode, const char* period)
 {
 	_chart_code = stdCode;
 	_chart_period = period;
 }
 
+/**
+ * @brief 添加图表标记
+ * @details 在图表上添加标记，用于标记特定事件或信号
+ *          只能在定时调度期间添加标记
+ *          标记会记录当前时间、价格、图标和标签信息
+ * @param price 标记价格，标记在图表上的垂直位置
+ * @param icon 图标名称，用于指定标记的图标样式
+ * @param tag 标签文本，用于描述标记的含义
+ */
 void CtaMocker::add_chart_mark(double price, const char* icon, const char* tag)
 {
 	if (!_is_in_schedule)
@@ -2575,6 +2638,13 @@ void CtaMocker::add_chart_mark(double price, const char* icon, const char* tag)
 	_mark_logs << curTime << "," << price << "," << icon << "," << tag << std::endl;
 }
 
+/**
+ * @brief 注册图表指标
+ * @details 注册一个图表指标，用于在回测图表上显示自定义指标
+ *          指标可以是主图指标或副图指标，由indexType决定
+ * @param idxName 指标名称，用于标识不同的指标
+ * @param indexType 指标类型，0表示主图指标，1表示副图指标
+ */
 void CtaMocker::register_index(const char* idxName, uint32_t indexType)
 {
 	ChartIndex& cIndex = _chart_indice[idxName];
@@ -2582,6 +2652,15 @@ void CtaMocker::register_index(const char* idxName, uint32_t indexType)
 	cIndex._indexType = indexType;
 }
 
+/**
+ * @brief 注册指标线
+ * @details 为已注册的指标添加一条指标线，用于在图表上显示指标的不同数据系列
+ *          指标线可以有不同的类型，如实线、虚线、柱状图等，由lineType决定
+ * @param idxName 指标名称，必须是已经注册过的指标
+ * @param lineName 指标线名称，用于标识同一指标下的不同数据系列
+ * @param lineType 指标线类型，如实线、虚线、柱状图等
+ * @return 注册成功返回true，失败返回false
+ */
 bool CtaMocker::register_index_line(const char* idxName, const char* lineName, uint32_t lineType)
 {
 	auto it = _chart_indice.find(idxName);
@@ -2598,6 +2677,15 @@ bool CtaMocker::register_index_line(const char* idxName, const char* lineName, u
 	return true;
 }
 
+/**
+ * @brief 添加指标基准线
+ * @details 为已注册的指标添加一条基准线，基准线是一条固定值的水平线
+ *          用于在图表上显示参考线，如零线、超买超卖线等
+ * @param idxName 指标名称，必须是已经注册过的指标
+ * @param lineName 基准线名称，用于标识不同的基准线
+ * @param val 基准线的数值
+ * @return 添加成功返回true，失败返回false
+ */
 bool CtaMocker::add_index_baseline(const char* idxName, const char* lineName, double val)
 {
 	auto it = _chart_indice.find(idxName);
@@ -2612,6 +2700,16 @@ bool CtaMocker::add_index_baseline(const char* idxName, const char* lineName, do
 	return true;
 }
 
+/**
+ * @brief 设置指标线数值
+ * @details 设置指定指标线的当前数值，用于更新图表上的指标数据
+ *          只能在定时调度期间调用该函数
+ *          指标数据会记录当前时间、指标名称、指标线名称和数值
+ * @param idxName 指标名称，必须是已经注册过的指标
+ * @param lineName 指标线名称，必须是已经注册过的指标线
+ * @param val 指标线的数值
+ * @return 设置成功返回true，失败返回false
+ */
 bool CtaMocker::set_index_value(const char* idxName, const char* lineName, double val)
 {
 	if (!_is_in_schedule)
