@@ -1003,6 +1003,11 @@ private:
 	StringHashMap	_user_datas;
 	bool			_ud_modified;
 
+	/**
+	 * @brief 持仓明细结构体
+	 * @details 记录单个持仓明细的详细信息，包括方向、价格、数量及开仓时间等
+	 *          用于跟踪每个仓位的盈亏状况和历史记录
+	 */
 	typedef struct _DetailInfo
 	{
 		/**
@@ -1016,29 +1021,100 @@ private:
 		 * @details 开仓时的价格
 		 */
 		double		_price;
+
+		/**
+		 * @brief 仓位数量
+		 * @details 该仓位的具体数量
+		 */
 		double		_volume;
+
+		/**
+		 * @brief 开仓时间戳
+		 * @details 开仓时的时间戳，用于计算持仓时间和时间分析
+		 */
 		uint64_t	_opentime;
+
+		/**
+		 * @brief 开仓交易日
+		 * @details 开仓时的交易日，格式为YYYYMMDD
+		 */
 		uint32_t	_opentdate;
+
+		/**
+		 * @brief 最大浮盈
+		 * @details 该仓位历史上的最大浮动盈利
+		 */
 		double		_max_profit;
+
+		/**
+		 * @brief 最大浮亏
+		 * @details 该仓位历史上的最大浮动亏损
+		 */
 		double		_max_loss;
+
+		/**
+		 * @brief 当前盈亏
+		 * @details 该仓位的当前盈亏状况
+		 */
 		double		_profit;
+
+		/**
+		 * @brief 用户标签
+		 * @details 开仓时的用户自定义标签，用于识别和跟踪交易
+		 */
 		char		_usertag[32];
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化持仓明细结构，将所有成员变量初始化为0
+		 */
 		_DetailInfo()
 		{
 			memset(this, 0, sizeof(_DetailInfo));
 		}
 	} DetailInfo;
 
+	/**
+	 * @brief 持仓信息结构体
+	 * @details 存储特定合约的总体持仓情况，包括总持仓量、盈亏和明细列表
+	 *          用于统一管理同一合约的所有仓位和计算盈亏
+	 */
 	typedef struct _PosInfo
 	{
+		/**
+		 * @brief 总持仓量
+		 * @details 当前合约的总持仓量，正数表示多头，负数表示空头
+		 */
 		double		_volume;
+
+		/**
+		 * @brief 平仓盈亏
+		 * @details 已平仓部分的实现盈亏
+		 */
 		double		_closeprofit;
+
+		/**
+		 * @brief 浮动盈亏
+		 * @details 当前持仓部分的浮动盈亏，基于最新市场价格计算
+		 */
 		double		_dynprofit;
+
+		/**
+		 * @brief 冻结仓位
+		 * @details 当前被冻结的仓位数量，如已提交平仓指令但尚未成交的部分
+		 */
 		double		_frozen;
 
+		/**
+		 * @brief 明细列表
+		 * @details 存储每笔持仓的详细信息，包括开仓价、时间等
+		 */
 		std::vector<DetailInfo> _details;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化持仓信息结构，将数值成员初始化为0
+		 */
 		_PosInfo()
 		{
 			_volume = 0;
@@ -1047,44 +1123,150 @@ private:
 			_frozen = 0;
 		}
 
+		/**
+		 * @brief 获取有效持仓量
+		 * @return 当前可用于交易的持仓量
+		 * @details 计算当前可供交易的有效持仓量，即总持仓量减去冻结量
+		 */
 		inline double valid() const { return _volume - _frozen; }
 	} PosInfo;
+	/**
+	 * @brief 持仓映射容器类型
+	 * @details 定义一个从合约代码到持仓信息的映射类型
+	 */
 	typedef wt_hashmap<std::string, PosInfo> PositionMap;
+
+	/**
+	 * @brief 持仓映射容器
+	 * @details 存储所有合约的持仓信息，键为合约代码，值为相应的持仓信息
+	 */
 	PositionMap		_pos_map;
 
+	/**
+	 * @brief 交易日志流
+	 * @details 记录所有交易操作的日志流，包括开仓和平仓操作
+	 */
 	std::stringstream	_trade_logs;
+
+	/**
+	 * @brief 平仓日志流
+	 * @details 记录所有平仓操作的详细日志流，包括每笔平仓的具体信息
+	 */
 	std::stringstream	_close_logs;
+
+	/**
+	 * @brief 资金日志流
+	 * @details 记录资金变动情况的日志流，包括盈亏、手续费等
+	 */
 	std::stringstream	_fund_logs;
+
+	/**
+	 * @brief 信号日志流
+	 * @details 记录交易信号相关的日志流，用于分析信号质量
+	 */
 	std::stringstream	_sig_logs;
+
+	/**
+	 * @brief 持仓日志流
+	 * @details 记录持仓变动情况的日志流，用于跟踪持仓变化
+	 */
 	std::stringstream	_pos_logs;
 
+	/**
+	 * @brief 策略资金信息结构体
+	 * @details 记录策略的整体资金状况，包括总盈亏、浮动盈亏和手续费等
+	 *          用于策略性能的统计和评估
+	 */
 	typedef struct _StraFundInfo
 	{
+		/**
+		 * @brief 总盈亏
+		 * @details 策略的已实现总盈亏，即已平仓部分的盈亏累计
+		 */
 		double	_total_profit;
+
+		/**
+		 * @brief 总浮动盈亏
+		 * @details 策略的当前浮动盈亏，即未平仓部分基于当前价格的盈亏
+		 */
 		double	_total_dynprofit;
+
+		/**
+		 * @brief 总手续费
+		 * @details 策略交易产生的总手续费支出
+		 */
 		double	_total_fees;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化资金信息结构，将所有成员初始化为0
+		 */
 		_StraFundInfo()
 		{
 			memset(this, 0, sizeof(_StraFundInfo));
 		}
 	} StraFundInfo;
 
+	/**
+	 * @brief 策略资金信息
+	 * @details 存储当前策略的资金状况，用于跟踪和计算策略绩效
+	 */
 	StraFundInfo		_fund_info;
 
 protected:
+	/**
+	 * @brief 上下文ID
+	 * @details 策略实例的唯一标识ID，用于区分不同的策略实例
+	 */
 	uint32_t		_context_id;
 
+	/**
+	 * @brief 计算互斥锁
+	 * @details 保护计算相关操作的互斥锁，确保多线程环境下计算的线程安全
+	 */
 	StdUniqueMutex	_mtx_calc;
+
+	/**
+	 * @brief 计算条件变量
+	 * @details 用于线程同步的条件变量，协调计算线程的等待和唇醒
+	 */
 	StdCondVariable	_cond_calc;
+
+	/**
+	 * @brief 是否启用钩子
+	 * @details 人为控制是否启用策略钩子函数，可通过enable_hook方法设置
+	 */
 	bool			_has_hook;		//这是人为控制是否启用钩子
+
+	/**
+	 * @brief 钩子是否有效
+	 * @details 根据是否是异步回测模式自动确定钩子是否可用
+	 */
 	bool			_hook_valid;	//这是根据是否是异步回测模式而确定钩子是否可用
+
+	/**
+	 * @brief 是否已恢复标志
+	 * @details 原子变量，标记策略是否已从暂停状态恢复，用于控制状态转换
+	 */
 	std::atomic<bool>	_resumed;	//临时变量，用于控制状态
 
 	//tick订阅列表
+	/**
+	 * @brief Tick数据订阅列表
+	 * @details 存储当前策略订阅的所有合约代码，用于管理订阅关系
+	 */
 	wt_hashset<std::string> _tick_subs;
 
+	/**
+	 * @brief Tick缓存类型
+	 * @details 定义Tick数据缓存的映射类型
+	 */
 	typedef WTSHashMap<std::string>	TickCache;
+
+	/**
+	 * @brief Tick缓存
+	 * @details 存储最新的Tick数据缓存，提供快速访问
+	 */
 	TickCache*	_ticks;
 };
 
