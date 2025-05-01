@@ -281,8 +281,8 @@ public:
 	virtual void on_session_end(uint32_t curTDate) override;
 
 	/**
-	 * @brief 撤销指定订单
-	 * @param localid 要撤销的订单本地ID
+	 * @brief 撤销订单
+	 * @param localid 本地订单ID
 	 * @return 撤单是否成功
 	 * @details 用于撤销已提交但未完全成交的订单
 	 */
@@ -517,35 +517,160 @@ public:
 	 */
 	virtual void stra_sub_transactions(const char* stdCode) override;
 
+	/**
+	 * @brief 输出信息级别日志
+	 * @param message 日志消息内容
+	 * @details 输出策略的信息级别日志，用于记录普通信息，例如交易状态变化等
+	 */
 	virtual void stra_log_info(const char* message) override;
+
+	/**
+	 * @brief 输出调试级别日志
+	 * @param message 日志消息内容
+	 * @details 输出策略的调试级别日志，用于记录详细信息，通常在调试时使用
+	 */
 	virtual void stra_log_debug(const char* message) override;
+
+	/**
+	 * @brief 输出错误级别日志
+	 * @param message 日志消息内容
+	 * @details 输出策略的错误级别日志，用于记录错误信息，例如交易失败等
+	 */
 	virtual void stra_log_error(const char* message) override;
 
 
 	//////////////////////////////////////////////////////////////////////////
+	/**
+	 * @brief 成交回调
+	 * @param localid 本地委托ID
+	 * @param stdCode 标准合约代码
+	 * @param isLong 是否为多头方向
+	 * @param offset 开平标记
+	 * @param vol 成交数量
+	 * @param price 成交价格
+	 * @details 当有成交发生时调用此函数，更新持仓信息和相关统计数据
+	 */
 	virtual void on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
 
+	/**
+	 * @brief 委托状态回调
+	 * @param localid 本地委托ID
+	 * @param stdCode 标准合约代码
+	 * @param isLong 是否为多头方向
+	 * @param offset 开平标记
+	 * @param totalQty 委托总数量
+	 * @param leftQty 剩余未成交数量
+	 * @param price 委托价格
+	 * @param isCanceled 是否已撤单
+	 * @details 当委托状态变化时调用此函数，例如送单成功、部分成交、撤单等
+	 */
 	virtual void on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled);
 
+	/**
+	 * @brief 通道就绪回调
+	 * @details 当交易通道就绪时调用此函数，表示可以开始交易
+	 */
 	virtual void on_channel_ready();
 
+	/**
+	 * @brief 委托结果回调
+	 * @param localid 本地委托ID
+	 * @param stdCode 标准合约代码
+	 * @param bSuccess 委托是否成功
+	 * @param message 相关消息或错误原因
+	 * @details 当委托下达并收到结果反馈时调用此函数
+	 */
 	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message);
 
 public:
+	/**
+	 * @brief 初始化UFT策略工厂
+	 * @param cfg 配置项参数
+	 * @return 初始化是否成功
+	 * @details 根据提供的配置初始化UFT策略工厂，加载对应的策略模块
+	 */
 	bool	init_uft_factory(WTSVariant* cfg);
 
 private:
+	/**
+	 * @brief 任务类型定义
+	 * @details 定义一个可执行的任务对象，用于异步任务队列
+	 */
 	typedef std::function<void()> Task;
+
+	/**
+	 * @brief 提交任务到任务队列
+	 * @param task 要提交的任务
+	 * @details 将任务提交到内部任务队列，等待异步处理
+	 */
 	void	postTask(Task task);
+
+	/**
+	 * @brief 处理任务队列中的任务
+	 * @details 处理内部任务队列中的所有任务，按提交顺序依次执行
+	 */
 	void	procTask();
 
+	/**
+	 * @brief 处理指定订单
+	 * @param localid 本地订单ID
+	 * @return 处理成功返回true，失败返回false
+	 * @details 处理指定订单，包括模拟成交、撤单等操作
+	 */
 	bool	procOrder(uint32_t localid);
 
+	/**
+	 * @brief 更新持仓信息
+	 * @param stdCode 标准合约代码
+	 * @param isLong 是否为多头方向
+	 * @param offset 开平仓标记
+	 * @param qty 数量
+	 * @param price 价格，默认为0.0
+	 * @details 根据成交结果更新合约的持仓信息
+	 */
 	void	update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price = 0.0);
+
+	/**
+	 * @brief 更新动态收益
+	 * @param stdCode 标准合约代码
+	 * @param newTick 最新的Tick数据
+	 * @details 根据最新的市场数据更新持仓的动态收益
+	 */
 	void	update_dyn_profit(const char* stdCode, WTSTickData* newTick);
 
+	/**
+	 * @brief 输出回测结果
+	 * @details 将回测结果输出到指定的文件或控制台
+	 */
 	void	dump_outputs();
+
+	/**
+	 * @brief 记录交易日志
+	 * @param stdCode 标准合约代码
+	 * @param isLong 是否为多头方向
+	 * @param offset 开平仓标记
+	 * @param curTime 当前时间
+	 * @param price 成交价格
+	 * @param qty 成交数量
+	 * @param fee 交易手续费
+	 * @details 记录交易日志，用于生成交易明细和分析报告
+	 */
 	void	log_trade(const char* stdCode, bool isLong, uint32_t offset, uint64_t curTime, double price, double qty, double fee);
+	/**
+	 * @brief 记录平仓日志
+	 * @param stdCode 标准合约代码
+	 * @param isLong 是否为多头方向
+	 * @param openTime 开仓时间
+	 * @param openpx 开仓价格
+	 * @param closeTime 平仓时间
+	 * @param closepx 平仓价格
+	 * @param qty 数量
+	 * @param profit 当次平仓盈亏
+	 * @param maxprofit 最大浮盈
+	 * @param maxloss 最大浮亏
+	 * @param totalprofit 总盈亏
+	 * @details 记录平仓操作相关数据，用于生成交易报告和回测分析
+	 */
 	void	log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty,
 		double profit, double maxprofit, double maxloss, double totalprofit);
 
