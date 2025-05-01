@@ -1,4 +1,4 @@
-﻿/*!
+/*!
 * \file MfMocker.cpp
 * \project	WonderTrader
 *
@@ -808,6 +808,14 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 	}
 }
 
+/**
+ * @brief 获取K线切片
+ * @details 获取指定合约、指定周期的K线切片数据
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如"m1"表示1分钟，"d1"表示日线
+ * @param count 请求的K线数量
+ * @return 返回K线切片指针，如果不存在则返回NULL
+ */
 WTSKlineSlice* SelMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
 	thread_local static char key[64] = { 0 };
@@ -876,36 +884,75 @@ void SelMocker::stra_sub_ticks(const char* code)
 	_replayer->sub_tick(_context_id, code);
 }
 
+/**
+ * @brief 获取合约的商品信息
+ * @details 返回指定合约的商品信息，包含合约乘数、价格单位等数据
+ * @param stdCode 标准合约代码
+ * @return 返回商品信息指针
+ */
 WTSCommodityInfo* SelMocker::stra_get_comminfo(const char* stdCode)
 {
 	return _replayer->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取合约的原始代码
+ * @details 返回标准合约代码对应的原始代码，即交易所原始编码
+ * @param stdCode 标准合约代码
+ * @return 返回原始代码字符串
+ */
 std::string SelMocker::stra_get_rawcode(const char* stdCode)
 {
 	return _replayer->get_rawcode(stdCode);
 }
 
+/**
+ * @brief 获取合约的交易时段信息
+ * @details 返回指定合约的交易时段信息，包含开盘时间、收盘时间等
+ * @param stdCode 标准合约代码
+ * @return 返回交易时段信息指针
+ */
 WTSSessionInfo* SelMocker::stra_get_sessinfo(const char* stdCode)
 {
 	return _replayer->get_session_info(stdCode, true);
 }
 
+/**
+ * @brief 获取当前交易日期
+ * @details 返回当前回测的交易日期，格式为YYYYMMDD
+ * @return 交易日期整数
+ */
 uint32_t SelMocker::stra_get_tdate()
 {
 	return _replayer->get_trading_date();
 }
 
+/**
+ * @brief 获取当前自然日期
+ * @details 返回当前回测的自然日期，格式为YYYYMMDD
+ * @return 自然日期整数
+ */
 uint32_t SelMocker::stra_get_date()
 {
 	return _replayer->get_date();
 }
 
+/**
+ * @brief 获取当前时间
+ * @details 返回当前回测的分钟时间，格式为HHMM
+ * @return 时间整数
+ */
 uint32_t SelMocker::stra_get_time()
 {
 	return _replayer->get_min_time();
 }
 
+/**
+ * @brief 获取资金数据
+ * @details 根据标志获取不同类型的资金数据
+ * @param flag 数据标志，0-总收益（平仓盈亏+浮动盈亏-手续费），1-平仓盈亏，2-浮动盈亏，3-手续费
+ * @return 对应类型的资金数据
+ */
 double SelMocker::stra_get_fund_data(int flag)
 {
 	switch (flag)
@@ -924,26 +971,53 @@ double SelMocker::stra_get_fund_data(int flag)
 }
 
 
+/**
+ * @brief 记录信息级别日志
+ * @details 记录一条信息级别的日志消息
+ * @param message 日志消息内容
+ */
 void SelMocker::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录调试级别日志
+ * @details 记录一条调试级别的日志消息
+ * @param message 日志消息内容
+ */
 void SelMocker::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录警告级别日志
+ * @details 记录一条警告级别的日志消息
+ * @param message 日志消息内容
+ */
 void SelMocker::stra_log_warn(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message);
 }
 
+/**
+ * @brief 记录错误级别日志
+ * @details 记录一条错误级别的日志消息
+ * @param message 日志消息内容
+ */
 void SelMocker::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载用户数据
+ * @details 根据键名从用户数据映射中加载数据
+ * @param key 数据键名
+ * @param defVal 默认值，当指定的键不存在时返回此值，默认为空字符串
+ * @return 返回键对应的值或默认值
+ */
 const char* SelMocker::stra_load_user_data(const char* key, const char* defVal /*= ""*/)
 {
 	auto it = _user_datas.find(key);
@@ -953,12 +1027,26 @@ const char* SelMocker::stra_load_user_data(const char* key, const char* defVal /
 	return defVal;
 }
 
+/**
+ * @brief 保存用户数据
+ * @details 将数据以键值对的形式保存到用户数据映射中
+ * @param key 数据键名
+ * @param val 数据值
+ */
 void SelMocker::stra_save_user_data(const char* key, const char* val)
 {
 	_user_datas[key] = val;
 	_ud_modified = true;
 }
 
+/**
+ * @brief 获取合约仓位
+ * @details 获取指定合约的当前持仓量
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只获取有效仓位（排除冻结部分），默认为false
+ * @param userTag 用户标签，用于检索特定标记的仓位，默认为空字符串
+ * @return 返回仓位量，正数表示多头，负数表示空头，0表示无仓位
+ */
 double SelMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = false*/, const char* userTag /* = "" */)
 {
 	//By Wesley @ 2023.04.17
@@ -1000,6 +1088,13 @@ double SelMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = fal
 	return 0;
 }
 
+/**
+ * @brief 获取合约的日线价格
+ * @details 获取指定合约的日线价格，包括开盘价、收盘价、最高价、最低价等
+ * @param stdCode 标准合约代码
+ * @param flag 价格标志：0-收盘价（默认），1-开盘价，2-最高价，3-最低价
+ * @return 返回对应的日线价格，如果不存在则返回0
+ */
 double SelMocker::stra_get_day_price(const char* stdCode, int flag /* = 0 */)
 {
 	if (_replayer)
@@ -1008,6 +1103,12 @@ double SelMocker::stra_get_day_price(const char* stdCode, int flag /* = 0 */)
 	return 0.0;
 }
 
+/**
+ * @brief 获取首次入场时间
+ * @details 获取指定合约当前持仓的首次入场时间
+ * @param stdCode 标准合约代码
+ * @return 返回首次入场时间，格式为YYYYMMDDHHMMSSsss，如果没有持仓则返回0
+ */
 uint64_t SelMocker::stra_get_first_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1021,6 +1122,12 @@ uint64_t SelMocker::stra_get_first_entertime(const char* stdCode)
 	return pInfo._details[0]._opentime;
 }
 
+/**
+ * @brief 获取最近入场时间
+ * @details 获取指定合约当前持仓的最近入场时间
+ * @param stdCode 标准合约代码
+ * @return 返回最近入场时间，格式为YYYYMMDDHHMMSSsss，如果没有持仓则返回0
+ */
 uint64_t SelMocker::stra_get_last_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1034,6 +1141,12 @@ uint64_t SelMocker::stra_get_last_entertime(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentime;
 }
 
+/**
+ * @brief 获取最近入场标签
+ * @details 获取指定合约当前持仓的最近入场标签
+ * @param stdCode 标准合约代码
+ * @return 返回最近入场标签，如果没有持仓则返回空字符串
+ */
 const char* SelMocker::stra_get_last_entertag(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1047,6 +1160,12 @@ const char* SelMocker::stra_get_last_entertag(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentag;
 }
 
+/**
+ * @brief 获取最近出场时间
+ * @details 获取指定合约的最近出场时间
+ * @param stdCode 标准合约代码
+ * @return 返回最近出场时间，格式为YYYYMMDDHHMMSSsss，如果没有出场记录则返回0
+ */
 uint64_t SelMocker::stra_get_last_exittime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1057,6 +1176,12 @@ uint64_t SelMocker::stra_get_last_exittime(const char* stdCode)
 	return pInfo._last_exittime;
 }
 
+/**
+ * @brief 获取最近入场价格
+ * @details 获取指定合约当前持仓的最近入场价格
+ * @param stdCode 标准合约代码
+ * @return 返回最近入场价格，如果没有持仓则返回0
+ */
 double SelMocker::stra_get_last_enterprice(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1070,6 +1195,12 @@ double SelMocker::stra_get_last_enterprice(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._price;
 }
 
+/**
+ * @brief 获取仓位平均价格
+ * @details 获取指定合约当前仓位的加权平均价格
+ * @param stdCode 标准合约代码
+ * @return 返回平均价格，如果无仓位则返回0
+ */
 double SelMocker::stra_get_position_avgpx(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1090,6 +1221,12 @@ double SelMocker::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+/**
+ * @brief 获取仓位浮动盈亏
+ * @details 获取指定合约当前仓位的浮动盈亏
+ * @param stdCode 标准合约代码
+ * @return 返回浮动盈亏金额
+ */
 double SelMocker::stra_get_position_profit(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1100,6 +1237,13 @@ double SelMocker::stra_get_position_profit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取仓位明细开仓时间
+ * @details 获取指定合约指定用户标签的仓位明细开仓时间
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @return 返回开仓时间，如果无仓位则返回0
+ */
 uint64_t SelMocker::stra_get_detail_entertime(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1119,6 +1263,13 @@ uint64_t SelMocker::stra_get_detail_entertime(const char* stdCode, const char* u
 	return 0;
 }
 
+/**
+ * @brief 获取仓位明细的开仓成本
+ * @details 获取指定合约和用户标签的仓位明细的开仓价格
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @return 返回开仓价格，如果没有找到对应的仓位明细则返回0
+ */
 double SelMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1138,6 +1289,14 @@ double SelMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 	return 0.0;
 }
 
+/**
+ * @brief 获取仓位明细的利润信息
+ * @details 根据标志获取指定合约和用户标签的仓位明细的不同利润信息
+ * @param stdCode 标准合约代码
+ * @param userTag 用户标签
+ * @param flag 标志：0-当前盈亏，1-最大盈利，-1-最大亏损，2-最高价格，-2-最低价格，默认为0
+ * @return 返回对应的利润信息，如果没有找到对应的仓位明细则返回0
+ */
 double SelMocker::stra_get_detail_profit(const char* stdCode, const char* userTag, int flag /* = 0 */)
 {
 	auto it = _pos_map.find(stdCode);

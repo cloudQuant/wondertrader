@@ -175,11 +175,11 @@
     - 执行管理器实现
     - 理解执行单元的管理流程
 
-37. **`/src/WtExecMon/WtExecMonStra.h`**
+37. **`/src/WtExecMon/WtExecPorter.h src/WtExecMon/WtExecRunner.h src/WtExecMon/WtSimpDataMgr.h`**
     - 执行监控策略头文件
     - 了解执行监控的接口
 
-38. **`/src/WtExecMon/WtExecMonStra.cpp`**
+38. **`/src/WtExecMon/WtExecPorter.cpp src/WtExecMon/WtExecRunner.cpp src/WtExecMon/WtSimpDataMgr.cpp`**
     - 执行监控策略实现
     - 理解执行单元的监控和管理机制
 

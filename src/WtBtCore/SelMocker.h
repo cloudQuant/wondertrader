@@ -760,46 +760,78 @@ protected:
 	/// @brief 用户数据是否被修改的标记，true表示数据已修改，false表示未修改
 	bool			_ud_modified;
 
+	/**
+	 * @brief 策略资金信息结构体
+	 * @details 用于记录策略的资金相关信息，包括盈亏和手续费
+	 */
 	typedef struct _StraFundInfo
 	{
+		/// @brief 总平仓盈亏，记录已平仓部分的总盈亏
 		double	_total_profit;
+		/// @brief 总浮动盈亏，记录未平仓部分的总浮动盈亏
 		double	_total_dynprofit;
+		/// @brief 总手续费，记录交易产生的总手续费
 		double	_total_fees;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化策略资金信息，将所有成员变量初始化为0
+		 */
 		_StraFundInfo()
 		{
 			memset(this, 0, sizeof(_StraFundInfo));
 		}
 	} StraFundInfo;
 
+	/// @brief 策略资金信息实例，记录当前策略的资金状况
 	StraFundInfo		_fund_info;
 
+	/**
+	 * @brief 策略工厂信息结构体
+	 * @details 用于记录选股策略工厂的相关信息，包括模块路径、工厂实例和函数指针等
+	 */
 	typedef struct _StraFactInfo
 	{
+		/// @brief 模块路径，记录存储策略库的路径
 		std::string		_module_path;
+		/// @brief 模块实例句柄，指向加载的动态链接库实例
 		DllHandle		_module_inst;
+		/// @brief 选股策略工厂指针，指向选股策略工厂实例
 		ISelStrategyFact*		_fact;
+		/// @brief 创建选股策略工厂的函数指针
 		FuncCreateSelStraFact	_creator;
+		/// @brief 删除选股策略工厂的函数指针
 		FuncDeleteSelStraFact	_remover;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化策略工厂信息，将模块实例和工厂指针初始化为Null
+		 */
 		_StraFactInfo()
 		{
 			_module_inst = NULL;
 			_fact = NULL;
 		}
 
+		/**
+		 * @brief 析构函数
+		 * @details 清理策略工厂资源，如果工厂实例存在则调用移除器函数删除
+		 */
 		~_StraFactInfo()
 		{
 			if (_fact)
 				_remover(_fact);
 		}
 	} StraFactInfo;
+	/// @brief 策略工厂信息实例，用于管理选股策略工厂
 	StraFactInfo	_factory;
 
+	/// @brief 选股策略指针，指向当前正在运行的选股策略实例
 	SelStrategy*	_strategy;
 
+	/// @brief 当前交易日，记录当前的交易日期，格式为YYYYMMDD
 	uint32_t		_cur_tdate;
 
-	//tick订阅列表
+	/// @brief tick订阅列表，存储当前策略订阅的所有合约代码
 	wt_hashset<std::string> _tick_subs;
 };
