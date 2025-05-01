@@ -277,11 +277,28 @@ void SelMocker::handle_init()
 	this->on_init();
 }
 
+/**
+ * @brief 处理K线关闭事件
+ * @param stdCode 标准合约代码
+ * @param period 周期标识（如'd'表示日K，'m'表示分钟线）
+ * @param times 周期倍数（如分钟周期为5，则表示5分钟线）
+ * @param newBar 新的K线数据
+ * @details 实现IDataSink接口的K线关闭事件处理函数，当新的K线完成时调用
+ *          该函数将K线数据转发给on_bar函数处理，触发策略的K线事件
+ */
 void SelMocker::handle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	this->on_bar(stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 处理定时调度事件
+ * @param uDate 当前日期（格式YYYYMMDD）
+ * @param uTime 当前时间（格式HHMMSS）
+ * @details 实现IDataSink接口的定时调度事件处理函数，当回测器触发定时调度时调用
+ *          该函数计算下一分钟的时间，处理跨日情况，并将调度事件转发给on_schedule函数
+ *          定时调度是策略执行的重要触发机制
+ */
 void SelMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 {
 	uint32_t nextTime = TimeUtils::getNextMinute(uTime, 1);
@@ -290,16 +307,40 @@ void SelMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 	this->on_schedule(uDate, uTime, nextTime);
 }
 
+/**
+ * @brief 处理交易日开始事件
+ * @param uCurDate 当前交易日（格式YYYYMMDD）
+ * @details 实现IDataSink接口的交易日开始事件处理函数，当新的交易日开始时调用
+ *          该函数将交易日开始事件转发给on_session_begin函数处理
+ *          通常用于重置每日的交易状态和冻结仓位
+ */
 void SelMocker::handle_session_begin(uint32_t uCurDate)
 {
 	this->on_session_begin(uCurDate);
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @param uCurDate 当前交易日（格式YYYYMMDD）
+ * @details 实现IDataSink接口的交易日结束事件处理函数，当交易日结束时调用
+ *          该函数将交易日结束事件转发给on_session_end函数进行计算汇总
+ *          用于汇总当日交易盈亏和记录日志
+ */
 void SelMocker::handle_session_end(uint32_t uCurDate)
 {
 	this->on_session_end(uCurDate);
 }
 
+/**
+ * @brief 处理回测结束事件
+ * @details 实现IDataSink接口的回测结束事件处理函数，当所有回测数据处理完毕时调用
+ *          该函数主要完成以下工作：
+ *          1. 记录策略调度统计信息（调度次数、总计算时间、平均计算时间）
+ *          2. 导出策略运行结果
+ *          3. 导出策略数据
+ *          4. 触发回测结束回调
+ *          这是回测结束时的最后一个处理函数
+ */
 void SelMocker::handle_replay_done()
 {
 	WTSLogger::log_dyn("strategy", _name.c_str(), LL_INFO, 
@@ -313,6 +354,19 @@ void SelMocker::handle_replay_done()
 	this->on_bactest_end();
 }
 
+/**
+ * @brief 处理Tick数据
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @param pxType 价格类型（0:实时价格，1:延迟行情，2:模拟价格，3:收盘价格）
+ * @details 实现IDataSink接口的Tick数据处理函数，当新的Tick数据到达时调用
+ *          主要函数包括：
+ *          1. 获取当前价格和上一价格
+ *          2. 更新价格缓存
+ *          3. 处理信号触发和持仓盈亏计算
+ *          4. 调用on_tick_updated通知策略
+ *          5. 根据价格类型处理不同情况
+ */
 void SelMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t pxType)
 {
 	double cur_px = newTick->price();
@@ -353,6 +407,18 @@ void SelMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 		proc_tick(stdCode, last_px, cur_px);
 }
 
+/**
+ * @brief 处理合约的Tick数据
+ * @param stdCode 标准合约代码
+ * @param last_px 上一次价格
+ * @param cur_px 当前最新价格
+ * @details 根据Tick数据处理信号和持仓信息，主要功能包括：
+ *          1. 检查信号列表中是否有当前合约的信号
+ *          2. 如果有信号，根据设置的期望价格或当前市场价格执行仓位操作
+ *          3. 执行完成后从信号列表中移除该信号
+ *          4. 更新合约的动态盈亏
+ *          这个函数是实际处理信号触发和持仓盈亏计算的核心逻辑
+ */
 void SelMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 {
 	{
@@ -406,6 +472,22 @@ void SelMocker::on_init()
 	WTSLogger::info("SEL Strategy initialized with {} slippage: {}", _ratio_slippage ? "ratio" : "absolute", _slippage);
 }
 
+/**
+ * @brief 更新持仓的动态盈亏
+ * @param stdCode 标准合约代码
+ * @param price 当前价格
+ * @details 根据最新市场价格计算持仓的动态盈亏，主要流程如下：
+ *          1. 查找标的合约目前的持仓情况
+ *          2. 如果持仓量为零，则直接将动态盈亏设为零
+ *          3. 如果有持仓，则遍历该合约的所有持仓明细，计算每笔交易的当前盈亏：
+ *             - 计算当前盈亏 = 持仓量 * (当前价格 - 开仓价格) * 合约乘数 * 方向系数
+ *             - 更新最大盈利和最大亏损记录
+ *             - 记录持仓期间遇到的最高价和最低价
+ *          4. 汇总合约的全部明细盈亏，得到该合约的总动态盈亏
+ *          5. 计算所有合约的总动态盈亏
+ *          6. 更新资金账户的总动态盈亏
+ *          这个函数是盈亏计算的核心部分，保证了回测系统的盈亏计算准确性
+ */
 void SelMocker::update_dyn_profit(const char* stdCode, double price)
 {
 	auto it = _pos_map.find(stdCode);
@@ -455,12 +537,30 @@ void SelMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStr
 	//这个逻辑迁移到handle_tick去了
 }
 
+/**
+ * @brief K线关闭回调函数
+ * @param code 标准合约代码
+ * @param period 周期标识
+ * @param newBar 新的K线数据
+ * @details 当新的K线完成时调用此函数，将K线数据传递给策略实例
+ *          检查策略实例是否存在，如果存在则调用策略的on_bar方法
+ *          作为实际将K线数据传递给用户策略的桥梁函数
+ */
 void SelMocker::on_bar_close(const char* code, const char* period, WTSBarStruct* newBar)
 {
 	if (_strategy)
 		_strategy->on_bar(this, code, period, newBar);
 }
 
+/**
+ * @brief Tick数据更新通知函数
+ * @param code 标准合约代码
+ * @param newTick 新的Tick数据
+ * @details 当有新的Tick数据到达时，检查该合约是否已订阅
+ *          如果合约未订阅，则直接返回不处理
+ *          如果合约已订阅且策略实例存在，则调用策略的on_tick方法
+ *          这确保只有被策略主动订阅的合约才会触发策略回调
+ */
 void SelMocker::on_tick_updated(const char* code, WTSTickData* newTick)
 {
 	auto it = _tick_subs.find(code);
@@ -471,6 +571,14 @@ void SelMocker::on_tick_updated(const char* code, WTSTickData* newTick)
 		_strategy->on_tick(this, code, newTick);
 }
 
+/**
+ * @brief 策略调度函数
+ * @param curDate 当前日期（格式YYYYMMDD）
+ * @param curTime 当前时间（格式HHMMSS）
+ * @details 在定时调度事件中调用，检查策略实例是否存在
+ *          如果策略实例存在，则调用策略的on_schedule方法
+ *          这是实际触发用户策略定时调度逻辑的函数
+ */
 void SelMocker::on_strategy_schedule(uint32_t curDate, uint32_t curTime)
 {
 	if (_strategy)
@@ -478,6 +586,22 @@ void SelMocker::on_strategy_schedule(uint32_t curDate, uint32_t curTime)
 }
 
 
+/**
+ * @brief 执行定时调度
+ * @param curDate 当前日期（格式YYYYMMDD）
+ * @param curTime 当前时间（格式HHMMSS）
+ * @param fireTime 触发时间（格式HHMMSS）
+ * @return 调度是否成功
+ * @details 策略定时调度的核心函数，主要流程如下：
+ *          1. 设置调度状态标记
+ *          2. 累计调度次数
+ *          3. 开始计时并调用策略调度函数
+ *          4. 检查当前所有持仓，收集需要清空的持仓
+ *          5. 自动清空无信号的持仓
+ *          6. 统计调度性能数据
+ *          7. 重置调度状态标记
+ *          这是策略模拟器中最重要的定时执行函数
+ */
 bool SelMocker::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime)
 {
 	_is_in_schedule = true;//开始调度,修改标记
@@ -511,6 +635,15 @@ bool SelMocker::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTim
 	return true;
 }
 
+/**
+ * @brief 交易日开始事件处理
+ * @param curTDate 当前交易日（格式YYYYMMDD）
+ * @details 当新的交易日开始时执行的函数，主要工作包括：
+ *          1. 更新当前交易日变量
+ *          2. 重置所有合约的冻结持仓数量为零
+ *          这个函数的主要目的是在每个新交易日开始时重置仓位的冻结状态
+ *          确保前一交易日未完成的交易不会影响新交易日的操作
+ */
 void SelMocker::on_session_begin(uint32_t curTDate)
 {
 	_cur_tdate = curTDate;
@@ -527,6 +660,16 @@ void SelMocker::on_session_begin(uint32_t curTDate)
 	}
 }
 
+/**
+ * @brief 枚举策略持仓
+ * @param cb 持仓回调函数
+ * @details 该函数枚举当前策略所有的持仓信息，并通过回调函数返回
+ *          收集逻辑如下：
+ *          1. 首先收集当前实际持仓
+ *          2. 再收集信号列表中的目标持仓
+ *          3. 通过回调函数将每个合约的最终持仓量返回给调用者
+ *          这个函数通常用于获取策略的当前持仓状态，包括已执行和待执行的目标仓位
+ */
 void SelMocker::enum_position(FuncEnumSelPositionCallBack cb)
 {
 	wt_hashmap<std::string, double> desPos;
@@ -549,6 +692,18 @@ void SelMocker::enum_position(FuncEnumSelPositionCallBack cb)
 		cb(v.first.c_str(), v.second);
 	}
 }
+
+/**
+ * @brief 交易日结束事件处理
+ * @param curTDate 当前交易日（格式YYYYMMDD）
+ * @details 当交易日结束时执行的函数，主要工作包括：
+ *          1. 调用策略的on_session_end回调函数
+ *          2. 遍历所有持仓，执行以下操作：
+ *             - 初始化持仓快照，记录当天收盘持仓状态
+ *             - 将当日平仓盈亏汇总到总盈亏
+ *             - 重置当日平仓盈亏为零，准备下一交易日的计算
+ *          这个函数的主要目的是完成当日盈亏的结算和持仓汇总
+ */
 
 void SelMocker::on_session_end(uint32_t curTDate)
 {
@@ -580,6 +735,14 @@ void SelMocker::on_session_end(uint32_t curTDate)
 
 //////////////////////////////////////////////////////////////////////////
 //策略接口
+/**
+ * @brief 获取合约当前价格
+ * @param stdCode 标准合约代码
+ * @return 当前合约的最新价格，如果存在则返回当前价格，否则返回0
+ * @details 策略接口函数，用于获取指定合约的当前市场价格
+ *          通过回测引擎返回当前最新的市场价格
+ *          这是策略开发者可以使用的市场数据查询函数
+ */
 double SelMocker::stra_get_price(const char* stdCode)
 {
 	if (_replayer)
@@ -588,6 +751,19 @@ double SelMocker::stra_get_price(const char* stdCode)
 	return 0.0;
 }
 
+/**
+ * @brief 设置合约目标持仓
+ * @param stdCode 标准合约代码
+ * @param qty 目标持仓量，正数表示多头持仓，负数表示空头持仓
+ * @param userTag 用户标签，如信号标识或交易备注，可用于后续调试和分析
+ * @details 策略接口函数，用于设置合约的目标持仓量，执行流程如下：
+ *          1. 首先获取合约信息，包括疯狂模式、T+1规则等
+ *          2. 检查目标仓位是否合法（例如是否能做空）
+ *          3. 比较目标仓位与当前仓位，如果相等则直接返回
+ *          4. 对于T+1合约，检查目标仓位是否满足冻结仓位的限制
+ *          5. 订阅合约的Tick数据，并添加仓位变更信号
+ *          这是策略开发者用于设置目标仓位的主要接口
+ */
 void SelMocker::stra_set_position(const char* stdCode, double qty, const char* userTag /* = "" */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -626,6 +802,24 @@ void SelMocker::stra_set_position(const char* stdCode, double qty, const char* u
 	append_signal(stdCode, qty, userTag);
 }
 
+/**
+ * @brief 添加仓位变更信号
+ * @param stdCode 标准合约代码
+ * @param qty 目标持仓量
+ * @param userTag 用户标签
+ * @param price 期望价格（可选），如果为0则使用当前市场价格
+ * @details 将仓位变更信号添加到信号列表中，执行流程如下：
+ *          1. 获取当前市场价格
+ *          2. 为给定合约创建或更新信号信息，包括：
+ *             - 目标仓位量
+ *             - 信号价格（当前市场价格）
+ *             - 期望成交价格（如果指定）
+ *             - 用户标签
+ *             - 信号生成时间
+ *             - 触发标志（在调度中生成的信号不立即触发）
+ *          3. 记录信号日志
+ *          信号会在下一个Tick处理中触发成交
+ */
 void SelMocker::append_signal(const char* stdCode, double qty, const char* userTag /* = "" */, double price/* = 0.0*/)
 {
 	double curPx = _price_map[stdCode].first;
@@ -643,6 +837,20 @@ void SelMocker::append_signal(const char* stdCode, double qty, const char* userT
 	//save_data();
 }
 
+/**
+ * @brief 实际执行仓位变更
+ * @param stdCode 标准合约代码
+ * @param qty 目标持仓量
+ * @param price 成交价格，如果为0则使用当前市场价格
+ * @param userTag 用户标签
+ * @param bTriggered 是否被触发的信号
+ * @details 实际执行仓位变更操作，包括开仓、平仓和仓位调整，执行流程如下：
+ *          1. 获取或创建合约的持仓信息
+ *          2. 确定成交价格（使用参数价格或当前市场价格）
+ *          3. 获取当前交易时间和交易日
+ *          4. 如果目标仓位与当前仓位相同，则不执行操作
+ *          这是实际执行仓位变更的核心函数，后续处理包括仓位调整、盈亏计算、交易记录等
+ */
 void SelMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */, bool bTriggered /* = false */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
