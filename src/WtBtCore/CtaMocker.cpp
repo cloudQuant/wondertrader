@@ -2007,6 +2007,17 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 	}
 }
 
+/**
+ * @brief 获取合约的K线数据
+ * @details 获取指定合约的指定周期的K线数据
+ *          可以指定是否作为主图指标，如果是主图指标，则会记录主图周期
+ *          返回的数据包含最新的count根K线
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如m1表示1分钟，d1表示日线
+ * @param count 要获取的K线数量
+ * @param isMain 是否作为主图指标，默认为false
+ * @return K线数据切片指针，调用者需要自行释放
+ */
 WTSKlineSlice* CtaMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain /* = false */)
 {
 	thread_local static char key[64] = { 0 };
@@ -2056,11 +2067,26 @@ WTSKlineSlice* CtaMocker::stra_get_bars(const char* stdCode, const char* period,
 	return kline;
 }
 
+/**
+ * @brief 获取合约的历史Tick数据切片
+ * @details 获取指定合约的最新一定数量的Tick数据切片
+ *          返回的数据包含最新的count个Tick数据
+ * @param stdCode 标准合约代码
+ * @param count 要获取的Tick数量
+ * @return Tick数据切片指针，调用者需要自行释放
+ */
 WTSTickSlice* CtaMocker::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取合约的最新Tick数据
+ * @details 获取指定合约的最新Tick数据
+ *          首先从本地缓存中查找，如果没有则从回放器中获取
+ * @param stdCode 标准合约代码
+ * @return 最新的Tick数据指针，调用者需要自行释放
+ */
 WTSTickData* CtaMocker::stra_get_last_tick(const char* stdCode)
 {
 	auto it = _ticks.find(stdCode);
@@ -2156,6 +2182,12 @@ uint32_t CtaMocker::stra_get_time()
 	return _replayer->get_min_time();
 }
 
+/**
+ * @brief 获取策略资金数据
+ * @details 获取策略的资金相关数据，包括总盈亏、已实现盈亏、浮动盈亏和手续费
+ * @param flag 数据标志：0-总盈亏（已实现盈亏-手续费+浮动盈亏），1-已实现盈亏，2-浮动盈亏，3-手续费
+ * @return 对应的资金数据值
+ */
 double CtaMocker::stra_get_fund_data(int flag)
 {
 	switch (flag)
@@ -2217,6 +2249,14 @@ void CtaMocker::stra_log_error(const char* message)
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载策略用户自定义数据
+ * @details 从内部缓存中加载策略的用户自定义数据
+ *          如果指定键名的数据不存在，则返回默认值
+ * @param key 数据键名
+ * @param defVal 默认值，当指定键名的数据不存在时返回，默认为空字符串
+ * @return 数据值或默认值
+ */
 const char* CtaMocker::stra_load_user_data(const char* key, const char* defVal /*= ""*/)
 {
 	auto it = _user_datas.find(key);
@@ -2226,12 +2266,26 @@ const char* CtaMocker::stra_load_user_data(const char* key, const char* defVal /
 	return defVal;
 }
 
+/**
+ * @brief 保存策略用户自定义数据
+ * @details 将策略的用户自定义数据保存到内部缓存中
+ *          用户数据以键值对的形式存储，可以在策略重启后通过stra_load_user_data函数加载
+ * @param key 数据键名
+ * @param val 数据值
+ */
 void CtaMocker::stra_save_user_data(const char* key, const char* val)
 {
 	_user_datas[key] = val;
 	_ud_modified = true;
 }
 
+/**
+ * @brief 获取合约的首次入场时间
+ * @details 获取指定合约的首次入场时间，即最早的一笔持仓明细的开仓时间
+ *          如果没有持仓，则返回0
+ * @param stdCode 标准合约代码
+ * @return 首次入场时间，格式为YYYYMMDDHHMMSS，如果没有持仓则返回0
+ */
 uint64_t CtaMocker::stra_get_first_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2245,6 +2299,13 @@ uint64_t CtaMocker::stra_get_first_entertime(const char* stdCode)
 	return pInfo._details[0]._opentime;
 }
 
+/**
+ * @brief 获取合约的最后入场时间
+ * @details 获取指定合约的最后入场时间，即最新的一笔持仓明细的开仓时间
+ *          如果没有持仓，则返回0
+ * @param stdCode 标准合约代码
+ * @return 最后入场时间，格式为YYYYMMDDHHMMSS，如果没有持仓则返回0
+ */
 uint64_t CtaMocker::stra_get_last_entertime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2258,6 +2319,13 @@ uint64_t CtaMocker::stra_get_last_entertime(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentime;
 }
 
+/**
+ * @brief 获取合约的最后入场标签
+ * @details 获取指定合约的最后入场标签，即最新的一笔持仓明细的开仓标签
+ *          如果没有持仓，则返回空字符串
+ * @param stdCode 标准合约代码
+ * @return 最后入场标签，如果没有持仓则返回空字符串
+ */
 const char* CtaMocker::stra_get_last_entertag(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2271,6 +2339,13 @@ const char* CtaMocker::stra_get_last_entertag(const char* stdCode)
 	return pInfo._details[pInfo._details.size() - 1]._opentag;
 }
 
+/**
+ * @brief 获取合约的最后平仓时间
+ * @details 获取指定合约的最后平仓时间
+ *          如果没有平仓记录，则返回0
+ * @param stdCode 标准合约代码
+ * @return 最后平仓时间，格式为YYYYMMDDHHMMSS，如果没有平仓记录则返回0
+ */
 uint64_t CtaMocker::stra_get_last_exittime(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2339,6 +2414,14 @@ double CtaMocker::stra_get_position(const char* stdCode, bool bOnlyValid /* = fa
 	return 0;
 }
 
+/**
+ * @brief 获取合约的持仓平均价格
+ * @details 获取指定合约的当前持仓平均价格
+ *          计算方式为将所有持仓明细的价格乘以数量的总和除以总数量
+ *          如果没有持仓，则返回0
+ * @param stdCode 标准合约代码
+ * @return 当前持仓平均价格，如果没有持仓则返回0
+ */
 double CtaMocker::stra_get_position_avgpx(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2359,6 +2442,14 @@ double CtaMocker::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+/**
+ * @brief 获取合约的持仓浮动盈亏
+ * @details 获取指定合约的当前持仓浮动盈亏
+ *          浮动盈亏是根据当前市场价格计算的未实现盈亏
+ *          如果没有持仓，则返回0
+ * @param stdCode 标准合约代码
+ * @return 当前持仓浮动盈亏，如果没有持仓则返回0
+ */
 double CtaMocker::stra_get_position_profit(const char* stdCode)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2369,6 +2460,14 @@ double CtaMocker::stra_get_position_profit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细入场时间
+ * @details 获取指定合约和指定用户标签的持仓明细的入场时间
+ *          如果没有找到对应标签的持仓明细，则返回0
+ * @param stdCode 标准合约代码
+ * @param userTag 用户自定义标签
+ * @return 入场时间，格式为YYYYMMDDHHMMSS，如果没有找到对应标签的持仓明细则返回0
+ */
 uint64_t CtaMocker::stra_get_detail_entertime(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2388,6 +2487,14 @@ uint64_t CtaMocker::stra_get_detail_entertime(const char* stdCode, const char* u
 	return 0;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细开仓成本
+ * @details 获取指定合约和指定用户标签的持仓明细的开仓价格
+ *          如果没有找到对应标签的持仓明细，则返回0
+ * @param stdCode 标准合约代码
+ * @param userTag 用户自定义标签
+ * @return 开仓价格，如果没有找到对应标签的持仓明细则返回0
+ */
 double CtaMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 {
 	auto it = _pos_map.find(stdCode);
@@ -2407,6 +2514,16 @@ double CtaMocker::stra_get_detail_cost(const char* stdCode, const char* userTag)
 	return 0.0;
 }
 
+/**
+ * @brief 获取指定标签的持仓明细的各种盈亏信息
+ * @details 获取指定合约和指定用户标签的持仓明细的盈亏相关信息
+ *          可以获取当前盈亏、最大盈利、最大亏损、最高价格和最低价格
+ *          如果没有找到对应标签的持仓明细，则返回0
+ * @param stdCode 标准合约代码
+ * @param userTag 用户自定义标签
+ * @param flag 标记参数：0-当前盈亏，1-最大盈利，-1-最大亏损，2-最高价格，-2-最低价格，默认为0
+ * @return 对应的盈亏信息，如果没有找到对应标签的持仓明细则返回0
+ */
 double CtaMocker::stra_get_detail_profit(const char* stdCode, const char* userTag, int flag /* = 0 */)
 {
 	auto it = _pos_map.find(stdCode);
