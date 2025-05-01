@@ -675,102 +675,343 @@ private:
 		double profit, double maxprofit, double maxloss, double totalprofit);
 
 private:
+	/**
+	 * @brief 历史数据回放器指针
+	 * @details 指向历史数据回放器的指针，用于获取回测所需的历史行情数据
+	 */
 	HisDataReplayer*	_replayer;
 
+	/**
+	 * @brief 是否使用最新价格标志
+	 * @details 控制是否使用最新价格进行回测撮合，true表示使用最新价格，false表示使用其他价格（如开盘价或收盘价）
+	 */
 	bool			_use_newpx;
-	uint32_t		_error_rate;
-	bool			_match_this_tick;	//是否在当前tick撮合
 
+	/**
+	 * @brief 错误率设置
+	 * @details 模拟交易的错误率，用于模拟现实交易中可能出现的错误情况，单位为万分之一
+	 */
+	uint32_t		_error_rate;
+
+	/**
+	 * @brief 当前tick撮合标志
+	 * @details 是否在当前tick数据到达时立即进行撮合，true表示立即撮合，false表示延迟撮合
+	 */
+	bool			_match_this_tick;
+
+	/**
+	 * @brief 价格映射类型定义
+	 * @details 合约代码到价格的映射，用于快速查找特定合约的价格
+	 */
 	typedef wt_hashmap<std::string, double> PriceMap;
+
+	/**
+	 * @brief 价格映射表
+	 * @details 存储各个合约的当前价格，键为合约代码，值为对应价格
+	 */
 	PriceMap		_price_map;
 
-
+	/**
+	 * @brief 策略工厂信息结构体
+	 * @details 用于存储UFT策略工厂的相关信息，包括模块路径、DLL句柄、工厂实例和创建/删除函数
+	 */
 	typedef struct _StraFactInfo
 	{
+		/**
+		 * @brief 策略模块文件路径
+		 * @details 存储策略模块的完整文件路径
+		 */
 		std::string		_module_path;
+
+		/**
+		 * @brief 动态链接库句柄
+		 * @details 加载的策略动态链接库的句柄
+		 */
 		DllHandle		_module_inst;
+
+		/**
+		 * @brief 策略工厂接口指针
+		 * @details 指向UFT策略工厂实例的指针
+		 */
 		IUftStrategyFact*	_fact;
+
+		/**
+		 * @brief 创建策略工厂的函数指针
+		 * @details 指向创建UFT策略工厂实例的函数
+		 */
 		FuncCreateUftStraFact	_creator;
+
+		/**
+		 * @brief 删除策略工厂的函数指针
+		 * @details 指向删除UFT策略工厂实例的函数
+		 */
 		FuncDeleteUftStraFact	_remover;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化策略工厂信息结构体的成员变量
+		 */
 		_StraFactInfo()
 		{
 			_module_inst = NULL;
 			_fact = NULL;
 		}
 
+		/**
+		 * @brief 析构函数
+		 * @details 释放策略工厂实例，使用_remover函数删除工厂实例
+		 */
 		~_StraFactInfo()
 		{
 			if (_fact)
 				_remover(_fact);
 		}
 	} StraFactInfo;
+
+	/**
+	 * @brief UFT策略工厂实例
+	 * @details 存储当前加载的UFT策略工厂的信息和实例
+	 */
 	StraFactInfo	_factory;
 
+	/**
+	 * @brief UFT策略实例指针
+	 * @details 指向当前正在进行回测的UFT策略实例
+	 */
 	UftStrategy*	_strategy;
 
 	//StdThreadPtr		_thrd;
+	/**
+	 * @brief 线程互斥锁
+	 * @details 用于保护对共享数据的并发访问，确保线程安全
+	 */
 	StdUniqueMutex		_mtx;
+
+	/**
+	 * @brief 任务队列
+	 * @details 存储待处理的任务列表，由postTask方法添加任务，procTask方法处理任务
+	 */
 	std::queue<Task>	_tasks;
 	//bool				_stopped;
 
+	/**
+	 * @brief 递归互斥锁
+	 * @details 用于保护对控制数据的并发访问，支持递归锁定，同一线程可以多次获取该锁
+	 */
 	StdRecurMutex		_mtx_control;
 
+	/**
+	 * @brief 订单信息结构体
+	 * @details 存储订单的基本信息，包括方向、合约代码、数量等
+	 */
 	typedef struct _OrderInfo
 	{
+		/**
+		 * @brief 是否为多头方向
+		 * @details true表示多头，false表示空头
+		 */
 		bool	_isLong;
+
+		/**
+		 * @brief 合约代码
+		 * @details 订单对应的合约代码，限制为32字节
+		 */
 		char	_code[32];
+
+		/**
+		 * @brief 委托价格
+		 * @details 订单的委托价格
+		 */
 		double	_price;
+
+		/**
+		 * @brief 委托总数量
+		 * @details 订单的总委托数量
+		 */
 		double	_total;
+
+		/**
+		 * @brief 剩余未成交数量
+		 * @details 订单的剩余未成交数量
+		 */
 		double	_left;
 		
+		/**
+		 * @brief 开平标记
+		 * @details 订单的开平标记：0-开仓，1-平仓，2-平今仓
+		 */
 		uint32_t	_offset;
+
+		/**
+		 * @brief 本地订单ID
+		 * @details 订单的本地唯一标识符
+		 */
 		uint32_t	_localid;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化订单信息结构体，将所有成员变量置零
+		 */
 		_OrderInfo()
 		{
 			memset(this, 0, sizeof(_OrderInfo));
 		}
 
 	} OrderInfo;
+
+	/**
+	 * @brief 订单映射类型定义
+	 * @details 定义订单ID到订单信息的映射关系，用于快速查找和维护订单
+	 */
 	typedef wt_hashmap<uint32_t, OrderInfo> Orders;
+
+	/**
+	 * @brief 订单管理的互斥锁
+	 * @details 用于保护对订单数据的并发访问，支持递归锁定
+	 */
 	StdRecurMutex	_mtx_ords;
+
+	/**
+	 * @brief 订单容器
+	 * @details 存储所有当前活跃的订单，以本地ID为键
+	 */
 	Orders			_orders;
 
 	//用户数据
+	/**
+	 * @brief 字符串映射类型定义
+	 * @details 定义键值对映射关系，用于存储用户自定义数据
+	 */
 	typedef wt_hashmap<std::string, std::string> StringHashMap;
+
+	/**
+	 * @brief 用户数据容器
+	 * @details 存储策略使用的自定义数据，支持持久化
+	 */
 	StringHashMap	_user_datas;
+
+	/**
+	 * @brief 用户数据修改标记
+	 * @details 标记用户数据是否被修改，用于决定是否需要持久化
+	 */
 	bool			_ud_modified;
 
+	/**
+	 * @brief 交易明细信息结构体
+	 * @details 存储交易明细的详细信息，包括价格、数量、时间、盈亏等
+	 */
 	typedef struct _DetailInfo
 	{
+		/**
+		 * @brief 交易价格
+		 * @details 成交价格
+		 */
 		double		_price;
+
+		/**
+		 * @brief 交易数量
+		 * @details 成交数量
+		 */
 		double		_volume;
+
+		/**
+		 * @brief 开仓时间
+		 * @details 开仓时间，整型表示的时间戳
+		 */
 		uint64_t	_opentime;
+
+		/**
+		 * @brief 开仓交易日期
+		 * @details 开仓的交易日期，格式YYYYMMDD
+		 */
 		uint32_t	_opentdate;
+
+		/**
+		 * @brief 最大浮盈
+		 * @details 持仓过程中的最大浮动盈利
+		 */
 		double		_max_profit;
+
+		/**
+		 * @brief 最大浮亏
+		 * @details 持仓过程中的最大浮动亏损
+		 */
 		double		_max_loss;
+
+		/**
+		 * @brief 实际盈亏
+		 * @details 平仓后的实际盈亏
+		 */
 		double		_profit;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化交易明细信息结构体，将所有成员变量置零
+		 */
 		_DetailInfo()
 		{
 			memset(this, 0, sizeof(_DetailInfo));
 		}
 	} DetailInfo;
 
+	/**
+	 * @brief 持仓项目结构体
+	 * @details 存储持仓的详细信息，包括方向、数量、可用数量、盈亏等
+	 */
 	typedef struct _PosItem
 	{
+		/**
+		 * @brief 持仓方向
+		 * @details true表示多头持仓，false表示空头持仓
+		 */
 		bool		_long;
+
+		/**
+		 * @brief 平仓盈亏
+		 * @details 已平仓部分的盈亏
+		 */
 		double		_closeprofit;
+
+		/**
+		 * @brief 浮动盈亏
+		 * @details 未平仓部分的浮动盈亏
+		 */
 		double		_dynprofit;
 
+		/**
+		 * @brief 前一日持仓量
+		 * @details 前一交易日结算后的持仓量
+		 */
 		double		_prevol;
+
+		/**
+		 * @brief 当日持仓量
+		 * @details 当前的持仓量，包括前一日结转和当日新增
+		 */
 		double		_newvol;
+
+		/**
+		 * @brief 前一日可用持仓量
+		 * @details 前一交易日结算后的可用持仓量
+		 */
 		double		_preavail;
+
+		/**
+		 * @brief 当日可用持仓量
+		 * @details 当前的可用持仓量，即可以用于平仓的数量
+		 */
 		double		_newavail;
 
+		/**
+		 * @brief 持仓明细列表
+		 * @details 存储持仓的各个分笔明细信息
+		 */
 		std::vector<DetailInfo> _details;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化持仓项目结构体，设置默认数值
+		 */
 		_PosItem()
 		{
 			_prevol = 0;
@@ -782,19 +1023,64 @@ private:
 			_dynprofit = 0;
 		}
 
+		/**
+		 * @brief 获取有效（可用）持仓量
+		 * @return 总的可用持仓量
+		 * @details 返回前一日和当日的所有可用持仓数量之和
+		 */
 		inline double valid() const { return _preavail + _newavail; }
+
+		/**
+		 * @brief 获取总持仓量
+		 * @return 总的持仓量
+		 * @details 返回前一日和当日的所有持仓数量之和
+		 */
 		inline double volume() const { return _prevol + _newvol; }
+
+		/**
+		 * @brief 获取冻结持仓量
+		 * @return 冻结的持仓量
+		 * @details 返回被冻结的持仓数量，即总持仓量减去可用持仓量
+		 */
 		inline double frozen() const { return volume() - valid(); }
 	} PosItem;
 
+	/**
+	 * @brief 合约持仓信息结构体
+	 * @details 存储单个合约的多空两个方向的完整持仓信息
+	 */
 	typedef struct _PosInfo
 	{
+		/**
+		 * @brief 多头持仓信息
+		 * @details 存储多头方向的持仓详细信息
+		 */
 		PosItem	_long;
+
+		/**
+		 * @brief 空头持仓信息
+		 * @details 存储空头方向的持仓详细信息
+		 */
 		PosItem	_short;
 
+		/**
+		 * @brief 获取平仓盈亏
+		 * @return 多空方向的平仓盈亏总和
+		 * @details 返回多头和空头的平仓盈亏之和
+		 */
 		inline double closeprofit() const{ return _long._closeprofit + _short._closeprofit; }
+		/**
+		 * @brief 获取浮动盈亏
+		 * @return 多空方向的浮动盈亏总和
+		 * @details 返回多头和空头的未平仓浮动盈亏之和
+		 */
 		inline double dynprofit() const { return _long._dynprofit + _short._dynprofit; }
 	} PosInfo;
+
+	/**
+	 * @brief 持仓映射类型定义
+	 * @details 定义合约代码到持仓信息的映射关系，用于快速查找和维护各合约的持仓
+	 */
 	typedef wt_hashmap<std::string, PosInfo> PositionMap;
 	PositionMap		_pos_map;
 
