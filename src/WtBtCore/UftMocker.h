@@ -1082,25 +1082,74 @@ private:
 	 * @details 定义合约代码到持仓信息的映射关系，用于快速查找和维护各合约的持仓
 	 */
 	typedef wt_hashmap<std::string, PosInfo> PositionMap;
+	/**
+	 * @brief 持仓映射容器
+	 * @details 存储所有合约的持仓信息，以标准合约代码为键
+	 */
 	PositionMap		_pos_map;
 
+	/**
+	 * @brief 交易日志流
+	 * @details 存储交易详细信息的日志流，用于记录每笔交易
+	 */
 	std::stringstream	_trade_logs;
+
+	/**
+	 * @brief 平仓日志流
+	 * @details 存储平仓信息的日志流，用于记录每笔平仓的详细信息
+	 */
 	std::stringstream	_close_logs;
+
+	/**
+	 * @brief 资金日志流
+	 * @details 存储资金变化信息的日志流，用于记录资金的日常变化
+	 */
 	std::stringstream	_fund_logs;
+
+	/**
+	 * @brief 持仓日志流
+	 * @details 存储持仓变化信息的日志流，用于记录持仓的日常变化
+	 */
 	std::stringstream	_pos_logs;
 
+	/**
+	 * @brief 策略资金信息结构体
+	 * @details 存储策略资金的详细信息，包括总盈亏、浮动盈亏、手续费等
+	 */
 	typedef struct _StraFundInfo
 	{
+		/**
+		 * @brief 总盈亏
+		 * @details 策略的总平仓盈亏
+		 */
 		double	_total_profit;
+
+		/**
+		 * @brief 总浮动盈亏
+		 * @details 策略当前未平仓持仓的总浮动盈亏
+		 */
 		double	_total_dynprofit;
+
+		/**
+		 * @brief 总手续费
+		 * @details 策略交易产生的总手续费
+		 */
 		double	_total_fees;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化策略资金信息结构体，将所有成员变量置零
+		 */
 		_StraFundInfo()
 		{
 			memset(this, 0, sizeof(_StraFundInfo));
 		}
 	} StraFundInfo;
 
+	/**
+	 * @brief 策略资金信息
+	 * @details 存储当前策略的资金情况，包括盈亏和手续费
+	 */
 	StraFundInfo		_fund_info;
 
 protected:
