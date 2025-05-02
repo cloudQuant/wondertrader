@@ -2068,6 +2068,15 @@ void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_order_queues(stdCode);
 }
 
+/**
+ * @brief 高频策略订阅逆回成交数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @details 订阅指定合约的逆回成交数据，高频策略可以通过这些数据分析市场的成交情况
+ *          逆回成交数据包含市场上实际发生的成交记录，是高频交易中非常重要的信息
+ *          订阅后系统会实时收集这些数据
+ *          实现了WtPorter.h中声明的hft_sub_transaction函数
+ */
 void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2077,6 +2086,17 @@ void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_transactions(stdCode);
 }
 
+/**
+ * @brief 高频策略撤单函数
+ * @param cHandle 高频策略上下文句柄
+ * @param localid 要撤销的委托本地ID
+ * @return 撤单是否成功，true表示撤单请求成功发送，false表示撤单请求失败
+ * @details 尝试撤销指定本地ID的委托单
+ *          高频交易中需要快速响应市场变化，有时需要撤销已发出的委托
+ *          注意这里的撤单只表示撤单请求发送成功，不代表委托一定被成功撤销
+ *          实际撤单结果需要通过回调获知
+ *          实现了WtPorter.h中声明的hft_cancel函数
+ */
 bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2086,6 +2106,18 @@ bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
 	return ctx->stra_cancel(localid);
 }
 
+/**
+ * @brief 高频策略批量撤单函数
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码，要撤销的合约
+ * @param isBuy 是否为买单，true表示买单，false表示卖单
+ * @return 被撤销的委托的本地ID列表，以逗号分隔的字符串
+ * @details 批量撤销指定合约的进行中的所有委托
+ *          可以根据isBuy参数选择只撤销买单或卖单
+ *          函数返回被撤销的委托的本地ID列表，如果没有委托被撤销则返回空字符串
+ *          高频交易中有时需要快速撤销所有进行中的委托以响应市场变化
+ *          实现了WtPorter.h中声明的hft_cancel_all函数
+ */
 WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2107,6 +2139,21 @@ WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
 	return ret.c_str();
 }
 
+/**
+ * @brief 高频策略买入函数
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param price 买入价格
+ * @param qty 买入数量
+ * @param userTag 用户自定义标签，用于标识特定交易
+ * @param flag 下单标记，可以指定下单类型或特殊属性
+ * @return 返回下单的本地ID列表，以逗号分隔的字符串形式
+ * @details 在高频交易策略中发出买入委托
+ *          可以通过flag参数指定不同的下单类型，如限价单、市价单等
+ *          可以通过userTag参数为该笔交易添加自定义标记，便于后续识别和管理
+ *          返回值是下单的本地ID列表，可用于跟踪和取消该委托
+ *          实现了WtPorter.h中声明的hft_buy函数
+ */
 WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2128,6 +2175,21 @@ WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double q
 	return ret.c_str();
 }
 
+/**
+ * @brief 高频策略卖出函数
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param price 卖出价格
+ * @param qty 卖出数量
+ * @param userTag 用户自定义标签，用于标识特定交易
+ * @param flag 下单标记，可以指定下单类型或特殊属性
+ * @return 返回下单的本地ID列表，以逗号分隔的字符串形式
+ * @details 在高频交易策略中发出卖出委托
+ *          可以通过flag参数指定不同的下单类型，如限价单、市价单等
+ *          可以通过userTag参数为该笔交易添加自定义标记，便于后续识别和管理
+ *          返回值是下单的本地ID列表，可用于跟踪和取消该委托
+ *          实现了WtPorter.h中声明的hft_sell函数
+ */
 WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2149,6 +2211,16 @@ WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double 
 	return ret.c_str();
 }
 
+/**
+ * @brief 高频策略保存用户数据
+ * @param cHandle 高频策略上下文句柄
+ * @param key 数据键名
+ * @param val 数据值
+ * @details 将高频策略的用户数据按照键值对的形式保存
+ *          该函数可以用于保存策略参数、中间计算结果或其他需要在不同运行周期间保存的数据
+ *          保存的数据可以通过hft_load_userdata函数加载
+ *          实现了WtPorter.h中声明的hft_save_userdata函数
+ */
 void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2158,6 +2230,17 @@ void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 	ctx->stra_save_user_data(key, val);
 }
 
+/**
+ * @brief 高频策略加载用户数据
+ * @param cHandle 高频策略上下文句柄
+ * @param key 要加载的数据键名
+ * @param defVal 如果键不存在时的默认值
+ * @return 返回加载的用户数据值，如果键不存在则返回defVal
+ * @details 从高频策略存储中加载指定键名的用户数据
+ *          该函数是hft_save_userdata的配对函数，用于读取之前保存的数据
+ *          可以用于读取策略参数、中间计算结果或其他跨运行周期的数据
+ *          实现了WtPorter.h中声明的hft_load_userdata函数
+ */
 WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -2169,6 +2252,16 @@ WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defV
 #pragma endregion "HFT策略接口"
 
 #pragma region "扩展Parser接口"
+/**
+ * @brief 外部行情解析器推送行情数据
+ * @param id 解析器ID标识
+ * @param curTick 当前行情数据结构指针
+ * @param uProcFlag 处理标志，控制数据处理方式
+ * @details 用于外部行情解析器推送行情数据到交易框架内
+ *          外部解析器获取到市场行情数据后，通过该函数将数据推送给WonderTrader处理
+ *          该函数会调用getRunner().on_ext_parser_quote来处理外部行情数据
+ *          实现了WtPorter.h中声明的parser_push_quote函数
+ */
 void parser_push_quote(const char* id, WTSTickStruct* curTick, WtUInt32 uProcFlag)
 {
 	getRunner().on_ext_parser_quote(id, curTick, uProcFlag);
