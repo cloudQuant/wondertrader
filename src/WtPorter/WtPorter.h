@@ -683,42 +683,220 @@ extern "C"
 	//////////////////////////////////////////////////////////////////////////
 	//选股策略接口
 #pragma  region "SEL接口"
+	/**
+	 * @brief 创建选股策略上下文
+	 * @param name 策略名称
+	 * @param date 日期，格式YYYYMMDD
+	 * @param time 时间，格式HHMMSS
+	 * @param period 周期，如d1/w1/m1等
+	 * @param trdtpl 交易模板，默认为"CHINA"
+	 * @param session 交易时段，默认为"TRADING"
+	 * @param slippage 滑点设置，默认为0
+	 * @return 返回策略上下文句柄
+	 * @details 创建一个选股策略的上下文环境
+	 *          选股策略主要用于管理股票池，可以根据不同标准选择股票
+	 *          策略初始化时可以指定日期、时间和周期，对应不同的选股频率
+	 */
 	EXPORT_FLAG	CtxHandler	create_sel_context(const char* name, uint32_t date, uint32_t time, const char* period, const char* trdtpl = "CHINA", const char* session = "TRADING", int32_t slippage = 0);
 
+	/**
+	 * @brief 获取选股策略的持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param bOnlyValid 是否只计算有效仓位，不包括过渡仓位
+	 * @param openTag 开仓标签，如果不为空，则只取指定标签的持仓
+	 * @return 返回持仓量，多头仓位返回正数，空头仓位返回负数
+	 * @details 获取选股策略指定合约的持仓数量
+	 *          有效仓位是指已经确认开仓成功的持仓，不包括过渡仓位
+	 *          选股策略中通常只有多头仓位，私募股票池将应用于实际交易策略
+	 */
 	EXPORT_FLAG	double		sel_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag);
 
+	/**
+	 * @brief 设置选股策略的目标仓位
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 目标仓位数量，正数表示多头仓位，负数表示空头仓位
+	 * @param uesrTag 用户自定义标签
+	 * @details 设置选股策略指定合约的目标仓位
+	 *          框架会根据当前仓位和目标仓位的差异自动进行调整
+	 *          在选股策略中主要用于发送选股结果到股票池
+	 *          标签可用于标记不同选股来源或策略
+	 */
 	EXPORT_FLAG	void		sel_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* uesrTag);
 
+	/**
+	 * @brief 获取指定合约的最新价格
+	 * @param stdCode 标准合约代码
+	 * @return 返回合约的最新价格，如果没有行情数据则返回0
+	 * @details 获取选股策略中指定合约的最新市场价格
+	 *          在选股策略中，通常用于获取股票的当前价格信息
+	 *          可以在选股算法中用于计算价格相关指标或信号
+	 */
 	EXPORT_FLAG	double 		sel_get_price(const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略当前日期
+	 * @return 返回当前日期，格式YYYYMMDD
+	 * @details 获取选股策略的当前日期
+	 *          在回测模式下，此日期为回测时间线的当前日期
+	 *          在实盘运行时，该日期为实际交易日期
+	 *          可用于选股策略中的日期判断和周期计算
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_date();
 
+	/**
+	 * @brief 获取选股策略当前时间
+	 * @return 返回当前时间，格式HHMMSS
+	 * @details 获取选股策略的当前时间
+	 *          在回测模式下，此时间为回测时间线的当前时间
+	 *          在实盘运行时，该时间为实际系统时间
+	 *          可用于选股策略中的时间判断和执行时间控制
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_time();
 
+	/**
+	 * @brief 获取合约的K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期，如m1/m5/d1等
+	 * @param barCnt 请求的K线数量
+	 * @param cb 获取K线数据的回调函数
+	 * @return 返回实际获取到的K线数量
+	 * @details 获取选股策略中指定合约的历史K线数据
+	 *          数据通过回调函数返回，每一条K线包含开高低收量等信息
+	 *          在选股策略中经常用于获取历史数据进行技术指标计算
+	 */
 	EXPORT_FLAG	WtUInt32	sel_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, FuncGetBarsCallback cb);
 
+	/**
+	 * @brief 获取合约的tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的tick数量
+	 * @param cb 获取tick数据的回调函数
+	 * @return 返回实际获取到的tick数量
+	 * @details 获取选股策略中指定合约的历史tick数据
+	 *          tick数据包含成交价、买卖价格、买卖量等市场微观信息
+	 *          选股策略中很少使用tick数据，因为选股通常在更长的周期进行
+	 */
 	EXPORT_FLAG	WtUInt32	sel_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb);
 
+	/**
+	 * @brief 获取选股策略的所有持仓信息
+	 * @param cHandle 策略上下文句柄
+	 * @param cb 持仓信息回调函数
+	 * @details 获取选股策略中所有合约的持仓信息
+	 *          每个持仓都通过回调函数返回，包含合约代码、持仓数量、持仓方向等信息
+	 *          可用于获取当前选股策略的所有股票池成分，进行批量操作或统计分析
+	 */
 	EXPORT_FLAG	void		sel_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb);
 
+	/**
+	 * @brief 写入选股策略日志
+	 * @param cHandle 策略上下文句柄
+	 * @param level 日志级别，数字越大级别越高
+	 * @param message 日志内容
+	 * @details 在选股策略中写入日志信息
+	 *          框架会自动将日志写入到日志文件中，方便调试和跟踪策略运行
+	 *          可用于记录选股策略的主要决策过程、错误信息或运行状态
+	 */
 	EXPORT_FLAG	void		sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message);
 
+	/**
+	 * @brief 保存选股策略用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param val 数据值（字符串格式）
+	 * @details 将选股策略中的自定义数据保存到存储中
+	 *          数据以键值对的形式存储，可以在下次运行时通过sel_load_userdata函数加载
+	 *          常用于保存选股策略的中间结果、算法参数或运行状态等信息
+	 */
 	EXPORT_FLAG	void		sel_save_userdata(CtxHandler cHandle, const char* key, const char* val);
 
+	/**
+	 * @brief 加载选股策略的用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param defVal 默认值，当键不存在时返回此值
+	 * @return 返回加载的数据字符串，如果键不存在则返回默认值
+	 * @details 从存储中加载选股策略的自定义数据
+	 *          与sel_save_userdata函数配合使用，用于恢复策略运行状态
+	 *          常用于在策略启动时加载先前保存的选股结果、算法参数或状态信息
+	 */
 	EXPORT_FLAG	WtString	sel_load_userdata(CtxHandler cHandle, const char* key, const char* defVal);
 
+	/**
+	 * @brief 在选股策略中订阅合约的tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 订阅指定合约的tick行情数据
+	 *          订阅后，每当新的tick数据到达时，策略的on_tick回调函数将被触发
+	 *          虽然选股策略通常在日线级别工作，但有时也需要实时行情数据进行特殊策略判断
+	 */
 	EXPORT_FLAG	void		sel_sub_ticks(CtxHandler cHandle, const char* stdCode);
 
 	//By Wesley @ 2023.05.17
 	//扩展SEL的接口，主要是和CTA接口做一个同步
+	/**
+	 * @brief 获取选股策略中指定合约的持仓盈亏
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回持仓的浮动盈亏，正数表示盈利，负数表示亏损
+	 * @details 获取选股策略中指定合约当前的浮动盈亏
+	 *          盈亏基于当前市场价格和开仓均价计算
+	 *          该函数是为了与CTA接口保持一致而扩展的SEL接口
+	 * @author Wesley
+	 * @date 2023.05.17
+	 */
 	EXPORT_FLAG	double		sel_get_position_profit(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略中指定合约的开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签，用于区分不同的开仓来源
+	 * @return 返回开仓时间，格式为时间戳
+	 * @details 获取选股策略中指定合约和开仓标签的开仓时间
+	 *          这个时间可以用于计算持仓时间或判断仓位的年龄
+	 *          在选股策略中可用于实现基于持仓时间的选股轮动策略
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取选股策略中指定合约的开仓成本
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签，用于区分不同的开仓来源
+	 * @return 返回开仓成本，包含开仓价格和手续费
+	 * @details 获取选股策略中指定合约和开仓标签的开仓成本
+	 *          这个成本可以用于交易节奏的控制或计算策略的收益率
+	 *          在选股策略中可以帮助比较不同标的股票购买成本
+	 */
 	EXPORT_FLAG	double		sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取选股策略中指定合约的盈亏细节
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签，用于区分不同的开仓来源
+	 * @param flag 盈亏标记，0-浮动盈亏，1-平仓盈亏
+	 * @return 返回策略盈亏值，正数表示盈利，负数表示亏损
+	 * @details 获取选股策略中指定合约和开仓标签的盈亏细节
+	 *          可以获取浮动盈亏或平仓盈亏，取决于参数flag
+	 *          在选股策略中可用于记录和跟踪各个股票的交易效果
+	 */
 	EXPORT_FLAG	double		sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag);
 
+	/**
+	 * @brief 获取选股策略中指定合约的持仓均价
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回指定合约的持仓均价，如果没有持仓则返回0
+	 * @details 获取选股策略中指定合约的持仓均价
+	 *          对于多次开仓的情况，返回的是加权平均价
+	 *          在选股策略中可用于计算浮动盈亏或分析交易成本
+	 */
 	EXPORT_FLAG	double		sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
 	EXPORT_FLAG	double 		sel_get_day_price(const char* stdCode, int flag);
