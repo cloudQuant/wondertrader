@@ -1824,6 +1824,18 @@ WtUInt32 hft_get_bars(CtxHandler cHandle, const char* stdCode, const char* perio
 	}
 }
 
+/**
+ * @brief 获取高频策略Tick数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param tickCnt 请求的tick数量
+ * @param cb Tick数据回调函数
+ * @return 返回实际获取的tick数量
+ * @details 获取高频策略指定合约的Tick数据
+ *          数据通过回调函数cb返回，包含最新的市场行情数据
+ *          如果没有数据或发生错误，则返回0
+ *          实现了WtPorter.h中声明的hft_get_ticks函数
+ */
 WtUInt32 hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1853,6 +1865,19 @@ WtUInt32 hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
 	}
 }
 
+/**
+ * @brief 获取高频策略委托队列数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param itemCnt 请求的委托队列数量
+ * @param cb 委托队列数据回调函数
+ * @return 返回实际获取的委托队列数量
+ * @details 获取高频策略指定合约的委托队列数据
+ *          委托队列数据包含市场上的委托情况，运行于非连续交易的市场
+ *          数据通过回调函数cb返回
+ *          如果没有数据或发生错误，则返回0
+ *          实现了WtPorter.h中声明的hft_get_ordque函数
+ */
 WtUInt32 hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetOrdQueCallback cb)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1879,6 +1904,19 @@ WtUInt32 hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCn
 	}
 }
 
+/**
+ * @brief 获取高频策略委托明细数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param itemCnt 请求的委托明细数量
+ * @param cb 委托明细数据回调函数
+ * @return 返回实际获取的委托明细数量
+ * @details 获取高频策略指定合约的委托明细数据
+ *          委托明细数据包含市场上的委托详情，比委托队列数据更详细
+ *          数据通过回调函数cb返回
+ *          如果没有数据或发生错误，则返回0
+ *          实现了WtPorter.h中声明的hft_get_orddtl函数
+ */
 WtUInt32 hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetOrdDtlCallback cb)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1905,6 +1943,19 @@ WtUInt32 hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCn
 	}
 }
 
+/**
+ * @brief 获取高频策略逆回成交数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @param itemCnt 请求的成交数量
+ * @param cb 成交数据回调函数
+ * @return 返回实际获取的成交数量
+ * @details 获取高频策略指定合约的逆回成交数据
+ *          逆回成交数据包含市场上的成交详情，是高频交易的重要信息
+ *          数据通过回调函数cb返回
+ *          如果没有数据或发生错误，则返回0
+ *          实现了WtPorter.h中声明的hft_get_trans函数
+ */
 WtUInt32 hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetTransCallback cb)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1931,6 +1982,15 @@ WtUInt32 hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt
 	}
 }
 
+/**
+ * @brief 高频策略日志输出函数
+ * @param cHandle 高频策略上下文句柄
+ * @param level 日志级别，可以是INFO、WARNING、ERROR等
+ * @param message 日志消息内容
+ * @details 将高频策略中需要记录的信息输出到系统日志中
+ *          根据指定的日志级别使用不同的输出方式
+ *          实现了WtPorter.h中声明的hft_log_text函数
+ */
 void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1956,6 +2016,14 @@ void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 	}
 }
 
+/**
+ * @brief 高频策略订阅Tick数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @details 订阅指定合约的Tick数据，高频策略需要Tick数据来分析短期市场流动性
+ *          订阅后，系统会实时收集并处理该合约的Tick数据
+ *          实现了WtPorter.h中声明的hft_sub_ticks函数
+ */
 void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1965,6 +2033,14 @@ void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_ticks(stdCode);
 }
 
+/**
+ * @brief 高频策略订阅委托明细数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @details 订阅指定合约的委托明细数据，高频策略需要这些数据来分析市场深度和流动性
+ *          委托明细数据包含市场上委托的详细情况，订阅后系统会实时收集这些数据
+ *          实现了WtPorter.h中声明的hft_sub_order_detail函数
+ */
 void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
@@ -1974,6 +2050,15 @@ void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_order_details(stdCode);
 }
 
+/**
+ * @brief 高频策略订阅委托队列数据
+ * @param cHandle 高频策略上下文句柄
+ * @param stdCode 合约代码
+ * @details 订阅指定合约的委托队列数据，高频策略可以通过这些数据分析市场深度
+ *          委托队列数据包含市场上委托排队的情况，相比委托明细数据更聚焦于队列结构
+ *          订阅后系统会实时收集这些数据
+ *          实现了WtPorter.h中声明的hft_sub_order_queue函数
+ */
 void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
 {
 	HftContextPtr ctx = getRunner().getHftContext(cHandle);
