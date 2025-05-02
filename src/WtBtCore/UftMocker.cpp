@@ -280,16 +280,31 @@ void UftMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 	//on_schedule(uDate, uTime);
 }
 
+/**
+ * @brief 处理交易日开始事件
+ * @param curTDate 当前交易日期，格式YYYYMMDD
+ * @details 实现IDataSink接口的方法，在每个交易日开始时被调用，触发策略的on_session_begin回调
+ */
 void UftMocker::handle_session_begin(uint32_t curTDate)
 {
 	on_session_begin(curTDate);
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @param curTDate 当前交易日期，格式YYYYMMDD
+ * @details 实现IDataSink接口的方法，在每个交易日结束时被调用，触发策略的on_session_end回调
+ */
 void UftMocker::handle_session_end(uint32_t curTDate)
 {
 	on_session_end(curTDate);
 }
 
+/**
+ * @brief 处理回放完成事件
+ * @details 实现IDataSink接口的方法，在历史数据回放完成时被调用
+ *          首先调用dump_outputs()输出回测结果，然后触发on_bactest_end()回调通知策略回测结束
+ */
 void UftMocker::handle_replay_done()
 {
 	dump_outputs();
@@ -297,12 +312,29 @@ void UftMocker::handle_replay_done()
 	this->on_bactest_end();
 }
 
+/**
+ * @brief 处理K线数据并调用策略的on_bar回调
+ * @param stdCode 标准合约代码
+ * @param period 周期标识符
+ * @param times 周期倍数
+ * @param newBar 新生成的K线数据
+ * @details 当收到新的K线数据时，将其传递给策略实例的on_bar回调函数处理
+ */
 void UftMocker::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (_strategy)
 		_strategy->on_bar(this, stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 处理Tick行情数据
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @details 这是回测模拟器的核心方法之一，负责处理新到的Tick数据，更新合约价格缓存，
+ *          计算动态收益，并根据配置决定是先处理订单还是先触发策略回调。
+ *          如果_match_this_tick为true，则先触发策略的on_tick回调，再处理订单；
+ *          否则先处理订单，再触发策略的on_tick回调。
+ */
 void UftMocker::on_tick(const char* stdCode, WTSTickData* newTick)
 {
 	_price_map[stdCode] = newTick->price();
@@ -370,6 +402,13 @@ void UftMocker::on_tick(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 处理Tick数据更新并触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newTick 新的Tick数据
+ * @details 当收到新的Tick数据时，首先检查该合约是否在订阅列表中，
+ *          如果在订阅列表中，则调用策略的on_tick回调函数处理该Tick数据
+ */
 void UftMocker::on_tick_updated(const char* stdCode, WTSTickData* newTick)
 {
 	auto it = _tick_subs.find(stdCode);
@@ -380,50 +419,101 @@ void UftMocker::on_tick_updated(const char* stdCode, WTSTickData* newTick)
 		_strategy->on_tick(this, stdCode, newTick);
 }
 
+/**
+ * @brief 处理委托队列数据
+ * @param stdCode 标准合约代码
+ * @param newOrdQue 新的委托队列数据
+ * @details 当收到新的委托队列数据时，调用on_ordque_updated方法处理
+ */
 void UftMocker::on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	on_ordque_updated(stdCode, newOrdQue);
 }
 
+/**
+ * @brief 处理委托队列数据更新并触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newOrdQue 新的委托队列数据
+ * @details 当收到新的委托队列数据时，调用策略的on_order_queue回调函数处理
+ */
 void UftMocker::on_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	if (_strategy)
 		_strategy->on_order_queue(this, stdCode, newOrdQue);
 }
 
+/**
+ * @brief 处理委托明细数据
+ * @param stdCode 标准合约代码
+ * @param newOrdDtl 新的委托明细数据
+ * @details 当收到新的委托明细数据时，调用on_orddtl_updated方法处理
+ */
 void UftMocker::on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	on_orddtl_updated(stdCode, newOrdDtl);
 }
 
+/**
+ * @brief 处理委托明细数据更新并触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newOrdDtl 新的委托明细数据
+ * @details 当收到新的委托明细数据时，调用策略的on_order_detail回调函数处理
+ */
 void UftMocker::on_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	if (_strategy)
 		_strategy->on_order_detail(this, stdCode, newOrdDtl);
 }
 
+/**
+ * @brief 处理逐笔成交数据
+ * @param stdCode 标准合约代码
+ * @param newTrans 新的逐笔成交数据
+ * @details 当收到新的逐笔成交数据时，调用on_trans_updated方法处理
+ */
 void UftMocker::on_transaction(const char* stdCode, WTSTransData* newTrans)
 {
 	on_trans_updated(stdCode, newTrans);
 }
 
+/**
+ * @brief 处理逐笔成交数据更新并触发策略回调
+ * @param stdCode 标准合约代码
+ * @param newTrans 新的逐笔成交数据
+ * @details 当收到新的逐笔成交数据时，调用策略的on_transaction回调函数处理
+ */
 void UftMocker::on_trans_updated(const char* stdCode, WTSTransData* newTrans)
 {
 	if (_strategy)
 		_strategy->on_transaction(this, stdCode, newTrans);
 }
 
+/**
+ * @brief 获取策略上下文ID
+ * @return 返回策略上下文的唯一ID
+ * @details 实现IUftStraCtx接口的方法，用于获取策略上下文的唯一标识
+ */
 uint32_t UftMocker::id()
 {
 	return _context_id;
 }
 
+/**
+ * @brief 初始化策略
+ * @details 在回测开始时调用，触发策略的on_init回调函数，实现策略的初始化
+ */
 void UftMocker::on_init()
 {
 	if (_strategy)
 		_strategy->on_init(this);
 }
 
+/**
+ * @brief 处理交易日开始事件
+ * @param curTDate 当前交易日期，格式YYYYMMDD
+ * @details 在每个交易日开始时调用，首先处理持仓状态，将冻结持仓释放，
+ *          将新建持仓转为旧持仓，然后触发策略的on_session_begin回调
+ */
 void UftMocker::on_session_begin(uint32_t curTDate)
 {
 	//每个交易日开始，要把冻结持仓置零
@@ -445,6 +535,13 @@ void UftMocker::on_session_begin(uint32_t curTDate)
 	_strategy->on_session_begin(this, curTDate);
 }
 
+/**
+ * @brief 处理交易日结束事件
+ * @param curTDate 当前交易日期，格式YYYYMMDD
+ * @details 在每个交易日结束时调用，首先触发策略的on_session_end回调，
+ *          然后计算当日的盈亏情况，包括平仓盈亏和浮动盈亏，
+ *          并将持仓和资金信息记录到日志中
+ */
 void UftMocker::on_session_end(uint32_t curTDate)
 {
 	_strategy->on_session_end(this, curTDate);
