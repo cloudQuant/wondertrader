@@ -908,6 +908,19 @@ uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double q
 	return localid;
 }
 
+/**
+ * @brief 平多仓操作
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param isToday 是否平今仓，默认为false表示平昨仓
+ * @param flag 标记，默认为0
+ * @return 委托ID，如果委托失败返回0
+ * @details 实现IUftStraCtx接口的方法，用于执行平多仓操作
+ *          首先检查持仓量是否足够，然后根据平仓模式决定平仓方式
+ *          如果不区分平今和平昨，则优先平昨仓，不足部分再平今仓
+ *          如果区分平今和平昨，则根据isToday参数决定平仓类型
+ */
 uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
@@ -1081,6 +1094,16 @@ void UftMocker::on_channel_ready()
 		_strategy->on_channel_ready(this);
 }
 
+/**
+ * @brief 更新动态浮动盈亏
+ * @param stdCode 标准合约代码
+ * @param newTick 最新的Tick数据
+ * @details 根据最新的市场行情数据计算当前持仓的浮动盈亏
+ *          分别计算多头和空头持仓的盈亏情况
+ *          对于多头持仓，使用买一档来计算
+ *          对于空头持仓，使用卖一档来计算
+ *          并更新每笔明细交易的最大盈利和最大亏损
+ */
 void UftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 {
 	auto it = _pos_map.find(stdCode);
@@ -1142,6 +1165,15 @@ void UftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 处理委托单
+ * @param localid 本地委托单ID
+ * @return 如果委托处理完成返回true，否则返回false
+ * @details 模拟委托单操作的应答和成交过程
+ *          首先检查是否在错误率范围内，如果在错误率范围内则模拟撤单
+ *          否则获取最新的Tick数据，并判断委托是否可能成交
+ *          如果有成交条件，则生成相应的成交结果并更新委托状态
+ */
 bool UftMocker::procOrder(uint32_t localid)
 {
 	auto it = _orders.find(localid);
@@ -1234,6 +1266,16 @@ WTSCommodityInfo* UftMocker::stra_get_comminfo(const char* stdCode)
 	return _replayer->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取K线切片数据
+ * @param stdCode 标准合约代码
+ * @param period 周期字符串，如"m1"表示1分钟，"d1"表示日线
+ * @param count 请求的K线条数
+ * @return K线切片数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的K线数据
+ *          这里对周期进行解析，分离出基础周期和周期倍数
+ *          例如"m5"会被分解为基础周期"m"和倍数"5"
+ */
 WTSKlineSlice* UftMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
 	thread_local static char basePeriod[2] = { 0 };
@@ -1245,26 +1287,70 @@ WTSKlineSlice* UftMocker::stra_get_bars(const char* stdCode, const char* period,
 	return _replayer->get_kline_slice(stdCode, basePeriod, count, times);
 }
 
+/**
+ * @brief 获取Tick切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的Tick数量
+ * @return Tick切片数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的Tick市场行情数据
+ *          调用回放器的get_tick_slice方法获取Tick数据
+ *          Tick数据包含了价格、成交量、委托量等市场行情信息
+ */
 WTSTickSlice* UftMocker::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取委托队列切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的委托队列数量
+ * @return 委托队列切片数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的委托队列数据
+ *          调用回放器的get_order_queue_slice方法获取委托队列数据
+ *          委托队列数据包含了多空双边多档价格及其对应的量信息
+ */
 WTSOrdQueSlice* UftMocker::stra_get_order_queue(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_order_queue_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取委托详情切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的委托详情数量
+ * @return 委托详情切片数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的委托详情数据
+ *          调用回放器的get_order_detail_slice方法获取委托详情数据
+ *          委托详情包含了委托价格、委托量、委托方向等详细信息
+ */
 WTSOrdDtlSlice* UftMocker::stra_get_order_detail(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_order_detail_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取成交切片数据
+ * @param stdCode 标准合约代码
+ * @param count 请求的成交数量
+ * @return 成交切片数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的成交数据
+ *          调用回放器的get_transaction_slice方法获取成交数据
+ *          成交数据包含了成交价格、成交量、成交方向等信息
+ */
 WTSTransSlice* UftMocker::stra_get_transaction(const char* stdCode, uint32_t count)
 {
 	return _replayer->get_transaction_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取最新Tick数据
+ * @param stdCode 标准合约代码
+ * @return 最新Tick数据对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的最新市场行情数据
+ *          调用回放器的get_last_tick方法获取最新Tick数据
+ *          返回的对象包含当前价格、多空档位、成交量等实时市场信息
+ */
 WTSTickData* UftMocker::stra_get_last_tick(const char* stdCode)
 {
 	return _replayer->get_last_tick(stdCode);
