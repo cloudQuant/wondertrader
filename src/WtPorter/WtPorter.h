@@ -899,78 +899,400 @@ extern "C"
 	 */
 	EXPORT_FLAG	double		sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取合约的日线价格数据
+	 * @param stdCode 标准合约代码
+	 * @param flag 价格标记，0-开盘价，1-最高价，2-最低价，3-收盘价，4-最新成交价
+	 * @return 返回指定价格类型的数值，如果没有数据则返回0
+	 * @details 在选股策略中获取合约的日线级别价格数据
+	 *          可以根据不同的flag参数获取开盘价、最高价、最低价等
+	 *          在选股策略中经常用于计算日线指标或做日线价格策略
+	 */
 	EXPORT_FLAG	double 		sel_get_day_price(const char* stdCode, int flag);
 
+	/**
+	 * @brief 获取选股策略的资金数据
+	 * @param cHandle 策略上下文句柄
+	 * @param flag 资金数据标记，0-动态权益，1-静态权益，2-可用资金
+	 * @return 返回指定类型的资金数据
+	 * @details 获取选股策略中的资金相关数据
+	 *          动态权益包含浮动盈亏，静态权益不包含浮动盈亏
+	 *          可用资金表示策略账户中当前可使用的资金量
+	 *          在选股策略中可用于估算当前可购买股票的数量或监控资金情况
+	 */
 	EXPORT_FLAG	double		sel_get_fund_data(CtxHandler cHandle, int flag);
 
+	/**
+	 * @brief 获取选股策略当前交易日期
+	 * @return 返回当前交易日期，格式YYYYMMDD
+	 * @details 获取系统当前交易日期，这个日期与sel_get_date的区别是：
+	 *          tdate是交易日期，表示市场当前交易日，非交易日不变
+	 *          date是自然日期，表示实际日期，每天都会变化
+	 *          在选股策略中通常用于判断当前是否是交易日或运行日线周期策略
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_tdate();
 
+	/**
+	 * @brief 获取选股策略中指定合约的首次开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回首次开仓时间，格式为时间戳，如果没有持仓则返回0
+	 * @details 获取选股策略中指定合约的最早一笔开仓时间
+	 *          可用于判断策略持仓时间，或实现基于持仓时间的选股逐出策略
+	 *          在选股轮动策略中，可以用来实现基于持仓时间的股票替换机制
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_first_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略中指定合约的最近开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近开仓时间，格式为时间戳，如果没有持仓则返回0
+	 * @details 获取选股策略中指定合约的最近一笔开仓时间
+	 *          与sel_get_first_entertime不同，当有多笔开仓时，返回最近的一次开仓时间
+	 *          可用于识别近期调仓操作，或在平滑加仓策略中控制加仓频率
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_last_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略中指定合约的最近平仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近平仓时间，格式为时间戳，如果没有平仓记录则返回0
+	 * @details 获取选股策略中指定合约的最近一笔平仓时间
+	 *          对于已平仓的合约，返回最后一次平仓的时间
+	 *          可用于选股策略中实现交易冷静期控制，避免频繁交易同一股票
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_last_exittime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略中指定合约的最近开仓价格
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近一笔开仓的价格，如果没有开仓记录则返回0
+	 * @details 获取选股策略中指定合约的最近一笔开仓的价格
+	 *          当有多笔开仓记录时，返回最近一次的开仓价格
+	 *          可用于选股策略中比较当前价格与开仓价格的差异，评估投资效果
+	 */
 	EXPORT_FLAG	double		sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取选股策略中指定合约的最近开仓标签
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近一笔开仓的标签字符串，如果没有开仓记录则返回空字符串
+	 * @details 获取选股策略中指定合约的最近一笔开仓的标签
+	 *          标签通常是在开仓时传入的自定义字符串，用于标记交易来源或类型
+	 *          在选股策略中可用于识别不同类型的股票或交易来源，进行分类统计或分析
+	 */
 	EXPORT_FLAG	WtString	sel_get_last_entertag(CtxHandler cHandle, const char* stdCode);
 #pragma endregion "SEL接口"
 
 	//////////////////////////////////////////////////////////////////////////
 	//HFT策略接口
 #pragma  region "HFT接口"
+	/**
+	 * @brief 创建HFT（高频交易）策略上下文
+	 * @param name 策略名称
+	 * @param trader 交易通道名称
+	 * @param agent 是否启用代理模式
+	 * @param slippage 滑点设置，默认为0
+	 * @return 返回策略上下文句柄
+	 * @details 创建一个高频交易策略的上下文环境
+	 *          高频交易策略通常对市场微观结构敏感，需要更高的实时性
+	 *          可以指定交易通道，并配置是否需要代理模式和滑点
+	 */
 	EXPORT_FLAG	CtxHandler	create_hft_context(const char* name, const char* trader, bool agent, int32_t slippage = 0);
 
+	/**
+	 * @brief 获取高频策略中指定合约的持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param bOnlyValid 是否只计算有效仓位，不包括过渡仓位
+	 * @return 返回持仓量，正数表示多头仓位，负数表示空头仓位
+	 * @details 获取高频策略中指定合约的当前持仓数量
+	 *          有效仓位是指已经确认开仓成功的持仓，不包括过渡仓位
+	 *          在高频策略中，由于订单可能存在延迟，需要特别注意识别过渡仓位和有效仓位
+	 */
 	EXPORT_FLAG	double		hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid);
 
+	/**
+	 * @brief 获取高频策略中指定合约的持仓盈亏
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回指定合约的浮动盈亏，正数表示盈利，负数表示亏损
+	 * @details 获取高频策略中指定合约的当前浮动盈亏
+	 *          盈亏是根据当前市场价格和开仓均价计算得出
+	 *          在高频策略中，此函数可用于实时跟踪交易效果和风险控制
+	 */
 	EXPORT_FLAG	double		hft_get_position_profit(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取高频策略中指定合约的持仓均价
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回指定合约的持仓均价，如果没有持仓则返回0
+	 * @details 获取高频策略中指定合约的持仓均价
+	 *          对于多笔开仓的情况，均价是根据交易数量加权平均计算的
+	 *          在高频策略中，持仓均价是计算盈亏和交易效果的重要依据
+	 */
 	EXPORT_FLAG	double		hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取高频策略中指定合约的未完成订单数量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回未完成的订单数量，正数表示多头未完成量，负数表示空头未完成量
+	 * @details 获取高频策略中指定合约当前未完成的订单数量
+	 *          这个数量包括未成交、部分成交的订单中剩余的待成交量
+	 *          在高频策略中，跟踪未完成订单对于计算实际持仓和控制订单风险非常重要
+	 */
 	EXPORT_FLAG	double		hft_get_undone(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的最新价格
+	 * @param stdCode 标准合约代码
+	 * @return 返回合约的最新价格，如果没有行情数据则返回0
+	 * @details 获取高频策略中指定合约的当前市场最新价格
+	 *          在高频策略中，这个价格经常用于实时分析或计算指标
+	 *          高频策略需要特别注意对这个价格的延迟性和准确性评估
+	 */
 	EXPORT_FLAG	double 		hft_get_price(const char* stdCode);
 
+	/**
+	 * @brief 获取高频策略当前日期
+	 * @return 返回当前日期，格式YYYYMMDD
+	 * @details 获取高频策略的当前日期
+	 *          在回测模式下，此日期为回测时间线的当前日期
+	 *          在实盘交易中，返回系统实际日期
+	 *          高频策略可用该日期进行日内策略切换或交易时段控制
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_date();
 
+	/**
+	 * @brief 获取高频策略当前时间
+	 * @return 返回当前时间，格式HHMMSS
+	 * @details 获取高频策略的当前时间
+	 *          在回测模式下，此时间为回测时间线的当前时间
+	 *          在实盘交易中，返回系统实际时间
+	 *          高频策略需要精确把握时间，进行交易时段判断和定时交易
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_time();
 
+	/**
+	 * @brief 获取高频策略当前秒数
+	 * @return 返回当前时间的秒数计数，从0点开始的秒数
+	 * @details 获取高频策略的当前秒级时间
+	 *          返回从当天零点开始的秒数，范围为0-86399（86400-1）
+	 *          在高频策略中，秒级时间对于逻辑判断和精确交易非常重要
+	 *          可用于实现微秒级策略或测量订单延迟
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_secs();
 
+	/**
+	 * @brief 获取高频策略中合约的K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期，如m1/m5/d1等
+	 * @param barCnt 请求的K线数量
+	 * @param cb 获取K线数据的回调函数
+	 * @return 返回实际获取到的K线数量
+	 * @details 获取高频策略中指定合约的历史K线数据
+	 *          数据通过回调函数返回，每一条K线包含开高低收量等信息
+	 *          高频策略中可用于获取分钟级别的K线进行技术指标分析
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, FuncGetBarsCallback cb);
 
+	/**
+	 * @brief 获取高频策略中合约的tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的tick数量
+	 * @param cb 获取tick数据的回调函数
+	 * @return 返回实际获取到的tick数量
+	 * @details 获取高频策略中指定合约的历史tick数据
+	 *          tick数据是市场的原子级信息，包含成交价、买卖相关信息
+	 *          高频策略通常依赖tick数据进行微观的市场分析和交易决策
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb);
 
+	/**
+	 * @brief 获取高频策略中合约的委托队列数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的数据条数
+	 * @param cb 获取委托队列数据的回调函数
+	 * @return 返回实际获取到的委托队列数据数量
+	 * @details 获取高频策略中指定合约的历史委托队列数据
+	 *          委托队列数据是行情的一种详细数据，反映当前市场委托价格排列情况
+	 *          高频策略可以使用该数据分析市场深度和买卖力量对比，进行更精准的交易决策
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetOrdQueCallback cb);
 
+	/**
+	 * @brief 获取高频策略中合约的委托明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的数据条数
+	 * @param cb 获取委托明细数据的回调函数
+	 * @return 返回实际获取到的委托明细数据数量
+	 * @details 获取高频策略中指定合约的历史委托明细数据
+	 *          委托明细数据包含具体委托时间、价格、方向等详细信息
+	 *          高频策略可以分析该数据以识别市场中的大单委托和交易意图
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetOrdDtlCallback cb);
 
+	/**
+	 * @brief 获取高频策略中合约的逐笔成交数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的数据条数
+	 * @param cb 获取逐笔成交数据的回调函数
+	 * @return 返回实际获取到的逐笔成交数据数量
+	 * @details 获取高频策略中指定合约的历史逐笔成交数据
+	 *          逐笔成交数据包含每笔具体的成交价格、数量、时间等信息
+	 *          高频策略可以分析这些数据来检测市场中的流动性和大单交易模式
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTransCallback cb);
 
+	/**
+	 * @brief 在高频策略中输出日志
+	 * @param cHandle 策略上下文句柄
+	 * @param level 日志级别，数字越大级别越高
+	 * @param message 日志内容
+	 * @details 在高频策略中输出指定级别的日志信息
+	 *          日志级别决定了消息的重要性，框架会根据级别决定日志的处理方式
+	 *          高频策略中的日志记录对于跟踪实时交易状态和调试问题非常重要
+	 */
 	EXPORT_FLAG	void		hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message);
 
+	/**
+	 * @brief 在高频策略中订阅合约的tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 在高频策略中订阅指定合约的tick数据
+	 *          订阅后，每当新的tick数据到达时，策略的on_tick回调函数将被触发
+	 *          这是高频策略中最基本的数据订阅方式，用于获取实时市场数据
+	 */
 	EXPORT_FLAG	void		hft_sub_ticks(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 在高频策略中订阅合约的委托队列数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 在高频策略中订阅指定合约的委托队列数据
+	 *          订阅后，每当委托队列变化时，策略的on_ordque_data回调函数将被触发
+	 *          委托队列数据可用于分析市场深度和买卖双方的力量对比
+	 */
 	EXPORT_FLAG	void		hft_sub_order_queue(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 在高频策略中订阅合约的委托明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 在高频策略中订阅指定合约的委托明细数据
+	 *          订阅后，每当有新的委托明细数据时，策略的on_orddtl_data回调函数将被触发
+	 *          委托明细数据包含具体委托信息，可用于分析大单行为和市场微观结构
+	 */
 	EXPORT_FLAG	void		hft_sub_order_detail(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 在高频策略中订阅合约的逐笔成交数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 在高频策略中订阅指定合约的逐笔成交数据
+	 *          订阅后，每当有新的成交发生时，策略的on_trans_data回调函数将被触发
+	 *          逐笔成交数据包含每一笔成交的具体信息，可用于监控市场流动性和交易模式
+	 */
 	EXPORT_FLAG	void		hft_sub_transaction(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 在高频策略中撤销订单
+	 * @param cHandle 策略上下文句柄
+	 * @param localid 订单的本地ID
+	 * @return 撤单请求发送成功返回true，失败返回false
+	 * @details 在高频策略中通过本地订单ID撤销订单
+	 *          本地ID是订单发送时由系统生成并返回的唯一标识
+	 *          高频策略中及时的撤单对于管理交易风险非常重要
+	 */
 	EXPORT_FLAG	bool		hft_cancel(CtxHandler cHandle, WtUInt32 localid);
 
+	/**
+	 * @brief 在高频策略中批量撤销订单
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码，为空表示撤销所有合约的订单
+	 * @param isBuy 是否只撤销买单，true表示只撤销买单，false表示只撤销卖单
+	 * @return 返回撤销成功的订单ID列表，以逗号分隔
+	 * @details 在高频策略中批量撤销符合条件的所有未完成订单
+	 *          可以通过合约代码和订单方向进行过滤
+	 *          在高频策略中常用于稳定低延迟行情时期或策略退出时清理所有未完成订单
+	 */
 	EXPORT_FLAG	WtString	hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy);
 
+	/**
+	 * @brief 在高频策略中发送买入委托
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param price 买入价格，如果是市价单则为0
+	 * @param qty 买入数量
+	 * @param userTag 用户自定义标签，用于识别订单来源
+	 * @param flag 委托标志，0-限价单，1-市价单，其他可能是特殊订单类型
+	 * @return 返回订单的本地ID，如果失败则返回空字符串
+	 * @details 在高频策略中发送买入委托单
+	 *          订单会立即发送到交易所，并返回本地生成的订单ID
+	 *          高频策略需要保存该ID以进行后续的订单状态跟踪或撤单操作
+	 */
 	EXPORT_FLAG	WtString	hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 
+	/**
+	 * @brief 在高频策略中发送卖出委托
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param price 卖出价格，如果是市价单则为0
+	 * @param qty 卖出数量
+	 * @param userTag 用户自定义标签，用于识别订单来源
+	 * @param flag 委托标志，0-限价单，1-市价单，其他可能是特殊订单类型
+	 * @return 返回订单的本地ID，如果失败则返回空字符串
+	 * @details 在高频策略中发送卖出委托单
+	 *          订单会立即发送到交易所，并返回本地生成的订单ID
+	 *          高频策略需要保存该ID以进行后续的订单状态跟踪或撤单操作
+	 */
 	EXPORT_FLAG	WtString	hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 
+	/**
+	 * @brief 保存高频策略的用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param val 数据值（字符串格式）
+	 * @details 将高频策略中的自定义数据保存到存储中
+	 *          数据以键值对的形式存储，可以在下次运行时通过hft_load_userdata函数加载
+	 *          在高频策略中可以用于保存交易状态、策略参数或其他需要持久化的数据
+	 */
 	EXPORT_FLAG	void		hft_save_userdata(CtxHandler cHandle, const char* key, const char* val);
 
+	/**
+	 * @brief 加载高频策略的用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param defVal 默认值，当键不存在时返回此值
+	 * @return 返回加载的数据字符串，如果键不存在则返回默认值
+	 * @details 从存储中加载高频策略的自定义数据
+	 *          与hft_save_userdata函数配合使用，用于恢复之前保存的数据
+	 *          在高频策略中可用于加载策略状态、参数设置或更复杂的数据结构（以JSON字符串形式）
+	 */
 	EXPORT_FLAG	WtString	hft_load_userdata(CtxHandler cHandle, const char* key, const char* defVal);
 #pragma endregion "HFT接口"
 
 #pragma region "扩展Parser接口"
+	/**
+	 * @brief 将行情数据推送到解析器
+	 * @param id 解析器ID
+	 * @param curTick 当前Tick数据结构
+	 * @param uProcFlag 处理标志，用于控制数据处理方式
+	 * @details 将行情数据推送到指定的解析器中进行处理
+	 *          这是扩展Parser接口的一部分，用于外部数据源将数据推送到框架中
+	 *          解析器会根据收到的数据进行处理并分发给相应的策略
+	 */
 	EXPORT_FLAG	void		parser_push_quote(const char* id, WTSTickStruct* curTick, WtUInt32 uProcFlag);
 #pragma endregion "扩展Parser接口"
 
