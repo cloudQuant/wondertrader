@@ -535,6 +535,17 @@ void WtBtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, En
 	}
 }
 
+/**
+ * @brief 策略周期性计算完成回调函数
+ * @details 根据引擎类型调用相应的计算完成回调函数
+ *          当策略周期性计算执行完成后触发此回调
+ *          与普通计算回调不同，此回调在所有计算都完成后触发
+ * 
+ * @param id 策略ID
+ * @param curDate 当前日期，格式YYYYMMDD
+ * @param curTime 当前时间，格式HHMMSS
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_calc_done(uint32_t id, uint32_t curDate, uint32_t curTime, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -546,6 +557,15 @@ void WtBtRunner::ctx_on_calc_done(uint32_t id, uint32_t curDate, uint32_t curTim
 	}
 }
 
+/**
+ * @brief 策略初始化回调函数
+ * @details 根据引擎类型调用相应的策略初始化回调函数
+ *          当策略引擎初始化完成时触发此回调
+ *          一般在回测开始前调用，用于策略初始化
+ * 
+ * @param id 策略ID
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_init(uint32_t id, EngineType eType/*= ET_CTA*/)
 {
 	switch (eType)
@@ -558,6 +578,19 @@ void WtBtRunner::ctx_on_init(uint32_t id, EngineType eType/*= ET_CTA*/)
 	}
 }
 
+/**
+ * @brief 条件触发回调函数
+ * @details 当指定条件被触发时调用相应的回调函数
+ *          目前只在CTA引擎中支持条件触发
+ *          条件触发通常用于价格到达特定条件时的信号通知
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param target 目标价格
+ * @param price 触发时的实际价格
+ * @param usertag 用户自定义标签
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double target, double price, const char* usertag, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -568,6 +601,17 @@ void WtBtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double 
 	}
 }
 
+/**
+ * @brief 交易时段事件回调函数
+ * @details 根据引擎类型调用相应的交易时段事件回调函数
+ *          当交易时段开始或结束时触发此回调
+ *          用于通知策略交易日切换或新交易日开始
+ * 
+ * @param id 策略ID
+ * @param curTDate 当前交易日，格式YYYYMMDD
+ * @param isBegin 是否是交易时段开始，true为开始，false为结束
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin /* = true */, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -580,6 +624,17 @@ void WtBtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBeg
 	}
 }
 
+/**
+ * @brief 实时行情tick数据回调函数
+ * @details 根据引擎类型调用相应的tick数据回调函数
+ *          当收到新的实时行情数据时触发此回调
+ *          tick数据包含当前合约的最新价格、成交量等信息
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param newTick 新的tick数据
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newTick, EngineType eType/*= ET_CTA*/)
 {
 	switch (eType)
@@ -592,48 +647,139 @@ void WtBtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newT
 	}
 }
 
+/**
+ * @brief 高频策略委托队列数据回调函数
+ * @details 当接收到新的委托队列数据时触发此回调
+ *          委托队列数据包含了各个价位的委托数量信息
+ *          仅在HFT高频模式下有效
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param newOrdQue 新的委托队列数据
+ */
 void WtBtRunner::hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	if (_cb_hft_ordque)
 		_cb_hft_ordque(id, stdCode, &newOrdQue->getOrdQueStruct());
 }
 
+/**
+ * @brief 高频策略委托明细数据回调函数
+ * @details 当接收到新的委托明细数据时触发此回调
+ *          委托明细数据包含了逻序委托的详细信息
+ *          仅在HFT高频模式下有效
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param newOrdDtl 新的委托明细数据
+ */
 void WtBtRunner::hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	if (_cb_hft_orddtl)
 		_cb_hft_orddtl(id, stdCode, &newOrdDtl->getOrdDtlStruct());
 }
 
+/**
+ * @brief 高频策略逆序成交明细数据回调函数
+ * @details 当接收到新的逆序成交明细数据时触发此回调
+ *          逆序成交明细数据包含了逻序成交的详细信息
+ *          仅在HFT高频模式下有效
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param newTrans 新的逆序成交明细数据
+ */
 void WtBtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransData* newTrans)
 {
 	if (_cb_hft_trans)
 		_cb_hft_trans(id, stdCode, &newTrans->getTransStruct());
 }
 
+/**
+ * @brief 高频策略交易通道就绪回调函数
+ * @details 当交易通道就绪时触发此回调
+ *          交易通道就绪意味着可以进行交易操作
+ *          仅在HFT高频模式下有效
+ * 
+ * @param cHandle 交易通道句柄
+ * @param trader 交易器ID
+ */
 void WtBtRunner::hft_on_channel_ready(uint32_t cHandle, const char* trader)
 {
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, 1000/*CHNL_EVENT_READY*/);
 }
 
+/**
+ * @brief 高频策略委托宣告回调函数
+ * @details 当发布委托宣告后收到回报时触发此回调
+ *          主要用于通知委托下单是否成功发送到交易所
+ *          仅在HFT高频模式下有效
+ * 
+ * @param cHandle 交易通道句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 错误消息，如果有的话
+ * @param userTag 用户自定义标签
+ */
 void WtBtRunner::hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag)
 {
 	if (_cb_hft_entrust)
 		_cb_hft_entrust(cHandle, localid, stdCode, bSuccess, message, userTag);
 }
 
+/**
+ * @brief 高频策略委托回报回调函数
+ * @details 当收到委托状态变化回报时触发此回调
+ *          用于通知委托状态变化，如部分成交、全部成交或取消
+ *          仅在HFT高频模式下有效
+ * 
+ * @param cHandle 交易通道句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入方向
+ * @param totalQty 委托总数量
+ * @param leftQty 剩余数量
+ * @param price 委托价格
+ * @param isCanceled 是否已取消
+ * @param userTag 用户自定义标签
+ */
 void WtBtRunner::hft_on_order(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag)
 {
 	if (_cb_hft_ord)
 		_cb_hft_ord(cHandle, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
 
+/**
+ * @brief 高频策略成交回报回调函数
+ * @details 当收到成交回报时触发此回调
+ *          用于通知委托已成交的信息
+ *          仅在HFT高频模式下有效
+ * 
+ * @param cHandle 交易通道句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入方向
+ * @param vol 成交数量
+ * @param price 成交价格
+ * @param userTag 用户自定义标签
+ */
 void WtBtRunner::hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
 {
 	if (_cb_hft_trd)
 		_cb_hft_trd(cHandle, localid, stdCode, isBuy, vol, price, userTag);
 }
 
+/**
+ * @brief 初始化回测引擎
+ * @details 初始化日志模块并设置输出目录
+ *          在Windows平台上还会启用崩溃转储功能
+ * 
+ * @param logProfile 日志配置文件路径或内容
+ * @param isFile 是否为文件路径，如果为false则logProfile为内容
+ * @param outDir 输出目录，默认为"./outputs_bt"
+ */
 void WtBtRunner::init(const char* logProfile /* = "" */, bool isFile /* = true */, const char* outDir/* = "./outputs_bt"*/)
 {
 #ifdef _MSC_VER
@@ -646,6 +792,15 @@ void WtBtRunner::init(const char* logProfile /* = "" */, bool isFile /* = true *
 	WtHelper::setOutputDir(outDir);
 }
 
+/**
+ * @brief 设置回测引擎配置
+ * @details 从配置文件或内容中加载回测引擎配置
+ *          并根据指定的模式初始化相应的模拟器
+ *          支持CTA、HFT、SEL和EXEC四种模式
+ * 
+ * @param cfgFile 配置文件路径或内容
+ * @param isFile 是否为文件路径，如果为false则cfgFile为内容
+ */
 void WtBtRunner::config(const char* cfgFile, bool isFile /* = true */)
 {
 	if(_inited)
@@ -706,6 +861,15 @@ void WtBtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	}
 }
 
+/**
+ * @brief 启动回测引擎
+ * @details 启动历史数据回放器进行回测
+ *          支持同步和异步两种模式运行
+ *          异步模式下会创建新线程进行回测，不会阻塞当前线程
+ * 
+ * @param bNeedDump 是否需要导出回测过程的详细数据
+ * @param bAsync 是否使用异步模式运行
+ */
 void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 {
 	if (_running)
@@ -747,6 +911,12 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 	}
 }
 
+/**
+ * @brief 停止回测引擎
+ * @details 停止正在运行的回测过程
+ *          如果是异步模式，会等待异步线程完成
+ *          在停止前会让模拟器完成最后一轮计算
+ */
 void WtBtRunner::stop()
 {
 	if (!_running)
@@ -782,11 +952,24 @@ void WtBtRunner::stop()
 	WTSLogger::debug("Backtest stopped");
 }
 
+/**
+ * @brief 释放回测引擎资源
+ * @details 关闭日志系统并释放相关资源
+ *          通常在回测结束或程序退出前调用
+ */
 void WtBtRunner::release()
 {
 	WTSLogger::stop();
 }
 
+/**
+ * @brief 设置回测时间范围
+ * @details 手动设置回测的起止时间
+ *          时间以YYYYMMDDHHMMSS格式指定
+ * 
+ * @param stime 起始时间，格式YYYYMMDDHHMMSS
+ * @param etime 结束时间，格式YYYYMMDDHHMMSS
+ */
 void WtBtRunner::set_time_range(WtUInt64 stime, WtUInt64 etime)
 {
 	_replayer.set_time_range(stime, etime);
@@ -794,6 +977,13 @@ void WtBtRunner::set_time_range(WtUInt64 stime, WtUInt64 etime)
 	WTSLogger::info("Backtest time range is set to be [{},{}] mannually", stime, etime);
 }
 
+/**
+ * @brief 启用或禁用tick数据回放
+ * @details 设置是否在回测中回放造市数据
+ *          启用tick回放可以提高回测精度，但会降低性能
+ * 
+ * @param bEnabled 是否启用tick数据回放，默认为true
+ */
 void WtBtRunner::enable_tick(bool bEnabled /* = true */)
 {
 	_replayer.enable_tick(bEnabled);
@@ -801,6 +991,11 @@ void WtBtRunner::enable_tick(bool bEnabled /* = true */)
 	WTSLogger::info("Tick data replaying is {}", bEnabled ? "enabled" : "disabled");
 }
 
+/**
+ * @brief 清理回放器缓存
+ * @details 清理并释放历史数据回放器的缓存数据
+ *          当需要重新加载数据或减少内存占用时调用
+ */
 void WtBtRunner::clear_cache()
 {
 	_replayer.clear_cache();
