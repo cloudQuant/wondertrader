@@ -570,6 +570,13 @@ void UftMocker::on_session_end(uint32_t curTDate)
 		_fund_info._total_profit + _fund_info._total_dynprofit - _fund_info._total_fees, _fund_info._total_fees);
 }
 
+/**
+ * @brief 获取未完成委托的数量
+ * @param stdCode 标准合约代码
+ * @return 未完成委托的数量，多头为正，空头为负
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的未完成委托数量
+ *          遍历所有未完成订单，累加计算指定合约的未成交数量
+ */
 double UftMocker::stra_get_undone(const char* stdCode)
 {
 	double ret = 0;
@@ -585,6 +592,17 @@ double UftMocker::stra_get_undone(const char* stdCode)
 	return ret;
 }
 
+/**
+ * @brief 取消委托
+ * @param localid 本地委托ID
+ * @return 取消是否成功，始终返回true
+ * @details 实现IUftStraCtx接口的方法，用于取消指定的委托
+ *          将取消操作添加到任务队列中异步执行，包括以下步骤：
+ *          1. 查找并锁定订单
+ *          2. 如果是平仓订单，释放冻结的持仓
+ *          3. 记录日志并触发on_order回调
+ *          4. 从订单列表中移除该订单
+ */
 bool UftMocker::stra_cancel(uint32_t localid)
 {
 	postTask([this, localid](){
@@ -625,6 +643,13 @@ bool UftMocker::stra_cancel(uint32_t localid)
 	return true;
 }
 
+/**
+ * @brief 取消指定合约的所有委托
+ * @param stdCode 标准合约代码
+ * @return 被取消的委托ID列表（当前实现中返回空列表）
+ * @details 实现IUftStraCtx接口的方法，用于取消指定合约的所有未完成委托
+ *          遍历所有未完成订单，如果合约代码匹配，则调用stra_cancel方法取消该订单
+ */
 OrderIDs UftMocker::stra_cancel_all(const char* stdCode)
 {
 	OrderIDs ret;
@@ -641,6 +666,19 @@ OrderIDs UftMocker::stra_cancel_all(const char* stdCode)
 	return ret;
 }
 
+/**
+ * @brief 买入操作（开多或平空）
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 委托ID列表
+ * @details 实现IUftStraCtx接口的方法，用于执行买入操作
+ *          首先检查合约信息和数量有效性，然后根据以下规则处理：
+ *          1. 如果有空头持仓，先平仓（根据平仓模式决定平仓方式）
+ *          2. 剩余数量再开多仓
+ *          该方法会自动处理平仓和开仓的逻辑
+ */
 OrderIDs UftMocker::stra_buy(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -766,6 +804,17 @@ OrderIDs UftMocker::stra_sell(const char* stdCode, double price, double qty, int
 	return ids;
 }
 
+/**
+ * @brief 开多仓操作
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 委托ID，如果委托失败返回0
+ * @details 实现IUftStraCtx接口的方法，用于执行开多仓操作
+ *          首先检查合约信息和数量有效性，然后创建并提交开多仓订单
+ *          该方法会异步触发on_entrust回调通知策略委托已提交
+ */
 uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -807,6 +856,17 @@ uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qt
 	return localid;
 }
 
+/**
+ * @brief 开空仓操作
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 委托ID，如果委托失败返回0
+ * @details 实现IUftStraCtx接口的方法，用于执行开空仓操作
+ *          首先检查合约信息和数量有效性，然后创建并提交开空仓订单
+ *          该方法会异步触发on_entrust回调通知策略委托已提交
+ */
 uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -970,12 +1030,36 @@ uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qt
 	return localid;
 }
 
+/**
+ * @brief 处理订单状态变化
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标记（0为开仓，1为平仓，2为平今）
+ * @param totalQty 总委托量
+ * @param leftQty 剩余未成交量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤单
+ * @details 当订单状态发生变化时调用，将订单状态变化信息传递给策略
+ *          通过策略的on_order回调函数处理
+ */
 void UftMocker::on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled)
 {
 	if(_strategy)
 		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
 }
 
+/**
+ * @brief 处理成交回报
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标记（0为开仓，1为平仓，2为平今）
+ * @param vol 成交数量
+ * @param price 成交价格
+ * @details 当订单成交时调用，首先更新持仓信息，然后将成交信息传递给策略
+ *          通过update_position更新持仓状态，并通过策略的on_trade回调函数处理
+ */
 void UftMocker::on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
 {
 	//PosInfo& posInfo = _pos_map[stdCode];
@@ -1137,6 +1221,14 @@ bool UftMocker::procOrder(uint32_t localid)
 	return false;
 }
 
+/**
+ * @brief 获取合约信息
+ * @param stdCode 标准合约代码
+ * @return 合约信息对象指针
+ * @details 实现IUftStraCtx接口的方法，用于获取指定合约的详细信息
+ *          直接调用回放器的get_commodity_info方法获取合约信息
+ *          返回的对象包含合约的代码、类型、交易单位、手续费率、交易模式等信息
+ */
 WTSCommodityInfo* UftMocker::stra_get_comminfo(const char* stdCode)
 {
 	return _replayer->get_commodity_info(stdCode);
@@ -1178,6 +1270,16 @@ WTSTickData* UftMocker::stra_get_last_tick(const char* stdCode)
 	return _replayer->get_last_tick(stdCode);
 }
 
+/**
+ * @brief 获取合约的持仓量
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只返回可用仓位，默认为false表示返回总仓位
+ * @param iFlag 持仓方向标记，1为单返回多头仓位，2为单返回空头仓位，3为多空差额，默认为3
+ * @return 持仓量
+ * @details 实现IUftStraCtx接口的方法，用于返回策略当前持有的指定合约的仓位
+ *          根据iFlag参数决定返回的是多头、空头还是多空差额
+ *          根据bOnlyValid参数决定返回的是总仓位还是可用仓位（总仓位减去冻结仓位）
+ */
 double UftMocker::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, int32_t iFlag /* = 3 */)
 {
 	const PosInfo& posInfo = _pos_map[stdCode];
@@ -1189,12 +1291,29 @@ double UftMocker::stra_get_position(const char* stdCode, bool bOnlyValid /* = fa
 		return bOnlyValid ? (posInfo._long.valid() - posInfo._short.valid()) : (posInfo._long.volume() - posInfo._short.volume());
 }
 
+/**
+ * @brief 获取合约的本地净持仓量
+ * @param stdCode 标准合约代码
+ * @return 净持仓量（多头减去空头）
+ * @details 实现IUftStraCtx接口的方法，用于返回策略当前本地的净持仓量
+ *          计算方式为多头总仓位减去空头总仓位
+ *          与 stra_get_position(stdCode, false, 3) 结果相同
+ */
 double UftMocker::stra_get_local_position(const char* stdCode)
 {
 	const PosInfo& posInfo = _pos_map[stdCode];
 	return posInfo._long.volume() - posInfo._short.volume();
 }
 
+/**
+ * @brief 枚举并回调所有持仓信息
+ * @param stdCode 标准合约代码，如果为空字符串则枚举所有合约
+ * @return 所有枚举合约的总持仓量
+ * @details 实现IUftStraCtx接口的方法，用于枚举当前所有或指定合约的持仓信息
+ *          对于每个合约，会通过策略的on_position回调将持仓详情传递给策略
+ *          同时累加计算总持仓量并返回
+ *          回调信息包括收盘持仓、可用持仓、新开持仓和新开可用持仓
+ */
 double UftMocker::stra_enum_position(const char* stdCode)
 {
 	uint32_t tdate = _replayer->get_trading_date();
@@ -1214,26 +1333,58 @@ double UftMocker::stra_enum_position(const char* stdCode)
 	return ret;
 }
 
+/**
+ * @brief 获取合约当前价格
+ * @param stdCode 标准合约代码
+ * @return 当前价格
+ * @details 实现IUftStraCtx接口的方法，用于获取合约当前最新价格
+ *          通过调用回放器的get_cur_price方法获取当前价格
+ */
 double UftMocker::stra_get_price(const char* stdCode)
 {
 	return _replayer->get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取当前日期
+ * @return 当前日期，格式为YYYYMMDD
+ * @details 实现IUftStraCtx接口的方法，用于获取回测当前的计算日期
+ *          返回四位数字格式的日期，如20220305表示2022年3月5日
+ */
 uint32_t UftMocker::stra_get_date()
 {
 	return _replayer->get_date();
 }
 
+/**
+ * @brief 获取当前时间
+ * @return 当前时间，格式为HHMMSS或HHMM
+ * @details 实现IUftStraCtx接口的方法，用于获取回测当前的原始时间
+ *          返回数字格式的时间，如092530表示9点25分30秒或ह点25分
+ */
 uint32_t UftMocker::stra_get_time()
 {
 	return _replayer->get_raw_time();
 }
 
+/**
+ * @brief 获取当前秒数
+ * @return 当前秒数
+ * @details 实现IUftStraCtx接口的方法，用于获取回测当前的秒数信息
+ *          返回0-59的秒数值，与当前时间的秒数部分相对应
+ */
 uint32_t UftMocker::stra_get_secs()
 {
 	return _replayer->get_secs();
 }
 
+/**
+ * @brief 订阅tick数据
+ * @param stdCode 标准合约代码
+ * @details 实现IUftStraCtx接口的方法，用于订阅指定合约的tick数据
+ *          首先将合约代码添加到本地订阅列表中，然后通知回放器订阅该合约的tick数据
+ *          自从2022.03.01起，增加了本地订阅列表，以便在tick数据回调前进行检查
+ */
 void UftMocker::stra_sub_ticks(const char* stdCode)
 {
 	/*
@@ -1246,37 +1397,89 @@ void UftMocker::stra_sub_ticks(const char* stdCode)
 	_replayer->sub_tick(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅订单队列数据
+ * @param stdCode 标准合约代码
+ * @details 实现IUftStraCtx接口的方法，用于订阅指定合约的订单队列数据
+ *          直接调用回放器的sub_order_queue方法进行订阅
+ *          订阅后将通过handle_order_queue方法接收订单队列数据
+ */
 void UftMocker::stra_sub_order_queues(const char* stdCode)
 {
 	_replayer->sub_order_queue(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅订单详情数据
+ * @param stdCode 标准合约代码
+ * @details 实现IUftStraCtx接口的方法，用于订阅指定合约的订单详情数据
+ *          直接调用回放器的sub_order_detail方法进行订阅
+ *          订阅后将通过handle_order_detail方法接收订单详情数据
+ */
 void UftMocker::stra_sub_order_details(const char* stdCode)
 {
 	_replayer->sub_order_detail(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅逆回成交数据
+ * @param stdCode 标准合约代码
+ * @details 实现IUftStraCtx接口的方法，用于订阅指定合约的逆回成交数据
+ *          直接调用回放器的sub_transaction方法进行订阅
+ *          订阅后将通过handle_transaction方法接收成交数据
+ */
 void UftMocker::stra_sub_transactions(const char* stdCode)
 {
 	_replayer->sub_transaction(_context_id, stdCode);
 }
 
+/**
+ * @brief 输出信息级别日志
+ * @param message 日志消息
+ * @details 实现IUftStraCtx接口的方法，用于输出信息级别的日志
+ *          调用WTSLogger的log_dyn_raw方法，将日志写入到strategy模块下当前策略的日志文件中
+ *          日志级别为INFO，用于记录普通信息
+ */
 void UftMocker::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 输出调试级别日志
+ * @param message 日志消息
+ * @details 实现IUftStraCtx接口的方法，用于输出调试级别的日志
+ *          调用WTSLogger的log_dyn_raw方法，将日志写入到strategy模块下当前策略的日志文件中
+ *          日志级别为DEBUG，用于记录详细的调试信息
+ */
 void UftMocker::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 输出错误级别日志
+ * @param message 日志消息
+ * @details 实现IUftStraCtx接口的方法，用于输出错误级别的日志
+ *          调用WTSLogger的log_dyn_raw方法，将日志写入到strategy模块下当前策略的日志文件中
+ *          日志级别为ERROR，用于记录错误信息和异常情况
+ */
 void UftMocker::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
 
+/**
+ * @brief 输出回测结果到CSV文件
+ * @details 将回测过程中收集的交易、平仓、资金和持仓日志导出到CSV文件
+ *          创建以策略名命名的文件夹，并将以下文件写入该文件夹：
+ *          1. trades.csv - 交易记录，包含合约、时间、方向、动作、价格、数量、手续费等
+ *          2. closes.csv - 平仓记录，包含合约、方向、开仓时间、开仓价格、平仓时间、平仓价格、数量、利润等
+ *          3. funds.csv - 资金记录，包含日期、平仓盈亏、持仓盈亏、动态余额和手续费
+ *          4. positions.csv - 持仓记录，包含日期、合约、方向、数量、平仓盈亏和动态盈亏
+ *          这些文件可用于后续的策略分析和绩效评估
+ */
 void UftMocker::dump_outputs()
 {
 	std::string folder = WtHelper::getOutputDir();
@@ -1306,12 +1509,43 @@ void UftMocker::dump_outputs()
 	StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size());
 }
 
+/**
+ * @brief 记录交易日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标记（0为开仓，1为平仓，2为平今）
+ * @param curTime 当前时间
+ * @param price 交易价格
+ * @param qty 交易数量
+ * @param fee 交易手续费
+ * @details 将交易信息格式化并追加到内部交易日志流中
+ *          记录的信息包括合约代码、时间、交易方向、开平动作、价格、数量和手续费
+ *          这些日志最终会写入trades.csv文件中
+ */
 void UftMocker::log_trade(const char* stdCode, bool isLong, uint32_t offset, uint64_t curTime, double price, double qty, double fee)
 {
 	_trade_logs << stdCode << "," << curTime << "," << (isLong ? "LONG" : "SHORT") << "," << OFFSET_NAMES[offset]
 		<< "," << price << "," << qty << "," << fee  << "\n";
 }
 
+/**
+ * @brief 记录平仓日志
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头方向
+ * @param openTime 开仓时间
+ * @param openpx 开仓价格
+ * @param closeTime 平仓时间
+ * @param closepx 平仓价格
+ * @param qty 平仓数量
+ * @param profit 平仓盈亏
+ * @param maxprofit 最大盈利
+ * @param maxloss 最大亏损
+ * @param totalprofit 总盈亏，默认为0
+ * @details 将平仓信息格式化并追加到内部平仓日志流中
+ *          记录的信息包括合约代码、交易方向、开仓时间、开仓价格、平仓时间、
+ *          平仓价格、数量、平仓盈亏、最大盈利、最大亏损和总盈亏
+ *          这些日志最终会写入closes.csv文件中
+ */
 void UftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss,
 	double totalprofit /* = 0 */)
 {
@@ -1320,6 +1554,20 @@ void UftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 		<< totalprofit << "\n";
 }
 
+/**
+ * @brief 更新持仓信息
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标记（0为开仓，1为平仓，2为平今）
+ * @param qty 交易数量
+ * @param price 交易价格，默认为0.0会使用当前的市场价格
+ * @details 根据交易信息更新账户持仓状态
+ *          不同的offset值对应不同的处理逻辑：
+ *          - 开仓(0): 添加新的持仓明细，更新新开仓量
+ *          - 平仓(1): 优先平收盘前持仓，然后再平新开仓仓，计算平仓盈亏
+ *          - 平今(2): 只平当日新开的仓位，计算平仓盈亏
+ *          同时记录交易日志和平仓日志，更新资金信息
+ */
 void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price /* = 0.0 */)
 {
 	PosItem& pItem = isLong ? _pos_map[stdCode]._long : _pos_map[stdCode]._short;
