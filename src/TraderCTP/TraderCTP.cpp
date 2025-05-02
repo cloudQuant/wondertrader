@@ -393,6 +393,13 @@ int TraderCTP::login(const char* user, const char* pass, const char* productInfo
 	return 0;
 }
 
+/**
+ * @brief 执行实际登录操作
+ * @details 创建并填充CTP登录请求字段
+ *          包括经纪商代码、用户名、密码、产品信息等
+ *          然后向CTP服务器发送登录请求
+ * @return int 总是返回0，实际登录结果通过回调函数获知
+ */
 int TraderCTP::doLogin()
 {
 	CThostFtdcReqUserLoginField req;
@@ -410,6 +417,13 @@ int TraderCTP::doLogin()
 	return 0;
 }
 
+/**
+ * @brief 登出交易账户
+ * @details 创建并填充CTP登出请求字段
+ *          包括经纪商代码、用户名等信息
+ *          然后向CTP服务器发送登出请求
+ * @return int 如果接口未初始化返回-1，否则总是返回0，实际登出结果通过回调函数获知
+ */
 int TraderCTP::logout()
 {
 	if (m_pUserAPI == NULL)
@@ -430,6 +444,15 @@ int TraderCTP::logout()
 	return 0;
 }
 
+/**
+ * @brief 委托下单
+ * @details 将WTSEntrust对象的委托信息转换成CTP的订单请求格式
+ *          并且填充各种必要的字段，如经纪商代码、投资者ID、合约代码、交易所代码
+ *          价格类型、买卖方向、开平标志、数量、价格等
+ *          同时设置不同委托标志（普通/FAK/FOK）对应的有效期和成交量条件
+ * @param entrust 要发送的委托对象
+ * @return int 如果交易通道未就绪返回-1，否则总是返回0，实际委托结果通过回调函数获知
+ */
 int TraderCTP::orderInsert(WTSEntrust* entrust)
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -514,6 +537,15 @@ int TraderCTP::orderInsert(WTSEntrust* entrust)
 	return 0;
 }
 
+/**
+ * @brief 委托操作（撤单）
+ * @details 将WTSEntrustAction对象的撤单信息转换成CTP的撤单请求格式
+ *          首先通过委托ID提取前置机编号、会话编号和委托引用
+ *          然后填充经纪商代码、投资者ID、操作标志、合约代码、交易所等信息
+ *          最后发送撤单请求给CTP交易服务器
+ * @param action 撤单操作对象
+ * @return int 如果交易通道未就绪或提取委托ID失败返回-1，否则总是返回0，实际撤单结果通过回调函数获知
+ */
 int TraderCTP::orderAction(WTSEntrustAction* action)
 {
 	if (m_wrapperState != WS_ALLREADY)
@@ -552,6 +584,14 @@ int TraderCTP::orderAction(WTSEntrustAction* action)
 	return 0;
 }
 
+/**
+ * @brief 查询资金账户
+ * @details 将资金账户查询请求添加到查询队列中
+ *          创建查询资金请求并填充经纪商代码和投资者ID
+ *          然后将该请求异步提交给工作线程处理
+ *          结果将在对应的回调函数中处理
+ * @return int 如果交易接口未初始化或未准备就绪返回-1，否则返回0
+ */
 int TraderCTP::queryAccount()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -575,6 +615,14 @@ int TraderCTP::queryAccount()
 	return 0;
 }
 
+/**
+ * @brief 查询持仓信息
+ * @details 将持仓查询请求添加到查询队列中
+ *          创建查询持仓请求并填充经纪商代码和投资者ID
+ *          然后将该请求异步提交给工作线程处理
+ *          结果将在对应的回调函数中处理
+ * @return int 如果交易接口未初始化或未准备就绪返回-1，否则返回0
+ */
 int TraderCTP::queryPositions()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -598,6 +646,14 @@ int TraderCTP::queryPositions()
 	return 0;
 }
 
+/**
+ * @brief 查询委托单
+ * @details 将查询委托请求添加到查询队列中
+ *          创建查询委托请求并填充经纪商代码和投资者ID
+ *          然后将该请求异步提交给工作线程处理
+ *          返回的所有委托单将在对应的回调函数中处理
+ * @return int 如果交易接口未初始化或未准备就绪返回-1，否则返回0
+ */
 int TraderCTP::queryOrders()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -622,6 +678,14 @@ int TraderCTP::queryOrders()
 	return 0;
 }
 
+/**
+ * @brief 查询成交记录
+ * @details 将成交查询请求添加到查询队列中
+ *          创建查询成交请求并填充经纪商代码和投资者ID
+ *          然后将该请求异步提交给工作线程处理
+ *          返回的所有成交记录将在对应的回调函数中处理
+ * @return int 如果交易接口未初始化或未准备就绪返回-1，否则返回0
+ */
 int TraderCTP::queryTrades()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -670,6 +734,11 @@ int TraderCTP::querySettlement(uint32_t uDate)
 	return 0;
 }
 
+/**
+ * @brief 前置机连接成功回调
+ * @details 当与CTP前置机建立连接成功后系统自动调用此函数
+ *          通过回调接口将连接成功事件通知给上层应用
+ */
 void TraderCTP::OnFrontConnected()
 {
 	if (m_sink)
@@ -1573,6 +1642,13 @@ int TraderCTP::confirm()
 	return 0;
 }
 
+/**
+ * @brief 进行交易账户认证
+ * @details 在登录之前先进行账户认证
+ *          创建认证请求并填充经纪商代码、用户名、授权码、应用ID等信息
+ *          然后向CTP服务器发送认证请求
+ * @return int 总是返回0，实际认证结果通过回调函数获知
+ */
 int TraderCTP::authenticate()
 {
 	CThostFtdcReqAuthenticateField req;
