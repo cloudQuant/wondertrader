@@ -36,9 +36,33 @@ const char* OFFSET_NAMES[] =
 	"CLOSET"
 };
 
+/**
+ * @brief 将交易量分拆成多个小单
+ * @param vol 总交易量（整型版本）
+ * @return 分拆后的交易量列表
+ * @details 用于将大单分拆为多个小单，以进行更真实的成交模拟
+ */
 extern std::vector<uint32_t> splitVolume(uint32_t vol);
+
+/**
+ * @brief 将交易量分拆成多个小单
+ * @param vol 总交易量（浮点版本）
+ * @param minQty 最小交易量，默认为1.0
+ * @param maxQty 最大交易量，默认为100.0
+ * @param qtyTick 交易量最小变动单位，默认为1.0
+ * @return 分拆后的交易量列表
+ * @details 用于将大单分拆为多个小单，以进行更真实的成交模拟
+ *          分拆时会考虑最小交易量、最大交易量和最小变动单位
+ */
 extern std::vector<double> splitVolume(double vol, double minQty = 1.0, double maxQty = 100.0, double qtyTick = 1.0);
 
+/**
+ * @brief 生成随机数
+ * @param maxVal 随机数的最大值，默认为10000
+ * @return 范围在0到maxVal之间的随机数
+ * @details 用于生成随机数，主要在模拟成交和错误率计算中使用
+ *          在procOrder函数中用于模拟委托失败或撤单
+ */
 extern uint32_t genRand(uint32_t maxVal = 10000);
 
 /**
@@ -203,9 +227,12 @@ bool UftMocker::init_uft_factory(WTSVariant* cfg)
 /**
  * @brief 处理Tick数据
  * @param stdCode 标准合约代码
- * @param curTick 当前的Tick数据
+ * @param curTick 当前Tick数据
  * @param pxType 价格类型
- * @details 实现IDataSink接口的方法，用于接收并处理行情数据源发送的Tick数据
+ * @details 实现IDataSink接口的方法，用于处理当前收到的Tick数据
+ *          先保存当前合约价格，然后更新浮动盈亏
+ *          如果该合约有未完成的委托，还会尝试处理这些委托
+ *          最后调用策略的on_tick回调函数通知有新的市场数据
  */
 void UftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
 {
@@ -741,6 +768,18 @@ OrderIDs UftMocker::stra_buy(const char* stdCode, double price, double qty, int 
 	return ids;
 }
 
+/**
+ * @brief 执行平空仓操作
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 委托ID列表，如果委托失败返回空列表
+ * @details 实现IUftStraCtx接口的方法，用于执行平空仓操作
+ *          首先检查持仓量是否足够，然后根据平仓模式决定平仓方式
+ *          如果不区分平今和平昨，则优先平昨仓，不足部分再平今仓
+ *          如果区分平今和平昨，则根据isToday参数决定平仓类型
+ */
 OrderIDs UftMocker::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
@@ -982,6 +1021,19 @@ uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty
 	return localid;
 }
 
+/**
+ * @brief 执行平空仓操作
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param isToday 是否平今仓
+ * @param flag 标记，默认为0
+ * @return 委托ID，如果委托失败返回0
+ * @details 实现IUftStraCtx接口的方法，用于执行平空仓操作
+ *          首先检查持仓量是否足够，然后根据平仓模式决定平仓方式
+ *          如果不区分平今和平昨，则优先平昨仓，不足部分再平今仓
+ *          如果区分平今和平昨，则根据isToday参数决定平仓类型
+ */
 uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
@@ -1082,12 +1134,29 @@ void UftMocker::on_trade(uint32_t localid, const char* stdCode, bool isLong, uin
 		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
 }
 
+/**
+ * @brief 处理委托回报
+ * @param localid 本地委托单ID
+ * @param stdCode 标准合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 委托回报消息
+ * @details 当委托发出后收到交易所回报时调用此函数
+ *          通过策略的on_entrust回调函数将委托状态通知给策略
+ *          策略可以根据回报状态决定后续操作
+ */
 void UftMocker::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	if (_strategy)
 		_strategy->on_entrust(localid, bSuccess, message);
 }
 
+/**
+ * @brief 通知交易通道已就绪
+ * @details 当交易通道已经准备就绪可以开始交易时调用此函数
+ *          通过策略的on_channel_ready回调函数通知策略交易通道已就绪
+ *          策略可以在此时机开始执行交易操作
+ *          在回测框架中，这个函数在初始化完成后调用
+ */
 void UftMocker::on_channel_ready()
 {
 	if (_strategy)
