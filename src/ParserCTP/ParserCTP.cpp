@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file ParserCTP.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief CTP行情解析器实现文件
+ * \details 本文件实现了与上期所CTP行情接口对接的ParserCTP类
+ *          实现了连接、登录、订阅、行情数据解析等功能
+ *          将CTP行情数据转换为内部使用的数据格式
  */
 #include "ParserCTP.h"
 
@@ -23,6 +26,15 @@
 
  //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+/**
+ * @brief 格式化写入日志
+ * @details 将格式化的日志信息写入到行情解析器回调中
+ * @tparam Args 格式化参数类型
+ * @param sink 行情解析器回调对象
+ * @param ll 日志级别
+ * @param format 格式化字符串
+ * @param args 参数列表
+ */
 template<typename... Args>
 inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -35,14 +47,28 @@ inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, cons
 	sink->handleParserLog(ll, buffer);
 }
 
+/**
+ * @brief DLL导出函数声明
+ * @details 声明供动态链接库调用的C接口函数
+ */
 extern "C"
 {
+	/**
+	 * @brief 创建行情解析器实例
+	 * @details 创建一个ParserCTP实例并返回接口指针
+	 * @return IParserApi* 新创建的行情接口实例
+	 */
 	EXPORT_FLAG IParserApi* createParser()
 	{
 		ParserCTP* parser = new ParserCTP();
 		return parser;
 	}
 
+	/**
+	 * @brief 删除行情解析器实例
+	 * @details 删除指定的行情解析器实例并将指针置空
+	 * @param parser 要删除的行情解析器实例指针引用
+	 */
 	EXPORT_FLAG void deleteParser(IParserApi* &parser)
 	{
 		if (NULL != parser)
@@ -54,6 +80,13 @@ extern "C"
 };
 
 
+/**
+ * @brief 将时间格式字符串转换为无格式整数
+ * @details 将含有分隔符":"的时间格式字符串转换为整数
+ *          例如将"09:30:15"转换为"93015"
+ * @param strTime 要转换的时间字符串
+ * @return uint32_t 转换后的整数时间
+ */
 inline uint32_t strToTime(const char* strTime)
 {
 	static char str[10] = { 0 };
@@ -73,6 +106,14 @@ inline uint32_t strToTime(const char* strTime)
 	return strtoul(str, NULL, 10);
 }
 
+/**
+ * @brief 检查并处理无效的数值
+ * @details 检查输入的浮点数是否为特定的无效值（DBL_MAX或FLT_MAX）
+ *          如果是无效值，则返回0，否则返回原值
+ *          在行情处理中用于过滤CTP接口返回的异常数值
+ * @param val 要检查的浮点数值
+ * @return double 处理后的有效数值
+ */
 inline double checkValid(double val)
 {
 	if (val == DBL_MAX || val == FLT_MAX)
@@ -81,6 +122,11 @@ inline double checkValid(double val)
 	return val;
 }
 
+/**
+ * @brief 构造函数
+ * @details 初始化ParserCTP对象的成员变量
+ *          将API指针、请求ID、交易日等置为初始值
+ */
 ParserCTP::ParserCTP()
 	:m_pUserAPI(NULL)
 	,m_iRequestID(0)
@@ -90,11 +136,25 @@ ParserCTP::ParserCTP()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理ParserCTP对象资源
+ *          将API指针置空，实际资源释放在release方法中进行
+ */
 ParserCTP::~ParserCTP()
 {
 	m_pUserAPI = NULL;
 }
 
+/**
+ * @brief 初始化行情解析器
+ * @details 从配置中读取各种参数并初始化行情解析器
+ *          加载CTP行情接口动态链接库
+ *          创建CTP行情API实例
+ *          注册回调接口和前置机地址
+ * @param config 包含初始化参数的变量集合
+ * @return bool 初始化是否成功，总是返回true
+ */
 bool ParserCTP::init(WTSVariant* config)
 {
 	m_strFrontAddr = config->getCString("front");
@@ -143,11 +203,22 @@ bool ParserCTP::init(WTSVariant* config)
 	return true;
 }
 
+/**
+ * @brief 释放行情解析器资源
+ * @details 调用disconnect方法断开与CTP服务器的连接并释放相关资源
+ */
 void ParserCTP::release()
 {
 	disconnect();
 }
 
+/**
+ * @brief 连接到CTP行情服务器
+ * @details 如果CTP API实例已创建，则初始化该实例
+ *          这将触发异步连接过程
+ *          连接成功后会回调OnFrontConnected方法
+ * @return bool 连接请求是否成功发送，总是返回true
+ */
 bool ParserCTP::connect()
 {
 	if(m_pUserAPI)
@@ -158,6 +229,12 @@ bool ParserCTP::connect()
 	return true;
 }
 
+/**
+ * @brief 断开与CTP行情服务器的连接
+ * @details 如果CTP API实例存在，则取消回调注册并释放API资源
+ *          将API指针置空以防止重复释放
+ * @return bool 断开连接是否成功，总是返回true
+ */
 bool ParserCTP::disconnect()
 {
 	if(m_pUserAPI)
@@ -170,11 +247,25 @@ bool ParserCTP::disconnect()
 	return true;
 }
 
+/**
+ * @brief 响应错误回调
+ * @details 当CTP行情接口返回错误时触发该回调
+ *          调用IsErrorRspInfo方法处理错误信息
+ * @param pRspInfo 错误信息字段指针
+ * @param nRequestID 对应的请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void ParserCTP::OnRspError( CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
 {
 	IsErrorRspInfo(pRspInfo);
 }
 
+/**
+ * @brief 前置机连接成功回调
+ * @details 当成功连接到CTP前置机时触发该回调
+ *          记录连接成功日志，并通过回调接口通知上层应用
+ *          然后自动发送登录请求
+ */
 void ParserCTP::OnFrontConnected()
 {
 	if(m_sink)
@@ -185,7 +276,17 @@ void ParserCTP::OnFrontConnected()
 
 	ReqUserLogin();
 }
-
+/**
+ * @brief 用户登录响应回调
+ * @details 当发送登录请求后收到的响应
+ *          如果登录成功，获取交易日并处理无效交易日的情况
+ *          记录登录成功日志并通知上层应用
+ *          然后自动执行行情订阅
+ * @param pRspUserLogin 登录响应字段指针
+ * @param pRspInfo 响应信息字段指针
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void ParserCTP::OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
 {
 	if(bIsLast && !IsErrorRspInfo(pRspInfo))
@@ -208,6 +309,15 @@ void ParserCTP::OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, CTho
 	}
 }
 
+/**
+ * @brief 用户登出响应回调
+ * @details 当发送登出请求后收到的响应
+ *          通过回调接口将登出事件通知上层应用
+ * @param pUserLogout 登出响应字段指针
+ * @param pRspInfo 响应信息字段指针
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void ParserCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if(m_sink)
@@ -216,6 +326,13 @@ void ParserCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFt
 	}
 }
 
+/**
+ * @brief 前置机断开连接回调
+ * @details 当与CTP前置机断开连接时触发该回调
+ *          记录断开连接错误日志，包含断开原因
+ *          通过回调接口将断开事件通知上层应用
+ * @param nReason 断开连接的原因代码
+ */
 void ParserCTP::OnFrontDisconnected( int nReason )
 {
 	if(m_sink)
@@ -225,11 +342,30 @@ void ParserCTP::OnFrontDisconnected( int nReason )
 	}
 }
 
+/**
+ * @brief 取消订阅行情响应回调
+ * @details 当发送取消订阅行情请求后收到的响应
+ *          当前实现中未处理此响应
+ * @param pSpecificInstrument 合约信息字段指针
+ * @param pRspInfo 响应信息字段指针
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void ParserCTP::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
 {
 
 }
 
+/**
+ * @brief 行情数据推送回调
+ * @details 当收到CTP推送的实时行情数据时触发该回调
+ *          处理流程包括：
+ *          1. 验证合约是否有效
+ *          2. 根据配置决定使用本地时间或CTP提供的时间
+ *          3. 将CTP行情数据转换为内部行情数据结构
+ *          4. 调用回调接口将行情数据推送给上层应用
+ * @param pDepthMarketData CTP行情数据字段指针
+ */
 void ParserCTP::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData )
 {	
 	if(m_pBaseDataMgr == NULL)
@@ -350,6 +486,16 @@ void ParserCTP::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMark
 	tick->release();
 }
 
+/**
+ * @brief 订阅行情响应回调
+ * @details 当发送订阅行情请求后收到的响应
+ *          检查响应是否包含错误信息
+ *          当前实现中空处理，可用于日志或状态跟踪
+ * @param pSpecificInstrument 合约信息字段指针
+ * @param pRspInfo 响应信息字段指针
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void ParserCTP::OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
 {
 	if(!IsErrorRspInfo(pRspInfo))
@@ -362,12 +508,25 @@ void ParserCTP::OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecific
 	}
 }
 
+/**
+ * @brief 心跳超时警告回调
+ * @details 当CTP行情服务器心跳超时时触发该回调
+ *          记录心跳超时日志，包含超时的时间间隔
+ * @param nTimeLapse 心跳超时的时间间隔（单位：秒）
+ */
 void ParserCTP::OnHeartBeatWarning( int nTimeLapse )
 {
 	if(m_sink)
 		write_log(m_sink, LL_INFO, "[ParserCTP] Heartbeating, elapse: {}", nTimeLapse);
 }
 
+/**
+ * @brief 发送登录请求
+ * @details 向CTP行情服务器发送登录请求
+ *          填充登录所需的各个字段：经纪ID、用户ID、密码等
+ *          如果用户API对象为空或请求发送失败，记录相应错误日志
+ *          登录结果将在OnRspUserLogin回调中处理
+ */
 void ParserCTP::ReqUserLogin()
 {
 	if(m_pUserAPI == NULL)
@@ -389,6 +548,15 @@ void ParserCTP::ReqUserLogin()
 	}
 }
 
+/**
+ * @brief 执行市场行情订阅
+ * @details 根据过滤集合发送行情订阅请求
+ *          处理流程包括：
+ *          1. 检查是否有合约要订阅
+ *          2. 处理合约代码格式，去除交易所前缀
+ *          3. 调用CTP API发送订阅请求
+ *          4. 记录订阅结果日志
+ */
 void ParserCTP::DoSubscribeMD()
 {
 	CodeSet codeFilter = m_filterSubs;
@@ -426,11 +594,26 @@ void ParserCTP::DoSubscribeMD()
 	delete[] subscribe;
 }
 
+/**
+ * @brief 检查响应信息是否包含错误
+ * @details 当前实现总是返回false，表示无错误
+ *          在实际应用中可能需要完善实现，检查pRspInfo是否为空
+ *          以及ErrorID是否为0来判断是否发生错误
+ * @param pRspInfo CTP响应信息字段指针
+ * @return bool 如果有错误返回true，无错误返回false
+ */
 bool ParserCTP::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 {
 	return false;
 }
 
+/**
+ * @brief 订阅行情
+ * @details 接受上层要订阅的合约代码集合
+ *          如果已登录（交易日已设置）则立即执行订阅
+ *          否则仅保存订阅列表，等待登录成功后自动订阅
+ * @param vecSymbols 要订阅的合约代码集合
+ */
 void ParserCTP::subscribe(const CodeSet &vecSymbols)
 {
 	if(m_uTradingDate == 0)
@@ -444,15 +627,34 @@ void ParserCTP::subscribe(const CodeSet &vecSymbols)
 	}
 }
 
+/**
+ * @brief 取消行情订阅
+ * @details 取消指定合约的行情订阅
+ *          当前实现中未实现该功能
+ * @param vecSymbols 要取消订阅的合约代码集合
+ */
 void ParserCTP::unsubscribe(const CodeSet &vecSymbols)
 {
 }
 
+/**
+ * @brief 检查是否已连接
+ * @details 检查CTP行情API实例是否已创建
+ *          注意这只检查API实例是否存在，不能决定连接是否活跃
+ * @return bool 如果API实例已创建则返回true，否则返回false
+ */
 bool ParserCTP::isConnected()
 {
 	return m_pUserAPI!=NULL;
 }
 
+/**
+ * @brief 注册行情回调接口
+ * @details 设置接收行情数据和事件通知的回调接口
+ *          同时从回调接口获取基础数据管理器
+ *          基础数据管理器用于获取合约信息
+ * @param listener 实现了IParserSpi接口的回调对象指针
+ */
 void ParserCTP::registerSpi(IParserSpi* listener)
 {
 	m_sink = listener;
