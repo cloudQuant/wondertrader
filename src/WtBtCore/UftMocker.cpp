@@ -5,7 +5,12 @@
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief UFT策略回测模拟器实现文件
+ * 
+ * UFT策略回测模拟器(UftMocker)是WonderTrader回测框架的核心组件之一，
+ * 负责在回测过程中模拟策略的运行环境、处理行情数据、执行交易指令、
+ * 模拟订单撮合、计算绩效指标等功能。该模块实现了IDataSink和IUftStraCtx接口，
+ * 能够无缝对接策略和行情数据，提供与实盘环境一致的接口体验。
  */
 #include "UftMocker.h"
 #include "WtHelper.h"
@@ -36,12 +41,23 @@ extern std::vector<double> splitVolume(double vol, double minQty = 1.0, double m
 
 extern uint32_t genRand(uint32_t maxVal = 10000);
 
+/**
+ * @brief 生成UFT策略上下文ID
+ * @return 新生成的唯一的上下文ID
+ * @details 使用原子操作生成唯一的UFT策略上下文ID，起始值为7000，每次调用自增1
+ */
 inline uint32_t makeUftCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 7000 };
 	return _auto_context_id.fetch_add(1);
 }
 
+/**
+ * @brief UFT策略回测模拟器构造函数
+ * @param replayer 历史数据回放器指针
+ * @param name 策略名称
+ * @details 初始化UFT策略回测模拟器，设置基本参数并生成唯一的上下文ID
+ */
 UftMocker::UftMocker(HisDataReplayer* replayer, const char* name)
 	: IUftStraCtx(name)
 	, _replayer(replayer)
@@ -54,6 +70,10 @@ UftMocker::UftMocker(HisDataReplayer* replayer, const char* name)
 }
 
 
+/**
+ * @brief UFT策略回测模拟器析构函数
+ * @details 清理模拟器资源，释放策略实例
+ */
 UftMocker::~UftMocker()
 {
 	if(_strategy)
@@ -62,6 +82,11 @@ UftMocker::~UftMocker()
 	}
 }
 
+/**
+ * @brief 处理任务队列中的任务
+ * @details 从任务队列中取出并执行所有待处理的任务，如果队列为空则直接返回。
+ *          使用递归锁保护整个任务处理过程，并在取出单个任务时使用互斥锁确保线程安全。
+ */
 void UftMocker::procTask()
 {
 	if (_tasks.empty())
@@ -86,6 +111,11 @@ void UftMocker::procTask()
 	_mtx_control.unlock();
 }
 
+/**
+ * @brief 提交任务到任务队列
+ * @param task 要提交的任务
+ * @details 将任务添加到任务队列中，任务队列是线程安全的。
+ */
 void UftMocker::postTask(Task task)
 {
 	{
@@ -125,6 +155,12 @@ void UftMocker::postTask(Task task)
 	//}
 }
 
+/**
+ * @brief 初始化UFT策略工厂
+ * @param cfg 配置参数，包含策略工厂的加载路径、撮合参数等
+ * @return 初始化是否成功
+ * @details 根据配置参数加载策略工厂动态链接库，初始化撮合参数，并创建UFT策略实例
+ */
 bool UftMocker::init_uft_factory(WTSVariant* cfg)
 {
 	if (cfg == NULL)
@@ -164,37 +200,81 @@ bool UftMocker::init_uft_factory(WTSVariant* cfg)
 	return true;
 }
 
+/**
+ * @brief 处理Tick数据
+ * @param stdCode 标准合约代码
+ * @param curTick 当前的Tick数据
+ * @param pxType 价格类型
+ * @details 实现IDataSink接口的方法，用于接收并处理行情数据源发送的Tick数据
+ */
 void UftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
 {
 	on_tick(stdCode, curTick);
 }
 
+/**
+ * @brief 处理委托明细数据
+ * @param stdCode 标准合约代码
+ * @param curOrdDtl 当前的委托明细数据
+ * @details 实现IDataSink接口的方法，用于接收并处理行情数据源发送的委托明细数据
+ */
 void UftMocker::handle_order_detail(const char* stdCode, WTSOrdDtlData* curOrdDtl)
 {
 	on_order_detail(stdCode, curOrdDtl);
 }
 
+/**
+ * @brief 处理委托队列数据
+ * @param stdCode 标准合约代码
+ * @param curOrdQue 当前的委托队列数据
+ * @details 实现IDataSink接口的方法，用于接收并处理行情数据源发送的委托队列数据
+ */
 void UftMocker::handle_order_queue(const char* stdCode, WTSOrdQueData* curOrdQue)
 {
 	on_order_queue(stdCode, curOrdQue);
 }
 
+/**
+ * @brief 处理逐笔成交数据
+ * @param stdCode 标准合约代码
+ * @param curTrans 当前的逐笔成交数据
+ * @details 实现IDataSink接口的方法，用于接收并处理行情数据源发送的逐笔成交数据
+ */
 void UftMocker::handle_transaction(const char* stdCode, WTSTransData* curTrans)
 {
 	on_transaction(stdCode, curTrans);
 }
 
+/**
+ * @brief 处理K线周期结束事件
+ * @param stdCode 标准合约代码
+ * @param period 周期标识符
+ * @param times 周期倍数
+ * @param newBar 新生成的K线数据
+ * @details 实现IDataSink接口的方法，当K线周期结束时被调用，将最新的K线数据传递给策略
+ */
 void UftMocker::handle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	on_bar(stdCode, period, times, newBar);
 }
 
+/**
+ * @brief 处理初始化事件
+ * @details 实现IDataSink接口的方法，在回测开始时调用，初始化策略并通知交易通道就绪
+ *          依次触发策略的on_init和on_channel_ready回调
+ */
 void UftMocker::handle_init()
 {
 	on_init();
 	on_channel_ready();
 }
 
+/**
+ * @brief 处理定时任务事件
+ * @param uDate 当前交易日期，格式YYYYMMDD
+ * @param uTime 当前时间，格式HHMMSS
+ * @details 实现IDataSink接口的方法，在回测器的定时任务触发时被调用，当前实现中未使用
+ */
 void UftMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
 {
 	//on_schedule(uDate, uTime);
