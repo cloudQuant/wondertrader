@@ -434,97 +434,303 @@ public:
 	 */
 	virtual void OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo) override;
 
+	/**
+	 * @brief 合约状态通知回调
+	 * @details 当合约交易状态发生变化时触发此回调
+	 *          包括开盘、收盘、集合竞价等状态变化
+	 * 
+	 * @param pInstrumentStatus 合约状态信息
+	 */
 	virtual void OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) override;
 
 private:
-	/*
-	*	检查错误信息
-	*/
+	/**
+	 * @brief 检查错误信息
+	 * @details 检查CTP响应信息中是否包含错误
+	 *          当错误码不为0时表示有错误
+	 * 
+	 * @param pRspInfo CTP响应信息字段
+	 * @return bool 是否存在错误，true表示有错误
+	 */
 	bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo);
 
+	/**
+	 * @brief 将WonderTrader价格类型转为CTP价格类型
+	 * @details 将内部价格类型转换为CTP交易接口的价格类型
+	 * 
+	 * @param priceType WonderTrader内部价格类型
+	 * @param isCFFEX 是否为中金所合约，默认为false
+	 * @return int CTP价格类型代码
+	 */
 	int wrapPriceType(WTSPriceType priceType, bool isCFFEX = false);
+	/**
+	 * @brief 将WonderTrader交易方向转为CTP方向类型
+	 * @details 将内部交易方向和开平类型转换为CTP交易接口的方向类型
+	 *          CTP中方向和开平标志是分开的，而在WonderTrader中是组合的
+	 * 
+	 * @param dirType WonderTrader内部交易方向类型
+	 * @param offType WonderTrader内部开平类型
+	 * @return int CTP方向类型代码
+	 */
 	int wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType);
+	/**
+	 * @brief 将WonderTrader开平类型转为CTP开平标志
+	 * @details 将内部开平类型转换为CTP交易接口的开平标志
+	 *          包括开仓、平仓、平今等
+	 * 
+	 * @param offType WonderTrader内部开平类型
+	 * @return int CTP开平标志代码
+	 */
 	int wrapOffsetType(WTSOffsetType offType);
+	/**
+	 * @brief 将WonderTrader时间条件转为CTP时间条件
+	 * @details 将内部时间条件类型转换为CTP交易接口的时间条件
+	 *          包括当日有效、立即执行等
+	 * 
+	 * @param timeCond WonderTrader内部时间条件类型
+	 * @return int CTP时间条件代码
+	 */
 	int	wrapTimeCondition(WTSTimeCondition timeCond);
+
+	/**
+	 * @brief 将WonderTrader操作标志转为CTP操作标志
+	 * @details 将内部操作标志类型转换为CTP交易接口的操作标志
+	 *          主要用于撤单操作
+	 * 
+	 * @param actionFlag WonderTrader内部操作标志类型
+	 * @return int CTP操作标志代码
+	 */
 	int wrapActionFlag(WTSActionFlag actionFlag);
 
+	/**
+	 * @brief 将CTP价格类型转为WonderTrader价格类型
+	 * @details 将CTP交易接口的价格类型转换为内部价格类型
+	 * 
+	 * @param priceType CTP的价格类型
+	 * @return WTSPriceType WonderTrader内部价格类型
+	 */
 	WTSPriceType		wrapPriceType(TThostFtdcOrderPriceTypeType priceType);
+
+	/**
+	 * @brief 将CTP方向和开平标志转为WonderTrader交易方向
+	 * @details 将CTP交易接口的方向和开平标志转换为内部交易方向
+	 *          CTP中方向和开平标志是分开的，而在WonderTrader中是组合的
+	 * 
+	 * @param dirType CTP的方向类型
+	 * @param offType CTP的开平标志
+	 * @return WTSDirectionType WonderTrader内部交易方向类型
+	 */
 	WTSDirectionType	wrapDirectionType(TThostFtdcDirectionType dirType, TThostFtdcOffsetFlagType offType);
+
+	/**
+	 * @brief 将CTP持仓方向转为WonderTrader方向类型
+	 * @details 将CTP交易接口的持仓方向转换为内部方向类型
+	 * 
+	 * @param dirType CTP的持仓方向类型
+	 * @return WTSDirectionType WonderTrader内部方向类型
+	 */
 	WTSDirectionType	wrapPosDirection(TThostFtdcPosiDirectionType dirType);
+
+	/**
+	 * @brief 将CTP开平标志转为WonderTrader开平类型
+	 * @details 将CTP交易接口的开平标志转换为内部开平类型
+	 * 
+	 * @param offType CTP的开平标志
+	 * @return WTSOffsetType WonderTrader内部开平类型
+	 */
 	WTSOffsetType		wrapOffsetType(TThostFtdcOffsetFlagType offType);
+
+	/**
+	 * @brief 将CTP时间条件转为WonderTrader时间条件
+	 * @details 将CTP交易接口的时间条件转换为内部时间条件类型
+	 * 
+	 * @param timeCond CTP的时间条件
+	 * @return WTSTimeCondition WonderTrader内部时间条件类型
+	 */
 	WTSTimeCondition	wrapTimeCondition(TThostFtdcTimeConditionType timeCond);
+
+	/**
+	 * @brief 将CTP委托状态转为WonderTrader委托状态
+	 * @details 将CTP交易接口的委托状态转换为内部委托状态类型
+	 * 
+	 * @param orderState CTP的委托状态
+	 * @return WTSOrderState WonderTrader内部委托状态
+	 */
 	WTSOrderState		wrapOrderState(TThostFtdcOrderStatusType orderState);
 
+	/**
+	 * @brief 将CTP委托对象转换为WonderTrader委托信息对象
+	 * @details 将CTP交易接口的委托对象转换为内部委托信息对象
+	 * 
+	 * @param orderField CTP的委托对象
+	 * @return WTSOrderInfo* WonderTrader内部委托信息对象指针
+	 */
 	WTSOrderInfo*	makeOrderInfo(CThostFtdcOrderField* orderField);
+
+	/**
+	 * @brief 将CTP委托输入对象转换为WonderTrader委托对象
+	 * @details 将CTP交易接口的委托输入对象转换为内部委托对象
+	 * 
+	 * @param entrustField CTP的委托输入对象
+	 * @return WTSEntrust* WonderTrader内部委托对象指针
+	 */
 	WTSEntrust*		makeEntrust(CThostFtdcInputOrderField *entrustField);
+
+	/**
+	 * @brief 将CTP委托操作输入对象转换为WonderTrader委托操作对象
+	 * @details 将CTP交易接口的委托操作输入对象转换为内部委托操作对象
+	 * 
+	 * @param entrustField CTP的委托操作输入对象
+	 * @return WTSEntrustAction* WonderTrader内部委托操作对象指针
+	 */
 	WTSEntrustAction*	makeAction(CThostFtdcInputOrderActionField *entrustField);
+	/**
+	 * @brief 根据CTP响应信息创建错误对象
+	 * @details 将CTP交易接口的响应错误信息转换为内部错误对象
+	 * 
+	 * @param rspInfo CTP的响应信息对象
+	 * @param ec 错误代码，默认为WEC_NONE
+	 * @return WTSError* WonderTrader内部错误对象指针
+	 */
 	WTSError*		makeError(CThostFtdcRspInfoField* rspInfo, WTSErroCode ec = WEC_NONE);
+
+	/**
+	 * @brief 将CTP成交对象转换为WonderTrader成交信息对象
+	 * @details 将CTP交易接口的成交对象转换为内部成交信息对象
+	 * 
+	 * @param tradeField CTP的成交对象
+	 * @return WTSTradeInfo* WonderTrader内部成交信息对象指针
+	 */
 	WTSTradeInfo*	makeTradeInfo(CThostFtdcTradeField *tradeField);
 
+	/**
+	 * @brief 生成委托单编号
+	 * @details 根据前置机ID、会话ID和报单引用生成唯一的委托单编号
+	 * 
+	 * @param buffer 存储生成编号的缓冲区
+	 * @param frontid 前置机ID
+	 * @param sessionid 会话ID
+	 * @param orderRef 报单引用
+	 */
 	void			generateEntrustID(char* buffer, uint32_t frontid, uint32_t sessionid, uint32_t orderRef);
+
+	/**
+	 * @brief 解析委托单编号
+	 * @details 从委托单编号中解析出前置机ID、会话ID和报单引用
+	 * 
+	 * @param entrustid 委托单编号
+	 * @param frontid 输出参数，解析出的前置机ID
+	 * @param sessionid 输出参数，解析出的会话ID
+	 * @param orderRef 输出参数，解析出的报单引用
+	 * @return bool 解析是否成功
+	 */
 	bool			extractEntrustID(const char* entrustid, uint32_t &frontid, uint32_t &sessionid, uint32_t &orderRef);
 
+	/**
+	 * @brief 生成请求ID
+	 * @details 生成唯一的请求ID，用于识别不同的交易请求
+	 *          每次调用都会自增，确保请求ID的唯一性
+	 * 
+	 * @return uint32_t 新生成的请求ID
+	 */
 	uint32_t		genRequestID();
 
 protected:
+	/// @brief 期货公司代码
 	std::string		m_strBroker;
+	/// @brief 交易前置机地址列表
 	std::vector<std::string> m_strFront;
 
+	/// @brief 交易账户用户名
 	std::string		m_strUser;
+	/// @brief 交易账户密码
 	std::string		m_strPass;
 
+	/// @brief CTP应用程ID，用于用户认证
 	std::string		m_strAppID;
+	/// @brief CTP应用授权码，用于用户认证
 	std::string		m_strAuthCode;
 
+	/// @brief 产品信息
 	std::string		m_strProdInfo;
 
+	/// @brief 是否使用快速启动模式，跳过结算单确认
 	bool			m_bQuickStart;
 
+	/// @brief 交易接口标签，用于识别当前交易接口
 	std::string		m_strTag;
 
+	/// @brief 结算单信息
 	std::string		m_strSettleInfo;
 
+	/// @brief 用户名称
 	std::string		m_strUserName;
+	/// @brief 流水等数据存储目录
 	std::string		m_strFlowDir;
 
+	/// @brief 交易接口回调接收器
 	ITraderSpi*		m_sink;
+	/// @brief 最后一次查询时间
 	uint64_t		m_uLastQryTime;
 
+	/// @brief 交易日期
 	uint32_t					m_lDate;
+	/// @brief 前置机编号，由CTP服务器分配
 	uint32_t					m_frontID;		//前置编号
+	/// @brief 会话编号，由CTP服务器分配
 	uint32_t					m_sessionID;	//会话编号
+	/// @brief 报单引用，自增值，用于唯一标识委托
 	std::atomic<uint32_t>		m_orderRef;		//报单引用
 
+	/// @brief 交易接口状态
 	WrapperState				m_wrapperState;
 
+	/// @brief CTP交易接口实例
 	CThostFtdcTraderApi*		m_pUserAPI;
+	/// @brief 请求ID，自增值，用于唯一标识请求
 	std::atomic<uint32_t>		m_iRequestID;
 
+	/// @brief 持仓映射类型定义，记录合约及其持仓情况
 	typedef WTSHashMap<std::string> PositionMap;
+	/// @brief 持仓映射表，用于存储所有合约的持仓情况
 	PositionMap*				m_mapPosition;
-	WTSArray*					m_ayTrades;
-	WTSArray*					m_ayOrders;
-	WTSArray*					m_ayPosDetail;
+	/// @brief 成交列表，存储所有成交记录
+	WTSArray*				m_ayTrades;
+	/// @brief 委托列表，存储所有委托记录
+	WTSArray*				m_ayOrders;
+	/// @brief 持仓明细列表，存储持仓明细信息
+	WTSArray*				m_ayPosDetail;
 
+	/// @brief 基础数据管理器，用于获取合约信息等
 	IBaseDataMgr*				m_bdMgr;
 
+	/// @brief 查询队列类型定义，用于处理批量查询
 	typedef std::queue<CommonExecuter>	QueryQue;
+	/// @brief 查询队列，存储待处理的查询请求
 	QueryQue				m_queQuery;
+	/// @brief 是否正在查询中的标志
 	bool					m_bInQuery;
+	/// @brief 查询队列互斥锁，保护查询队列的线程安全
 	StdUniqueMutex			m_mtxQuery;
+	/// @brief 最后一次查询时间
 	uint64_t				m_lastQryTime;
 
+	/// @brief 是否停止的标志
 	bool					m_bStopped;
+	/// @brief 工作线程，用于异步处理查询等操作
 	StdThreadPtr			m_thrdWorker;
 
+	/// @brief CTP模块路径
 	std::string		m_strModule;
+	/// @brief CTP动态库句柄
 	DllHandle		m_hInstCTP;
+	/// @brief CTP创建器函数指针类型
 	typedef CThostFtdcTraderApi* (*CTPCreator)(const char *);
+	/// @brief CTP创建器函数指针
 	CTPCreator		m_funcCreator;
 
-	//委托单标记缓存器
+	/// @brief 委托单标记缓存器，用于缓存委托单编号与其他信息的关联
 	WtKVCache		m_eidCache;
-	//订单标记缓存器
+	/// @brief 订单标记缓存器，用于缓存订单编号与其他信息的关联
 	WtKVCache		m_oidCache;
 };
-
