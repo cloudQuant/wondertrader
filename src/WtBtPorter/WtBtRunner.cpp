@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file WtBtRunner.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 回测引擎实现文件
+ * \details 该文件实现了WtBtRunner类，提供完整的CTA、SEL及HFT策略回测框架支持
+ *          实现历史数据加载、模拟器初始化、回调注册、回测流程控制等核心功能
  */
 #include "WtBtRunner.h"
 #include "ExpCtaMocker.h"
@@ -43,6 +45,12 @@ const char* getModuleName()
 }
 #endif
 
+/**
+ * @brief 构造函数
+ * @details 初始化回测引擎对象，将所有成员变量初始化为默认值
+ *          包括各类模拟器、回调函数指针、数据加载器和状态标志
+ *          并安装信号处理钩子用于捕获异常
+ */
 WtBtRunner::WtBtRunner()
 	: _cta_mocker(NULL)
 	, _sel_mocker(NULL)
@@ -91,10 +99,26 @@ WtBtRunner::WtBtRunner()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 释放回测引擎对象占用的资源
+ *          注意实际的资源释放在release方法中完成
+ */
 WtBtRunner::~WtBtRunner()
 {
 }
 
+/**
+ * @brief 加载原始历史K线数据
+ * @details 使用外部注册的原始数据加载器来加载指定品种、指定周期的原始历史K线数据
+ * 
+ * @param obj 数据接收对象
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param cb 读取K线数据的回调函数
+ * 
+ * @return bool 是否成功加载数据
+ */
 bool WtBtRunner::loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -120,6 +144,18 @@ bool WtBtRunner::loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod p
 	}
 }
 
+/**
+ * @brief 加载处理过的历史K线数据
+ * @details 使用外部注册的最终数据加载器来加载指定品种、指定周期的已处理的历史K线数据
+ *          与原始数据不同，最终数据可能已经过滤、调整或其他处理
+ * 
+ * @param obj 数据接收对象
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param cb 读取K线数据的回调函数
+ * 
+ * @return bool 是否成功加载数据
+ */
 bool WtBtRunner::loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -145,6 +181,16 @@ bool WtBtRunner::loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod
 	}
 }
 
+/**
+ * @brief 加载所有除权因子
+ * @details 使用外部注册的除权因子加载器来加载所有品种的除权因子
+ *          除权因子用于处理除权日前后的数据连续性
+ * 
+ * @param obj 数据接收对象
+ * @param cb 读取除权因子的回调函数
+ * 
+ * @return bool 是否成功加载数据
+ */
 bool WtBtRunner::loadAllAdjFactors(void* obj, FuncReadFactors cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -157,6 +203,17 @@ bool WtBtRunner::loadAllAdjFactors(void* obj, FuncReadFactors cb)
 	return _ext_adj_fct_loader("");
 }
 
+/**
+ * @brief 加载指定品种的除权因子
+ * @details 使用外部注册的除权因子加载器来加载指定品种的除权因子
+ *          与loadAllAdjFactors不同，本方法只加载指定品种的除权因子
+ * 
+ * @param obj 数据接收对象
+ * @param stdCode 标准化合约代码
+ * @param cb 读取除权因子的回调函数
+ * 
+ * @return bool 是否成功加载数据
+ */
 bool WtBtRunner::loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -169,6 +226,17 @@ bool WtBtRunner::loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors 
 	return _ext_adj_fct_loader(stdCode);
 }
 
+/**
+ * @brief 加载原始历史造市数据
+ * @details 使用外部注册的tick数据加载器来加载指定品种、指定日期的原始历史tick数据
+ * 
+ * @param obj 数据接收对象
+ * @param stdCode 标准化合约代码
+ * @param uDate 日期，格式YYYYMMDD
+ * @param cb 读取tick数据的回调函数
+ * 
+ * @return bool 是否成功加载数据
+ */
 bool WtBtRunner::loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -181,6 +249,14 @@ bool WtBtRunner::loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate,
 	return _ext_tick_loader(stdCode, uDate);
 }
 
+/**
+ * @brief 向回测引擎输入原始K线数据
+ * @details 将加载的原始K线数据通过回调函数输入到回测引擎中
+ *          该方法需要在外部数据加载器装在数据后调用
+ * 
+ * @param bars K线数据结构数组
+ * @param count 数据数量
+ */
 void WtBtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 {
 	if(_ext_fnl_bar_loader == NULL && _ext_raw_bar_loader == NULL)
@@ -192,6 +268,16 @@ void WtBtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 	_feeder_bars(_feed_obj, bars, count);
 }
 
+/**
+ * @brief 向回测引擎输入除权因子数据
+ * @details 将加载的除权因子数据通过回调函数输入到回测引擎中
+ *          除权因子用于处理除权日前后的数据连续性
+ * 
+ * @param stdCode 标准化合约代码
+ * @param dates 日期数组，格式YYYYMMDD
+ * @param factors 对应的除权因子数组
+ * @param count 数据数量
+ */
 void WtBtRunner::feedAdjFactors(const char* stdCode, uint32_t* dates, double* factors, uint32_t count)
 {
 	if(_ext_adj_fct_loader == NULL)
@@ -203,6 +289,14 @@ void WtBtRunner::feedAdjFactors(const char* stdCode, uint32_t* dates, double* fa
 	_feeder_fcts(_feed_obj, stdCode, dates, factors, count);
 }
 
+/**
+ * @brief 向回测引擎输入原始tick数据
+ * @details 将加载的原始tick数据通过回调函数输入到回测引擎中
+ *          需要在外部数据加载器加载数据后调用
+ * 
+ * @param ticks tick数据结构数组
+ * @param count 数据数量
+ */
 void WtBtRunner::feedRawTicks(WTSTickStruct* ticks, uint32_t count)
 {
 	if (_ext_tick_loader == NULL)
@@ -214,6 +308,19 @@ void WtBtRunner::feedRawTicks(WTSTickStruct* ticks, uint32_t count)
 	_feeder_ticks(_feed_obj, ticks, count);
 }
 
+/**
+ * @brief 注册CTA策略引擎的回调函数
+ * @details 注册后的回调函数将在相应事件发生时被引擎调用
+ *          这些回调用于通知策略模块各类事件的发生
+ *
+ * @param cbInit 策略初始化回调
+ * @param cbTick 市场实时行情推送回调
+ * @param cbCalc 计算需要回调
+ * @param cbBar K线周期数据推送回调
+ * @param cbSessEvt 交易时段事件回调
+ * @param cbCalcDone 计算完成回调
+ * @param cbCondTrigger 条件触发回调
+ */
 void WtBtRunner::registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, FuncStraBarCallback cbBar, 
 	FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone /* = NULL */, FuncStraCondTriggerCallback cbCondTrigger /* = NULL */)
 {
@@ -229,6 +336,18 @@ void WtBtRunner::registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of CTA engine registration done");
 }
 
+/**
+ * @brief 注册SEL选股策略引擎的回调函数
+ * @details 注册后的回调函数将在相应事件发生时被引擎调用
+ *          这些回调用于通知选股策略模块各类事件的发生
+ * 
+ * @param cbInit 策略初始化回调
+ * @param cbTick 市场实时行情推送回调
+ * @param cbCalc 计算需要回调
+ * @param cbBar K线周期数据推送回调
+ * @param cbSessEvt 交易时段事件回调
+ * @param cbCalcDone 计算完成回调
+ */
 void WtBtRunner::registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 	FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone/* = NULL*/)
 {
@@ -243,6 +362,23 @@ void WtBtRunner::registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of SEL engine registration done");
 }
 
+/**
+ * @brief 注册HFT高频策略引擎的回调函数
+ * @details 注册后的回调函数将在相应事件发生时被引擎调用
+ *          这些回调用于通知高频策略模块各类市场数据和交易事件的发生
+ * 
+ * @param cbInit 策略初始化回调
+ * @param cbTick 市场实时行情推送回调
+ * @param cbBar K线周期数据推送回调
+ * @param cbChnl 交易通道就绪事件回调
+ * @param cbOrd 委托回报事件回调
+ * @param cbTrd 成交回报事件回调
+ * @param cbEntrust 委托宣告事件回调
+ * @param cbOrdDtl 逆序委托明细事件回调
+ * @param cbOrdQue 委托队列事件回调
+ * @param cbTrans 逆序成交明细事件回调
+ * @param cbSessEvt 交易时段事件回调
+ */
 void WtBtRunner::registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar,
 	FuncHftChannelCallback cbChnl, FuncHftOrdCallback cbOrd, FuncHftTrdCallback cbTrd, FuncHftEntrustCallback cbEntrust, 
 	FuncStraOrdDtlCallback cbOrdDtl, FuncStraOrdQueCallback cbOrdQue, FuncStraTransCallback cbTrans, FuncSessionEvtCallback cbSessEvt)
@@ -265,6 +401,20 @@ void WtBtRunner::registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of HFT engine registration done");
 }
 
+/**
+ * @brief 初始化CTA策略模拟器
+ * @details 新建并初始化一个ExpCtaMocker对象，用于模拟和执行CTA策略
+ *          如果已存在模拟器，则先删除原模拟器
+ * 
+ * @param name 策略名称
+ * @param slippage 滑点设置，默认为0
+ * @param hook 是否安装钩子函数，用于手动给模拟器发信号
+ * @param persistData 是否持久化数据
+ * @param bIncremental 是否加载增量数据
+ * @param isRatioSlp 滑点是否为比例滑点
+ * 
+ * @return uint32_t 模拟器ID
+ */
 uint32_t WtBtRunner::initCtaMocker(const char* name, int32_t slippage /* = 0 */, bool hook /* = false */, 
 	bool persistData /* = true */, bool bIncremental /* = false */, bool isRatioSlp /* = false */)
 {
@@ -284,6 +434,16 @@ uint32_t WtBtRunner::initCtaMocker(const char* name, int32_t slippage /* = 0 */,
 	return _cta_mocker->id();
 }
 
+/**
+ * @brief 初始化HFT高频策略模拟器
+ * @details 新建并初始化一个ExpHftMocker对象，用于模拟和执行高频策略
+ *          如果已存在模拟器，则先删除原模拟器
+ * 
+ * @param name 策略名称
+ * @param hook 是否安装钩子函数，用于手动给模拟器发信号
+ * 
+ * @return uint32_t 模拟器ID
+ */
 uint32_t WtBtRunner::initHftMocker(const char* name, bool hook/* = false*/)
 {
 	if (_hft_mocker)
@@ -298,6 +458,23 @@ uint32_t WtBtRunner::initHftMocker(const char* name, bool hook/* = false*/)
 	return _hft_mocker->id();
 }
 
+/**
+ * @brief 初始化SEL选股策略模拟器
+ * @details 新建并初始化一个ExpSelMocker对象，用于模拟和执行选股策略
+ *          如果已存在模拟器，则先删除原模拟器
+ *          并且在回放器中注册定时任务
+ * 
+ * @param name 策略名称
+ * @param date 任务日期，格式YYYYMMDD
+ * @param time 任务时间，格式HHMMSS
+ * @param period 任务周期
+ * @param trdtpl 交易模板，默认为"CHINA"
+ * @param session 交易时段，默认为"TRADING"
+ * @param slippage 滑点设置，默认为0
+ * @param isRatioSlp 滑点是否为比例滑点
+ * 
+ * @return uint32_t 模拟器ID
+ */
 uint32_t WtBtRunner::initSelMocker(const char* name, uint32_t date, uint32_t time, const char* period, 
 	const char* trdtpl /* = "CHINA" */, const char* session /* = "TRADING" */, int32_t slippage /* = 0 */, bool isRatioSlp /* = false */)
 {
@@ -314,6 +491,17 @@ uint32_t WtBtRunner::initSelMocker(const char* name, uint32_t date, uint32_t tim
 	return _sel_mocker->id();
 }
 
+/**
+ * @brief K线周期数据回调函数
+ * @details 根据引擎类型调用相应的K线数据回调函数
+ *          当新的K线数据到达时触发此回调
+ * 
+ * @param id 策略ID
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param newBar 新到的K线数据
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period, WTSBarStruct* newBar, EngineType eType/*= ET_CTA*/)
 {
 	switch (eType)
@@ -326,6 +514,16 @@ void WtBtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period
 	}
 }
 
+/**
+ * @brief 策略周期性计算回调函数
+ * @details 根据引擎类型调用相应的计算回调函数
+ *          当到达计算时间点时触发此回调
+ * 
+ * @param id 策略ID
+ * @param curDate 当前日期，格式YYYYMMDD
+ * @param curTime 当前时间，格式HHMMSS
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtBtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
