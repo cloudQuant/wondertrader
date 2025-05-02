@@ -1001,6 +1001,14 @@ void WtBtRunner::clear_cache()
 	_replayer.clear_cache();
 }
 
+/**
+ * @brief 获取原始合约代码
+ * @details 从标准化合约代码中获取原始合约代码
+ *          在某些场景下需要使用原始合约代码而非标准化代码
+ * 
+ * @param stdCode 标准化合约代码
+ * @return const char* 原始合约代码
+ */
 const char* WtBtRunner::get_raw_stdcode(const char* stdCode)
 {
 	static thread_local std::string s;
@@ -1008,6 +1016,12 @@ const char* WtBtRunner::get_raw_stdcode(const char* stdCode)
 	return s.c_str();
 }
 
+/**
+ * @brief 日志级别标签数组
+ * @details 定义了系统支持的日志级别标签
+ *          从全部输出(all)到不输出(none)的不同级别
+ *          依次为级别从低到高排列
+ */
 const char* LOG_TAGS[] = {
 	"all",
 	"debug",
@@ -1018,6 +1032,14 @@ const char* LOG_TAGS[] = {
 	"none",
 };
 
+/**
+ * @brief 初始化事件通知器
+ * @details 根据配置初始化事件通知器组件
+ *          事件通知器用于将回测过程中的事件发送到外部监听器
+ * 
+ * @param cfg 事件通知器配置对象
+ * @return bool 初始化是否成功
+ */
 bool WtBtRunner::initEvtNotifier(WTSVariant* cfg)
 {
 	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
