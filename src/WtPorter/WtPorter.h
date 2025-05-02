@@ -206,103 +206,460 @@ extern "C"
 	 */
 	EXPORT_FLAG	bool		reg_sel_factories(const char* factFolder);
 
+	/**
+	 * @brief 注册执行器工厂
+	 * @param factFolder 工厂文件夹路径，包含执行器动态库文件
+	 * @return 注册成功返回true，失败返回false
+	 * @details 注册执行器工厂，框架会自动加载指定文件夹中的所有执行器动态库
+	 *          执行器负责将策略生成的交易信号转化为实际的交易指令并发送到交易系统
+	 */
 	EXPORT_FLAG	bool		reg_exe_factories(const char* factFolder);
 
+	/**
+	 * @brief 释放Porter模块资源
+	 * @details 清理并释放Porter模块占用的各种资源
+	 *          在异步运行模式下，应在程序退出前调用此函数以释放资源
+	 *          调用后不能再使用其他Porter接口函数，除非重新初始化
+	 */
 	EXPORT_FLAG	void		release_porter();
 
+	/**
+	 * @brief 创建外部数据解析器
+	 * @param id 数据解析器标识符
+	 * @return 创建成功返回true，失败返回false
+	 * @details 创建外部数据解析器实例，用于接入自定义的数据源
+	 *          需要先调用register_parser_callbacks注册相关回调对外部解析器进行处理
+	 */
 	EXPORT_FLAG	bool		create_ext_parser(const char* id);
 
+	/**
+	 * @brief 创建外部执行器
+	 * @param id 执行器标识符
+	 * @return 创建成功返回true，失败返回false
+	 * @details 创建外部执行器实例，用于接入自定义的交易执行器
+	 *          需要先调用register_exec_callbacks注册相关回调对外部执行器进行处理
+	 *          执行器负责将策略生成的交易信号转化为实际的交易指令
+	 */
 	EXPORT_FLAG	bool		create_ext_executer(const char* id);
 
+	/**
+	 * @brief 获取原始标准合约代码
+	 * @param stdCode 标准合约代码
+	 * @return 原始合约代码字符串
+	 * @details 将框架内部使用的标准化合约代码转换为原始的交易所合约代码
+	 *          当需要与外部系统交互或在用户界面显示原始合约时非常有用
+	 */
 	EXPORT_FLAG	WtString	get_raw_stdcode(const char* stdCode);
 
 	//////////////////////////////////////////////////////////////////////////
 	//CTA策略接口
 #pragma region "CTA接口"
+	/**
+	 * @brief 创建CTA策略上下文
+	 * @param name 策略名称
+	 * @param slippage 滑点设置，默认为0
+	 * @return 返回策略上下文句柄
+	 * @details 创建一个新的CTA策略上下文，用于执行策略相关的操作
+	 *          每个策略实例都需要一个独立的上下文来管理其状态和交互
+	 *          滑点参数用于模拟实际交易中的价格滑点，提高回测真实性
+	 */
 	EXPORT_FLAG	CtxHandler	create_cta_context(const char* name, int slippage = 0);
 
+	/**
+	 * @brief CTA策略开多仓
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 交易数量
+	 * @param userTag 用户自定义标签，用于标识交易
+	 * @param limitprice 限价，如果希望市价委托，可以传入0
+	 * @param stopprice 止损价，不使用止损价可以传入0
+	 * @details 执行多头开仓操作，即买入并持有合约
+	 *          可以指定限价和止损价，实现更精细的交易控制
+	 *          userTag可以用于跟踪交易标的来源和目的
+	 */
 	EXPORT_FLAG	void		cta_enter_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice);
 
+	/**
+	 * @brief CTA策略平多仓
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 平仓数量
+	 * @param userTag 用户自定义标签，用于标识交易
+	 * @param limitprice 限价，如果希望市价委托，可以传入0
+	 * @param stopprice 止损价，不使用止损价可以传入0
+	 * @details 执行多头平仓操作，即卖出持有的多头合约
+	 *          可以指定限价和止损价，实现更精细的交易控制
+	 *          userTag可以用于跟踪交易标的来源和目的
+	 */
 	EXPORT_FLAG	void		cta_exit_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice);
 
+	/**
+	 * @brief CTA策略开空仓
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 交易数量
+	 * @param userTag 用户自定义标签，用于标识交易
+	 * @param limitprice 限价，如果希望市价委托，可以传入0
+	 * @param stopprice 止损价，不使用止损价可以传入0
+	 * @details 执行空头开仓操作，即卖出合约并形成空头持仓
+	 *          可以指定限价和止损价，实现更精细的交易控制
+	 *          userTag可以用于跟踪交易标的来源和目的
+	 */
 	EXPORT_FLAG	void		cta_enter_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice);
 
+	/**
+	 * @brief CTA策略平空仓
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 平仓数量
+	 * @param userTag 用户自定义标签，用于标识交易
+	 * @param limitprice 限价，如果希望市价委托，可以传入0
+	 * @param stopprice 止损价，不使用止损价可以传入0
+	 * @details 执行空头平仓操作，即买入合约并平掉空头持仓
+	 *          可以指定限价和止损价，实现更精细的交易控制
+	 *          userTag可以用于跟踪交易标的来源和目的
+	 */
 	EXPORT_FLAG	void		cta_exit_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice);
 
+	/**
+	 * @brief 获取指定合约的持仓盈亏
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回持仓盈亏金额，如果没有持仓则返回0
+	 * @details 获取当前策略对指定合约的持仓盈亏
+	 *          持仓盈亏是根据最新行情价格计算的浮动盈亏
+	 *          在策略运行中可以用来实时监控盈亏状况
+	 */
 	EXPORT_FLAG	double		cta_get_position_profit(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定标签持仓的开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签
+	 * @return 返回开仓时间，格式为YYYYMMDDHHMMSS，如果没有存在相应持仓返回0
+	 * @details 获取策略指定合约和标签的开仓时间
+	 *          开仓标签是在开仓时自定义的标识，可以用于跟踪特定交易
+	 *          时间格式为YYYYMMDDHHMMSS，便于进行时间计算和比较
+	 */
 	EXPORT_FLAG	WtUInt64	cta_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取指定标签持仓的开仓成本
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签
+	 * @return 返回开仓成本，如果没有存在相应持仓返回0
+	 * @details 获取策略指定合约和标签的开仓成本
+	 *          开仓成本是开仓时的单位平均价格，用于计算持仓盈亏
+	 *          可用于与当前市场价格比较，进行止损或止盈决策
+	 */
 	EXPORT_FLAG	double		cta_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取指定标签持仓的收益
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param openTag 开仓标签
+	 * @param flag 收益类型标志，0-浮动盈亏，1-平仓盈亏
+	 * @return 返回指定标签持仓的收益值，如果没有存在相应持仓返回0
+	 * @details 获取策略指定合约、标签和类型的持仓收益
+	 *          当flag为0时，返回根据当前行情价格计算的浮动盈亏
+	 *          当flag为1时，返回已实现的平仓盈亏
+	 *          可用于策略的收益跟踪和风险管理
+	 */
 	EXPORT_FLAG	double		cta_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag);
 
+	/**
+	 * @brief 获取指定合约的持仓平均价格
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回持仓平均价格，如果没有持仓则返回0
+	 * @details 获取策略指定合约的所有持仓的平均价格
+	 *          平均价格考虑了多次开仓的价格差异，是根据总成本除以总量计算得到的
+	 *          可用于判断当前持仓的成本水平和进行止盈止损决策
+	 */
 	EXPORT_FLAG	double		cta_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param bOnlyValid 是否只计算有效仓位，不包括过渡仓位
+	 * @param openTag 开仓标签，如果不为空，则只取指定标签的持仓
+	 * @return 返回持仓量，多头仓位返回正数，空头仓位返回负数
+	 * @details 获取策略指定合约的持仓数量
+	 *          有效仓位是指已经确认开仓成功的持仓，不包括过渡仓位
+	 *          过渡仓位是指发出开仓请求但还未成交的持仓
+	 */
 	EXPORT_FLAG	double		cta_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag);
 
+	/**
+	 * @brief 设置CTA策略指定合约的目标仓位
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param qty 目标仓位数量，正数表示多头仓位，负数表示空头仓位
+	 * @param uesrTag 用户自定义标签
+	 * @param limitprice 限价，如果希望市价委托，可以传入0
+	 * @param stopprice 止损价，不使用止损价可以传入0
+	 * @details 设置策略指定合约的目标仓位，框架会自动根据当前仓位和目标仓位的差异进行开仓或平仓
+	 *          这是一个非常方便的函数，可以直接设置目标持仓，而不需要手动计算开平仓数量
+	 *          如果当前没有持仓，会直接开仓到目标仓位；如果已有持仓，会自动计算差异并加减仓位
+	 */
 	EXPORT_FLAG	void		cta_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* uesrTag, double limitprice, double stopprice);
 
+	/**
+	 * @brief 获取指定合约的最新价格
+	 * @param stdCode 标准合约代码
+	 * @return 返回合约的最新价格，如果没有行情数据则返回0
+	 * @details 获取指定合约的最新市场价格
+	 *          这个价格通常是最新成交价，用于策略判断当前市场状况
+	 *          在策略计算中非常有用，如计算指标、做出交易决策等
+	 */
 	EXPORT_FLAG	double 		cta_get_price(const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的当日价格数据
+	 * @param stdCode 标准合约代码
+	 * @param flag 价格标志：0-开盘价，1-最高价，2-最低价，3-收盘价
+	 * @return 返回指定类型的当日价格，如果没有数据则返回0
+	 * @details 获取指定合约当天的开盘价、最高价、最低价或收盘价
+	 *          这些价格信息在进行日内策略计算时非常有用
+	 *          策略可以基于当日的高低点来设定交易策略和风险控制
+	 */
 	EXPORT_FLAG	double 		cta_get_day_price(const char* stdCode, int flag);
 
+	/**
+	 * @brief 获取策略账户资金数据
+	 * @param cHandle 策略上下文句柄
+	 * @param flag 资金数据标志：0-动态权益，1-静态权益，2-可用资金
+	 * @return 返回指定类型的资金数据
+	 * @details 获取策略账户的资金相关数据
+	 *          动态权益包含浮动盈亏，静态权益不包含浮动盈亏
+	 *          可用资金是当前可以用于开仓的资金量
+	 *          这些数据在策略的风险管理和资金分配中非常有用
+	 */
 	EXPORT_FLAG	double		cta_get_fund_data(CtxHandler cHandle, int flag);
 
+	/**
+	 * @brief 获取当前交易日期
+	 * @return 返回当前交易日期，格式YYYYMMDD
+	 * @details 获取系统当前的交易日期
+	 *          交易日期是指股票、期货市场的交易日，非自然日
+	 *          在策略计算中经常需要知道当前的交易日期以进行各种判断
+	 */
 	EXPORT_FLAG	WtUInt32 	cta_get_tdate();
 
+	/**
+	 * @brief 获取当前日期
+	 * @return 返回当前日期，格式YYYYMMDD
+	 * @details 获取系统当前日期，这是自然日期，除非模拟交易环境下会根据回测数据设置
+	 *          与交易日期不同，自然日期包含了周末和节假日
+	 *          在策略中可用于日志记录、时间计算等场景
+	 */
 	EXPORT_FLAG	WtUInt32 	cta_get_date();
 
+	/**
+	 * @brief 获取当前时间
+	 * @return 返回当前时间，格式HHMMSS，例如235959
+	 * @details 获取系统当前时间，除非模拟交易环境下会根据回测数据设置
+	 *          这个时间在策略中非常重要，特别是在日内策略中
+	 *          可用于判断当前是否在交易时段内、交易时间限制等
+	 */
 	EXPORT_FLAG	WtUInt32 	cta_get_time();
 
+	/**
+	 * @brief 获取历史K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期，如m1/m5/d1等
+	 * @param barCnt 请求的K线数量
+	 * @param isMain 是否是主力合约
+	 * @param cb 回调函数，用于接收返回的K线数据
+	 * @return 返回实际获取到的K线数量
+	 * @details 获取指定合约的历史K线数据，并通过回调函数返回给策略
+	 *          実际返回的K线数量可能少于请求的数量，这取决于数据库中的可用数据
+	 *          策略可以根据这些K线数据计算指标、生成交易信号等
+	 */
 	EXPORT_FLAG	WtUInt32	cta_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, bool isMain, FuncGetBarsCallback cb);
 
+	/**
+	 * @brief 获取历史Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param tickCnt 请求的Tick数量
+	 * @param cb 回调函数，用于接收返回的Tick数据
+	 * @return 返回实际获取到的Tick数量
+	 * @details 获取指定合约的历史Tick数据，并通过回调函数返回给策略
+	 *          Tick数据是最小的行情单元，包含密集的成交、委托信息
+	 *          高频策略中经常需要这些微观市场结构数据来分析和决策
+	 */
 	EXPORT_FLAG	WtUInt32	cta_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb);
 
+	/**
+	 * @brief 获取策略的所有持仓信息
+	 * @param cHandle 策略上下文句柄
+	 * @param cb 回调函数，用于接收返回的持仓数据
+	 * @details 获取策略当前的所有持仓信息，并通过回调函数返回
+	 *          每个持仓包含标准合约代码、持仓方向、数量等信息
+	 *          这对于策略的风险管理和持仓监控非常有用
+	 */
 	EXPORT_FLAG	void		cta_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb);
 
+	/**
+	 * @brief 获取指定合约的首次开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回首次开仓时间，格式YYYYMMDDHHMMSS，如果没有相关持仓则返回0
+	 * @details 获取指定合约的最早一笔开仓的时间
+	 *          开仓时间是指策略对某个合约建立仓位的时间
+	 *          可用于计算持仓时间，判断显示持仓久度等
+	 */
 	EXPORT_FLAG	WtUInt64	cta_get_first_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的最近开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近开仓时间，格式YYYYMMDDHHMMSS，如果没有相关持仓则返回0
+	 * @details 获取指定合约的最近一笔开仓的时间
+	 *          与cta_get_first_entertime不同，这个函数返回的是最近的开仓时间
+	 *          可用于判断最近是否有新增仓位，跟踪近期的开仓操作等
+	 */
 	EXPORT_FLAG	WtUInt64	cta_get_last_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的最近平仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近平仓时间，格式YYYYMMDDHHMMSS，如果没有平仓记录则返回0
+	 * @details 获取指定合约的最近一笔平仓的时间
+	 *          平仓时间是指策略对某个合约清空仓位的时间
+	 *          可用于判断最近是否有平仓操作，以及实现一些时间限制，如平仓后的冷静期
+	 */
 	EXPORT_FLAG	WtUInt64	cta_get_last_exittime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的最近开仓价格
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近开仓价格，如果没有相关持仓则返回0
+	 * @details 获取指定合约的最近一笔开仓的价格
+	 *          开仓价格是指策略对某个合约建立仓位时的成交价格
+	 *          可用于计算浮动盈亏、设置止盈止损价位等
+	 */
 	EXPORT_FLAG	double		cta_get_last_enterprice(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取指定合约的最近开仓标签
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @return 返回最近开仓标签，如果没有相关持仓则返回空字符串
+	 * @details 获取指定合约的最近一笔开仓的标签
+	 *          开仓标签是在开仓时自定义的标识，用于标记交易的来源或目的
+	 *          可用于记录开仓原因、策略信号类型等信息，便于后续分析
+	 */
 	EXPORT_FLAG	WtString	cta_get_last_entertag(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 将文本写入策略日志
+	 * @param cHandle 策略上下文句柄
+	 * @param level 日志级别，数值越大级别越高
+	 * @param message 日志消息内容
+	 * @details 将指定级别的文本信息写入到策略的日志中
+	 *          日志系统会根据级别进行过滤和管理
+	 *          在策略开发和调试中，日志记录是非常重要的工具
+	 */
 	EXPORT_FLAG	void		cta_log_text(CtxHandler cHandle, WtUInt32 level, const char* message);
 
+	/**
+	 * @brief 保存用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param val 数据值
+	 * @details 将键值对保存到策略的持久化存储中
+	 *          用户数据存储可以在策略实例重启或系统重启后仍然可用
+	 *          常用于保存策略状态、统计信息、历史交易记录等
+	 */
 	EXPORT_FLAG	void		cta_save_userdata(CtxHandler cHandle, const char* key, const char* val);
 
+	/**
+	 * @brief 加载用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param defVal 默认值，当指定键不存在时返回此值
+	 * @return 返回保存的数据值，如果不存在则返回默认值
+	 * @details 从策略的持久化存储中加载指定键的数据
+	 *          与cta_save_userdata配合使用，实现用户数据的读写
+	 *          可以用于恢复策略状态、读取历史统计信息等
+	 */
 	EXPORT_FLAG	WtString	cta_load_userdata(CtxHandler cHandle, const char* key, const char* defVal);
 
+	/**
+	 * @brief 订阅合约的Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @details 订阅指定合约的Tick行情数据
+	 *          订阅后，可以通过策略的on_tick回调函数接收该合约的Tick数据
+	 *          Tick数据包含合约最新的成交价、买卖目标价、成交量等信息
+	 */
 	EXPORT_FLAG	void		cta_sub_ticks(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 订阅合约的K线事件
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期，如m1/m5/d1等
+	 * @details 订阅指定合约的指定周期K线事件
+	 *          订阅后，当新的K线生成时，策略的on_bar回调函数会被触发
+	 *          K线事件在策略开发中非常重要，可用于指标计算、交易信号生成等
+	 */
 	EXPORT_FLAG	void		cta_sub_bar_events(CtxHandler cHandle, const char* stdCode, const char* period);
 
-	/*
-	 *	设置图表K线
+	/**
+	 * @brief 设置图表K线
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期，如m1/m5/d1等
+	 * @details 设置策略图表中显示的K线合约和周期
+	 *          这个函数用于策略开发环境中，允许在UI中显示指定合约的K线图表
+	 *          帮助策略开发者可视化地分析市场和策略行为
 	 */
 	EXPORT_FLAG void		cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* period);
 
-	/*
-	 *	添加信号
+	/**
+	 * @brief 添加图表标记
+	 * @param cHandle 策略上下文句柄
+	 * @param price 标记价格位置
+	 * @param icon 图标名称
+	 * @param tag 标记标签文本
+	 * @details 在策略图表上添加标记点，用于标记重要的交易信号或事件
+	 *          标记会显示在指定的价格位置，并使用指定的图标和标签
+	 *          在策略开发和调试中提供可视化的信号标记，帮助理解策略行为
 	 */
 	EXPORT_FLAG void		cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, const char* tag);
 
-	/*
-	 *	添加指标
-	 *	@idxName	指标名称
-	 *	@indexType	指标类型：0-主图指标，1-副图指标
+	/**
+	 * @brief 注册图表指标
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称
+	 * @param indexType 指标类型：0-主图指标，1-副图指标
+	 * @details 在策略图表上注册一个指标，指标可以显示在主图或副图上
+	 *          主图指标与K线在同一个图表区域，副图指标则显示在单独的区域
+	 *          注册成功后，还需要使用cta_register_index_line添加指标线，并使用cta_set_index_value设置指标值
 	 */
 	EXPORT_FLAG void		cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexType);
 
-	/*
-	 *	添加指标线
-	 *	@idxName	指标名称
-	 *	@lineName	线条名称
-	 *	@lineType	线性，0-曲线
+	/**
+	 * @brief 注册指标线
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称，与cta_register_index中的名称一致
+	 * @param lineName 线条名称，在同一指标中唯一
+	 * @param lineType 线性类型，0-曲线
+	 * @return 注册成功返回true，失败返回false
+	 * @details 在已注册的指标上添加一条线，每个指标可以包含多条线
+	 *          注册指标线后，需要使用cta_set_index_value函数设置线的具体数值
+	 *          不同的线可以使用不同的颜色来表示，便于在图表上区分
 	 */
 	EXPORT_FLAG bool		cta_register_index_line(CtxHandler cHandle, const char* idxName, const char* lineName, WtUInt32 lineType);
 
