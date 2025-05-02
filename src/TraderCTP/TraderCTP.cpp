@@ -892,6 +892,18 @@ void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFt
 		m_sink->handleEvent(WTE_Logout, 0);
 }
 
+
+/**
+ * @brief 查询结算单确认响应回调
+ * @details 当调用ReqQrySettlementInfoConfirm查询结算单确认情况后收到的响应
+ *          根据回调中获取的确认日期信息判断是否需要重新确认结算单
+ *          如果确认日期大于等于交易日，则设置为已准备就绪状态
+ *          否则调用confirm方法进行结算单确认
+ * @param pSettlementInfoConfirm 结算单确认信息
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -931,6 +943,16 @@ void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmFie
 
 }
 
+/**
+ * @brief 结算单确认请求响应回调
+ * @details 当调用ReqSettlementInfoConfirm发送结算单确认请求后收到的响应
+ *          如果结算单确认成功，将包装器状态更新为已就绪状态
+ *          并通过回调接口将登录成功信息通知给上层应用
+ * @param pSettlementInfoConfirm 结算单确认信息
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pSettlementInfoConfirm != NULL)
@@ -947,6 +969,16 @@ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
 	}
 }
 
+/**
+ * @brief 订单插入失败响应回调
+ * @details 当订单提交被CTP交易服务器拒绝时触发此回调
+ *          将订单字段和错误信息转换为内部错误对象
+ *          然后通过回调接口将错误信息推送给上层应用
+ * @param pInputOrder CTP订单插入字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
@@ -968,6 +1000,16 @@ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
 	}
 }
 
+/**
+ * @brief 撤单操作失败响应回调
+ * @details 当撤单操作被CTP交易服务器拒绝时触发此回调
+ *          将撤单操作字段和错误信息转换为内部错误对象和操作对象
+ *          然后通过回调接口将错误信息推送给上层应用
+ * @param pInputOrderAction CTP撤单操作字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (IsErrorRspInfo(pRspInfo))
@@ -985,6 +1027,17 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
 	}
 }
 
+/**
+ * @brief 查询资金账户响应回调
+ * @details 当调用ReqQryTradingAccount查询资金账户后收到的响应
+ *          将CTP账户字段转换为内部WTSAccountInfo对象
+ *          包括保证金、可用资金、手续费、平仓盈亏、入金、出金等信息
+ *          然后通过回调接口将账户信息推送给上层应用
+ * @param pTradingAccount CTP资金账户字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -1018,6 +1071,18 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
 	}
 }
 
+/**
+ * @brief 查询投资者持仓响应回调
+ * @details 当调用ReqQryInvestorPosition查询持仓后收到的响应
+ *          将CTP持仓字段转换为内部WTSPositionItem对象
+ *          根据交易所和合约代码划分持仓，并区分多空方向
+ *          处理昨仓和今仓的持仓数量、均价、浮动盈亏等信息
+ *          最后将所有持仓信息通过回调接口推送给上层应用
+ * @param pInvestorPosition CTP持仓字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -1166,6 +1231,16 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
 	}
 }
 
+/**
+ * @brief 查询结算单响应回调
+ * @details 当调用ReqQrySettlementInfo查询结算单后收到的响应
+ *          收集结算单内容并存储到类成员变量m_strSettleInfo中
+ *          当收到所有结算单内容后，通过回调接口将结算单推送给上层应用
+ * @param pSettlementInfo CTP结算单字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -1185,6 +1260,17 @@ void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlemen
 	}
 }
 
+/**
+ * @brief 查询成交响应回调
+ * @details 当调用ReqQryTrade查询成交记录后收到的响应
+ *          将CTP成交字段转换为内部WTSTradeInfo对象
+ *          并添加到成交数组中
+ *          收集完所有成交数据后，通过回调接口将成交信息推送给上层应用
+ * @param pTrade CTP成交字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -1215,6 +1301,17 @@ void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoFie
 	}
 }
 
+/**
+ * @brief 查询订单响应回调
+ * @details 当调用ReqQryOrder查询订单后收到的响应
+ *          将CTP订单字段转换为内部WTSOrderInfo对象
+ *          并添加到订单数组中
+ *          收集完所有订单数据后，通过回调接口将订单信息推送给上层应用
+ * @param pOrder CTP订单字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (bIsLast)
@@ -1271,6 +1368,13 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder)
 	//ReqQryTradingAccount();
 }
 
+/**
+ * @brief 成交回报回调
+ * @details 当有新成交发生时，CTP交易服务器主动推送该回调
+ *          将CTP成交字段转换为内部WTSTradeInfo对象
+ *          然后通过回调接口将成交信息推送给上层应用
+ * @param pTrade CTP成交字段指针
+ */
 void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade)
 {
 	WTSTradeInfo *tRecord = makeTradeInfo(pTrade);
@@ -1283,6 +1387,15 @@ void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade)
 	}
 }
 
+/**
+ * @brief 将内部方向类型和开平类型转换为CTP方向类型
+ * @details 在中国期货市场中，交易方向需要结合开平标志来确定买卖方向
+ *          例如：多头开仓是买入，多头平仓是卖出
+ *                空头开仓是卖出，空头平仓是买入
+ * @param dirType 内部交易方向类型（多/空）
+ * @param offsetType 内部开平类型（开仓/平仓/平今/平昨）
+ * @return int CTP方向类型定义，对应THOST_FTDC_D_Buy或THOST_FTDC_D_Sell
+ */
 int TraderCTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offsetType)
 {
 	if (WDT_LONG == dirType)
@@ -1297,6 +1410,15 @@ int TraderCTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offsetT
 			return THOST_FTDC_D_Buy;
 }
 
+/**
+ * @brief 将CTP方向类型和开平类型转换为内部方向类型
+ * @details 与第一个wrapDirectionType方法相反，该方法将CTP的买卖方向和开平标志转换为内部使用的多空方向
+ *          例如：买入开仓是多头，买入平仓是空头
+ *                卖出开仓是空头，卖出平仓是多头
+ * @param dirType CTP交易方向类型（买/卖）
+ * @param offsetType CTP开平类型（开仓/平仓/平今/平昨）
+ * @return WTSDirectionType 内部方向类型定义，对应WDT_LONG或WDT_SHORT
+ */
 WTSDirectionType TraderCTP::wrapDirectionType(TThostFtdcDirectionType dirType, TThostFtdcOffsetFlagType offsetType)
 {
 	if (THOST_FTDC_D_Buy == dirType)
@@ -1319,6 +1441,13 @@ WTSDirectionType TraderCTP::wrapPosDirection(TThostFtdcPosiDirectionType dirType
 		return WDT_SHORT;
 }
 
+/**
+ * @brief 将内部开平类型转换为CTP开平类型
+ * @details 转换内部定义的开平类型为CTP接口使用的开平类型
+ *          注意在CTP中平昨仓使用的是普通平仓标志THOST_FTDC_OF_Close
+ * @param offType 内部开平类型定义（WOT_OPEN/WOT_CLOSE/WOT_CLOSETODAY/WOT_CLOSEYESTERDAY/WOT_FORCECLOSE）
+ * @return int CTP开平类型定义，对应THOST_FTDC_OF_*系列常量
+ */
 int TraderCTP::wrapOffsetType(WTSOffsetType offType)
 {
 	if (WOT_OPEN == offType)
@@ -1333,6 +1462,14 @@ int TraderCTP::wrapOffsetType(WTSOffsetType offType)
 		return THOST_FTDC_OF_ForceClose;
 }
 
+/**
+ * @brief 将CTP开平类型转换为内部开平类型
+ * @details 与第一个wrapOffsetType方法相反，该方法将CTP接口的开平类型转换为内部使用的开平类型
+ *          注意在CTP中普通平仓标志THOST_FTDC_OF_Close会转换为WOT_CLOSE
+ *          这会导致无法区分是平仓还是平昨仓，需要结合其他信息判断
+ * @param offType CTP开平类型定义（THOST_FTDC_OF_*系列常量）
+ * @return WTSOffsetType 内部开平类型定义（WOT_OPEN/WOT_CLOSE/WOT_CLOSETODAY/WOT_FORCECLOSE）
+ */
 WTSOffsetType TraderCTP::wrapOffsetType(TThostFtdcOffsetFlagType offType)
 {
 	if (THOST_FTDC_OF_Open == offType)
@@ -1345,6 +1482,15 @@ WTSOffsetType TraderCTP::wrapOffsetType(TThostFtdcOffsetFlagType offType)
 		return WOT_FORCECLOSE;
 }
 
+/**
+ * @brief 将内部价格类型转换为CTP价格类型
+ * @details 转换内部价格类型为CTP接口使用的价格类型
+ *          特别地，对于中金所（CFFEX）的市价单需要使用五档行情报价
+ *          其他交易所可以使用普通市价单
+ * @param priceType 内部价格类型定义（WPT_ANYPRICE/WPT_LIMITPRICE/WPT_BESTPRICE/WPT_LASTPRICE）
+ * @param isCFFEX 是否为中金所合约，默认为false
+ * @return int CTP价格类型定义，对应THOST_FTDC_OPT_*系列常量
+ */
 int TraderCTP::wrapPriceType(WTSPriceType priceType, bool isCFFEX /* = false */)
 {
 	if (WPT_ANYPRICE == priceType)
@@ -1357,6 +1503,13 @@ int TraderCTP::wrapPriceType(WTSPriceType priceType, bool isCFFEX /* = false */)
 		return THOST_FTDC_OPT_LastPrice;
 }
 
+/**
+ * @brief 将CTP价格类型转换为内部价格类型
+ * @details 与第一个wrapPriceType方法相反，该方法将CTP接口的价格类型转换为内部使用的价格类型
+ *          注意市价单和五档行情报价类型都会转换为内部的WPT_ANYPRICE类型
+ * @param priceType CTP价格类型定义（THOST_FTDC_OPT_*系列常量）
+ * @return WTSPriceType 内部价格类型定义（WPT_ANYPRICE/WPT_LIMITPRICE/WPT_BESTPRICE/WPT_LASTPRICE）
+ */
 WTSPriceType TraderCTP::wrapPriceType(TThostFtdcOrderPriceTypeType priceType)
 {
 	if (THOST_FTDC_OPT_AnyPrice == priceType || THOST_FTDC_OPT_FiveLevelPrice == priceType)
@@ -1408,6 +1561,14 @@ int TraderCTP::wrapActionFlag(WTSActionFlag actionFlag)
 }
 
 
+/**
+ * @brief 创建订单信息对象
+ * @details 将CTP订单字段转换为内部使用的WTSOrderInfo对象
+ *          包括合约信息、价格、数量、方向、开平标志、订单状态等
+ *          同时维护订单ID与用户标签之间的映射关系
+ * @param orderField CTP订单字段指针
+ * @return WTSOrderInfo* 创建的订单信息对象指针，如果合约不存在则返回NULL
+ */
 WTSOrderInfo* TraderCTP::makeOrderInfo(CThostFtdcOrderField* orderField)
 {
 	WTSContractInfo* contract = m_bdMgr->getContract(orderField->InstrumentID, orderField->ExchangeID);
@@ -1482,6 +1643,14 @@ WTSOrderInfo* TraderCTP::makeOrderInfo(CThostFtdcOrderField* orderField)
 	return pRet;
 }
 
+/**
+ * @brief 创建委托对象
+ * @details 将CTP订单插入字段转换为内部使用的WTSEntrust对象
+ *          包括合约信息、价格、数量、交易所、交易方向、开平标志等
+ *          同时生成委托ID并关联用户标签
+ * @param entrustField CTP订单插入字段指针
+ * @return WTSEntrust* 创建的委托对象指针，如果合约不存在则返回NULL
+ */
 WTSEntrust* TraderCTP::makeEntrust(CThostFtdcInputOrderField *entrustField)
 {
 	WTSContractInfo* ct = m_bdMgr->getContract(entrustField->InstrumentID, entrustField->ExchangeID);
@@ -1522,6 +1691,14 @@ WTSEntrust* TraderCTP::makeEntrust(CThostFtdcInputOrderField *entrustField)
 	return pRet;
 }
 
+/**
+ * @brief 创建撤单操作对象
+ * @details 将CTP撤单操作字段转换为内部使用的WTSEntrustAction对象
+ *          包括合约代码、交易所、系统单号等信息
+ *          同时生成委托ID并关联用户标签
+ * @param actionField CTP撤单操作字段指针
+ * @return WTSEntrustAction* 创建的撤单操作对象指针
+ */
 WTSEntrustAction* TraderCTP::makeAction(CThostFtdcInputOrderActionField *actionField)
 {
 	WTSEntrustAction* pRet = WTSEntrustAction::create(actionField->InstrumentID, actionField->ExchangeID);
@@ -1536,12 +1713,29 @@ WTSEntrustAction* TraderCTP::makeAction(CThostFtdcInputOrderActionField *actionF
 	return pRet;
 }
 
+/**
+ * @brief 创建错误信息对象
+ * @details 将CTP响应信息字段转换为内部使用的WTSError对象
+ *          格式化错误信息为错误消息和错误代码的组合
+ * @param rspInfo CTP响应信息字段指针
+ * @param ec 错误代码，默认为WEC_NONE
+ * @return WTSError* 创建的错误信息对象指针
+ */
 WTSError* TraderCTP::makeError(CThostFtdcRspInfoField* rspInfo, WTSErroCode ec /* = WEC_NONE */)
 {
 	WTSError* pRet = WTSError::create(ec, fmtutil::format("{}({})", rspInfo->ErrorMsg, rspInfo->ErrorID));
 	return pRet;
 }
 
+/**
+ * @brief 创建成交信息对象
+ * @details 将CTP成交字段转换为内部使用的WTSTradeInfo对象
+ *          包括合约信息、成交价格、成交量、成交时间、成交ID等
+ *          同时根据方向和开平标志确定交易类型，计算成交金额
+ *          并从缓存中获取对应的用户标签
+ * @param tradeField CTP成交字段指针
+ * @return WTSTradeInfo* 创建的成交信息对象指针，如果合约不存在则返回NULL
+ */
 WTSTradeInfo* TraderCTP::makeTradeInfo(CThostFtdcTradeField *tradeField)
 {
 	WTSContractInfo* contract = m_bdMgr->getContract(tradeField->InstrumentID, tradeField->ExchangeID);
@@ -1587,11 +1781,31 @@ WTSTradeInfo* TraderCTP::makeTradeInfo(CThostFtdcTradeField *tradeField)
 	return pRet;
 }
 
+/**
+ * @brief 生成完整的委托ID
+ * @details 根据前置机编号、会话编号和委托引用生成格式化的委托ID
+ *          格式为“000001#0000000100#000123”，即“前置机编号#会话编号#委托引用”
+ * @param buffer 接收生成的委托ID的缓冲区
+ * @param frontid 前置机编号
+ * @param sessionid 会话编号
+ * @param orderRef 委托引用
+ */
 void TraderCTP::generateEntrustID(char* buffer, uint32_t frontid, uint32_t sessionid, uint32_t orderRef)
 {
 	fmtutil::format_to(buffer, "{:06d}#{:010d}#{:06d}", frontid, sessionid, orderRef);
 }
 
+/**
+ * @brief 从委托ID中提取组件
+ * @details 解析形如“000001#0000000100#000123”的委托ID字符串
+ *          按照“前置机编号#会话编号#委托引用”的格式提取各部分
+ *          并将提取的值保存到相应的输出参数中
+ * @param entrustid 要解析的委托ID字符串
+ * @param frontid 输出参数，存放提取的前置机编号
+ * @param sessionid 输出参数，存放提取的会话编号
+ * @param orderRef 输出参数，存放提取的委托引用
+ * @return bool 如果解析成功返回true，否则返回false
+ */
 bool TraderCTP::extractEntrustID(const char* entrustid, uint32_t &frontid, uint32_t &sessionid, uint32_t &orderRef)
 {
 	thread_local static char buffer[64];
@@ -1616,6 +1830,13 @@ bool TraderCTP::extractEntrustID(const char* entrustid, uint32_t &frontid, uint3
 	return true;
 }
 
+/**
+ * @brief 判断响应信息是否包含错误
+ * @details 检查CTP响应信息字段中的错误代码是否非零
+ *          如果错误代码非零，则表示响应中包含错误
+ * @param pRspInfo CTP响应信息字段指针
+ * @return bool 如果包含错误返回true，否则返回false
+ */
 bool TraderCTP::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 {
 	if (pRspInfo && pRspInfo->ErrorID != 0)
@@ -1624,6 +1845,14 @@ bool TraderCTP::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 	return false;
 }
 
+/**
+ * @brief 下单错误通知回调
+ * @details 当报单在进入交易所前发生错误时，CTP交易服务器主动推送该回调
+ *          将原始输入的订单字段和错误信息转换为内部委托对象和错误对象
+ *          然后通过回调接口将错误信息推送给上层应用
+ * @param pInputOrder CTP输入订单字段指针
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ */
 void TraderCTP::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo)
 {
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
@@ -1638,17 +1867,37 @@ void TraderCTP::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CTho
 	}
 }
 
+/**
+ * @brief 合约状态变化通知回调
+ * @details 当合约交易状态发生变化时，CTP交易服务器主动推送该回调
+ *          将合约交易所、代码和状态信息通过回调接口推送给上层应用
+ *          状态包括开盘前、非交易、连续交易、集合竞价、集合竞价结束等
+ * @param pInstrumentStatus CTP合约状态字段指针
+ */
 void TraderCTP::OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus)
 {
 	if (m_sink)
 		m_sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
 }
 
+/**
+ * @brief 检查交易接口连接状态
+ * @details 判断当前交易接口是否处于全部就绪状态
+ *          只有在当前状态为WS_ALLREADY时才认为连接成功
+ * @return bool 如果已连接并就绪返回true，否则返回false
+ */
 bool TraderCTP::isConnected()
 {
 	return (m_wrapperState == WS_ALLREADY);
 }
 
+/**
+ * @brief 查询结算单确认状态
+ * @details 向CTP服务器发送查询结算单确认状态请求
+ *          将查询操作加入查询队列，待触发执行
+ *          只有在当前状态为WS_LOGINED(已登录)时才能执行
+ * @return int 成功返回0，失败返回-1
+ */
 int TraderCTP::queryConfirm()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_LOGINED)
@@ -1677,6 +1926,13 @@ int TraderCTP::queryConfirm()
 	return 0;
 }
 
+/**
+ * @brief 确认结算单
+ * @details 向CTP服务器发送结算单确认请求
+ *          填充经纪商代码、投资者ID、当前日期和时间
+ *          只有在包装器状态为WS_CONFIRM_QRYED(已查询结算单确认)时才能执行
+ * @return int 成功返回0，失败返回-1
+ */
 int TraderCTP::confirm()
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_CONFIRM_QRYED)
