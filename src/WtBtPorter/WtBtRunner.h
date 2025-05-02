@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file WtBtRunner.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 回测引擎类定义文件
+ * \details 该文件定义了回测引擎WtBtRunner类，提供完整的CTA、SEL及HFT策略回测框架支持
+ *          实现了历史数据回放、回调事件分发、策略环境模拟等核心回测功能
+ *          是WonderTrader回测系统与外部组件交互的核心接口
  */
 #pragma once
 #include "PorterDefs.h"
@@ -34,48 +37,183 @@ class CtaMocker;
 class HftMocker;
 class ExecMocker;
 
+/**
+ * @brief 回测引擎类
+ * @details 提供了完整的策略回测环境，继承IBtDataLoader接口，实现历史数据加载
+ *          支持CTA策略、选股策略和高频策略的回测
+ *          实现了事件传递、回调调度和数据回放的核心功能
+ *          是WonderTrader回测系统与外部组件交互的核心类
+ */
 class WtBtRunner : public IBtDataLoader
 {
 public:
+	/**
+	 * @brief 构造函数
+	 * @details 初始化回测引擎对象，初始化成员变量并设置默认状态
+	 */
 	WtBtRunner();
+
+	/**
+	 * @brief 析构函数
+	 * @details 清理回测引擎资源，释放所有策略模拟器和用户数据
+	 */
 	~WtBtRunner();
 
 
 	//////////////////////////////////////////////////////////////////////////
 	//IBtDataLoader
+	/**
+	 * @brief 加载已处理的历史K线数据
+	 * @param obj 用户指针，可传递给回调函数
+	 * @param stdCode 标准化合约代码
+	 * @param period K线周期类型
+	 * @param cb 读取回调函数
+	 * @return 是否成功加载
+	 * @details 重写自 IBtDataLoader 接口，用于加载已经过复权处理的历史最终K线数据
+	 */
 	virtual bool loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) override;
 
+	/**
+	 * @brief 加载原始历史K线数据
+	 * @param obj 用户指针，可传递给回调函数
+	 * @param stdCode 标准化合约代码
+	 * @param period K线周期类型
+	 * @param cb 读取回调函数
+	 * @return 是否成功加载
+	 * @details 重写自 IBtDataLoader 接口，用于加载未经过复权处理的原始K线数据
+	 */
 	virtual bool loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) override;
 
+	/**
+	 * @brief 加载全部复权因子
+	 * @param obj 用户指针，可传递给回调函数
+	 * @param cb 复权因子读取回调函数
+	 * @return 是否成功加载
+	 * @details 重写自 IBtDataLoader 接口，用于加载所有合约的复权因子数据
+	 */
 	virtual bool loadAllAdjFactors(void* obj, FuncReadFactors cb) override;
 
+	/**
+	 * @brief 加载指定合约的复权因子
+	 * @param obj 用户指针，可传递给回调函数
+	 * @param stdCode 标准化合约代码
+	 * @param cb 复权因子读取回调函数
+	 * @return 是否成功加载
+	 * @details 重写自 IBtDataLoader 接口，用于加载指定合约的复权因子数据
+	 */
 	virtual bool loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb) override;
 
+	/**
+	 * @brief 加载原始Tick数据
+	 * @param obj 用户指针，可传递给回调函数
+	 * @param stdCode 标准化合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @param cb Tick数据读取回调函数
+	 * @return 是否成功加载
+	 * @details 重写自 IBtDataLoader 接口，用于加载指定日期的原始Tick数据
+	 */
 	virtual bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) override;
 
+	/**
+	 * @brief 检查是否自动转存数据
+	 * @return 是否启用数据自动转存
+	 * @details 重写自 IBtDataLoader 接口，该方法表示当数据加载器加载数据时是否自动将数据转存到本地
+	 */
 	virtual bool isAutoTrans() override
 	{
 		return _loader_auto_trans;
 	}
 
+	/**
+	 * @brief 输入原始K线数据
+	 * @param bars K线数据数组
+	 * @param count 数据数量
+	 * @details 用于将原始K线数据直接输入到回测引擎中，通常配合外部数据源使用
+	 */
 	void feedRawBars(WTSBarStruct* bars, uint32_t count);
+	/**
+	 * @brief 输入原始Tick数据
+	 * @param ticks Tick数据数组
+	 * @param count 数据数量
+	 * @details 用于将原始Tick数据直接输入到回测引擎中，通常用于实时数据或高频策略测试
+	 */
 	void feedRawTicks(WTSTickStruct* ticks, uint32_t count);
+	/**
+	 * @brief 输入复权因子数据
+	 * @param stdCode 标准化合约代码
+	 * @param dates 日期数组，每个复权因子对应的日期
+	 * @param factors 复权因子数组
+	 * @param count 数据数量
+	 * @details 用于将合约的复权因子数据直接输入到回测引擎中，通常用于股票等需要复权的品种
+	 */
 	void feedAdjFactors(const char* stdCode, uint32_t* dates, double* factors, uint32_t count);
 
 public:
+	/**
+	 * @brief 注册CTA策略回调函数
+	 * @param cbInit 策略初始化回调
+	 * @param cbTick 实时行情回调
+	 * @param cbCalc 定时计算回调
+	 * @param cbBar K线更新回调
+	 * @param cbSessEvt 交易日事件回调
+	 * @param cbCalcDone 计算完成回调，可选
+	 * @param cbCondTrigger 条件触发回调，可选
+	 * @details 用于外部系统注册CTA策略的各类事件回调函数，这些函数将在相应事件发生时被回测引擎调用
+	 */
 	void	registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 		FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone = NULL, FuncStraCondTriggerCallback cbCondTrigger = NULL);
+	/**
+	 * @brief 注册选股策略回调函数
+	 * @param cbInit 策略初始化回调
+	 * @param cbTick 实时行情回调
+	 * @param cbCalc 定时计算回调
+	 * @param cbBar K线更新回调
+	 * @param cbSessEvt 交易日事件回调
+	 * @param cbCalcDone 计算完成回调，可选
+	 * @details 用于外部系统注册选股策略的各类事件回调函数，选股策略主要关注多个标的的比较和选择
+	 */
 	void	registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 		FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone = NULL);
+	/**
+	 * @brief 注册高频策略回调函数
+	 * @param cbInit 策略初始化回调
+	 * @param cbTick 实时行情回调
+	 * @param cbBar K线更新回调
+	 * @param cbChnl 通道就绪回调
+	 * @param cbOrd 委托回报回调
+	 * @param cbTrd 成交回报回调
+	 * @param cbEntrust 委托返回回调
+	 * @param cbOrdDtl 逃单回调
+	 * @param cbOrdQue 委托队列回调
+	 * @param cbTrans 逐笔成交回调
+	 * @param cbSessEvt 交易日事件回调
+	 * @details 用于外部系统注册高频策略的各类事件回调函数，高频策略需要更多的市场微观结构数据支持
+	 */
 	void registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar,
 		FuncHftChannelCallback cbChnl, FuncHftOrdCallback cbOrd, FuncHftTrdCallback cbTrd, FuncHftEntrustCallback cbEntrust,
 		FuncStraOrdDtlCallback cbOrdDtl, FuncStraOrdQueCallback cbOrdQue, FuncStraTransCallback cbTrans, FuncSessionEvtCallback cbSessEvt);
 
+	/**
+	 * @brief 注册全局事件回调函数
+	 * @param cbEvt 事件回调函数
+	 * @details 用于注册全局事件回调，如初始化事件、回测结束事件等重要的全局性事件
+	 *          这些事件允许外部系统在回测的关键时刻执行相应的处理逻辑
+	 */
 	void registerEvtCallback(FuncEventCallback cbEvt)
 	{
 		_cb_evt = cbEvt;
 	}
 
+	/**
+	 * @brief 注册外部数据加载器
+	 * @param fnlBarLoader 处理后的历史K线加载回调
+	 * @param rawBarLoader 原始K线加载回调
+	 * @param fctLoader 复权因子加载回调
+	 * @param tickLoader Tick数据加载回调
+	 * @param bAutoTrans 是否自动转存数据，默认为true
+	 * @details 注册外部数据加载器，允许回测引擎从自定义数据源加载数据
+	 *          通过这种方式，可以将回测引擎与不同的数据来源集成，如数据库、网络或自定义文件格式
+	 */
 	void		registerExtDataLoader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader, bool bAutoTrans = true)
 	{
 		_ext_fnl_bar_loader = fnlBarLoader;
