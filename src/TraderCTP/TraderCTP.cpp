@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file TraderCTP.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief CTP交易接口实现
+ * \details 本文件实现了与上期所CTP交易接口对接的TraderCTP类
+ *          实现了连接、认证、登录、下单、撤单、查询等功能
  */
 #include "TraderCTP.h"
 
@@ -24,6 +26,15 @@
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+/**
+ * @brief 格式化写入日志
+ * @details 将格式化的日志信息写入到交易接口回调中
+ * @tparam Args 格式化参数类型
+ * @param sink 交易接口回调对象
+ * @param ll 日志级别
+ * @param format 格式化字符串
+ * @param args 参数列表
+ */
 template<typename... Args>
 inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -35,6 +46,13 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 	sink->handleTraderLog(ll, buffer);
 }
 
+/**
+ * @brief 将时间格式字符串转换为无格式整数
+ * @details 将含有分隔符“:”的时间格式字符串转换为整数
+ *          例如将“09:30:15”转换为“93015”
+ * @param strTime 要转换的时间字符串
+ * @return uint32_t 转换后的整数时间
+ */
 uint32_t strToTime(const char* strTime)
 {
 	std::string str;
@@ -51,14 +69,28 @@ uint32_t strToTime(const char* strTime)
 	return strtoul(str.c_str(), NULL, 10);
 }
 
+/**
+ * @brief DLL导出函数声明
+ * @details 声明供动态链接库调用的C接口函数
+ */
 extern "C"
 {
+	/**
+	 * @brief 创建交易接口实例
+	 * @details 创建一个TraderCTP实例并返回接口指针
+	 * @return ITraderApi* 新创建的交易接口实例
+	 */
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderCTP *instance = new TraderCTP();
 		return instance;
 	}
 
+	/**
+	 * @brief 删除交易接口实例
+	 * @details 删除指定的交易接口实例并将指针置空
+	 * @param trader 要删除的交易接口实例指针引用
+	 */
 	EXPORT_FLAG void deleteTrader(ITraderApi* &trader)
 	{
 		if (NULL != trader)
@@ -69,6 +101,11 @@ extern "C"
 	}
 }
 
+/**
+ * @brief 构造函数
+ * @details 初始化TraderCTP对象的成员变量
+ *          将指针和状态设置为初始值
+ */
 TraderCTP::TraderCTP()
 	: m_pUserAPI(NULL)
 	, m_mapPosition(NULL)
@@ -85,11 +122,24 @@ TraderCTP::TraderCTP()
 {
 }
 
-
+/**
+ * @brief 析构函数
+ * @details 清理TraderCTP对象资源
+ *          实际资源释放在release方法中进行
+ */
 TraderCTP::~TraderCTP()
 {
 }
 
+/**
+ * @brief 初始化交易接口
+ * @details 根据传入的参数设置交易接口的各种配置
+ *          包括前置机地址、经纪商代码、用户名密码、授权信息等
+ *          加载CTP交易接口动态库并获取创建函数
+ * 
+ * @param params 配置参数集合
+ * @return bool 初始化是否成功
+ */
 bool TraderCTP::init(WTSVariant* params)
 {
 	auto fontItem = params->get("front");
@@ -143,6 +193,12 @@ bool TraderCTP::init(WTSVariant* params)
 	return true;
 }
 
+/**
+ * @brief 释放交易接口资源
+ * @details 释放交易接口的所有资源
+ *          包括释放CTP交易接口实例
+ *          清空委托、成交、持仓等数据集合
+ */
 void TraderCTP::release()
 {
 	m_bStopped = true;
@@ -167,6 +223,13 @@ void TraderCTP::release()
 		m_ayTrades->clear();
 }
 
+/**
+ * @brief 连接交易服务器
+ * @details 初始化CTP交易接口并连接服务器
+ *          创建流文件目录、注册回调接口
+ *          根据配置决定是否使用快速订阅模式
+ *          注册前置机地址并初始化数据集合
+ */
 void TraderCTP::connect()
 {
 	std::stringstream ss;
@@ -230,6 +293,12 @@ void TraderCTP::connect()
 	}
 }
 
+/**
+ * @brief 断开交易服务器连接
+ * @details 将断开连接请求添加到查询队列中
+ *          等待工作线程完成后合并线程
+ *          释放相关资源
+ */
 void TraderCTP::disconnect()
 {
 	m_queQuery.push([this]() {
@@ -243,6 +312,15 @@ void TraderCTP::disconnect()
 	}
 }
 
+/**
+ * @brief 生成委托编号
+ * @details 创建格式化的委托编号字符串
+ *          由前置机编号、会话编号和递增的委托引用组成
+ *          格式为：前置机编号#会话编号#委托引用
+ * @param buffer 接收生成的委托编号的缓冲区
+ * @param length 缓冲区长度
+ * @return bool 是否成功生成委托编号
+ */
 bool TraderCTP::makeEntrustID(char* buffer, int length)
 {
 	if (buffer == NULL || length == 0)
@@ -263,6 +341,12 @@ bool TraderCTP::makeEntrustID(char* buffer, int length)
 	return false;
 }
 
+/**
+ * @brief 注册交易回调接口
+ * @details 注册用于接收交易事件通知的回调接口
+ *          并从接口中获取基础数据管理器
+ * @param listener 交易回调接口实例
+ */
 void TraderCTP::registerSpi(ITraderSpi *listener)
 {
 	m_sink = listener;
@@ -272,11 +356,26 @@ void TraderCTP::registerSpi(ITraderSpi *listener)
 	}
 }
 
+/**
+ * @brief 生成请求编号
+ * @details 生成唯一的请求编号用于CTP API调用
+ *          使用原子操作保证线程安全
+ * @return uint32_t 新生成的请求编号
+ */
 uint32_t TraderCTP::genRequestID()
 {
 	return m_iRequestID.fetch_add(1) + 1;
 }
 
+/**
+ * @brief 登录交易账户
+ * @details 使用提供的用户名和密码登录交易账户
+ *          设置内部状态并启动认证流程
+ * @param user 用户名
+ * @param pass 密码
+ * @param productInfo 产品信息
+ * @return int 成功返回0，失败返回负值
+ */
 int TraderCTP::login(const char* user, const char* pass, const char* productInfo)
 {
 	m_strUser = user;
