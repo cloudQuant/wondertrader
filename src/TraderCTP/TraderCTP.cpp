@@ -710,6 +710,15 @@ int TraderCTP::queryTrades()
 	return 0;
 }
 
+/**
+ * @brief 查询结算单信息
+ * @details 根据指定的交易日期查询结算单信息
+ *          首先清空之前的结算单字符串
+ *          然后将查询请求添加到查询队列中
+ *          创建结算单查询请求并填充经纪商代码和投资者ID
+ * @param uDate 交易日期(YYYYMMDD格式)
+ * @return int 如果交易接口未初始化或未准备就绪返回-1，否则返回0
+ */
 int TraderCTP::querySettlement(uint32_t uDate)
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
@@ -745,6 +754,13 @@ void TraderCTP::OnFrontConnected()
 		m_sink->handleEvent(WTE_Connect, 0);
 }
 
+/**
+ * @brief 前置机断开连接回调
+ * @details 当与CTP前置机连接断开后系统自动调用此函数
+ *          将包装器状态设置为未登录状态
+ *          通过回调接口将断开连接事件及原因通知给上层应用
+ * @param nReason 断开原因代码
+ */
 void TraderCTP::OnFrontDisconnected(int nReason)
 {
 	m_wrapperState = WS_NOTLOGIN;
@@ -752,11 +768,28 @@ void TraderCTP::OnFrontDisconnected(int nReason)
 		m_sink->handleEvent(WTE_Close, nReason);
 }
 
+/**
+ * @brief 心跳警告回调
+ * @details 当与CTP前置机连接建立后，如果在一定时间内没有收到心跳包，系统会自动调用此函数
+ *          通过回调接口将心跳警告事件通知给上层应用
+ * @param nTimeLapse 心跳间隔时间（秒）
+ */
 void TraderCTP::OnHeartBeatWarning(int nTimeLapse)
 {
 	write_log(m_sink, LL_DEBUG, "[TraderCTP][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
+
+/**
+ * @brief 认证请求响应回调
+ * @details 当调用ReqAuthenticate发送认证请求后收到的响应
+ *          如果认证成功，继续调用doLogin方法进行登录
+ *          如果认证失败，记录错误日志并设置登录失败状态
+ * @param pRspAuthenticateField 认证响应数据
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo))
@@ -774,6 +807,17 @@ void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentica
 
 }
 
+/**
+ * @brief 登录请求响应回调
+ * @details 当调用ReqUserLogin发送登录请求后收到的响应
+ *          如果登录成功，设置包装器状态为已登录
+ *          获取交易日、前置机编号、会话编号等信息
+ *          如果登录失败，设置到登录失败状态
+ * @param pRspUserLogin 登录响应数据
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo))
@@ -831,6 +875,16 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
 	}
 }
 
+/**
+ * @brief 登出请求响应回调
+ * @details 当调用ReqUserLogout发送登出请求后收到的响应
+ *          将包装器状态设置为未登录状态
+ *          通过回调接口将登出事件通知给上层应用
+ * @param pUserLogout 登出响应数据
+ * @param pRspInfo 响应信息，包含错误代码和错误信息
+ * @param nRequestID 请求ID
+ * @param bIsLast 是否为最后一个响应
+ */
 void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	m_wrapperState = WS_NOTLOGIN;
@@ -1196,6 +1250,13 @@ void TraderCTP::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, boo
 	m_sink->handleTraderLog(LL_ERROR, fmtutil::format("{} rsp error: {} : {}", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg));
 }
 
+/**
+ * @brief 订单状态回报回调
+ * @details 当订单状态发生变化时，CTP交易服务器主动推送该回调
+ *          将CTP订单字段转换为内部WTSOrderInfo对象
+ *          然后通过回调接口将订单状态推送给上层应用
+ * @param pOrder CTP订单字段指针
+ */
 void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder)
 {
 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
