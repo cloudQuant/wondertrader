@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtPorter.cpp
  * \project	WonderTrader
  *
@@ -25,6 +25,12 @@
     char PLATFORM_NAME[] = "UNIX";
 #endif
 
+/**
+ * @brief 获取WtRtRunner全局单例
+ * @return 返回WtRtRunner的静态单例对象引用
+ * @details 采用单例模式实现，确保全局只有一个WtRtRunner实例
+ *          WtRtRunner是实时交易引擎的入口类，管理各种策略和交易的运行
+ */
 WtRtRunner& getRunner()
 {
 	static WtRtRunner runner;
@@ -32,21 +38,70 @@ WtRtRunner& getRunner()
 }
 
 
+/**
+ * @brief 注册事件回调函数
+ * @param cbEvt 事件回调函数指针
+ * @details 注册系统事件的回调函数，用于接收交易引擎中的事件通知
+ *          事件包括系统启动、终止、行情接收等重要状态变化
+ *          实现了WtPorter.h中声明的register_evt_callback函数
+ */
 void register_evt_callback(FuncEventCallback cbEvt)
 {
 	getRunner().registerEvtCallback(cbEvt);
 }
 
+/**
+ * @brief 注册CTA策略回调函数集
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick tick数据回调函数
+ * @param cbCalc 周期计算回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ * @param cbCondTrigger 条件触发回调函数，默认为NULL
+ * @details 注册CTA策略所需的各类回调函数
+ *          CTA策略（Commodity Trading Advisor）是单合约策略，主要用于期货等标的交易
+ *          实现了WtPorter.h中声明的register_cta_callbacks函数
+ */
 void register_cta_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCondTriggerCallback cbCondTrigger/* = NULL*/)
 {
 	getRunner().registerCtaCallbacks(cbInit, cbTick, cbCalc, cbBar, cbSessEvt, cbCondTrigger);
 }
 
+/**
+ * @brief 注册SEL选股策略回调函数集
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick tick数据回调函数
+ * @param cbCalc 周期计算回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ * @details 注册选股策略所需的各类回调函数
+ *          SEL策略主要用于选股，可以管理多个股票标的组合
+ *          实现了WtPorter.h中声明的register_sel_callbacks函数
+ */
 void register_sel_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt)
 {
 	getRunner().registerSelCallbacks(cbInit, cbTick, cbCalc, cbBar, cbSessEvt);
 }
 
+/**
+ * @brief 注册HFT高频策略回调函数集
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick tick数据回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbChnl 通道事件回调函数
+ * @param cbOrd 订单回调函数
+ * @param cbTrd 成交回调函数
+ * @param cbEntrust 委托回调函数
+ * @param cbOrdDtl 逮单明细回调函数
+ * @param cbOrdQue 委托队列回调函数
+ * @param cbTrans 成交明细回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ * @param cbPosition 持仓变化回调函数
+ * @details 注册高频交易策略所需的各类回调函数
+ *          HFT策略（High Frequency Trading）是高频交易策略，需要更快速地响应市场变化
+ *          包含了更多微观市场数据的回调，如委托队列、成交明细等
+ *          实现了WtPorter.h中声明的register_hft_callbacks函数
+ */
 void register_hft_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar, 
 	FuncHftChannelCallback cbChnl, FuncHftOrdCallback cbOrd, FuncHftTrdCallback cbTrd, FuncHftEntrustCallback cbEntrust,
 	FuncStraOrdDtlCallback cbOrdDtl, FuncStraOrdQueCallback cbOrdQue, FuncStraTransCallback cbTrans, FuncSessionEvtCallback cbSessEvt, FuncHftPosCallback cbPosition)
@@ -54,36 +109,103 @@ void register_hft_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cb
 	getRunner().registerHftCallbacks(cbInit, cbTick, cbBar, cbChnl, cbOrd, cbTrd, cbEntrust, cbOrdDtl, cbOrdQue, cbTrans, cbSessEvt, cbPosition);
 }
 
+/**
+ * @brief 注册解析器回调函数集
+ * @param cbEvt 解析器事件回调函数
+ * @param cbSub 解析器订阅回调函数
+ * @details 注册行情解析器的回调函数
+ *          行情解析器负责从各种数据源解析行情数据，并转换为平台支持的格式
+ *          事件回调处理解析器事件，如连接、断开等；订阅回调处理行情订阅请求
+ *          实现了WtPorter.h中声明的register_parser_callbacks函数
+ */
 void register_parser_callbacks(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub)
 {
 	getRunner().registerParserPorter(cbEvt, cbSub);
 }
 
+/**
+ * @brief 注册执行器回调函数集
+ * @param cbInit 执行器初始化回调函数
+ * @param cbExec 执行器命令回调函数
+ * @details 注册交易执行器的回调函数
+ *          执行器负责处理具体的订单执行逻辑，控制交易执行的细节
+ *          初始化回调处理执行器的初始化，命令回调用于处理执行命令
+ *          实现了WtPorter.h中声明的register_exec_callbacks函数
+ */
 void register_exec_callbacks(FuncExecInitCallback cbInit, FuncExecCmdCallback cbExec)
 {
 	getRunner().registerExecuterPorter(cbInit, cbExec);
 }
 
+/**
+ * @brief 创建外部行情解析器
+ * @param id 解析器唯一标识
+ * @return 创建成功返回true，失败返回false
+ * @details 创建一个外部行情解析器实例
+ *          外部解析器用于处理非内置数据源的行情数据
+ *          通过id标识唯一确定该解析器
+ *          实现了WtPorter.h中声明的create_ext_parser函数
+ */
 bool create_ext_parser(const char* id)
 {
 	return getRunner().createExtParser(id);
 }
 
+/**
+ * @brief 创建外部交易执行器
+ * @param id 执行器唯一标识
+ * @return 创建成功返回true，失败返回false
+ * @details 创建一个外部交易执行器实例
+ *          外部执行器用于处理非内置执行器的订单执行逻辑
+ *          通过id标识唯一确定执行器
+ *          实现了WtPorter.h中声明的create_ext_executer函数
+ */
 bool create_ext_executer(const char* id)
 {
 	return getRunner().createExtExecuter(id);
 }
 
+/**
+ * @brief 注册外部数据加载器
+ * @param fnlBarLoader 最终K线加载器回调函数
+ * @param rawBarLoader 原始K线加载器回调函数
+ * @param fctLoader 除权因子加载器回调函数
+ * @param tickLoader tick数据加载器回调函数
+ * @details 注册外部数据加载器的回调函数集
+ *          外部数据加载器用于从自定义数据源加载历史行情数据
+ *          支持最终K线、原始K线、除权因子和tick数据的加载
+ *          实现了WtPorter.h中声明的register_ext_data_loader函数
+ */
 void register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader)
 {
 	getRunner().registerExtDataLoader(fnlBarLoader, rawBarLoader, fctLoader, tickLoader);
 }
 
+/**
+ * @brief 输入原始K线数据
+ * @param bars K线数据结构指针
+ * @param count K线数量
+ * @details 将原始K线数据输入到交易引擎中
+ *          原始K线数据通常是由外部数据源或自定义数据加载器提供的
+ *          引擎会自动处理这些数据并分发给相应的策略
+ *          实现了WtPorter.h中声明的feed_raw_bars函数
+ */
 void feed_raw_bars(WTSBarStruct* bars, WtUInt32 count)
 {
 	getRunner().feedRawBars(bars, count);
 }
 
+/**
+ * @brief 输入除权因子数据
+ * @param stdCode 标准合约代码
+ * @param dates 除权日期数组指针，格式YYYYMMDD
+ * @param factors 除权因子数组指针
+ * @param count 除权因子数量
+ * @details 将合约的除权因子数据输入到交易引擎中
+ *          除权因子主要用于股票等需要除权的金融工具，用于修正价格
+ *          引擎会自动处理这些因子并应用于相关的价格数据计算
+ *          实现了WtPorter.h中声明的feed_adj_factors函数
+ */
 void feed_adj_factors(WtString stdCode, WtUInt32* dates, double* factors, WtUInt32 count)
 {
 	getRunner().feedAdjFactors(stdCode, (uint32_t*)dates, factors, count);
