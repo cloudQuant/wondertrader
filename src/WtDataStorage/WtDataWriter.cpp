@@ -78,6 +78,19 @@ WtDataWriter::_TaskInfo::~_TaskInfo()
 }
 
 
+/**
+ * @brief 数据写入器的构造函数
+ * 
+ * @details 初始化数据写入器的各个成员变量到默认值：
+ * - _terminated = false 设置终止标志为否
+ * - _save_tick_log = false 设置不保存tick日志
+ * - _log_group_size = 1000 设置日志打印组大小为1000
+ * - 各种数据类型的禁用标志初始化为否，包括日线、分钟线、订单明细、订单队列、成交、tick和历史数据
+ * - _skip_notrade_tick = false 设置不跳过无成交的tick
+ * - _skip_notrade_bar = false 设置不跳过无成交的行情柱
+ * 
+ * 构造完成后，数据写入器处于未初始化状态，需要调用init方法完成真正的初始化
+ */
 WtDataWriter::WtDataWriter()
 	: _terminated(false)
 	, _save_tick_log(false)
@@ -96,10 +109,28 @@ WtDataWriter::WtDataWriter()
 }
 
 
+/**
+ * @brief 数据写入器的析构函数
+ * 
+ * @details 类释放时调用的析构函数，直接调用release函数来释放资源。
+ * 在WtDataWriter类中，大部分资源的释放工作是在release函数中实现的。
+ */
 WtDataWriter::~WtDataWriter()
 {
 }
 
+/**
+ * @brief 检查指定会话是否已经处理过
+ * @param sid 会话标识符
+ * @return bool 如果会话已处理过则返回true，否则返回false
+ * 
+ * @details 该函数用于检查特定会话是否已经被处理过，主要流程如下：
+ * 1. 在记录的已处理会话映射表中查找指定的会话标识符
+ * 2. 如果找不到，说明该会话尚未处理过，返回false
+ * 3. 如果找到了，则比较记录的日期是否大于等于当前日期
+ * 
+ * 该函数主要用于防止重复处理同一交易日的会话数据
+ */
 bool WtDataWriter::isSessionProceeded(const char* sid)
 {
 	auto it = _proc_date.find(sid);
@@ -193,6 +224,22 @@ bool WtDataWriter::init(WTSVariant* params, IDataWriterSink* sink)
 	return true;
 }
 
+/**
+ * @brief 释放数据写入器资源
+ * 
+ * @details 该函数负责清理和释放WtDataWriter对象使用的所有资源，包括：
+ * 1. 设置终止标志，通知处理线程结束运行
+ * 2. 等待处理线程完成当前任务并退出
+ * 3. 释放各种实时数据块的内存，包括：
+ *    - tick数据块
+ *    - 成交数据块
+ *    - 订单明细数据块
+ *    - 订单队列数据块
+ *    - 1分钟K线数据块
+ *    - 5分钟K线数据块
+ * 
+ * 在应用程序退出或重新初始化数据写入器时调用此函数，确保资源正确释放，避免内存泄漏
+ */
 void WtDataWriter::release()
 {
 	_terminated = true;
@@ -473,6 +520,18 @@ void WtDataWriter::procTick(WTSTickData* curTick, uint32_t procFlag)
 	} while (false);
 }
 
+/**
+ * @brief 写入订单队列数据
+ * @param curOrdQue 当前订单队列数据对象
+ * @return bool 是否成功写入
+ * 
+ * @details 该函数为外部接口，用于将订单队列数据写入缓存。执行流程如下：
+ * 1. 首先检查数据对象是否为空或者是否禁用了订单队列存储
+ * 2. 如果启用了异步处理，则将任务推送到任务队列中
+ * 3. 如果是同步处理，则直接调用procQueue函数进行处理
+ * 
+ * 订单队列数据包含买卖相关的市场深度信息，用于分析市场流动性和下单的优先级
+ */
 bool WtDataWriter::writeOrderQueue(WTSOrdQueData* curOrdQue)
 {
 	if (curOrdQue == NULL || _disable_ordque)
@@ -486,6 +545,21 @@ bool WtDataWriter::writeOrderQueue(WTSOrdQueData* curOrdQue)
 	return true;
 }
 
+/**
+ * @brief 处理订单队列数据
+ * @param curOrdQue 当前订单队列数据对象
+ * 
+ * @details 该函数负责处理接收到的订单队列数据，主要处理流程如下：
+ * 1. 获取合约信息和商品信息
+ * 2. 验证当前会话是否可以接收数据
+ * 3. 获取相应的订单队列数据块
+ * 4. 检查数据块容量，如果不足则调整大小
+ * 5. 将订单队列数据复制到数据块中
+ * 6. 调用广播函数将数据广播给监听器
+ * 7. 记录和显示接收数据的统计信息
+ * 
+ * 该函数在同步模式下由writeOrderQueue直接调用，在异步模式下由任务处理线程调用
+ */
 void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
 {
 	do
@@ -527,6 +601,18 @@ void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
 	} while (false);
 }
 
+/**
+ * @brief 写入订单明细数据
+ * @param curOrdDtl 当前订单明细数据对象
+ * @return bool 是否成功写入
+ * 
+ * @details 该函数为外部接口，用于将订单明细数据写入缓存。执行流程如下：
+ * 1. 首先检查数据对象是否为空或者是否禁用了订单明细存储
+ * 2. 如果启用了异步处理，则将任务推送到任务队列中
+ * 3. 如果是同步处理，则直接调用procOrder函数进行处理
+ * 
+ * 订单明细数据包含单笔交易详细信息，应用于分析详细的市场订单行为
+ */
 bool WtDataWriter::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
 {
 	if (curOrdDtl == NULL || _disable_orddtl)
@@ -540,6 +626,21 @@ bool WtDataWriter::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
 	return true;
 }
 
+/**
+ * @brief 处理订单明细数据
+ * @param curOrdDtl 当前订单明细数据对象
+ * 
+ * @details 该函数负责处理接收到的订单明细数据，主要处理流程如下：
+ * 1. 获取合约信息和商品信息
+ * 2. 验证当前会话是否可以接收数据
+ * 3. 获取相应的订单明细数据块
+ * 4. 检查数据块容量，如果不足则调整大小
+ * 5. 将订单明细数据复制到数据块中
+ * 6. 调用广播函数将数据广播给监听器
+ * 7. 记录和显示接收数据的统计信息
+ * 
+ * 该函数在同步模式下由writeOrderDetail直接调用，在异步模式下由任务处理线程调用
+ */
 void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
 {
 	do
@@ -581,6 +682,18 @@ void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
 	} while (false);
 }
 
+/**
+ * @brief 写入成交数据
+ * @param curTrans 当前成交数据对象
+ * @return bool 是否成功写入
+ * 
+ * @details 该函数为外部接口，用于将成交数据写入缓存。执行流程如下：
+ * 1. 首先检查数据对象是否为空或者是否禁用了成交数据存储
+ * 2. 如果启用了异步处理，则将任务推送到任务队列中
+ * 3. 如果是同步处理，则直接调用procTrans函数进行处理
+ * 
+ * 成交数据记录了实际发生的交易信息，包含价格、数量等详细属性，对于分析市场流动性和交易行为非常重要
+ */
 bool WtDataWriter::writeTransaction(WTSTransData* curTrans)
 {
 	if (curTrans == NULL || _disable_orddtl)
@@ -854,6 +967,24 @@ WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct,
 	return pBlock;
 }
 
+/**
+ * @brief 获取合约的订单明细数据块
+ * @param ct 合约信息对象
+ * @param curDate 当前交易日期
+ * @param bAutoCreate 是否自动创建数据块，默认为true
+ * @return OrdDtlBlockPair* 返回订单明细数据块对象指针，失败返回NULL
+ * 
+ * @details 该函数负责获取指定合约的订单明细数据块，主要流程包括：
+ * 1. 首先从缓存中查找已有的数据块，如果不存在则创建新的
+ * 2. 如果数据块未初始化，则执行初始化操作：
+ *    - 确保数据目录存在
+ *    - 检查数据文件是否存在，如不存在则创建新文件
+ *    - 将数据文件映射到内存
+ * 3. 如果数据块的日期与当前日期不一致，则重新初始化数据块
+ * 4. 验证并修复数据块文件的一致性，确保容量和大小信息正确
+ * 
+ * 该函数维护了订单明细数据块的缓存机制，提高了数据存储和检索效率
+ */
 WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
@@ -949,6 +1080,24 @@ WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct,
 	return pBlock;
 }
 
+/**
+ * @brief 获取合约的成交数据块
+ * @param ct 合约信息对象
+ * @param curDate 当前交易日期
+ * @param bAutoCreate 是否自动创建数据块，默认为true
+ * @return TransBlockPair* 返回成交数据块对象指针，失败返回NULL
+ * 
+ * @details 该函数负责获取指定合约的成交数据块，主要流程包括：
+ * 1. 首先从缓存中查找已有的数据块，如果不存在则创建新的
+ * 2. 如果数据块未初始化，则执行初始化操作：
+ *    - 确保数据目录存在
+ *    - 检查数据文件是否存在，如不存在则创建新文件
+ *    - 将数据文件映射到内存
+ * 3. 如果数据块的日期与当前日期不一致，则重新初始化数据块
+ * 4. 验证并修复数据块文件的一致性，确保容量和大小信息正确
+ * 
+ * 该函数维护了成交数据块的缓存机制，提高了数据存储和检索效率
+ */
 WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
