@@ -18,6 +18,20 @@
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+/**
+ * @brief 数据写入器日志输出函数
+ * @tparam Args 可变参数模板参数类型
+ * @param sink 日志输出接收器对象
+ * @param ll 日志级别
+ * @param format 日志格式化字符串
+ * @param args 可变参数列表，用于格式化字符串
+ * 
+ * @details 该函数是一个工具函数，用于将格式化的日志信息输出到指定的接收器。
+ * 它使用fmtlib库进行字符串格式化，并通过sink对象的outputLog方法输出日志。
+ * 如果sink为NULL，则不进行任何操作。
+ * 
+ * 这是整个数据写入器中的核心日志输出机制，用于记录重要的系统信息和调试信息。
+ */
 template<typename... Args>
 inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -29,19 +43,45 @@ inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* f
 	sink->outputLog(ll, buffer);
 }
 
-/*
- *	处理块数据
+/**
+ * @brief 处理数据块
+ * @param content 需要处理的数据内容，作为引用传入以便直接修改
+ * @param isBar 是否为K线数据，如果为true表示处理的是行情柱数据，否则为tick等其他数据
+ * @param bKeepHead 是否保留数据头部信息，默认为true
+ * @return bool 处理是否成功
+ * 
+ * @details 该函数实现了对不同类型的数据块进行格式化和转换处理
+ * 对于K线数据和其他类型数据（如tick）采用不同的处理方式
+ * 可以选择是否保留数据块的头部信息，这对于某些特殊需求很有用
  */
 extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead = true);
 
+/**
+ * @brief 外部导出函数
+ * @details 这些函数提供了与WonderTrader数据写入器模块交互的C接口
+ */
 extern "C"
 {
+	/**
+	 * @brief 创建数据写入器实例
+	 * @return IDataWriter* 数据写入器接口指针
+	 * 
+	 * @details 外部系统调用此函数创建一个WtDataWriter实例
+	 * 并通过IDataWriter接口返回给调用者
+	 */
 	EXPORT_FLAG IDataWriter* createWriter()
 	{
 		IDataWriter* ret = new WtDataWriter();
 		return ret;
 	}
 
+	/**
+	 * @brief 销毁数据写入器实例
+	 * @param writer 数据写入器接口指针的引用
+	 * 
+	 * @details 外部系统调用此函数销毁之前创建的WtDataWriter实例
+	 * 并将指针设置为NULL防止重复释放
+	 */
 	EXPORT_FLAG void deleteWriter(IDataWriter* &writer)
 	{
 		if (writer != NULL)
@@ -52,12 +92,44 @@ extern "C"
 	}
 };
 
+/**
+ * @brief 缓存扩容相关常量
+ * @details 定义了缓存扩容的步长和标记文件
+ */
+
+/**
+ * @brief 普通缓存扩容步长
+ * @details 普通数据缓存在需要扩容时的步长大小，默认为200条记录
+ */
 static const uint32_t CACHE_SIZE_STEP = 200;
+
+/**
+ * @brief 高频交易数据缓存扩容步长
+ * @details 高频交易数据（如tick、订单明细等）缓存扩容时的步长，默认为2500条记录
+ */
 static const uint32_t HFT_SIZE_STEP = 2500;
 
+/**
+ * @brief 清除缓存的命令字符串
+ */
 const char CMD_CLEAR_CACHE[] = "CMD_CLEAR_CACHE";
+
+/**
+ * @brief 标记文件名
+ * @details 该文件用于记录系统状态和会话处理信息
+ */
 const char MARKER_FILE[] = "marker.ini";
 
+/**
+ * @brief TaskInfo对象构造函数
+ * @param data 任务数据对象指针
+ * @param dtype 数据类型标记
+ * @param flag 处理标志，默认为0
+ * 
+ * @details 创建一个TaskInfo对象，用于封装异步处理的任务数据。
+ * 将数据对象指针保存并增加引用计数（retain）以防止被过早释放。
+ * 数据类型标记用于区分不同类型的数据（如tick、成交、订单等）。
+ */
 WtDataWriter::_TaskInfo::_TaskInfo(WTSObject* data, uint64_t dtype, uint32_t flag/* = 0*/)
 	: _type(dtype), _flag(flag)
 {
@@ -65,6 +137,14 @@ WtDataWriter::_TaskInfo::_TaskInfo(WTSObject* data, uint64_t dtype, uint32_t fla
 	_obj->retain();
 }
 
+/**
+ * @brief TaskInfo对象复制构造函数
+ * @param rhs 源TaskInfo对象
+ * 
+ * @details 创建一个TaskInfo对象的副本，复制数据类型和标志信息。
+ * 同时将数据对象指针也复制并增加引用计数（retain）以防止被过早释放。
+ * 这确保了数据对象在复制过程中不会意外释放。
+ */
 WtDataWriter::_TaskInfo::_TaskInfo(const _TaskInfo& rhs)
 	: _type(rhs._type), _flag(rhs._flag)
 {
@@ -72,6 +152,14 @@ WtDataWriter::_TaskInfo::_TaskInfo(const _TaskInfo& rhs)
 	_obj->retain();
 }
 
+/**
+ * @brief TaskInfo对象析构函数
+ * 
+ * @details 当TaskInfo对象被销毁时自动调用此函数。
+ * 该函数会释放任务数据对象的引用（release），减少引用计数。
+ * 如果引用计数减至零，那么数据对象将被自动销毁。
+ * 这确保了内存管理的正确性，防止内存泄漏。
+ */
 WtDataWriter::_TaskInfo::~_TaskInfo() 
 { 
 	_obj->release(); 
@@ -330,6 +418,19 @@ void DataManager::preloadRtCaches(const char* exchg)
 }
 */
 
+/**
+ * @brief 加载实时行情缓存
+ * 
+ * @details 该函数负责加载和初始化实时行情缓存文件，主要流程如下：
+ * 1. 首先检查缓存文件是否已加载，如已加载则直接返回
+ * 2. 获取当前交易日的所有合约数量
+ * 3. 检查缓存文件是否存在，如不存在则创建一个新文件
+ * 4. 将缓存文件映射到内存
+ * 5. 如果是新文件，则初始化它的内容和元数据
+ * 6. 如果是已有文件，则加载其中的行情缓存数据并建立索引
+ * 
+ * 行情缓存用于快速访问和更新实时行情数据，提高数据处理效率
+ */
 void WtDataWriter::loadCache()
 {
 	if (_tick_cache_file != NULL)
@@ -1716,6 +1817,26 @@ WTSTickData* WtDataWriter::getCurTick(const char* code, const char* exchg/* = ""
 	return WTSTickData::create(item._tick);
 }
 
+/**
+ * @brief 更新实时行情缓存
+ * @param ct 合约信息对象
+ * @param curTick 当前行情数据对象
+ * @param procFlag 处理标志，0表示直接替换，1表示需要预处理
+ * @return bool 更新是否成功
+ * 
+ * @details 该函数负责将新收到的行情数据更新到行情缓存中，主要处理流程如下：
+ * 1. 首先验证缓存块和行情数据是否有效
+ * 2. 使用自旋锁保护缓存访问
+ * 3. 根据合约代码获取或创建缓存索引
+ * 4. 如果是新交易日的数据，直接复制并更新缓存
+ * 5. 如果是当前交易日的数据，进行多种验证：
+ *    - 检查交易日加偏是否不匹配
+ *    - 检查总成交量是否减少
+ *    - 检查时间戳是否冲突，并进行必要的调整
+ * 6. 根据处理标志决定是直接替换还是先计算增量值再更新
+ * 
+ * 该函数处理了多种特殊情况，包括部分交易所的时间戳冲突，以及数据存在问题时的处理方式
+ */
 bool WtDataWriter::updateCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag)
 {
 	if (curTick == NULL || _tick_cache_block == NULL)
@@ -1870,6 +1991,22 @@ void WtDataWriter::transHisData(const char* sid)
 	}
 }
 
+/**
+ * @brief 数据块检查循环线程
+ * 
+ * @details 该函数在新线程中执行，用于定期检查各类数据块的使用状态并清理过期数据块。主要功能如下：
+ * 1. 每10秒进行一次检查，判断各类数据块是否过期（默认超过600秒无访问即为过期）
+ * 2. 如果收盘作业线程已启动（_proc_thrd非空），则退出检查循环
+ * 3. 对以下类型的数据块进行过期检查并释放：
+ *    - tick行情数据块
+ *    - 成交数据块
+ *    - 订单明细数据块
+ *    - 订单队列数据块
+ *    - 1分钟K线数据块
+ *    - 5分钟K线数据块
+ * 
+ * 这种过期清理机制可以避免内存映射文件占用过多资源，提高系统整体运行效率
+ */
 void WtDataWriter::check_loop()
 {
 	uint32_t expire_secs = 600;
@@ -2151,6 +2288,27 @@ bool WtDataWriter::proc_block_data(const char* tag, std::string& content, bool i
 	return true;
 }
 
+/**
+ * @brief 将日线数据导出到文件
+ * @param ct 合约信息对象
+ * @param newBar 新的日线数据
+ * @return bool 导出是否成功
+ * 
+ * @details 该函数负责将指定的日线数据写入到相应的文件中，处理逻辑如下：
+ * 1. 首先确定文件路径并创建必要的目录结构
+ * 2. 判断目标文件是否存在，处理逻辑有所不同：
+ *    - 如果文件不存在（新文件），直接创建并写入数据
+ *    - 如果文件已存在，则读取文件内容并进行处理
+ * 3. 对于已存在的文件，需要判断是否为压缩版本，并解压数据
+ * 4. 对于新数据，会与已有数据进行时间比较：
+ *    - 如果日期相同但数据不同，则用新数据替换最后一条
+ *    - 如果新数据的日期更大，则直接追加到文件末尾
+ * 5. 根据数据量决定是否压缩：
+ *    - 如果原文件已经是压缩版本或数据量超过100条，则进行压缩
+ *    - 否则以原始格式写入
+ * 
+ * 该函数充分考虑了文件是否存在、数据重复、压缩方式等多种情况，确保日线数据的完整性和效率
+ */
 bool WtDataWriter::dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar)
 {
 	std::stringstream ss;
@@ -2250,6 +2408,20 @@ bool WtDataWriter::dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar)
 	}
 }
 
+/**
+ * @brief 将缓存的K线数据导出到文件
+ * @param ct 合约信息对象
+ * @return uint32_t 导出的数据条数
+ * 
+ * @details 该函数负责将缓存中的K线数据导出到文件系统，主要处理以下几种数据：
+ * 1. 日线数据：从最新的tick缓存中提取日线数据并存入文件
+ * 2. 1分钟K线数据：将实时缓存中理1分钟K线数据导出到历史文件
+ * 3. 5分钟K线数据：将实时缓存中理5分钟K线数据导出到历史文件
+ * 
+ * 导出过程中会检查是否禁用了相应类型的数据存储，如果禁用则跳过处理。
+ * 对于每种周期的K线数据，都会检查目标文件是否存在，如果存在则读取并追加新数据，
+ * 最后将所有数据压缩后写入文件。完成往文件导出后，会清空缓存块中的数据。
+ */
 uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 {
 	if (ct == NULL)
