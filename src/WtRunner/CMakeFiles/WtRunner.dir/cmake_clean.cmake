@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtRunner/WtRunner"
-  "../build_x64/bin/WtRunner/WtRunner.pdb"
+  "../build_x64/Release/bin/WtRunner/WtRunner"
+  "../build_x64/Release/bin/WtRunner/WtRunner.pdb"
   "CMakeFiles/WtRunner.dir/WtRunner.cpp.o"
   "CMakeFiles/WtRunner.dir/WtRunner.cpp.o.d"
   "CMakeFiles/WtRunner.dir/main.cpp.o"

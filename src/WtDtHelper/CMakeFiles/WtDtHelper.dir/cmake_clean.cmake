@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtDtPorter/libWtDtHelper.pdb"
-  "../build_x64/bin/WtDtPorter/libWtDtHelper.so"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtHelper.pdb"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtHelper.so"
   "CMakeFiles/WtDtHelper.dir/WtDtHelper.cpp.o"
   "CMakeFiles/WtDtHelper.dir/WtDtHelper.cpp.o.d"
 )

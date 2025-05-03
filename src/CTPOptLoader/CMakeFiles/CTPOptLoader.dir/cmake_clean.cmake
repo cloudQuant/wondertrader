@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/Loader/libCTPOptLoader.pdb"
-  "../build_x64/bin/Loader/libCTPOptLoader.so"
+  "../build_x64/Release/bin/Loader/libCTPOptLoader.pdb"
+  "../build_x64/Release/bin/Loader/libCTPOptLoader.so"
   "CMakeFiles/CTPOptLoader.dir/CTPOptLoader.cpp.o"
   "CMakeFiles/CTPOptLoader.dir/CTPOptLoader.cpp.o.d"
   "CMakeFiles/CTPOptLoader.dir/TraderSpi.cpp.o"

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWtBtCore.a"
-  "../build_x64/libs/libWtBtCore.pdb"
+  "../build_x64/Release/libs/libWtBtCore.a"
+  "../build_x64/Release/libs/libWtBtCore.pdb"
   "CMakeFiles/WtBtCore.dir/CtaMocker.cpp.o"
   "CMakeFiles/WtBtCore.dir/CtaMocker.cpp.o.d"
   "CMakeFiles/WtBtCore.dir/EventNotifier.cpp.o"

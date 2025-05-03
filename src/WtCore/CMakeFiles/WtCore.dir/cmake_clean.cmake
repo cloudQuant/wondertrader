@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWtCore.a"
-  "../build_x64/libs/libWtCore.pdb"
+  "../build_x64/Release/libs/libWtCore.a"
+  "../build_x64/Release/libs/libWtCore.pdb"
   "CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o"
   "CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o.d"
   "CMakeFiles/WtCore.dir/CtaStraBaseCtx.cpp.o"

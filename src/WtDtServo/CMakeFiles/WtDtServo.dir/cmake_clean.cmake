@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtDtPorter/libWtDtServo.pdb"
-  "../build_x64/bin/WtDtPorter/libWtDtServo.so"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtServo.pdb"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtServo.so"
   "CMakeFiles/WtDtServo.dir/ParserAdapter.cpp.o"
   "CMakeFiles/WtDtServo.dir/ParserAdapter.cpp.o.d"
   "CMakeFiles/WtDtServo.dir/WtDataManager.cpp.o"

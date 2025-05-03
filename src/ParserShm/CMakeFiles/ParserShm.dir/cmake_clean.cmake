@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libParserShm.pdb"
-  "../build_x64/bin/libParserShm.so"
+  "../build_x64/Release/bin/libParserShm.pdb"
+  "../build_x64/Release/bin/libParserShm.so"
   "CMakeFiles/ParserShm.dir/ParserShm.cpp.o"
   "CMakeFiles/ParserShm.dir/ParserShm.cpp.o.d"
 )

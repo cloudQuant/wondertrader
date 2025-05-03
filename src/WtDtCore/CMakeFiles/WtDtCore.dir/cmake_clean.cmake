@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWtDtCore.a"
-  "../build_x64/libs/libWtDtCore.pdb"
+  "../build_x64/Release/libs/libWtDtCore.a"
+  "../build_x64/Release/libs/libWtDtCore.pdb"
   "CMakeFiles/WtDtCore.dir/DataManager.cpp.o"
   "CMakeFiles/WtDtCore.dir/DataManager.cpp.o.d"
   "CMakeFiles/WtDtCore.dir/IndexFactory.cpp.o"

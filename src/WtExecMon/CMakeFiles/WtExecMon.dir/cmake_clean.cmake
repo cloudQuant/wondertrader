@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtPorter/libWtExecMon.pdb"
-  "../build_x64/bin/WtPorter/libWtExecMon.so"
+  "../build_x64/Release/bin/WtPorter/libWtExecMon.pdb"
+  "../build_x64/Release/bin/WtPorter/libWtExecMon.so"
   "CMakeFiles/WtExecMon.dir/WtExecPorter.cpp.o"
   "CMakeFiles/WtExecMon.dir/WtExecPorter.cpp.o.d"
   "CMakeFiles/WtExecMon.dir/WtExecRunner.cpp.o"

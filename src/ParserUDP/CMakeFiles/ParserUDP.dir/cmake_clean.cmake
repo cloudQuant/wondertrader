@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libParserUDP.pdb"
-  "../build_x64/bin/libParserUDP.so"
+  "../build_x64/Release/bin/libParserUDP.pdb"
+  "../build_x64/Release/bin/libParserUDP.so"
   "CMakeFiles/ParserUDP.dir/ParserUDP.cpp.o"
   "CMakeFiles/ParserUDP.dir/ParserUDP.cpp.o.d"
 )

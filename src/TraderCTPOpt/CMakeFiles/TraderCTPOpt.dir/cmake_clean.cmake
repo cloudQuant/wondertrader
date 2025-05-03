@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libTraderCTPOpt.pdb"
-  "../build_x64/bin/libTraderCTPOpt.so"
+  "../build_x64/Release/bin/libTraderCTPOpt.pdb"
+  "../build_x64/Release/bin/libTraderCTPOpt.so"
   "CMakeFiles/TraderCTPOpt.dir/TraderCTPOpt.cpp.o"
   "CMakeFiles/TraderCTPOpt.dir/TraderCTPOpt.cpp.o.d"
 )

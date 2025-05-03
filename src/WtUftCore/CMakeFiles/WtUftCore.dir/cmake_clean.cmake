@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWtUftCore.a"
-  "../build_x64/libs/libWtUftCore.pdb"
+  "../build_x64/Release/libs/libWtUftCore.a"
+  "../build_x64/Release/libs/libWtUftCore.pdb"
   "CMakeFiles/WtUftCore.dir/ActionPolicyMgr.cpp.o"
   "CMakeFiles/WtUftCore.dir/ActionPolicyMgr.cpp.o.d"
   "CMakeFiles/WtUftCore.dir/EventNotifier.cpp.o"

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWTSTools.a"
-  "../build_x64/libs/libWTSTools.pdb"
+  "../build_x64/Release/libs/libWTSTools.a"
+  "../build_x64/Release/libs/libWTSTools.pdb"
   "CMakeFiles/WTSTools.dir/CsvHelper.cpp.o"
   "CMakeFiles/WTSTools.dir/CsvHelper.cpp.o.d"
   "CMakeFiles/WTSTools.dir/WTSBaseDataMgr.cpp.o"

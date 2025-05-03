@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libTraderYD.pdb"
-  "../build_x64/bin/libTraderYD.so"
+  "../build_x64/Release/bin/libTraderYD.pdb"
+  "../build_x64/Release/bin/libTraderYD.so"
   "CMakeFiles/TraderYD.dir/TraderYD.cpp.o"
   "CMakeFiles/TraderYD.dir/TraderYD.cpp.o.d"
 )

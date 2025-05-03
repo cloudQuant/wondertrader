@@ -6,5 +6,5 @@ CXX_DEFINES = -DCTPLoader_EXPORTS
 
 CXX_INCLUDES = -I/home/yun/anaconda3/include -I/home/mydeps/include
 
-CXX_FLAGS = -std=gnu++17 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden
 

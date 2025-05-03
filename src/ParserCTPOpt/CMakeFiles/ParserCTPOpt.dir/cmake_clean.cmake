@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libParserCTPOpt.pdb"
-  "../build_x64/bin/libParserCTPOpt.so"
+  "../build_x64/Release/bin/libParserCTPOpt.pdb"
+  "../build_x64/Release/bin/libParserCTPOpt.so"
   "CMakeFiles/ParserCTPOpt.dir/ParserCTPOpt.cpp.o"
   "CMakeFiles/ParserCTPOpt.dir/ParserCTPOpt.cpp.o.d"
 )

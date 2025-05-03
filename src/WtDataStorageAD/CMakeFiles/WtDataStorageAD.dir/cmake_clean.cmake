@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libWtDataStorageAD.pdb"
-  "../build_x64/bin/libWtDataStorageAD.so"
+  "../build_x64/Release/bin/libWtDataStorageAD.pdb"
+  "../build_x64/Release/bin/libWtDataStorageAD.so"
   "CMakeFiles/WtDataStorageAD.dir/WtBtDtReaderAD.cpp.o"
   "CMakeFiles/WtDataStorageAD.dir/WtBtDtReaderAD.cpp.o.d"
   "CMakeFiles/WtDataStorageAD.dir/WtDataReaderAD.cpp.o"

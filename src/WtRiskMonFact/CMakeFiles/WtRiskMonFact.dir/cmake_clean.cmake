@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libWtRiskMonFact.pdb"
-  "../build_x64/bin/libWtRiskMonFact.so"
+  "../build_x64/Release/bin/libWtRiskMonFact.pdb"
+  "../build_x64/Release/bin/libWtRiskMonFact.so"
   "CMakeFiles/WtRiskMonFact.dir/WtRiskMonFact.cpp.o"
   "CMakeFiles/WtRiskMonFact.dir/WtRiskMonFact.cpp.o.d"
   "CMakeFiles/WtRiskMonFact.dir/WtSimpRiskMon.cpp.o"

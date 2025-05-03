@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtBtPorter/libWtBtPorter.pdb"
-  "../build_x64/bin/WtBtPorter/libWtBtPorter.so"
+  "../build_x64/Release/bin/WtBtPorter/libWtBtPorter.pdb"
+  "../build_x64/Release/bin/WtBtPorter/libWtBtPorter.so"
   "CMakeFiles/WtBtPorter.dir/ExpCtaMocker.cpp.o"
   "CMakeFiles/WtBtPorter.dir/ExpCtaMocker.cpp.o.d"
   "CMakeFiles/WtBtPorter.dir/ExpHftMocker.cpp.o"

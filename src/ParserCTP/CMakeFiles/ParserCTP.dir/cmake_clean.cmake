@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libParserCTP.pdb"
-  "../build_x64/bin/libParserCTP.so"
+  "../build_x64/Release/bin/libParserCTP.pdb"
+  "../build_x64/Release/bin/libParserCTP.so"
   "CMakeFiles/ParserCTP.dir/ParserCTP.cpp.o"
   "CMakeFiles/ParserCTP.dir/ParserCTP.cpp.o.d"
 )

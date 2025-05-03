@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libTraderXTP.pdb"
-  "../build_x64/bin/libTraderXTP.so"
+  "../build_x64/Release/bin/libTraderXTP.pdb"
+  "../build_x64/Release/bin/libTraderXTP.so"
   "CMakeFiles/TraderXTP.dir/TraderXTP.cpp.o"
   "CMakeFiles/TraderXTP.dir/TraderXTP.cpp.o.d"
 )

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libWtMsgQue.pdb"
-  "../build_x64/bin/libWtMsgQue.so"
+  "../build_x64/Release/bin/libWtMsgQue.pdb"
+  "../build_x64/Release/bin/libWtMsgQue.so"
   "CMakeFiles/WtMsgQue.dir/MQClient.cpp.o"
   "CMakeFiles/WtMsgQue.dir/MQClient.cpp.o.d"
   "CMakeFiles/WtMsgQue.dir/MQManager.cpp.o"

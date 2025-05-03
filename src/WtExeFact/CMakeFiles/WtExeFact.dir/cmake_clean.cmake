@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libWtExeFact.pdb"
-  "../build_x64/bin/libWtExeFact.so"
+  "../build_x64/Release/bin/libWtExeFact.pdb"
+  "../build_x64/Release/bin/libWtExeFact.so"
   "CMakeFiles/WtExeFact.dir/WtDiffMinImpactExeUnit.cpp.o"
   "CMakeFiles/WtExeFact.dir/WtDiffMinImpactExeUnit.cpp.o.d"
   "CMakeFiles/WtExeFact.dir/WtExeFact.cpp.o"

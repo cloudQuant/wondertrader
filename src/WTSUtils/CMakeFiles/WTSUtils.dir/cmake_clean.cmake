@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWTSUtils.a"
-  "../build_x64/libs/libWTSUtils.pdb"
+  "../build_x64/Release/libs/libWTSUtils.a"
+  "../build_x64/Release/libs/libWTSUtils.pdb"
   "CMakeFiles/WTSUtils.dir/StackTracer/StackTracer.cpp.o"
   "CMakeFiles/WTSUtils.dir/StackTracer/StackTracer.cpp.o.d"
   "CMakeFiles/WTSUtils.dir/WTSCfgLoader.cpp.o"

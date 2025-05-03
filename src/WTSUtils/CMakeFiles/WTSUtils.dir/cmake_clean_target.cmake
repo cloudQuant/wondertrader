@@ -1,3 +1,3 @@
 file(REMOVE_RECURSE
-  "../build_x64/libs/libWTSUtils.a"
+  "../build_x64/Release/libs/libWTSUtils.a"
 )

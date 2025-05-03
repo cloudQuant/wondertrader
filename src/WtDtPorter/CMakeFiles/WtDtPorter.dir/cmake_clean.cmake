@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtDtPorter/libWtDtPorter.pdb"
-  "../build_x64/bin/WtDtPorter/libWtDtPorter.so"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtPorter.pdb"
+  "../build_x64/Release/bin/WtDtPorter/libWtDtPorter.so"
   "CMakeFiles/WtDtPorter.dir/ExpDumper.cpp.o"
   "CMakeFiles/WtDtPorter.dir/ExpDumper.cpp.o.d"
   "CMakeFiles/WtDtPorter.dir/ExpParser.cpp.o"

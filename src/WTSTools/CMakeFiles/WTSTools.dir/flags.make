@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/yun/anaconda3/include -I/home/mydeps/include -I/home/yun/Documents/wondertrader/src/WTSTools/../WTSUtils/yamlcpp
 
-CXX_FLAGS =  -fPIC -std=gnu++17
+CXX_FLAGS =  -fPIC -O3 -DNDEBUG -std=gnu++17
 

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libTraderCTPMini.pdb"
-  "../build_x64/bin/libTraderCTPMini.so"
+  "../build_x64/Release/bin/libTraderCTPMini.pdb"
+  "../build_x64/Release/bin/libTraderCTPMini.so"
   "CMakeFiles/TraderCTPMini.dir/TraderCTPMini.cpp.o"
   "CMakeFiles/TraderCTPMini.dir/TraderCTPMini.cpp.o.d"
 )

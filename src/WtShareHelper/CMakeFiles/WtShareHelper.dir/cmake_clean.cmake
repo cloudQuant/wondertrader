@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libWtShareHelper.pdb"
-  "../build_x64/bin/libWtShareHelper.so"
+  "../build_x64/Release/bin/libWtShareHelper.pdb"
+  "../build_x64/Release/bin/libWtShareHelper.so"
   "CMakeFiles/WtShareHelper.dir/ShareBlocks.cpp.o"
   "CMakeFiles/WtShareHelper.dir/ShareBlocks.cpp.o.d"
   "CMakeFiles/WtShareHelper.dir/WtShareHelper.cpp.o"

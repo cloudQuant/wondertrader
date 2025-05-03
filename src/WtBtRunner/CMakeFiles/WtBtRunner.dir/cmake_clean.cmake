@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtBtRunner/WtBtRunner"
-  "../build_x64/bin/WtBtRunner/WtBtRunner.pdb"
+  "../build_x64/Release/bin/WtBtRunner/WtBtRunner"
+  "../build_x64/Release/bin/WtBtRunner/WtBtRunner.pdb"
   "CMakeFiles/WtBtRunner.dir/WtBtRunner.cpp.o"
   "CMakeFiles/WtBtRunner.dir/WtBtRunner.cpp.o.d"
 )

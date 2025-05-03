@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/WtPorter/libTraderDumper.pdb"
-  "../build_x64/bin/WtPorter/libTraderDumper.so"
+  "../build_x64/Release/bin/WtPorter/libTraderDumper.pdb"
+  "../build_x64/Release/bin/WtPorter/libTraderDumper.so"
   "CMakeFiles/TraderDumper.dir/Dumper.cpp.o"
   "CMakeFiles/TraderDumper.dir/Dumper.cpp.o.d"
   "CMakeFiles/TraderDumper.dir/TraderAdapter.cpp.o"

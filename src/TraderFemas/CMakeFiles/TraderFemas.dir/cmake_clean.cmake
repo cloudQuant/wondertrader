@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libTraderFemas.pdb"
-  "../build_x64/bin/libTraderFemas.so"
+  "../build_x64/Release/bin/libTraderFemas.pdb"
+  "../build_x64/Release/bin/libTraderFemas.so"
   "CMakeFiles/TraderFemas.dir/TraderFemas.cpp.o"
   "CMakeFiles/TraderFemas.dir/TraderFemas.cpp.o.d"
 )

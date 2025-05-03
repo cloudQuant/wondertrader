@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../build_x64/bin/libParserXeleSkt.pdb"
-  "../build_x64/bin/libParserXeleSkt.so"
+  "../build_x64/Release/bin/libParserXeleSkt.pdb"
+  "../build_x64/Release/bin/libParserXeleSkt.so"
   "CMakeFiles/ParserXeleSkt.dir/ParserXeleSkt.cpp.o"
   "CMakeFiles/ParserXeleSkt.dir/ParserXeleSkt.cpp.o.d"
 )
