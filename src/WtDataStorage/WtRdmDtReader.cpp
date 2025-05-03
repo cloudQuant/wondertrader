@@ -1,4 +1,18 @@
-﻿#include "WtRdmDtReader.h"
+/**
+ * @file WtRdmDtReader.cpp
+ * @author Wesley
+ * @brief WonderTrader随机数据访问器实现文件
+ * @version 0.1
+ * @date 2022-01-05
+ * 
+ * @copyright Copyright (c) 2022-2025
+ * 
+ * @details 该文件实现了WtRdmDtReader类，提供了高效的数据随机访问功能，
+ * 支持K线、Tick、委托明细、委托队列和成交数据的读取。
+ * 数据管理包括实时和历史数据，支持按时间范围、数量和日期等多种方式查询。
+ */
+
+#include "WtRdmDtReader.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -19,6 +33,16 @@ namespace rj = rapidjson;
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+/**
+ * @brief 日志输出函数，使用fmt格式化字符串并发送到日志接收器
+ * @tparam Args 可变参数类型列表
+ * @param sink 日志接收器指针
+ * @param ll 日志级别
+ * @param format 格式化字符串模板
+ * @param args 可变参数列表
+ * 
+ * @details 该函数将格式化后的日志信息通过IRdmDtReaderSink接口的reader_log方法输出
+ */
 template<typename... Args>
 inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -1989,6 +2013,16 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 }
 
 
+/**
+ * @brief 获取实时Tick数据块
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @return WtRdmDtReader::TickBlockPair* Tick数据块对象指针，如果不存在则返回NULL
+ * 
+ * @details 根据交易所和合约代码获取实时Tick数据块。
+ * 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。
+ * 该方法会更新数据块的最后访问时间以支持缓存过期机制。
+ */
 WtRdmDtReader::TickBlockPair* WtRdmDtReader::getRTTickBlock(const char* exchg, const char* code)
 {
 	std::string key = fmt::format("{}.{}", exchg, code);
@@ -2029,6 +2063,17 @@ WtRdmDtReader::TickBlockPair* WtRdmDtReader::getRTTickBlock(const char* exchg, c
 	return &block;
 }
 
+/**
+ * @brief 获取实时委托明细数据块
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @return WtRdmDtReader::OrdDtlBlockPair* 委托明细数据块对象指针，如果不存在则返回NULL
+ * 
+ * @details 根据交易所和合约代码获取实时委托明细数据块。
+ * 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。
+ * 该方法会更新数据块的最后访问时间以支持缓存过期机制。
+ * 当文件大小发生变化时，会自动重新映射文件。
+ */
 WtRdmDtReader::OrdDtlBlockPair* WtRdmDtReader::getRTOrdDtlBlock(const char* exchg, const char* code)
 {
 	std::string key = fmt::format("{}.{}", exchg, code);
@@ -2069,6 +2114,17 @@ WtRdmDtReader::OrdDtlBlockPair* WtRdmDtReader::getRTOrdDtlBlock(const char* exch
 	return &block;
 }
 
+/**
+ * @brief 获取实时委托队列数据块
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @return WtRdmDtReader::OrdQueBlockPair* 委托队列数据块对象指针，如果不存在则返回NULL
+ * 
+ * @details 根据交易所和合约代码获取实时委托队列数据块。
+ * 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。
+ * 该方法会更新数据块的最后访问时间以支持缓存过期机制。
+ * 当文件大小发生变化时，会自动重新映射文件。
+ */
 WtRdmDtReader::OrdQueBlockPair* WtRdmDtReader::getRTOrdQueBlock(const char* exchg, const char* code)
 {
 	std::string key = fmt::format("{}.{}", exchg, code);
@@ -2109,6 +2165,17 @@ WtRdmDtReader::OrdQueBlockPair* WtRdmDtReader::getRTOrdQueBlock(const char* exch
 	return &block;
 }
 
+/**
+ * @brief 获取实时成交数据块
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @return WtRdmDtReader::TransBlockPair* 成交数据块对象指针，如果不存在则返回NULL
+ * 
+ * @details 根据交易所和合约代码获取实时成交数据块。
+ * 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。
+ * 该方法会更新数据块的最后访问时间以支持缓存过期机制。
+ * 当文件大小发生变化时，会自动重新映射文件。
+ */
 WtRdmDtReader::TransBlockPair* WtRdmDtReader::getRTTransBlock(const char* exchg, const char* code)
 {
 	std::string key = fmt::format("{}.{}", exchg, code);
@@ -2149,6 +2216,19 @@ WtRdmDtReader::TransBlockPair* WtRdmDtReader::getRTTransBlock(const char* exchg,
 	return &block;
 }
 
+/**
+ * @brief 获取实时K线数据块
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @param period K线周期，目前仅支持1分钟和5分钟K线
+ * @return WtRdmDtReader::RTKlineBlockPair* K线数据块对象指针，如果不存在则返回NULL
+ * 
+ * @details 根据交易所、合约代码和K线周期获取实时K线数据块。
+ * 目前仅支持1分钟和5分钟周期的K线数据。
+ * 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。
+ * 该方法会更新数据块的最后访问时间以支持缓存过期机制。
+ * 当文件大小发生变化时，会自动重新映射文件。
+ */
 WtRdmDtReader::RTKlineBlockPair* WtRdmDtReader::getRTKilneBlock(const char* exchg, const char* code, WTSKlinePeriod period)
 {
 	if (period != KP_Minute1 && period != KP_Minute5)
@@ -2602,6 +2682,16 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 	return slice;
 }
 
+/**
+ * @brief 根据日期获取股票除权因子
+ * @param stdCode 标准化合约代码
+ * @param date 日期，默认为0（表示当前日期）
+ * @return double 除权因子值
+ * 
+ * @details 根据指定的合约代码和日期，从缓存中查找并返回适用的除权因子。
+ * 如果指定日期没有对应因子，则返回小于等于当前日期的最近一个因子。
+ * 非股票品种永远返回1.0。
+ */
 double WtRdmDtReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -2638,6 +2728,13 @@ double WtRdmDtReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* =
 	}
 }
 
+/**
+ * @brief 清理所有数据缓存
+ * 
+ * @details 清空所有数据缓存，包括K线缓存、实时分钟线缓存、Tick数据缓存、
+ * 成交数据缓存、委托明细缓存和委托队列缓存等。
+ * 这个方法通常在系统重置或清理内存时调用。
+ */
 void WtRdmDtReader::clearCache()
 {
 	_bars_cache.clear();
