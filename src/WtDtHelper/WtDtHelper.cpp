@@ -1414,6 +1414,19 @@ bool store_order_queues(WtString tickFile, WTSOrdQueStruct* firstItem, int count
 	return true;
 }
 
+/**
+ * @brief 将成交数据存储为二进制文件（股票Level2数据）
+ * @param tickFile 输出文件路径
+ * @param firstItem 第一个成交数据结构指针，数据数组的起始地址
+ * @param count 数据数量
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return bool 存储是否成功
+ * 
+ * @details 该函数将内存中的成交数据数组存储为二进制文件（.dsb格式）。
+ * 首先检查数据有效性，然后将数据复制到缓冲区，
+ * 设置数据块类型为BT_HIS_Trnsctn，将数据压缩后写入文件。
+ * 该函数主要用于存储股票Level2数据中的成交信息。
+ */
 bool store_transactions(WtString tickFile, WTSTransStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
 {
 	if (count == 0)
