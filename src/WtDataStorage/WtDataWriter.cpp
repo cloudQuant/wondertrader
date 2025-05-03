@@ -1,3 +1,4 @@
+
 #include "WtDataWriter.h"
 
 #include "../Includes/WTSSessionInfo.hpp"
@@ -26,7 +27,11 @@
  * @param format 日志格式化字符串
  * @param args 可变参数列表，用于格式化字符串
  * 
- * @details 该函数是一个工具函数，用于将格式化的日志信息输出到指定的接收器。
+ * @details 该函数使用fmt库实现格式化日志输出，支持类似printf的格式化语法。
+ * 通过传入的日志接收器sink将格式化后的日志内容输出到指定目标。
+ * 这是WtDataWriter模块中记录运行状态和错误信息的核心函数。
+ * 
+ * 该函数是一个工具函数，用于将格式化的日志信息输出到指定的接收器。
  * 它使用fmtlib库进行字符串格式化，并通过sink对象的outputLog方法输出日志。
  * 如果sink为NULL，则不进行任何操作。
  * 
@@ -974,6 +979,24 @@ void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 	}
 }
 
+/**
+ * @brief 获取合约的订单队列数据块
+ * @param ct 合约信息对象
+ * @param curDate 当前交易日期
+ * @param bAutoCreate 是否自动创建数据块，默认为true
+ * @return OrdQueBlockPair* 返回订单队列数据块对象指针，失败返回NULL
+ * 
+ * @details 该函数负责获取指定合约的订单队列数据块，主要流程包括：
+ * 1. 首先从缓存中查找已有的数据块，如果不存在则创建新的
+ * 2. 如果数据块未初始化，则执行初始化操作：
+ *    - 确保数据目录存在
+ *    - 检查数据文件是否存在，如不存在则创建新文件
+ *    - 将数据文件映射到内存
+ * 3. 如果数据块的日期与当前日期不一致，则重新初始化数据块
+ * 4. 验证并修复数据块文件的一致性，确保容量和大小信息正确
+ * 
+ * 该函数维护了订单队列数据块的缓存机制，是订单队列数据存储和分析的基础
+ */
 WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
@@ -1678,6 +1701,21 @@ void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
 	}
 }
 
+/**
+ * @brief 释放数据块资源
+ * @tparam T 数据块类型，支持各种块对（BlockPair）类型
+ * @param block 要释放的数据块指针
+ * 
+ * @details 该函数是一个模板函数，用于释放各种类型的数据块资源，主要流程如下：
+ * 1. 首先检查数据块指针和文件指针是否有效
+ * 2. 使用自旋锁保护共享数据的访问
+ * 3. 将数据块指针设置为空（NULL）
+ * 4. 重置文件映射指针，释放相关资源
+ * 5. 清零最后访问时间
+ * 
+ * 该函数可以释放任意已映射的数据块，包括tick、订单明细、订单队列、成交和K线等类型
+ * 释放后的数据块不再保持内存映射，需要时可以重新获取
+ */
 template<typename T>
 void WtDataWriter::releaseBlock(T* block)
 {
@@ -1690,6 +1728,27 @@ void WtDataWriter::releaseBlock(T* block)
 	block->_lasttime = 0;
 }
 
+/**
+ * @brief 获取指定合约和周期的K线数据块
+ * @param ct 合约信息对象
+ * @param period K线周期，目前支持KP_Minute1（1分钟）和KP_Minute5（5分钟）
+ * @param bAutoCreate 如果数据块不存在是否自动创建，默认为true
+ * @return KBlockPair* K线数据块对象指针，如果获取失败则返回NULL
+ * 
+ * @details 该函数负责获取指定合约和周期的K线数据块，主要流程如下：
+ * 1. 首先根据周期类型确定哪个缓存映射表和子目录
+ * 2. 检查缓存映射表中是否已有该合约的数据块
+ * 3. 如果没有，则创建新的KBlockPair对象并加入缓存
+ * 4. 如果数据块未被初始化，则创建或打开相应的文件：
+ *    - 构建文件路径
+ *    - 检查文件是否存在，如果不存在则创建新文件
+ *    - 根据合约的交易分钟数预分配文件大小
+ * 5. 使用内存映射文件打开数据
+ * 6. 如果是新创建的文件，初始化数据块的各种属性
+ * 7. 更新数据块的最后访问时间
+ * 
+ * 该函数是实现K线数据访问的关键函数，所有的K线读写操作都需要通过该函数获取的数据块来进行
+ */
 WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKlinePeriod period, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
@@ -1797,6 +1856,21 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 	return pBlock;
 }
 
+/**
+ * @brief 获取指定合约的当前行情数据
+ * @param code 合约代码
+ * @param exchg 交易所代码，默认为空字符串
+ * @return WTSTickData* 返回行情数据对象指针，如果未找到则返回NULL
+ * 
+ * @details 该函数用于从内存缓存中检索并返回指定合约的最新行情数据，主要流程如下：
+ * 1. 首先验证合约代码是否有效
+ * 2. 通过底层数据管理器获取合约信息对象
+ * 3. 使用自旋锁保护缓存访问
+ * 4. 从缓存索引表中查找合约对应的索引
+ * 5. 使用索引从缓存块中检索并创建新的行情数据对象
+ * 
+ * 该函数通常用于实时查询合约的当前行情状态，返回的对象是原数据的克隆，使用后需要释放
+ */
 WTSTickData* WtDataWriter::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
 	if (strlen(code) == 0)
@@ -1944,6 +2018,22 @@ bool WtDataWriter::updateCache(WTSContractInfo* ct, WTSTickData* curTick, uint32
 	return true;
 }
 
+/**
+ * @brief 转换历史数据
+ * @param sid 会话标识符，特殊值"CMD_CLEAR_CACHE"表示清除缓存
+ * 
+ * @details 该函数负责将指定会话相关的合约历史数据转换并处理，主要流程如下：
+ * 1. 首先检查会话标识是否为清除缓存的特殊命令
+ * 2. 如果不是清除缓存命令，则按会话标识获取相关的商品集合
+ * 3. 遍历每个商品及其包含的各个合约代码：
+ *    - 获取合约信息
+ *    - 将合约全码加入处理队列
+ * 4. 在队列结尾添加一个标记项，标记当前会话的出现
+ * 5. 启动或通知处理线程，进行实际的数据转换处理
+ * 
+ * 当输入为清除缓存命令时，则直接将该命令加入处理队列，遍由处理线程执行缓存清理
+ * 这种设计允许历史数据转换在后台异步进行，不影响主线程的其他操作
+ */
 void WtDataWriter::transHisData(const char* sid)
 {
 	StdUniqueLock lock(_proc_mtx);
@@ -2089,6 +2179,20 @@ void WtDataWriter::check_loop()
 	}
 }
 
+/**
+ * @brief 通过扩展数据转储器将K线数据导出
+ * @param ct 合约信息对象
+ * @return uint32_t 成功导出的数据条数
+ * 
+ * @details 该函数负责通过注册的IHisDataDumper扩展数据转储器导出数据，主要处理以下类型的数据：
+ * 1. 日线数据：从缓存的tick数据中构建日线并通过转储器导出
+ * 2. 1分钟线K线数据：从实时缓存中检索并通过转储器导出
+ * 3. 5分钟线K线数据：从实时缓存中检索并通过转储器导出
+ * 
+ * 对于每种类型的数据，函数会遍历所有注册的数据转储器，并调用相应的方法进行数据导出。
+ * 当遇到导出失败时，会记录错误日志但保证其他数据和转储器的处理正常进行。
+ * 完成导出后，函数会释放相应的内存块并清空数据块大小，以便下次写入新数据。
+ */
 uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 {
 	if (ct == NULL || _dumpers.empty())
@@ -2197,6 +2301,24 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 	return count;
 }
 
+/**
+ * @brief 处理数据块内容
+ * @param tag 数据块标识，用于日志输出
+ * @param content 数据块内容，作为引用传入以便直接修改
+ * @param isBar 是否为K线数据，true表示数据块是K线数据，false表示是tick等其他数据
+ * @param bKeepHead 是否保留数据块头部信息，默认为true
+ * @return bool 处理是否成功
+ * 
+ * @details 该函数负责对不同版本和格式的数据块进行处理，主要功能包括：
+ * 1. 检查数据块是否被压缩或是否为旧版本格式
+ * 2. 如果是压缩数据，则进行解压缩处理
+ * 3. 如果是旧版本数据结构，则进行版本转换：
+ *    - 对于K线数据，将WTSBarStructOld结构转换为WTSBarStruct
+ *    - 对于tick数据，将WTSTickStructOld结构转换为WTSTickStruct
+ * 4. 根据参数决定是否保留数据块头部
+ * 
+ * 该函数使系统能够兼容处理不同版本的数据格式，确保数据转换的正确性和兼容性
+ */
 bool WtDataWriter::proc_block_data(const char* tag, std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
 	BlockHeader* header = (BlockHeader*)content.data();
@@ -2594,6 +2716,20 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 	return count;
 }
 
+/**
+ * @brief 处理队列循环函数，用于后台处理数据写入相关的任务
+ * 
+ * @details 该函数在独立线程中运行，主要负责执行等待在处理队列中的任务。具体功能如下：
+ * 1. 持续监听处理队列，当队列为空时等待条件变量通知
+ * 2. 从队列中获取并处理各种命令或合约代码
+ * 3. 特别处理CMD_CLEAR_CACHE命令，该命令用于清理缓存：
+ *    - 验证并清理过期的合约缓存
+ *    - 生成并保存当日的行情快照
+ *    - 重新组织tick缓存数据，移除过期的数据
+ *    - 清理物理文件，包括分钟线、tick、订单、队列和成交等数据
+ * 
+ * 该函数在每个交易日结束时执行清理操作，确保数据存储系统的常规运行和效率
+ */
 void WtDataWriter::proc_loop()
 {
 	while (!_terminated)
