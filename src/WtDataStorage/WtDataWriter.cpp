@@ -1,4 +1,4 @@
-﻿#include "WtDataWriter.h"
+#include "WtDataWriter.h"
 
 #include "../Includes/WTSSessionInfo.hpp"
 #include "../Includes/WTSContractInfo.hpp"
@@ -110,6 +110,29 @@ bool WtDataWriter::isSessionProceeded(const char* sid)
 }
 
 
+/**
+ * @brief 初始化数据写入器
+ * @param params 配置参数对象
+ * @param sink 数据写入器回调接口
+ * @return bool 初始化是否成功
+ * 
+ * @details 该函数实现数据写入器的初始化过程，主要包括以下步骤：
+ * 1. 调用父类初始化方法
+ * 2. 获取数据管理器对象
+ * 3. 从参数中读取各种配置项：
+ *    - 数据存储路径和缓存文件名
+ *    - 是否开启异步处理模式
+ *    - 日志打印组大小
+ *    - 各种数据类型的处理选项（是否跳过无成交tick等）
+ *    - 是否禁用不同类型的数据存储（历史数据、tick、分钟线、日线等）
+ *    - 分钟线价格模式设置
+ * 4. 创建必要的数据目录
+ * 5. 读取标记文件中的交易日期信息
+ * 6. 加载数据缓存
+ * 7. 创建检查线程
+ * 
+ * 初始化完成后输出日志包含各种配置参数的设置情况
+ */
 bool WtDataWriter::init(WTSVariant* params, IDataWriterSink* sink)
 {
 	IDataWriter::init(params, sink);
@@ -305,6 +328,22 @@ void WtDataWriter::loadCache()
 	}
 }
 
+/**
+ * @brief 调整实时数据块的大小
+ * @tparam HeaderType 数据块头部类型
+ * @tparam T 数据记录类型
+ * @param mfPtr 内存映射文件指针
+ * @param nCount 需要调整的新容量
+ * @return void* 调整后的内存块地址，失败返回NULL
+ * 
+ * @details 该函数用于动态调整实时数据缓存块的大小，主要步骤包括：
+ * 1. 检查当前容量是否已满足需求，若满足则直接返回
+ * 2. 计算新旧大小并调整底层文件尺寸
+ * 3. 重新映射文件到内存
+ * 4. 更新容量信息
+ * 
+ * 该函数通常在数据块空间不足时被调用，以确保实时数据能够持续写入而不丢失
+ */
 template<typename HeaderType, typename T>
 void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 {
@@ -359,6 +398,17 @@ void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 	return mfPtr->addr();
 }
 
+/**
+ * @brief 写入实时行情数据
+ * @param curTick 当前行情数据对象
+ * @param procFlag 处理标志
+ * @return bool 是否成功写入
+ * 
+ * @details 该函数是外部接口，用于接收实时行情数据。根据配置决定是异步处理还是同步处理：
+ * - 如果启用了异步处理，则将数据推送到任务队列中等待处理
+ * - 如果使用同步处理，则直接调用procTick函数进行处理
+ * 这种设计允许在高频场景下提高性能，避免数据处理阻塞行情接收
+ */
 bool WtDataWriter::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
 	if (curTick == NULL)
@@ -372,6 +422,20 @@ bool WtDataWriter::writeTick(WTSTickData* curTick, uint32_t procFlag)
 	return true;
 }
 
+/**
+ * @brief 处理送入的实时行情数据
+ * @param curTick 当前行情数据对象
+ * @param procFlag 处理标志
+ * 
+ * @details 该函数负责处理实时行情数据，包含以下步骤：
+ * 1. 获取合约信息和商品信息
+ * 2. 检查会话是否可以接收数据
+ * 3. 更新缓存数据
+ * 4. 如果未禁用tick存储，则将数据存入tick缓存
+ * 5. 将数据转存到K线缓存中
+ * 6. 广播tick数据给监听器
+ * 7. 记录接收数据的统计信息
+ */
 void WtDataWriter::procTick(WTSTickData* curTick, uint32_t procFlag)
 {
 	do
@@ -530,6 +594,13 @@ bool WtDataWriter::writeTransaction(WTSTransData* curTrans)
 	return true;
 }
 
+/*!
+ * \brief 处理送入的成交数据
+ * \param curTrans 当前成交数据对象
+ * 
+ * \details 将成交数据存入相应的数据块，并广播给监听器。
+ * 如果数据块容量不足，会自动调整大小。同时记录接收数据的统计信息。
+ */
 void WtDataWriter::procTrans(WTSTransData* curTrans)
 {
 	do
@@ -571,6 +642,21 @@ void WtDataWriter::procTrans(WTSTransData* curTrans)
 	} while (false);
 }
 
+/**
+ * @brief 推送数据处理任务到任务队列
+ * @param task 任务信息对象
+ * 
+ * @details 该函数负责将数据处理任务推送到异步任务队列中，实现数据处理与接收分离，主要功能包括：
+ * 1. 如果未启用异步处理，则直接返回
+ * 2. 将任务添加到任务队列中并通知处理线程
+ * 3. 如果任务处理线程尚未创建，则创建新的任务处理线程
+ * 4. 线程实现了一个循环处理流程：
+ *    - 当任务队列为空时，线程等待新任务
+ *    - 有任务时，将队列中的所有任务取出到临时队列中批量处理
+ *    - 根据任务类型调用相应的处理函数（处理行情、队列、订单明细或成交）
+ * 
+ * 这种设计模式允许数据接收和处理在不同线程中进行，提高了系统在高频环境下的性能和稳定性
+ */
 void WtDataWriter::pushTask(const TaskInfo& task)
 {
 	if (!_async_proc)
@@ -617,6 +703,19 @@ void WtDataWriter::pushTask(const TaskInfo& task)
 	}
 }
 
+/**
+ * @brief 将实时行情数据写入Tick缓存块
+ * @param ct 合约信息对象
+ * @param curTick 当前行情数据对象
+ * 
+ * @details 该函数将实时行情数据写入到对应合约的Tick数据块中，主要步骤包括：
+ * 1. 获取合约对应的Tick数据块
+ * 2. 检查数据块容量，如果不足则调用resizeRTBlock进行扩容
+ * 3. 将当前行情数据写入数据块并更新大小
+ * 4. 如果启用了tick日志记录，则同时将数据写入日志文件
+ * 
+ * 该函数的关键作用是维护实时行情数据的缓存，为后续数据分析和存储提供基础
+ */
 void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 {
 	TickBlockPair* pBlockPair = getTickBlock(ct, curTick->tradingdate());
@@ -945,6 +1044,25 @@ WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, u
 	return pBlock;
 }
 
+/**
+ * @brief 获取合约的Tick数据块
+ * @param ct 合约信息对象
+ * @param curDate 当前交易日期
+ * @param bAutoCreate 是否自动创建数据块，默认为true
+ * @return TickBlockPair* 返回Tick数据块对象指针，失败返回NULL
+ * 
+ * @details 该函数负责获取指定合约的Tick数据块，主要流程包括：
+ * 1. 首先从缓存中查找已有的数据块，如果不存在则创建新的
+ * 2. 如果数据块未初始化，则执行初始化操作：
+ *    - 确保数据目录存在
+ *    - 如果需要保存tick日志，则初始化日志文件流
+ *    - 检查数据文件是否存在，如不存在则创建新文件
+ *    - 将数据文件映射到内存
+ * 3. 如果数据块的日期与当前日期不一致，则重新初始化数据块
+ * 4. 验证并修复数据块文件的一致性，确保容量和大小信息正确
+ * 
+ * 该函数维护了数据块的缓存机制，提高了数据存储和检索效率，同时具有错误检测和自动修复功能
+ */
 WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
@@ -1049,6 +1167,24 @@ WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uin
 	return pBlock;
 }
 
+/**
+ * @brief 将实时行情数据转化为K线数据
+ * @param ct 合约信息对象
+ * @param curTick 当前行情数据对象
+ * 
+ * @details 该函数负责将实时行情数据转化成不同周期的K线数据，主要包括：
+ * 1. 首先判断是否需要跳过无成交的行情数据
+ * 2. 根据会话信息计算当前行情对应的分钟数
+ * 3. 如果没有禁用分钟线，则生成并更新1分钟线K线数据：
+ *    - 获取相应的K线数据块
+ *    - 如果容量不足则调整数据块大小
+ *    - 根据行情建立新的K线或更新已有K线
+ * 4. 如果未禁甁5分钟线，则同样处理生成和更新5分钟线K线数据
+ * 5. 如果未禁用日线，则处理日线K线数据
+ * 
+ * 对于每种K线周期，程序都会做相应的判断并决定是创建新的K线还是更新已有的K线。
+ * 还会根据配置决定是否记录挂单价格或持仓量信息。
+ */
 void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
 {
 	bool tickNoTrade = decimal::eq(curTick->turnover(),0);
