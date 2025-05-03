@@ -785,6 +785,13 @@ void WtDataManager::subscribe_bar(const char* stdCode, WTSKlinePeriod period, ui
 	WTSLogger::info("Realtime bar {} has subscribed", key);
 }
 
+/**
+ * @brief 清除所有K线数据订阅
+ * 
+ * @details 清除实时K线映射中的所有数据，取消所有K线数据的订阅。
+ * 该方法会先获取实时K线映射的互斥锁，然后清除所有数据。
+ * 该方法通常在重新订阅或重置系统状态时调用。
+ */
 void WtDataManager::clear_subbed_bars()
 {
 	StdUniqueLock lock(_mtx_rtbars);
@@ -792,6 +799,22 @@ void WtDataManager::clear_subbed_bars()
 		_rt_bars->clear();
 }
 
+/**
+ * @brief 更新K线数据
+ * @param stdCode 标准化合约代码
+ * @param newTick 新的Tick数据指针
+ * 
+ * @details 根据新的Tick数据更新已订阅的K线数据。
+ * 该方法的处理逻辑如下：
+ * 1. 首先检查实时K线映射是否存在，如果不存在则直接返回
+ * 2. 遍历实时K线映射中的所有条目，找到与当前合约代码匹配的K线数据
+ * 3. 获取合约的交易时段信息，如果在Tick数据中有合约信息则使用，否则通过get_session_info获取
+ * 4. 调用数据工厂的updateKlineData方法更新K线数据
+ * 5. 根据K线周期类型和倍数生成周期字符串
+ * 6. 调用运行器的trigger_bar方法触发K线数据回调
+ * 
+ * 该方法通常由WtDtRunner的proc_tick方法调用，用于实时更新K线数据。
+ */
 void WtDataManager::update_bars(const char* stdCode, WTSTickData* newTick)
 {
 	if (_rt_bars == NULL)
@@ -832,6 +855,17 @@ void WtDataManager::update_bars(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 清除所有数据缓存
+ * 
+ * @details 清除数据读取器中的所有数据缓存。
+ * 该方法的处理逻辑如下：
+ * 1. 首先检查数据读取器是否已初始化，如果未初始化则输出警告并返回
+ * 2. 调用数据读取器的clearCache方法清除所有缓存
+ * 3. 输出日志提示缓存已清除
+ * 
+ * 该方法通常用于释放内存或重置系统状态，例如在系统重启或数据更新后调用。
+ */
 void WtDataManager::clear_cache()
 {
 	if (_reader == NULL)
