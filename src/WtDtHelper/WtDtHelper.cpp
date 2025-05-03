@@ -1,11 +1,16 @@
-﻿/*!
- * \file WtDtPorter.cpp
- * \project	WonderTrader
+/**
+ * @file WtDtHelper.cpp
+ * @project WonderTrader
  *
- * \author Wesley
- * \date 2020/03/30
+ * @author Wesley
+ * @date 2020/03/30
  * 
- * \brief 
+ * @brief WonderTrader数据处理辅助工具实现文件
+ * 
+ * @details 该文件实现了WonderTrader数据处理辅助工具的接口函数，
+ * 包括数据转换、数据导出、数据读取和数据重采样等功能。
+ * 这些函数主要用于处理K线、Tick、委托明细、委托队列和成交数据，
+ * 支持二进制数据与CSV格式之间的转换，以及数据的读取和重采样操作。
  */
 #include "WtDtHelper.h"
 #include "../Share/StrUtil.hpp"
@@ -26,8 +31,16 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
-/*
- *	处理块数据
+/**
+ * @brief 处理数据块内容
+ * @param content 数据块内容，传入传出参数
+ * @param isBar 是否是K线数据块，如果是false则表示是Tick数据块
+ * @param bKeepHead 是否保留块头部，默认为true
+ * @return bool 处理是否成功
+ * 
+ * @details 该函数用于处理数据块内容，包括解压缩、版本转换等操作。
+ * 如果数据块是压缩的，则先解压缩；如果是旧版本的数据结构，则转换为新版本。
+ * 该函数主要用于数据读取和转换过程中的数据预处理。
  */
 bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
@@ -118,6 +131,16 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 }
 
 
+/**
+ * @brief 将时间字符串转换为整数时间
+ * @param strTime 时间字符串，格式如"10:30:25"
+ * @param bKeepSec 是否保留秒数，默认为false
+ * @return uint32_t 转换后的整数时间，如果bKeepSec为false则返回小时分钟（HHMM），否则返回小时分钟秒（HHMMSS）
+ * 
+ * @details 该函数将包含冒号的时间字符串转换为整数格式的时间。
+ * 首先移除字符串中的冒号，然后将其转换为整数。
+ * 如果bKeepSec为false且结果大于10000（即包含秒），则会将结果除以100以移除秒数。
+ */
 uint32_t strToTime(const char* strTime, bool bKeepSec = false)
 {
 	std::string str;
@@ -138,6 +161,15 @@ uint32_t strToTime(const char* strTime, bool bKeepSec = false)
 	return ret;
 }
 
+/**
+ * @brief 将日期字符串转换为整数日期
+ * @param strDate 日期字符串，支持格式如"2020/03/30"或"2020-03-30"
+ * @return uint32_t 转换后的整数日期，格式为YYYYMMDD
+ * 
+ * @details 该函数将日期字符串转换为整数格式的日期。
+ * 首先根据分隔符（"/"或"-"）将字符串分割为年、月、日部分，
+ * 然后将其组合成YYYYMMDD格式的整数。如果月或日为单位数，会自动添加前导零。
+ */
 uint32_t strToDate(const char* strDate)
 {
 	StringVector ay = StrUtil::split(strDate, "/");
@@ -157,6 +189,17 @@ uint32_t strToDate(const char* strDate)
 	return strtoul(ss.str().c_str(), NULL, 10);
 }
 
+/**
+ * @brief 将二进制K线数据导出为CSV格式
+ * @param binFolder 二进制数据文件夹路径
+ * @param csvFolder CSV输出文件夹路径
+ * @param strFilter 合约过滤器，支持通配符，默认为空（处理所有合约）
+ * @param cbLogger 日志回调函数，默认为NULL
+ * 
+ * @details 该函数遍历指定目录中的.dsb文件，将其中的K线数据转换为CSV格式并存储到目标文件夹。
+ * 对于每个文件，首先检查是否是K线数据，然后读取并处理数据块，最后将数据写入CSV文件。
+ * 可以通过strFilter参数指定要处理的合约。
+ */
 void dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter /* = "" */, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
@@ -262,6 +305,17 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter /* = "
 		cbLogger(StrUtil::printf("目录%s全部导出完成...", binFolder).c_str());
 }
 
+/**
+ * @brief 将二进制Tick数据导出为CSV格式
+ * @param binFolder 二进制数据文件夹路径
+ * @param csvFolder CSV输出文件夹路径
+ * @param strFilter 合约过滤器，支持通配符，默认为空（处理所有合约）
+ * @param cbLogger 日志回调函数，默认为NULL
+ * 
+ * @details 该函数遍历指定目录中的.dsb文件，将其中的Tick数据转换为CSV格式并存储到目标文件夹。
+ * 对于每个文件，首先检查是否是Tick数据，然后读取并处理数据块，最后将数据写入CSV文件。
+ * 可以通过strFilter参数指定要处理的合约。
+ */
 void dump_ticks(WtString binFolder, WtString csvFolder, WtString strFilter /* = "" */, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
@@ -368,6 +422,17 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString strFilter /* = 
 		cbLogger(StrUtil::printf("目录%s全部导出完成...", binFolder).c_str());
 }
 
+/**
+ * @brief 将CSV格式的K线数据转换为二进制格式
+ * @param csvFolder CSV数据文件夹路径
+ * @param binFolder 二进制输出文件夹路径
+ * @param period K线周期，如"m1"/"d1"
+ * @param cbLogger 日志回调函数，默认为NULL
+ * 
+ * @details 该函数遍历指定目录中的CSV文件，将其中的K线数据转换为二进制格式并存储到目标文件夹。
+ * 对于每个文件，首先读取CSV数据，然后将其转换为K线结构数组，最后压缩并写入二进制文件。
+ * 输出文件的类型由period参数决定，支持分钟线、日线等不同周期的K线数据。
+ */
 void trans_csv_bars(WtString csvFolder, WtString binFolder, WtString period, FuncLogCallback cbLogger /* = NULL */)
 {
 	if (!BoostFile::exists(csvFolder))
@@ -587,6 +652,18 @@ void trans_csv_bars(WtString csvFolder, WtString binFolder, WtString period, Fun
 //	return true;
 //}
 
+/**
+ * @brief 读取二进制Tick数据文件（.dsb格式）
+ * @param tickFile Tick数据文件路径
+ * @param cb Tick数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dsb格式文件中读取Tick数据，并通过回调函数返回给调用者。
+ * 首先读取文件内容，然后处理数据块（包括解压缩和版本转换），
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dsb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string path = tickFile;
@@ -622,6 +699,18 @@ WtUInt32 read_dsb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDat
 	return (WtUInt32)tcnt;
 }
 
+/**
+ * @brief 读取二进制委托明细数据文件（.dsb格式）
+ * @param dataFile 委托明细数据文件路径
+ * @param cb 委托明细数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dsb格式文件中读取委托明细数据，并通过回调函数返回给调用者。
+ * 首先读取文件内容，然后处理数据块（包括解压缩和版本转换），
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dsb_order_details(WtString dataFile, FuncGetOrdDtlCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger/* = NULL*/)
 {
 	std::string path = dataFile;
@@ -657,6 +746,18 @@ WtUInt32 read_dsb_order_details(WtString dataFile, FuncGetOrdDtlCallback cb, Fun
 	return (WtUInt32)tcnt;
 }
 
+/**
+ * @brief 读取二进制委托队列数据文件（.dsb格式）
+ * @param dataFile 委托队列数据文件路径
+ * @param cb 委托队列数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dsb格式文件中读取委托队列数据，并通过回调函数返回给调用者。
+ * 首先读取文件内容，然后处理数据块（包括解压缩和版本转换），
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dsb_order_queues(WtString dataFile, FuncGetOrdQueCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger/* = NULL*/)
 {
 	std::string path = dataFile;
@@ -692,6 +793,18 @@ WtUInt32 read_dsb_order_queues(WtString dataFile, FuncGetOrdQueCallback cb, Func
 	return (WtUInt32)tcnt;
 }
 
+/**
+ * @brief 读取二进制成交数据文件（.dsb格式）
+ * @param dataFile 成交数据文件路径
+ * @param cb 成交数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dsb格式文件中读取成交数据，并通过回调函数返回给调用者。
+ * 首先读取文件内容，然后处理数据块（包括解压缩和版本转换），
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dsb_transactions(WtString dataFile, FuncGetTransCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger/* = NULL*/)
 {
 	std::string path = dataFile;
@@ -727,6 +840,18 @@ WtUInt32 read_dsb_transactions(WtString dataFile, FuncGetTransCallback cb, FuncC
 	return (WtUInt32)tcnt;
 }
 
+/**
+ * @brief 读取二进制K线数据文件（.dsb格式）
+ * @param barFile K线数据文件路径
+ * @param cb K线数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dsb格式文件中读取K线数据，并通过回调函数返回给调用者。
+ * 首先读取文件内容，然后处理数据块（包括解压缩和版本转换），
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dsb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger )
 {
 	std::string path = barFile;
@@ -761,6 +886,19 @@ WtUInt32 read_dsb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 	return (WtUInt32)kcnt;
 }
 
+/**
+ * @brief 读取内存映射二进制K线数据文件（.dmb格式）
+ * @param barFile K线数据文件路径
+ * @param cb K线数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dmb格式文件中读取K线数据，并通过回调函数返回给调用者。
+ * .dmb格式是内存映射二进制格式，读取效率更高。
+ * 首先读取文件内容，然后处理数据块，
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dmb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger)
 {
 	std::string path = barFile;
@@ -791,6 +929,19 @@ WtUInt32 read_dmb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 	return (WtUInt32)kcnt;
 }
 
+/**
+ * @brief 读取内存映射二进制Tick数据文件（.dmb格式）
+ * @param tickFile Tick数据文件路径
+ * @param cb Tick数据获取回调函数
+ * @param cbCnt 数据计数回调函数
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return WtUInt32 读取到的数据数量
+ * 
+ * @details 该函数从指定的.dmb格式文件中读取Tick数据，并通过回调函数返回给调用者。
+ * .dmb格式是内存映射二进制格式，读取效率更高。
+ * 首先读取文件内容，然后处理数据块，
+ * 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。
+ */
 WtUInt32 read_dmb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDataCallback cbCnt, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string path = tickFile;
@@ -825,6 +976,25 @@ WtUInt32 read_dmb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDat
 }
 
 
+/**
+ * @brief 对K线数据进行重采样
+ * @param barFile 输入K线数据文件路径
+ * @param cb K线数据获取回调函数，用于返回重采样后的数据
+ * @param cbCnt 数据计数回调函数
+ * @param fromTime 开始时间
+ * @param endTime 结束时间
+ * @param period 目标K线周期，如"m5"/"d1"
+ * @param times 周期倍数，如将分钟线采样为5分钟线，则为5
+ * @param sessInfo 交易时段信息
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @param bAlignSec 是否按秒对齐，默认为false
+ * @return WtUInt32 重采样后的数据数量
+ * 
+ * @details 该函数将指定文件中的K线数据进行重采样，生成新的周期的K线数据。
+ * 首先读取原始数据，然后根据指定的周期和倍数进行采样，
+ * 最后通过cb回调函数返回采样后的数据。
+ * 该函数支持将分钟线采样为更高周期的K线，如将分钟线采样为5分钟线、日线等。
+ */
 WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCallback cbCnt, WtUInt64 fromTime, WtUInt64 endTime,
 	WtString period, WtUInt32 times, WtString sessInfo, FuncLogCallback cbLogger /* = NULL */, bool bAlignSec/* = false*/)
 {
@@ -1018,6 +1188,20 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 	return (WtUInt32)newCnt;
 }
 
+/**
+ * @brief 将K线数据存储为二进制文件
+ * @param barFile 输出文件路径
+ * @param firstBar 第一个K线数据结构指针，数据数组的起始地址
+ * @param count 数据数量
+ * @param period K线周期，如"m1"/"d1"
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return bool 存储是否成功
+ * 
+ * @details 该函数将内存中的K线数据数组存储为二进制文件（.dsb格式）。
+ * 首先检查数据有效性，然后将数据复制到缓冲区，
+ * 根据周期类型设置数据块类型，将数据压缩后写入文件。
+ * 该函数支持存储分钟线、日线等不同周期的K线数据。
+ */
 bool store_bars(WtString barFile, WTSBarStruct* firstBar, int count, WtString period, FuncLogCallback cbLogger /* = NULL */)
 {
 	if (count == 0)
@@ -1071,6 +1255,19 @@ bool store_bars(WtString barFile, WTSBarStruct* firstBar, int count, WtString pe
 	return true;
 }
 
+/**
+ * @brief 将Tick数据存储为二进制文件
+ * @param tickFile 输出文件路径
+ * @param firstTick 第一个Tick数据结构指针，数据数组的起始地址
+ * @param count 数据数量
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return bool 存储是否成功
+ * 
+ * @details 该函数将内存中的Tick数据数组存储为二进制文件（.dsb格式）。
+ * 首先检查数据有效性，然后将数据复制到缓冲区，
+ * 设置数据块类型为BT_HIS_Ticks，将数据压缩后写入文件。
+ * 该函数用于存储各种金融市场的Tick数据，包括股票、期货等。
+ */
 bool store_ticks(WtString tickFile, WTSTickStruct* firstTick, int count, FuncLogCallback cbLogger/* = NULL*/)
 {
 	if (count == 0)
@@ -1111,6 +1308,19 @@ bool store_ticks(WtString tickFile, WTSTickStruct* firstTick, int count, FuncLog
 	return true;
 }
 
+/**
+ * @brief 将委托明细数据存储为二进制文件（股票Level2数据）
+ * @param tickFile 输出文件路径
+ * @param firstItem 第一个委托明细数据结构指针，数据数组的起始地址
+ * @param count 数据数量
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return bool 存储是否成功
+ * 
+ * @details 该函数将内存中的委托明细数据数组存储为二进制文件（.dsb格式）。
+ * 首先检查数据有效性，然后将数据复制到缓冲区，
+ * 设置数据块类型为BT_HIS_OrdDetail，将数据压缩后写入文件。
+ * 该函数主要用于存储股票Level2数据中的委托明细信息。
+ */
 bool store_order_details(WtString tickFile, WTSOrdDtlStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
 {
 	if (count == 0)
@@ -1151,6 +1361,19 @@ bool store_order_details(WtString tickFile, WTSOrdDtlStruct* firstItem, int coun
 	return true;
 }
 
+/**
+ * @brief 将委托队列数据存储为二进制文件（股票Level2数据）
+ * @param tickFile 输出文件路径
+ * @param firstItem 第一个委托队列数据结构指针，数据数组的起始地址
+ * @param count 数据数量
+ * @param cbLogger 日志回调函数，默认为NULL
+ * @return bool 存储是否成功
+ * 
+ * @details 该函数将内存中的委托队列数据数组存储为二进制文件（.dsb格式）。
+ * 首先检查数据有效性，然后将数据复制到缓冲区，
+ * 设置数据块类型为BT_HIS_OrdQueue，将数据压缩后写入文件。
+ * 该函数主要用于存储股票Level2数据中的委托队列信息。
+ */
 bool store_order_queues(WtString tickFile, WTSOrdQueStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
 {
 	if (count == 0)
