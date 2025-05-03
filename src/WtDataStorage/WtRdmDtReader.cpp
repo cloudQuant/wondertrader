@@ -57,12 +57,24 @@ inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const cha
 
 extern "C"
 {
+	/**
+	 * @brief 创建IRdmDtReader接口实例
+	 * @return IRdmDtReader* 新创建的接口实例指针
+	 * 
+	 * @details 创建WtRdmDtReader对象并返回其接口指针，供外部模块使用
+	 */
 	EXPORT_FLAG IRdmDtReader* createRdmDtReader()
 	{
 		IRdmDtReader* ret = new WtRdmDtReader();
 		return ret;
 	}
 
+	/**
+	 * @brief 删除IRdmDtReader接口实例
+	 * @param reader 要删除的接口实例指针
+	 * 
+	 * @details 安全地删除传入的IRdmDtReader接口实例，释放相关资源
+	 */
 	EXPORT_FLAG void deleteRdmDtReader(IRdmDtReader* reader)
 	{
 		if (reader != NULL)
@@ -70,11 +82,25 @@ extern "C"
 	}
 };
 
-/*
- *	处理块数据
+/**
+ * @brief 处理数据块
+ * @param content 数据内容字符串，传入传出参数
+ * @param isBar 是否是K线数据块
+ * @param bKeepHead 是否保留块头部，默认为true
+ * @return bool 处理是否成功
+ * 
+ * @details 外部函数，用于处理不同类型的数据块，如Tick块和K线块等。
+ * 该函数负责将读取的原始数据块内容进行解析和处理，使其可以被后续程序直接使用。
  */
 extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead = true);
 
+/**
+ * @brief WtRdmDtReader类的构造函数
+ * 
+ * @details 初始化随机数据访问器对象，设置初始状态。
+ * 将基础数据管理器、主力合约管理器设置为空，
+ * 并将停止标志初始化为false。
+ */
 WtRdmDtReader::WtRdmDtReader()
 	: _base_data_mgr(NULL)
 	, _hot_mgr(NULL)
@@ -83,6 +109,13 @@ WtRdmDtReader::WtRdmDtReader()
 }
 
 
+/**
+ * @brief WtRdmDtReader类的析构函数
+ * 
+ * @details 清理资源，停止检查线程，并等待线程安全结束。
+ * 首先设置_stopped标志为true，通知后台线程停止运行，
+ * 然后等待线程结束，避免资源泄漏。
+ */
 WtRdmDtReader::~WtRdmDtReader()
 {
 	_stopped = true;
@@ -90,6 +123,17 @@ WtRdmDtReader::~WtRdmDtReader()
 		_thrd_check->join();
 }
 
+/**
+ * @brief 初始化随机数据访问器
+ * @param cfg 配置项参数，包含数据路径和除权因子文件等配置
+ * @param sink 数据收集器接口，用于日志输出和获取其他管理器
+ * 
+ * @details 根据配置参数初始化随机数据访问器，设置数据路径、加载除权因子，
+ * 并启动资源清理线程，定期释放长时间未访问的数据块缓存。
+ * 该方法首先收集基础数据管理器和主力合约管理器，然后根据配置初始化
+ * 数据路径并加载除权因子文件。最后创建内存资源清理线程，定期清理
+ * 长时间不使用的数据块，以节省内存使用。
+ */
 void WtRdmDtReader::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 {
 	_sink = sink;
@@ -190,6 +234,15 @@ void WtRdmDtReader::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 }
 
 
+/**
+ * @brief 从文件加载股票除权因子
+ * @param adjfile 除权因子文件路径
+ * @return bool 加载是否成功
+ * 
+ * @details 该方法从指定的JSON文件中加载股票除权因子数据，
+ * 用于实现前复权或者后复权的功能。文件格式为交易所->股票代码->除权因子列表。
+ * 除权因子用于调整股票历史价格，使得股票分红除权后的价格可比。
+ */
 bool WtRdmDtReader::loadStkAdjFactorsFromFile(const char* adjfile)
 {
 	if (!StdFile::exists(adjfile))
@@ -260,6 +313,16 @@ bool WtRdmDtReader::loadStkAdjFactorsFromFile(const char* adjfile)
 	return true;
 }
 
+/**
+ * @brief 按日期读取Tick数据切片
+ * @param stdCode 标准化合约代码
+ * @param uDate 交易日期，默认为0（表示当前日期）
+ * @return WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码和日期，获取对应日期的全部Tick数据切片。
+ * 如果是当日数据，会同时查询实时数据和历史数据。
+ * 如果是期货合约，会根据访问规则获取真实合约的数据。
+ */
 WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t uDate )
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -384,6 +447,17 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 	return NULL;
 }
 
+/**
+ * @brief 按时间范围读取Tick数据切片
+ * @param stdCode 标准化合约代码
+ * @param stime 开始时间
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码和时间范围，获取对应的Tick数据切片。
+ * 时间格式为年月日时分秒毫秒，例如：20190807124533900。
+ * 数据包括历史Tick数据和实时Tick数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。
+ */
 WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -1149,6 +1223,18 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 	}
 }
 
+/**
+ * @brief 从文件中缓存历史K线数据
+ * @param codeInfo 合约信息指针，包含交易所、品种等信息
+ * @param key 缓存映射的键名
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @return bool 缓存是否成功
+ * 
+ * @details 根据给定的合约信息和周期，从磁盘文件中加载历史K线数据并存入内存缓存。
+ * 处理多种不同的数据存储格式，包括日线、分钟线等，并支持前复权和后复权的处理。
+ * 该方法会根据不同的存储路径规则查找相应的数据文件，对于股票数据还会进行复权处理。
+ */
 bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -1640,6 +1726,19 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 	return true;
 }
 
+/**
+ * @brief 根据时间范围从缓存中获取K线数据指针
+ * @param key 缓存键名
+ * @param stime 开始时间
+ * @param etime 结束时间
+ * @param count 输出参数，返回获取到的K线数量
+ * @param isDay 是否为日线数据，默认为false
+ * @return WTSBarStruct* 返回K线数据数组的开始指针
+ * 
+ * @details 根据给定的时间范围，从内存缓存中快速检索符合条件的K线数据。
+ * 返回的是直接指向缓存中数据的指针，不进行数据复制，效率更高。
+ * 根据时间格式不同（日线或分钟线），使用不同的比较方法定位数据。
+ */
 WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, uint64_t stime, uint64_t etime, uint32_t& count, bool isDay /* = false */)
 {
 	uint32_t rDate, rTime, lDate, lTime;
@@ -1699,6 +1798,18 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, ui
 	return &barsList._bars[sIdx];
 }
 
+/**
+ * @brief 根据数量从缓存中获取K线数据指针
+ * @param key 缓存键名
+ * @param etime 结束时间
+ * @param count 输入输出参数，输入时指定要获取的数量，输出时返回实际获取到的数量
+ * @param isDay 是否为日线数据，默认为false
+ * @return WTSBarStruct* 返回K线数据数组的开始指针
+ * 
+ * @details 根据给定的结束时间和数量，向前获取指定数量的K线数据。
+ * 返回的是直接指向缓存中数据的指针，不进行数据复制，效率更高。
+ * 该方法会先定位到结束时间的数据，然后向前获取指定数量的数据。
+ */
 WTSBarStruct* WtRdmDtReader::indexBarFromCacheByCount(const std::string& key, uint64_t etime, uint32_t& count, bool isDay /* = false */)
 {
 	uint32_t rDate, rTime;
@@ -1740,6 +1851,19 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByCount(const std::string& key, ui
 	return &barsList._bars[sIdx];
 }
 
+/**
+ * @brief 根据时间范围从缓存中读取K线数据并复制到向量中
+ * @param key 缓存键名
+ * @param stime 开始时间
+ * @param etime 结束时间
+ * @param ayBars 输出参数，用于存放获取到的K线数据
+ * @param isDay 是否为日线数据，默认为false
+ * @return uint32_t 返回获取到的K线数量
+ * 
+ * @details 根据给定的时间范围，从内存缓存中获取K线数据并复制到提供的向量中。
+ * 用于需要对数据进行进一步处理的场景。
+ * 该方法会先从缓存中定位符合时间范围的数据，然后复制到提供的向量中返回。
+ */
 uint32_t WtRdmDtReader::readBarsFromCacheByRange(const std::string& key, uint64_t stime, uint64_t etime, std::vector<WTSBarStruct>& ayBars, bool isDay /* = false */)
 {
 	uint32_t rDate, rTime, lDate, lTime;
@@ -1800,6 +1924,19 @@ uint32_t WtRdmDtReader::readBarsFromCacheByRange(const std::string& key, uint64_
 	return curCnt;
 }
 
+/**
+ * @brief 按时间范围读取K线数据切片
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param stime 开始时间
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSKlineSlice* K线数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码、周期和时间范围，获取对应的K线数据切片。
+ * 数据包括历史数据和实时数据，并会根据需要对股票数据进行复权处理。
+ * 该方法首先会查询缓存中是否已有数据，如果没有则从文件中加载。然后根据周期类型和时间范围
+ * 获取历史和实时数据，并合并成完整的数据切片返回。
+ */
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -2286,6 +2423,18 @@ WtRdmDtReader::RTKlineBlockPair* WtRdmDtReader::getRTKilneBlock(const char* exch
 	return &block;
 }
 
+/**
+ * @brief 按数量读取K线数据切片
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param count 要读取的K线数量
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSKlineSlice* K线数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码、周期、数量和结束时间，向前获取指定数量的K线数据切片。
+ * 该方法会同时查询历史数据和实时数据，并将它们合并成一个完整的数据切片返回。
+ * 如果是股票数据，还会根据需要对数据进行复权处理。
+ */
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
