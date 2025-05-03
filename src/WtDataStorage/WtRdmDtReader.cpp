@@ -700,6 +700,17 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 	return slice;
 }
 
+/**
+ * @brief 按时间范围读取委托队列数据切片
+ * @param stdCode 标准化合约代码
+ * @param stime 开始时间
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSOrdQueSlice* 委托队列数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码和时间范围，获取对应的委托队列数据切片。
+ * 时间格式为年月日时分秒毫秒，例如：20190807124533900。
+ * 数据包括历史委托队列数据和实时委托队列数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。
+ */
 WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -875,6 +886,17 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 	}
 }
 
+/**
+ * @brief 按时间范围读取委托明细数据切片
+ * @param stdCode 标准化合约代码
+ * @param stime 开始时间
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSOrdDtlSlice* 委托明细数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码和时间范围，获取对应的委托明细数据切片。
+ * 时间格式为年月日时分秒毫秒，例如：20190807124533900。
+ * 数据包括历史委托明细数据和实时委托明细数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。
+ */
 WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -1049,6 +1071,17 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 	}
 }
 
+/**
+ * @brief 按时间范围读取成交数据切片
+ * @param stdCode 标准化合约代码
+ * @param stime 开始时间
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSTransSlice* 成交数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码和时间范围，获取对应的成交数据切片。
+ * 时间格式为年月日时分秒毫秒，例如：20190807124533900。
+ * 数据包括历史成交数据和实时成交数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。
+ */
 WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -2611,6 +2644,18 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 	return NULL;
 }
 
+/**
+ * @brief 按数量读取Tick数据切片
+ * @param stdCode 标准化合约代码
+ * @param count 要读取的Tick数量
+ * @param etime 结束时间，默认为0（表示当前时间）
+ * @return WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL
+ * 
+ * @details 根据给定的合约代码、数量和结束时间，向前获取指定数量的Tick数据切片。
+ * 该方法会同时查询实时数据和历史数据，并将它们合并成一个完整的数据切片返回。
+ * 对于期货合约，会根据规则标签自动处理主力合约转换。
+ * 时间格式为年月日时分秒毫秒，例如：20190807124533900。
+ */
 WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
