@@ -363,18 +363,65 @@ private:
 	typedef wt_hashmap<std::string, OrdQueBlockPair*>	OrdQueBlockFilesMap;
 	
 
-	KBlockFilesMap	_rt_min1_blocks;		///< 1分钟线K线数据块映射表
-	KBlockFilesMap	_rt_min5_blocks;		///< 5分钟线K线数据块映射表
+	/*!
+	 * \brief 1分钟K线数据块映射表
+	 * \details 以合约标识为键，存储实时1分钟K线数据
+	 */
+	KBlockFilesMap	_rt_min1_blocks;
 
-	TickBlockFilesMap	_rt_ticks_blocks;		///< Tick数据块映射表
-	TransBlockFilesMap	_rt_trans_blocks;		///< 成交数据块映射表
-	OrdDtlBlockFilesMap _rt_orddtl_blocks;		///< 委托明细数据块映射表
-	OrdQueBlockFilesMap _rt_ordque_blocks;		///< 委托队列数据块映射表
+	/*!
+	 * \brief 5分钟K线数据块映射表
+	 * \details 以合约标识为键，存储实时5分钟K线数据
+	 */
+	KBlockFilesMap	_rt_min5_blocks;
 
-	SpinMutex		_lck_tick_cache;			///< Tick缓存锁
-	wt_hashmap<std::string, uint32_t> _tick_cache_idx;	///< Tick缓存索引表
-	BoostMFPtr		_tick_cache_file;			///< Tick缓存文件
-	RTTickCache*	_tick_cache_block;			///< Tick缓存数据块
+	/*!
+	 * \brief Tick数据块映射表
+	 * \details 以合约标识为键，存储实时Tick行情数据
+	 */
+	TickBlockFilesMap	_rt_ticks_blocks;
+
+	/*!
+	 * \brief 成交数据块映射表
+	 * \details 以合约标识为键，存储实时逐笔成交数据
+	 */
+	TransBlockFilesMap	_rt_trans_blocks;
+
+	/*!
+	 * \brief 委托明细数据块映射表
+	 * \details 以合约标识为键，存储实时逐笔委托明细数据
+	 */
+	OrdDtlBlockFilesMap _rt_orddtl_blocks;
+
+	/*!
+	 * \brief 委托队列数据块映射表
+	 * \details 以合约标识为键，存储实时委托队列数据
+	 */
+	OrdQueBlockFilesMap _rt_ordque_blocks;
+
+	/*!
+	 * \brief Tick缓存锁
+	 * \details 用于保护Tick缓存的自旋锁，确保多线程访问安全
+	 */
+	SpinMutex		_lck_tick_cache;
+
+	/*!
+	 * \brief Tick缓存索引表
+	 * \details 以合约标识为键，缓存索引为值的哈希映射，用于快速查找指定合约的Tick数据
+	 */
+	wt_hashmap<std::string, uint32_t> _tick_cache_idx;
+
+	/*!
+	 * \brief Tick缓存文件
+	 * \details 内存映射文件智能指针，用于存储Tick缓存数据
+	 */
+	BoostMFPtr		_tick_cache_file;
+
+	/*!
+	 * \brief Tick缓存数据块
+	 * \details 指向Tick缓存数据块的指针，用于快速访问和更新Tick数据
+	 */
+	RTTickCache*	_tick_cache_block;
 
 	//typedef std::function<void()> TaskInfo;
 	/*!
@@ -407,42 +454,164 @@ private:
 		~_TaskInfo();
 
 	} TaskInfo;
-	std::queue<TaskInfo>	_tasks;				///< 任务队列
-	StdThreadPtr			_task_thrd;			///< 任务处理线程
-	StdUniqueMutex			_task_mtx;			///< 任务队列互斥锁
-	StdCondVariable			_task_cond;			///< 任务队列条件变量
-
-	std::string		_base_dir;				///< 基础目录
-	std::string		_cache_file;				///< 缓存文件路径
-	uint32_t		_log_group_size;			///< 日志分组大小
-	bool			_async_proc;				///< 是否异步处理
-
-	StdCondVariable	_proc_cond;				///< 处理队列条件变量
-	StdUniqueMutex	_proc_mtx;				///< 处理队列互斥锁
-	std::queue<std::string> _proc_que;			///< 处理队列
-	StdThreadPtr	_proc_thrd;				///< 处理线程
-	StdThreadPtr	_proc_chk;				///< 检查线程
-	bool			_terminated;				///< 是否终止标志
-
-	bool			_save_tick_log;				///< 是否保存Tick日志
-	bool			_skip_notrade_tick;			///< 是否跳过非交易的Tick
-	bool			_skip_notrade_bar;			///< 是否跳过非交易的K线
-	bool			_disable_his;				///< 是否禁用历史数据处理
-
-	bool			_disable_tick;				///< 是否禁用Tick数据处理
-	bool			_disable_min1;				///< 是否禁用1分钟线处理
-	bool			_disable_min5;				///< 是否禁用5分钟线处理
-	bool			_disable_day;				///< 是否禁用日线处理
-
-	bool			_disable_trans;				///< 是否禁用成交数据处理
-	bool			_disable_ordque;				///< 是否禁用委托队列处理
-	bool			_disable_orddtl;				///< 是否禁用委托明细处理
-
-	/*
-	 *	by Wesley @ 2023.05.04
-	 *	分钟线价格模式，0-常规模式，1-将买卖价也记录下来，这个设计时只针对期权这种不活跃的品种
+	/*!
+	 * \brief 任务队列
+	 * \details 存储待处理的数据任务，由任务处理线程异步处理
 	 */
-	uint32_t		_min_price_mode;			///< 分钟线价格模式，0-常规模式，1-将买卖价也记录下来
+	std::queue<TaskInfo>	_tasks;
+
+	/*!
+	 * \brief 任务处理线程
+	 * \details 用于异步处理任务队列中的数据任务
+	 */
+	StdThreadPtr			_task_thrd;
+
+	/*!
+	 * \brief 任务队列互斥锁
+	 * \details 用于保护任务队列的互斥访问
+	 */
+	StdUniqueMutex			_task_mtx;
+
+	/*!
+	 * \brief 任务队列条件变量
+	 * \details 用于任务线程的等待和通知机制
+	 */
+	StdCondVariable			_task_cond;
+
+	/*!
+	 * \brief 基础目录
+	 * \details 数据存储的根目录路径
+	 */
+	std::string		_base_dir;
+
+	/*!
+	 * \brief 缓存文件路径
+	 * \details Tick数据缓存文件的完整路径
+	 */
+	std::string		_cache_file;
+
+	/*!
+	 * \brief 日志分组大小
+	 * \details 日志文件按大小分组的参数，单位为KB
+	 */
+	uint32_t		_log_group_size;
+
+	/*!
+	 * \brief 是否异步处理
+	 * \details 标记数据处理是否使用异步方式，true表示使用异步处理
+	 */
+	bool			_async_proc;
+
+	/*!
+	 * \brief 处理队列条件变量
+	 * \details 用于处理线程的等待和通知机制
+	 */
+	StdCondVariable	_proc_cond;
+
+	/*!
+	 * \brief 处理队列互斥锁
+	 * \details 用于保护处理队列的互斥访问
+	 */
+	StdUniqueMutex	_proc_mtx;
+
+	/*!
+	 * \brief 处理队列
+	 * \details 存储待处理的文件路径或任务标识
+	 */
+	std::queue<std::string> _proc_que;
+
+	/*!
+	 * \brief 处理线程
+	 * \details 用于异步处理数据的工作线程
+	 */
+	StdThreadPtr	_proc_thrd;
+
+	/*!
+	 * \brief 检查线程
+	 * \details 用于定期检查并处理历史数据的工作线程
+	 */
+	StdThreadPtr	_proc_chk;
+
+	/*!
+	 * \brief 是否终止标志
+	 * \details 标记线程是否应该终止，true表示需要终止线程
+	 */
+	bool			_terminated;
+
+	/*!
+	 * \brief 是否保存Tick日志
+	 * \details 标记是否将Tick数据保存到日志文件，true表示保存
+	 */
+	bool			_save_tick_log;
+
+	/*!
+	 * \brief 是否跳过非交易的Tick
+	 * \details 标记是否忽略非交易时段的Tick数据，true表示跳过
+	 */
+	bool			_skip_notrade_tick;
+
+	/*!
+	 * \brief 是否跳过非交易的K线
+	 * \details 标记是否忽略非交易时段的K线数据，true表示跳过
+	 */
+	bool			_skip_notrade_bar;
+
+	/*!
+	 * \brief 是否禁用历史数据处理
+	 * \details 标记是否禁用历史数据的处理功能，true表示禁用
+	 */
+	bool			_disable_his;
+
+	/*!
+	 * \brief 是否禁用Tick数据处理
+	 * \details 标记是否禁用Tick数据的处理功能，true表示禁用
+	 */
+	bool			_disable_tick;
+
+	/*!
+	 * \brief 是否禁用1分钟线处理
+	 * \details 标记是否禁用1分钟K线的处理功能，true表示禁用
+	 */
+	bool			_disable_min1;
+
+	/*!
+	 * \brief 是否禁用5分钟线处理
+	 * \details 标记是否禁用5分钟K线的处理功能，true表示禁用
+	 */
+	bool			_disable_min5;
+
+	/*!
+	 * \brief 是否禁用日线处理
+	 * \details 标记是否禁用日线的处理功能，true表示禁用
+	 */
+	bool			_disable_day;
+
+	/*!
+	 * \brief 是否禁用成交数据处理
+	 * \details 标记是否禁用逐笔成交数据的处理功能，true表示禁用
+	 */
+	bool			_disable_trans;
+
+	/*!
+	 * \brief 是否禁用委托队列处理
+	 * \details 标记是否禁用委托队列数据的处理功能，true表示禁用
+	 */
+	bool			_disable_ordque;
+
+	/*!
+	 * \brief 是否禁用委托明细处理
+	 * \details 标记是否禁用委托明细数据的处理功能，true表示禁用
+	 */
+	bool			_disable_orddtl;
+
+	/*!
+	 * \brief 分钟线价格模式
+	 * \details 控制分钟线价格的记录模式：
+	 *  - 0: 常规模式，只记录OHLC
+	 *  - 1: 增强模式，额外记录买卖价，主要用于期权等不活跃品种
+	 * \author Wesley @ 2023.05.04
+	 */
+	uint32_t		_min_price_mode;
 	
 	std::map<std::string, uint32_t> _proc_date;	///< 已处理的交易日映射表
 
