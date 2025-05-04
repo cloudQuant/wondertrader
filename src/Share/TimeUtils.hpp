@@ -509,6 +509,18 @@ public:
 		return (uint32_t)(minTime%10000);
 	}
 
+	/**
+	 * @brief 判断指定日期是否为周末（周六或周日）
+	 * 
+	 * @param uDate 日期，格式为 YYYYMMDD
+	 * @return bool 如果是周末返回true，否则返回false
+	 * 
+	 * @details 该方法判断指定的日期是否为周末（即周六或周日）。
+	 * 首先将日期转换为tm结构体，然后使用mktime和localtime函数获取对应的星期信息。
+	 * 如果转换过程中出现错误，或者结果显示该日期是周六（tm_wday==6）或周日（tm_wday==0），
+	 * 则返回true，否则返回false。
+	 * 该方法在交易系统中常用于判断是否为交易日。
+	 */
 	static inline bool isWeekends(uint32_t uDate)
 	{
 		tm t;	
@@ -529,11 +541,34 @@ public:
 	}
 
 public:
+	/**
+	 * @brief 时间处理工具类，用于处理包含毫秒级精度的时间
+	 * 
+	 * @details Time32类封装了时间相关的操作，包括时间的格式化、转换、日期和时间的提取等功能。
+	 * 类内部使用tm结构体存储时间信息，并额外记录毫秒信息。
+	 * 该类提供了多种构造方式和各种时间格式化方法，在需要精确时间处理的场景中非常有用。
+	 */
 	class Time32
 	{
 	public:
+		/**
+		 * @brief 默认构造函数
+		 * 
+		 * @details 创建一个时间对象，并将毫秒部分初始化为0。
+		 * 注意这个构造函数仅初始化了毫秒部分，时间结构体tm未进行初始化。
+		 */
 		Time32():_msec(0){}
 
+		/**
+		 * @brief 使用time_t时间戳和毫秒构造时间对象
+		 * 
+		 * @param _time 标准C/C++时间戳，从1970年1月1日起算的秒数
+		 * @param msecs 毫秒部分，默认为0
+		 * 
+		 * @details 创建一个时间对象，使用给定的time_t时间戳和毫秒值。
+		 * 该构造函数会将time_t时间戳转换为tm结构体，并存储毫秒值。
+		 * 该函数考虑了跨平台兼容性，在Windows和Unix/Linux系统上使用不同的时间转换函数。
+		 */
 		Time32(time_t _time, uint32_t msecs = 0)
 		{
 #ifdef _WIN32
@@ -544,6 +579,16 @@ public:
 			_msec = msecs;
 		}
 
+		/**
+		 * @brief 使用毫秒级时间戳构造时间对象
+		 * 
+		 * @param _time 毫秒级时间戳，从1970年1月1日起算的毫秒数
+		 * 
+		 * @details 创建一个时间对象，使用给定的毫秒级时间戳。
+		 * 该构造函数先将毫秒级时间戳拆分为秒数与毫秒两部分，
+		 * 然后将秒数部分转换为tm结构体，并存储毫秒值。
+		 * 该函数考虑了跨平台兼容性，在Windows和Unix/Linux系统上使用不同的时间转换函数。
+		 */
 		Time32(uint64_t _time)
 		{
 			time_t _t = _time/1000;
@@ -555,6 +600,16 @@ public:
 #endif
 		}
 
+		/**
+		 * @brief 从毫秒级本地时间戳设置时间对象
+		 * 
+		 * @param _time 毫秒级本地时间戳，从1970年1月1日起算的毫秒数
+		 * 
+		 * @details 该方法使用给定的毫秒级时间戳设置当前时间对象的值。
+		 * 方法先将毫秒级时间戳拆分为秒数与毫秒两部分，
+		 * 然后将秒数部分转换为tm结构体，并存储毫秒值。
+		 * 该函数同样考虑了跨平台兼容性，在Windows和Unix/Linux系统上使用不同的时间转换函数。
+		 */
 		void from_local_time(uint64_t _time)
 		{
 			time_t _t = _time/1000;
@@ -566,21 +621,62 @@ public:
 #endif
 		}
 
+		/**
+		 * @brief 获取日期部分
+		 * 
+		 * @return uint32_t 日期，格式为 YYYYMMDD
+		 * 
+		 * @details 该方法从当前时间对象中提取日期部分，并将其转换为 YYYYMMDD 格式的整数表示。
+		 * 计算方式为：年*10000 + 月*100 + 日。
+		 * 例如，2022年3月9日将返回 20220309。
+		 */
 		uint32_t date()
 		{
 			return (t.tm_year + 1900)*10000 + (t.tm_mon + 1)*100 + t.tm_mday;
 		}
 
+		/**
+		 * @brief 获取时间部分（不包含毫秒）
+		 * 
+		 * @return uint32_t 时间，格式为 HHMMSS
+		 * 
+		 * @details 该方法从当前时间对象中提取时间部分，不包含毫秒，并将其转换为 HHMMSS 格式的整数表示。
+		 * 计算方式为：小时*10000 + 分钟*100 + 秒。
+		 * 例如，10点30分45秒将返回 103045。
+		 */
 		uint32_t time()
 		{
 			return t.tm_hour*10000 + t.tm_min*100 + t.tm_sec;
 		}
 
+		/**
+		 * @brief 获取时间部分（包含毫秒）
+		 * 
+		 * @return uint32_t 时间，格式为 HHMMSSmmm
+		 * 
+		 * @details 该方法从当前时间对象中提取时间部分，包含毫秒，并将其转换为 HHMMSSmmm 格式的整数表示。
+		 * 计算方式为：小时*10000000 + 分钟*100000 + 秒*1000 + 毫秒。
+		 * 例如，10点30分45秒123毫秒将返回 103045123。
+		 * 该方法在需要精确到毫秒级别的时间表示场景中很有用，如高频交易、性能测试等。
+		 */
 		uint32_t time_ms()
 		{
 			return t.tm_hour*10000000 + t.tm_min*100000 + t.tm_sec*1000 + _msec;
 		}
 
+		/**
+		 * @brief 格式化时间为字符串
+		 * 
+		 * @param sfmt 时间格式化字符串，遵循strftime函数的格式规则，默认为"%Y.%m.%d %H:%M:%S"
+		 * @param hasMilliSec 是否包含毫秒信息，默认为false
+		 * @return const char* 格式化后的时间字符串
+		 * 
+		 * @details 该方法将当前时间对象格式化为指定格式的字符串。
+		 * 首先使用strftime函数将tm结构体格式化为字符串，然后根据hasMilliSec参数决定是否需要在字符串末尾添加毫秒信息。
+		 * 注意该方法返回的是一个静态内部缓冲区的指针，调用者不应修改该指针指向的内容，
+		 * 且如果连续多次调用该方法，之前返回的结果可能会被覆盖。
+		 * 常用于日志输出、调试信息打印等需要格式化时间的场景。
+		 */
 		const char* fmt(const char* sfmt = "%Y.%m.%d %H:%M:%S", bool hasMilliSec = false) const
 		{
 			static char buff[1024];
