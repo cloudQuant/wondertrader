@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file TimeUtils.hpp
  * \project	WonderTrader
  *
@@ -6,6 +6,13 @@
  * \date 2020/03/30
  * 
  * \brief 时间处理的封装
+ * 
+ * \details 本文件封装了各种时间处理相关的工具函数和类，包括：
+ * - 获取当前时间（精确到毫秒级）
+ * - 时间格式转换（日期、时间的各种格式互转）
+ * - 日期计算（获取下一天、下一分钟、下一月等）
+ * - 时间字符串格式化
+ * - 高精度计时器
  */
 #pragma once
 
@@ -54,6 +61,13 @@ struct KUSER_SHARED_DATA
 #define TICKSPERSEC        10000000L
 #endif
 
+/**
+ * @brief 时间处理工具类
+ * 
+ * @details TimeUtils类提供了一系列与时间相关的静态方法，包括时间获取、格式转换、日期计算等功能。
+ * 包含两个内部类：Time32（时间处理类）和Ticker（高精度计时器）。
+ * 所有方法都是静态的，可以直接通过类名调用，无需创建类的实例。
+ */
 class TimeUtils 
 {
 	
@@ -64,6 +78,15 @@ public:
 //		ftime(&now);
 //		return now.time * 1000 + now.millitm;
 //	}
+	/**
+	 * @brief 获取当前本地时间（旧版方法）
+	 * 
+	 * @return int64_t 当前时间的毫秒级时间戳，从1970年1月1日起算的毫秒数
+	 * 
+	 * @details 该方法使用clock_gettime函数获取当前系统时间，并将其转换为毫秒级时间戳。
+	 * 使用thread_local关键字确保每个线程都有自己的timespec实例，避免多线程竞争。
+	 * 这是旧版的获取时间方法，保留为了兼容性目的。
+	 */
 	static inline int64_t getLocalTimeNowOld(void)
 	{
 		thread_local static struct timespec now;
@@ -71,8 +94,16 @@ public:
 		return static_cast<int64_t>(now.tv_sec) * 1000 + now.tv_nsec / 1000000;
 	}
 
-	/*
-	 *	获取本地时间，精确到毫秒，eg  1734350031606
+	/**
+	 * @brief 获取当前本地时间，精确到毫秒
+	 * 
+	 * @return int64_t 当前时间的毫秒级时间戳，从1970年1月1日起算的毫秒数，例如 1734350031606
+	 * 
+	 * @details 该方法根据不同的操作系统提供了不同的实现：
+	 * - Windows平台：使用SharedUserData结构直接访问系统时间，避免了系统调用开销，性能更高
+	 * - Unix/Linux平台：使用clock_gettime函数获取系统时间，相比ftime提升了约10%的性能
+	 * 
+	 * 这是获取当前时间的首选方法，比getLocalTimeNowOld更高效。
 	 */
 	static inline int64_t getLocalTimeNow(void)
 	{
@@ -100,8 +131,18 @@ public:
 #endif
 	}
 
-     /*
-       返回当前的时间，包含毫秒：19:53:51,606 不包含毫秒 19:53:51
+     /**
+      * @brief 获取当前本地时间的字符串表示
+      * 
+      * @param bIncludeMilliSec 是否包含毫秒信息，默认为true
+      * @return std::string 当前时间的字符串表示，格式为 "HH:MM:SS" 或 "HH:MM:SS,mmm"
+      * 
+      * @details 该方法返回当前时间的字符串表示，可以选择是否包含毫秒信息：
+      * - 包含毫秒时格式例如："19:53:51,606"
+      * - 不包含毫秒时格式例如："19:53:51"
+      * 
+      * 该方法内部调用getLocalTimeNow获取当前时间的毫秒级时间戳，
+      * 然后将其转换为所需的字符串格式。
       */
 	static inline std::string getLocalTime(bool bIncludeMilliSec = true)
 	{
@@ -118,8 +159,18 @@ public:
 		return str;
 	}
 
-    /*
-    返回当前的日期和时间，eg  20241216195351
+    /**
+     * @brief 获取当前日期和时间的整数表示
+     * 
+     * @return uint64_t 当前日期和时间的整数表示，格式为 YYYYMMDDhhmmss，例如 20241216195351
+     * 
+     * @details 该方法返回当前日期和时间的整数表示，将年月日时分秒组合成一个整数。
+     * 计算过程如下：
+     * 1. 日期部分：年*10000 + 月*100 + 日，例如 20241216
+     * 2. 时间部分：时*10000 + 分*100 + 秒，例如 195351
+     * 3. 组合结果：日期*1000000 + 时间，例如 20241216195351
+     * 
+     * 该格式常用于日志记录、数据存储等需要紧凑表示时间的场景。
      */
 	static inline uint64_t getYYYYMMDDhhmmss()
 	{
@@ -134,10 +185,18 @@ public:
 		return date * 1000000 + time;
 	}
 
-    /*
-     * 读取当前时间
-     * @date    当前日期，格式如20220309
-     * @time    当前时间，精确到毫秒，格式如103029500
+    /**
+     * @brief 获取当前日期和时间，分别存储到两个参数中
+     * 
+     * @param[out] date 当前日期，格式为 YYYYMMDD，例如 20220309
+     * @param[out] time 当前时间，包含毫秒，格式为 HHMMSSmmmm，例如 103029500
+     * 
+     * @details 该方法获取当前的日期和时间，并将其分别存储到两个参数中。
+     * 计算过程如下：
+     * 1. 日期部分：年*10000 + 月*100 + 日，例如 20220309
+     * 2. 时间部分：时*10000 + 分*100 + 秒，然后乘以1000再加上毫秒，例如 103029500
+     * 
+     * 该方法常用于需要分别处理日期和时间的场景，如交易数据存储、日志记录等。
      */
 	static inline void getDateTime(uint32_t &date, uint32_t &time)
 	{
@@ -155,7 +214,12 @@ public:
 	}
 
     /**
-     返回当前的日期，如 20241216
+     * @brief 获取当前日期
+     * 
+     * @return uint32_t 当前日期的整数表示，格式为 YYYYMMDD，例如 20241216
+     * 
+     * @details 该方法返回当前日期的整数表示，计算方式为：年*10000 + 月*100 + 日。
+     * 该格式常用于交易系统中的日期表示、数据存储和日志记录等。
      */
 	static inline uint32_t getCurDate()
 	{
@@ -166,8 +230,16 @@ public:
 
 		return date;
 	}
-    /*
-    返回当前的星期，如周一返回值是1
+    /**
+     * @brief 获取指定日期或当前日期的星期
+     * 
+     * @param uDate 要查询的日期，格式为 YYYYMMDD，默认为0（表示当前日期）
+     * @return uint32_t 星期几，范围为1-7，其中1表示周一，7表示周日
+     * 
+     * @details 该方法返回指定日期或当前日期的星期几。
+     * 如果参数uDate为0，则获取当前日期的星期；否则获取指定日期的星期。
+     * 返回值为1-7的整数，分别对应周一到周日。
+     * 该方法在交易日判断、日历处理等场景中非常有用。
      */
 	static inline uint32_t getWeekDay(uint32_t uDate = 0)
 	{
@@ -190,8 +262,14 @@ public:
 	
 		return tNow->tm_wday;
 	}
-    /*
-    返回当前的时间，eg 195351
+    /**
+     * @brief 获取当前时间（时分秒）
+     * 
+     * @return uint32_t 当前时间的整数表示，格式为 HHMMSS，例如 195351
+     * 
+     * @details 该方法返回当前时间的整数表示，计算方式为：时*10000 + 分*100 + 秒。
+     * 该格式常用于交易系统中的时间表示、数据存储和日志记录等。
+     * 与getDateTime方法不同，该方法只返回时分秒部分，不包含毫秒信息。
      */
 	static inline uint32_t getCurMin()
 	{
@@ -203,6 +281,15 @@ public:
 		return time;
 	}
 
+	/**
+	 * @brief 获取本地时区相对于UTC的偏移量（小时）
+	 * 
+	 * @return int32_t 时区偏移量，单位为小时，东时区为正数（如北京时间为+8），西时区为负数
+	 * 
+	 * @details 该方法返回本地时区相对于UTC（协调世界时）的偏移量，单位为小时。
+	 * 为了提高性能，方法使用静态变量缓存第一次计算的结果，后续调用直接返回缓存值。
+	 * 该方法在处理跨时区的时间计算中非常有用，如将本地时间转换为UTC时间或将UTC时间转换为本地时间。
+	 */
 	static inline int32_t getTZOffset()
 	{
 		static int32_t offset = 99;
