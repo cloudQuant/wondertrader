@@ -309,11 +309,18 @@ public:
 		return offset;
 	}
 
-	/*
-	 *	生成带毫秒的timestamp
-	 *	@lDate			日期，yyyymmdd
-	 *	@lTimeWithMs	带毫秒的时间，HHMMSSsss
-	 *	@isToUTC		是否转成UTC时间
+	/**
+	 * @brief 生成带毫秒的时间戳
+	 * 
+	 * @param lDate 日期，格式为 YYYYMMDD，例如 20220309
+	 * @param lTimeWithMs 带毫秒的时间，格式为 HHMMSSmmm，例如 103029500
+	 * @param isToUTC 是否转成UTC时间，默认为 false
+	 * @return int64_t 毫秒级时间戳，从1970年1月1日起算的毫秒数
+	 * 
+	 * @details 该方法根据给定的日期和时间生成毫秒级时间戳。
+	 * 首先将日期和时间解析成tm结构体，然后使用mktime函数转换为时间戳。
+	 * 如果isToUTC为true，则会根据本地时区将时间转换为UTC时间。
+	 * 这个方法常用于将特定格式的日期时间转换为时间戳，方便进行时间计算和比较。
 	 */
 	static inline int64_t makeTime(long lDate, long lTimeWithMs, bool isToUTC = false)
 	{
@@ -335,6 +342,18 @@ public:
 		return ts * 1000+ millisec;
 	}
 
+	/**
+	 * @brief 将毫秒级时间戳转换为字符串表示
+	 * 
+	 * @param mytime 毫秒级时间戳，从1970年1月1日起算的毫秒数
+	 * @return std::string 格式化后的时间字符串，格式为 "YYYYMMDDHHmmss" 或 "YYYYMMDDHHmmss.mmm"
+	 * 
+	 * @details 该方法将毫秒级时间戳转换为字符串格式。
+	 * 如果时间戳包含毫秒部分，则格式为 "YYYYMMDDHHmmss.mmm"；
+	 * 如果没有毫秒部分，则格式为 "YYYYMMDDHHmmss"。
+	 * 如果传入的时间戳为0或无效，则返回空字符串。
+	 * 该方法考虑了跨平台兼容性，在Windows和Unix/Linux系统上使用不同的本地时间转换函数。
+	 */
 	static std::string timeToString(int64_t mytime)
 	{
 		if (mytime == 0) return "";
@@ -358,6 +377,18 @@ public:
 		return tm_buf;
 	};
 
+	/**
+	 * @brief 获取指定日期后的第 N 天日期
+	 * 
+	 * @param curDate 当前日期，格式为 YYYYMMDD，例如 20220309
+	 * @param days 要增加的天数，默认为1，可以为负数（表示往前计算）
+	 * @return uint32_t 计算后的日期，格式为 YYYYMMDD
+	 * 
+	 * @details 该方法用于计算指定日期之后（或之前）的日期。
+	 * 利用标准时间库中的mktime和localtime函数进行日期计算，
+	 * 可以正确处理月底和年底的进位问题，以及闰年等特殊情况。
+	 * 该方法在交易系统中常用于计算交易日、结算日等。
+	 */
 	static uint32_t getNextDate(uint32_t curDate, int days = 1)
 	{
 		tm t;	
@@ -373,6 +404,18 @@ public:
 		return (newT->tm_year+1900)*10000 + (newT->tm_mon+1)*100 + newT->tm_mday;
 	}
 
+	/**
+	 * @brief 获取指定时间后的第 N 分钟的时间
+	 * 
+	 * @param curTime 当前时间，格式为 HHMM，例如 1030表示10点30分
+	 * @param mins 要增加的分钟数，默认为1，可以为负数（表示往前计算）
+	 * @return uint32_t 计算后的时间，格式为 HHMM
+	 * 
+	 * @details 该方法用于计算指定时间之后（或之前）的时间。
+	 * 时间计算基于24小时制，同时处理了跨日的情况（如果计算结果超过1440分钟或小于0分钟）。
+	 * 例如，如果当前时间是2350，增加20分钟，则结果将是0010。
+	 * 该方法在交易系统中常用于计算交易时间、K线周期等。
+	 */
 	static uint32_t getNextMinute(int32_t curTime, int32_t mins = 1)
 	{
 		int32_t curHour = curTime / 100;
@@ -389,9 +432,17 @@ public:
 		return (uint32_t)ret;
 	}
 
-    /*
-     * @curMonth: YYYYMM
-     * @return: YYYYMM
+    /**
+     * @brief 获取指定月份后的第 N 个月的年月
+     * 
+     * @param curMonth 当前年月，格式为 YYYYMM，例如 202203表示2022年3月
+     * @param months 要增加的月数，默认为1，可以为负数（表示往前计算）
+     * @return uint32_t 计算后的年月，格式为 YYYYMM
+     * 
+     * @details 该方法用于计算指定年月之后（或之前）的年月。
+     * 计算过程中会正确处理跨年的情况，例如，如果当前是202212（即•2022年12月”），
+     * 增加2个月后将得到202302（即•2023年2月”）。
+     * 该方法在处理月度数据、计算合约到期日等有关月度时间的场景中非常实用。
      */
     static uint32_t getNextMonth(uint32_t curMonth, int months = 1)
     {
@@ -411,16 +462,48 @@ public:
         return (uint32_t) (uYear*100 + uMonth);
     }
 
+	/**
+	 * @brief 将日期和时间转换为分钟线ID
+	 * 
+	 * @param uDate 日期，格式为 YYYYMMDD，例如 20220309
+	 * @param uTime 时间，格式为 HHMM或HHMMSS，例如 1030或103000
+	 * @return uint64_t 分钟线ID，用于唯一标识特定分钟的K线
+	 * 
+	 * @details 该方法将日期和时间转换为分钟线ID，计算方式为(uDate-19900000)*10000 + uTime。
+	 * 例如，如果日期是20220309，时间是1030，则分钟线ID为(20220309-19900000)*10000 + 1030 = 23303091030。
+	 * 该ID可以唯一标识交易系统中的每一分钟的K线数据，并支持数据存储和查询。
+	 */
 	static inline uint64_t timeToMinBar(uint32_t uDate, uint32_t uTime)
 	{
 		return (uint64_t)((uDate-19900000)*10000) + uTime;
 	}
 
+	/**
+	 * @brief 从分钟线ID中提取日期部分
+	 * 
+	 * @param minTime 分钟线ID，由timeToMinBar方法生成
+	 * @return uint32_t 日期，格式为 YYYYMMDD
+	 * 
+	 * @details 该方法从分钟线ID中提取日期部分，是timeToMinBar方法的逆操作。
+	 * 计算方式为 minTime/10000 + 19900000。
+	 * 例如，如果分钟线ID是23303091030，则日期为23303091030/10000 + 19900000 = 2330309 + 19900000 = 20220309。
+	 */
 	static inline uint32_t minBarToDate(uint64_t minTime)
 	{
 		return (uint32_t)(minTime/10000 + 19900000);
 	}
 
+	/**
+	 * @brief 从分钟线ID中提取时间部分
+	 * 
+	 * @param minTime 分钟线ID，由timeToMinBar方法生成
+	 * @return uint32_t 时间，格式为 HHMM或HHMMSS
+	 * 
+	 * @details 该方法从分钟线ID中提取时间部分，是timeToMinBar方法的逆操作。
+	 * 计算方式为 minTime % 10000。
+	 * 例如，如果分钟线ID是23303091030，则时间为23303091030 % 10000 = 1030。
+	 * 返回的时间格式依赖于原始的时间格式，如果原始时间是4位数字，则返回的是HHMM格式，如果是6位数字，则返回的是HHMMSS格式。
+	 */
 	static inline uint32_t minBarToTime(uint64_t minTime)
 	{
 		return (uint32_t)(minTime%10000);
