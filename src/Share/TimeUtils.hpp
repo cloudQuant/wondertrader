@@ -68,6 +68,21 @@ struct KUSER_SHARED_DATA
  * 包含两个内部类：Time32（时间处理类）和Ticker（高精度计时器）。
  * 所有方法都是静态的，可以直接通过类名调用，无需创建类的实例。
  */
+/**
+ * @brief 时间工具类，提供各种时间相关的工具函数和类
+ * 
+ * @details TimeUtils类是一个静态工具类，封装了各种时间相关的实用函数和子类。
+ * 它提供了以下功能：
+ * - 获取当前时间：精确到毫秒级别的当前时间获取
+ * - 时间格式转换：各种时间格式之间的相互转换，如日期、时间的整数表示和字符串表示
+ * - 日期计算：计算下一天、下一分钟、下一月等
+ * - 分钟线ID转换：将日期和时间转换为唯一的分钟线ID，以及反向转换
+ * - 时间处理工具类：Time32类、Ticker高精度计时器等
+ * 
+ * 该类设计为静态类，所有方法都是静态的，不需要创建类的实例即可使用。
+ * 其中许多方法都是inline的，这样可以提高运行效率，特别是在高频交易系统中。
+ * 该类考虑了跨平台兼容性，在Windows和Unix/Linux系统上都能正常工作。
+ */
 class TimeUtils 
 {
 	
@@ -687,23 +702,69 @@ public:
 		}
 
 	protected:
+		/**
+		 * @brief 时间结构体
+		 * 
+		 * @details 存储日期和时间信息，包括年、月、日、时、分、秒等。
+		 * 这是C/C++标准库中的时间结构体，用于时间操作和格式化。
+		 */
 		struct tm t;
+
+		/**
+		 * @brief 毫秒部分
+		 * 
+		 * @details 存储毫秒级别的时间精度，范围为0-999。
+		 * 由于C/C++标准库中的tm结构体不包含毫秒信息，
+		 * 因此需要额外使用该变量来存储毫秒部分。
+		 */
 		uint32_t _msec;
 	};
 
+	/**
+	 * @brief 高精度计时器类
+	 * 
+	 * @details Ticker类提供了一个高精度的计时工具，基于C++11的std::chrono库实现。
+	 * 该类可用于测量从实例化或重置开始到调用时的经过时间，
+	 * 支持以秒、毫秒、微秒和纳秒为单位返回经过的时间。
+	 * 该类在需要测量程序性能、执行时间或实现超时功能的场景中非常有用。
+	 */
 	class Ticker
 	{
 	public:
+		/**
+		 * @brief 构造函数，创建计时器并开始计时
+		 * 
+		 * @details 创建一个新的Ticker实例，并将内部的时间记录点初始化为当前时间。
+		 * 该构造函数使用std::chrono::high_resolution_clock获取当前系统的高精度时间，
+		 * 使计时器具有最高的时间精度。一旦实例化，计时器就开始运行。
+		 */
 		Ticker()
 		{
 			_tick = std::chrono::high_resolution_clock::now();
 		}
 
+		/**
+		 * @brief 重置计时器
+		 * 
+		 * @details 将计时器的内部时间记录点重置为当前时间，相当于重新开始计时。
+		 * 该方法同样使用std::chrono::high_resolution_clock获取当前系统的高精度时间。
+		 * 调用该方法后，后续的时间测量将以这个新的时间点作为起始点。
+		 * 当需要多次使用同一个计时器实例测量不同时间段时，该方法非常有用。
+		 */
 		void reset()
 		{
 			_tick = std::chrono::high_resolution_clock::now();
 		}
 
+		/**
+		 * @brief 获取从计时器初始化或重置开始经过的秒数
+		 * 
+		 * @return int64_t 经过的时间，单位为秒
+		 * 
+		 * @details 该方法计算从计时器初始化或最近一次重置到现在经过的时间，并以秒为单位返回。
+		 * 该方法先获取当前时间，然后计算与计时器起始时间的差值，最后转换为秒单位。
+		 * 该方法适用于测量较长时间的操作，如长时间运行的任务、超时检测等。
+		 */
 		inline int64_t seconds() const 
 		{
 			auto now = std::chrono::high_resolution_clock::now();
@@ -711,6 +772,16 @@ public:
 			return std::chrono::duration_cast<std::chrono::seconds>(td).count();
 		}
 
+		/**
+		 * @brief 获取从计时器初始化或重置开始经过的毫秒数
+		 * 
+		 * @return int64_t 经过的时间，单位为毫秒
+		 * 
+		 * @details 该方法计算从计时器初始化或最近一次重置到现在经过的时间，并以毫秒为单位返回。
+		 * 该方法先获取当前时间，然后计算与计时器起始时间的差值，最后转换为毫秒单位。
+		 * 该方法适用于测量中等时间的操作，如网络请求响应时间、算法执行时间等。
+		 * 1秒 = 1000毫秒。
+		 */
 		inline int64_t milli_seconds() const
 		{
 			auto now = std::chrono::high_resolution_clock::now();
@@ -718,6 +789,16 @@ public:
 			return std::chrono::duration_cast<std::chrono::milliseconds>(td).count();
 		}
 
+		/**
+		 * @brief 获取从计时器初始化或重置开始经过的微秒数
+		 * 
+		 * @return int64_t 经过的时间，单位为微秒
+		 * 
+		 * @details 该方法计算从计时器初始化或最近一次重置到现在经过的时间，并以微秒为单位返回。
+		 * 该方法先获取当前时间，然后计算与计时器起始时间的差值，最后转换为微秒单位。
+		 * 该方法适用于测量较短时间的操作，如内存操作、CPU密集型计算等。
+		 * 1毫秒 = 1000微秒，1秒 = 1000000微秒。
+		 */
 		inline int64_t micro_seconds() const
 		{
 			auto now = std::chrono::high_resolution_clock::now();
@@ -725,6 +806,16 @@ public:
 			return std::chrono::duration_cast<std::chrono::microseconds>(td).count();
 		}
 
+		/**
+		 * @brief 获取从计时器初始化或重置开始经过的纳秒数
+		 * 
+		 * @return int64_t 经过的时间，单位为纳秒
+		 * 
+		 * @details 该方法计算从计时器初始化或最近一次重置到现在经过的时间，并以纳秒为单位返回。
+		 * 该方法先获取当前时间，然后计算与计时器起始时间的差值，最后转换为纳秒单位。
+		 * 该方法提供了最高精度的时间测量，适用于测量非常短的操作时间，如单条指令执行、高频交易环境中的时间关键操作等。
+		 * 1微秒 = 1000纳秒，1毫秒 = 1000000纳秒，1秒 = 1000000000纳秒。
+		 */
 		inline int64_t nano_seconds() const
 		{
 			auto now = std::chrono::high_resolution_clock::now();
@@ -733,6 +824,14 @@ public:
 		}
 
 	private:
+		/**
+		 * @brief 计时器的起始时间点
+		 * 
+		 * @details 存储计时器初始化或最近一次重置时的高精度时间点。
+		 * 该时间点用于计算经过的时间。使用std::chrono::high_resolution_clock提供的高精度时间点，
+		 * 确保时间测量具有最高的精度。
+		 * 该类型是C++11标准库中提供的高精度计时工具。
+		 */
 		std::chrono::time_point<std::chrono::high_resolution_clock> _tick;
 	};
 };
