@@ -613,7 +613,25 @@ public:
 		return num;
 	}
 
-
+	
+	/**
+	 * @brief 检测数据是否为UTF-8编码
+	 * 
+	 * @param data 要检测的数据的指针
+	 * @param len 数据长度
+	 * @return bool 如果数据是UTF-8编码返回true，否则返回false
+	 * 
+	 * @details 该方法通过检查字节序列是否符合UTF-8编码规范来判断数据是否为UTF-8编码。
+	 * UTF-8编码中字符的字节模式如下：
+	 * 1. 0xxx_xxxx：单字节ASCII字符
+	 * 2. 110x_xxxx 10xx_xxxx：双字节字符
+	 * 3. 1110_xxxx 10xx_xxxx 10xx_xxxx：三字节字符
+	 * 4. 1111_0xxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：四字节字符
+	 * 5. 1111_10xx 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：五字节字符
+	 * 6. 1111_110x 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：六字节字符
+	 * 
+	 * 方法判断字符串中的字节序列是否符合这些模式，特别检测多字节字符的后续字节是否都以10开头。
+	 */
 	static bool isUtf8(unsigned char* data, std::size_t len) {
 		int num = 0;
 		std::size_t i = 0;
