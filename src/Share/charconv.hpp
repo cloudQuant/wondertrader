@@ -201,19 +201,59 @@ private :
 	UTF8toChar &operator=(const UTF8toChar &rhs);
 };
 
+/**
+ * @brief 本地编码字符串转换为UTF-8编码的工具类
+ * 
+ * @details 该类用于将本地编码的字符串转换为UTF-8编码：
+ * - Windows系统下从系统当前活动代码页（CP_ACP）转换为UTF-8
+ * - Linux系统下从本地编码（通常是gb2312）转换为UTF-8
+ * 
+ * 该类是UTF8toChar类的逆操作，实现了自动类型转换运算符以及内存管理功能。
+ * 如果字符串只包含ASCII字符，则不会进行转换，以提高效率。
+ */
 class ChartoUTF8
 {
 public :
+	/**
+	 * @brief 使用std::string构造ChartoUTF8对象
+	 * 
+	 * @param str 本地编码的std::string字符串
+	 * 
+	 * @details 该构造函数将std::string转换为C风格字符串，然后调用init方法完成实际的编码转换
+	 */
 	ChartoUTF8(const std::string& str)
 	{
 		init(str.c_str());
 	}
 
+	/**
+	 * @brief 使用C风格字符串构造ChartoUTF8对象
+	 * 
+	 * @param t_string 本地编码的字符串指针
+	 * 
+	 * @details 构造函数将调用init方法完成实际的编码转换工作
+	 */
 	ChartoUTF8(const char *t_string)
 	{
 		init(t_string);
 	}
 
+	/**
+	 * @brief 初始化并执行字符编码转换
+	 * 
+	 * @param t_string 本地编码的字符串指针
+	 * 
+	 * @details 这个方法执行实际的编码转换工作，将本地编码转换为UTF-8编码。处理流程如下：
+	 * 1. 如果输入字符串为空指针，则输出也设置为空指针
+	 * 2. 如果输入字符串为空字符串，则直接使用空字符串常量
+	 * 3. 如果输入字符串只包含ASCII字符，则直接使用原字符串指针，不需要转换
+	 * 4. 如果字符串包含非ASCII字符，则执行编码转换：
+	 *    - Windows下：先将本地编码转换成Unicode，再将Unicode转换为UTF-8
+	 *    - Linux下：使用iconv将gb2312直接转换为UTF-8
+	 * 
+	 * 当需要转换时，会动态分配内存并设置needFree标志，以便在析构时释放内存。
+	 * 注意在Linux下要求输入的字符串必须是gb2312编码。
+	 */
 	void init(const char *t_string)
 	{
 		if (0 == t_string)
@@ -264,16 +304,40 @@ public :
 		}
 	}
 
+	/**
+	 * @brief 类型转换运算符，将对象转换为字符串指针
+	 * 
+	 * @return const char* 转换后的UTF-8编码字符串指针
+	 * 
+	 * @details 该运算符允许将ChartoUTF8对象直接用于需要const char*类型的表达式中
+	 * 例如：printf("%s", ChartoUTF8(str));
+	 */
 	operator const char*()
 	{
 		return utf8_string;
 	}
 
+	/**
+	 * @brief 获取转换后的C风格字符串
+	 * 
+	 * @return const char* 转换后的UTF-8编码字符串指针
+	 * 
+	 * @details 该方法与类型转换运算符功能相同，返回转换后的字符串指针。
+	 * 提供该方法是为了与C++标准库容器类的c_str()方法保持一致的命名风格。
+	 */
 	const char* c_str() const
 	{
 		return utf8_string;
 	}
 
+	/**
+	 * @brief 析构函数
+	 * 
+	 * @details 析构函数负责释放在转换过程中可能分配的内存。
+	 * 只有当needFree标志为true时（即实际进行了字符编码转换并分配了新内存），
+	 * 才会释放utf8_string指向的内存。如果是直接使用原字符串指针（ASCII字符串或空字符串），
+	 * 则不需要释放内存。
+	 */
 	~ChartoUTF8()
 	{
 		if (needFree)
@@ -281,7 +345,20 @@ public :
 	}
 
 private :
+	/**
+	 * @brief 转换后的UTF-8编码字符串指针
+	 * 
+	 * @details 存储转换后的UTF-8编码字符串指针。
+	 * 根据输入字符串的类型，可能指向原始字符串（ASCII字符）或新分配的内存（非ASCII字符）。
+	 */
 	char *utf8_string;
+
+	/**
+	 * @brief 标记是否需要释放字符串内存
+	 * 
+	 * @details 当为true时，表示转换过程中分配了新内存，需要在析构函数中释放内存。
+	 * 当为false时，表示utf8_string指向原始字符串或字符串常量，不需要释放内存。
+	 */
 	bool needFree;
 
 	//
@@ -455,9 +532,31 @@ private:
 	std::string decoded_string;
 };
 
+/**
+ * @brief 字符编码检测帮助类
+ * 
+ * @details 该类提供了字符编码检测功能，可以检测一个字符串是否为GBK编码或UTF-8编码。
+ * 所有方法都是静态的，可以直接通过类名调用，不需要创建类实例。
+ * 
+ * 这在处理来自不同源的文本数据时非常有用，可以在转换之前先确定字符串的编码格式。
+ */
 class EncodingHelper
 {
 public:
+	/**
+	 * @brief 检测数据是否为GBK编码
+	 * 
+	 * @param data 要检测的数据的指针
+	 * @param len 数据长度
+	 * @return bool 如果数据包含GBK编码返回true，否则返回false
+	 * 
+	 * @details 该方法通过检查字节序列是否符合GBK编码规范来判断数据是否为GBK编码。
+	 * GBK编码规则如下：
+	 * 1. 0x00~0x7F的字符是单字节编码，与ASCII兼容
+	 * 2. 0x81~0xFE范围内的字节开头，后跟0x40~0xFE范围内的字节（但不能是0xF7）组成双字节编码
+	 * 
+	 * 只要发现符合GBK编码规则的双字节序列，就认为整个字符串是GBK编码。
+	 */
 	static bool isGBK(unsigned char* data, std::size_t len) {
 		std::size_t i = 0;
 		while (i < len) {
@@ -482,6 +581,23 @@ public:
 		return false;
 	}
 
+	/**
+	 * @brief 计算UTF-8编码字节首部连续为1的比特数量
+	 * 
+	 * @param byte 要检测的字节
+	 * @return int 字节首部连续1的比特数量
+	 * 
+	 * @details 该方法用于判断UTF-8编码中一个字符所使用的字节数。
+	 * 在UTF-8编码中，首字节的表现形式如下：
+	 * - 0xxxxxxx: 单字节字符（ASCII字符），返回0
+	 * - 110xxxxx: 双字节字符，返回2
+	 * - 1110xxxx: 三字节字符，返回3
+	 * - 11110xxx: 四字节字符，返回4
+	 * - 111110xx: 五字节字符，返回5
+	 * - 1111110x: 六字节字符，返回6
+	 * 
+	 * 这个数字表示在UTF-8编码中该字符占用的字节数。
+	 */
 	static int preNUm(unsigned char byte) {
 		unsigned char mask = 0x80;
 		int num = 0;
