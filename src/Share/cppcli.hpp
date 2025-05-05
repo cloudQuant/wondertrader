@@ -816,8 +816,27 @@ cppcli::Rule *cppcli::Rule::asHelpParam()
     return this;
 }
 
+/**
+ * @brief 检查规则对应的参数是否存在于命令行中
+ * 
+ * @return bool 如果参数存在返回true，否则返回false
+ * 
+ * @details 用于判断用户是否在命令行中提供了该参数
+ */
 bool cppcli::Rule::exists() { return _existsInMap; }
 
+/**
+ * @brief 获取特定错误类型的错误信息字符串
+ * 
+ * @param errorEventType 错误事件类型
+ * @return const std::string 格式化的错误信息字符串
+ * 
+ * @details 根据不同的错误类型，生成相应的错误提示信息：
+ * - 必需参数缺失错误：显示参数名称
+ * - 值类型错误：显示期望的值类型
+ * - 值不在预设集合中错误：显示所有有效的值选项
+ * - 数值范围错误：显示有效的最小值和最大值
+ */
 const std::string cppcli::Rule::getError(cppcli::detail::ErrorEventType errorEventType)
 {
     std::ostringstream oss;
@@ -861,6 +880,21 @@ const std::string cppcli::Rule::getError(cppcli::detail::ErrorEventType errorEve
     return std::move(oss.str());
 }
 
+/**
+ * @brief 构建格式化的帮助信息行
+ * 
+ * @return std::string 格式化后的帮助信息行字符串
+ * 
+ * @details 根据当前规则的各项属性，构建一个格式化的帮助信息行，用于在命令行帮助文档中显示。
+ * 信息行包括：
+ * - 参数名称（短名称和长名称）
+ * - 帮助描述信息
+ * - 是否必需输入的标记
+ * - 默认值信息
+ * 
+ * 对于较长的帮助文本，会自动进行换行处理，保证输出的美观性。第一行会包含完整信息，
+ * 后续行只包含帮助文本的继续部分，并使用适当的缩进保持对齐。
+ */
 std::string cppcli::Rule::buildHelpInfoLine()
 {
     std::ostringstream oss;
@@ -910,6 +944,24 @@ std::string cppcli::Rule::buildHelpInfoLine()
 }
 
 #ifdef CPPCLI_DEBUG
+/**
+ * @brief 获取规则对象的调试信息
+ * 
+ * @return std::string 包含规则详细信息的字符串
+ * 
+ * @details 生成一个包含规则对象所有重要属性的调试字符串，用于开发和调试目的。
+ * 返回的信息包括：
+ * - 参数名称（短名称和长名称）
+ * - 输入值
+ * - 是否必需
+ * - 值类型
+ * - 默认值
+ * - 是否已存在于命令行中
+ * - 可选值列表（如果有）
+ * - 数字范围限制（如果有）
+ * 
+ * 该方法仅在定义了CPPCLI_DEBUG宏的情况下可用。
+ */
 std::string cppcli::Rule::debugInfo() const
 {
 
@@ -1306,6 +1358,19 @@ namespace cppcli {
 
 }   // namespace cppcli
 
+/**
+ * @brief 验证必需参数是否存在
+ * 
+ * @param opt Option对象引用
+ * @return int 如果验证失败，返回失败规则的索引；如果验证通过，返回-1
+ * 
+ * @details 验证所有标记为必需的参数是否存在于命令行中。
+ * 验证流程：
+ * 1. 遍历所有参数规则
+ * 2. 检查每个必需参数是否存在于命令行中
+ * 3. 如果有必需参数缺失，返回其索引
+ * 4. 如果所有必需参数都存在，返回-1表示验证通过
+ */
 int cppcli::Option::Option::detail::necessaryVerify(Option &opt)
 {
     cppcli::Rule *rule = nullptr;
@@ -1324,6 +1389,21 @@ int cppcli::Option::Option::detail::necessaryVerify(Option &opt)
     return -1;
 };
 
+/**
+ * @brief 验证参数值类型是否正确
+ * 
+ * @param opt Option对象引用
+ * @return int 如果验证失败，返回失败规则的索引；如果验证通过，返回-1
+ * 
+ * @details 验证所有限制了值类型的参数是否满足类型要求。
+ * 验证流程：
+ * 1. 遍历所有参数规则
+ * 2. 如果参数类型是字符串或参数不存在，直接跳过
+ * 3. 如果参数类型是整数，验证其值是否是有效整数
+ * 4. 如果参数类型是浮点数，验证其值是否是有效数字（整数或浮点数）
+ * 5. 如果有参数值类型不正确，返回其索引
+ * 6. 如果所有参数值类型都正确，返回-1表示验证通过
+ */
 int cppcli::Option::Option::detail::valueTypeVerify(Option &opt)
 {
     cppcli::Rule *rule = nullptr;
@@ -1360,6 +1440,22 @@ int cppcli::Option::Option::detail::valueTypeVerify(Option &opt)
     return -1;
 }
 
+/**
+ * @brief 验证数值参数是否在指定范围内
+ * 
+ * @param opt Option对象引用
+ * @return int 如果验证失败，返回失败规则的索引；如果验证通过，返回-1
+ * 
+ * @details 验证设置了数值范围限制的参数是否在指定范围内。
+ * 验证流程：
+ * 1. 遍历所有参数规则
+ * 2. 如果参数类型是字符串或参数不存在，直接跳过
+ * 3. 如果参数没有设置数值范围限制（min和max都是-1），直接跳过
+ * 4. 验证参数值是否是有效的数字
+ * 5. 验证参数值是否在指定的最小值和最大值之间
+ * 6. 如果有参数值超出范围，返回其索引
+ * 7. 如果所有参数值都在范围内，返回-1表示验证通过
+ */
 int cppcli::Option::Option::detail::numRangeVerify(Option &opt)
 {
     cppcli::Rule *rule = nullptr;
