@@ -1495,6 +1495,16 @@ int cppcli::Option::Option::detail::numRangeVerify(Option &opt)
     return -1;
 }
 
+/**
+ * @brief 验证参数是否在给定的值列表中
+ * 
+ * @param opt Option对象
+ * @return int 如果验证失败，返回失败的规则索引；否则返回-1
+ * 
+ * @details 遍历所有规则，检查每个规则的_limitOneVec是否为空。
+ * 如果规则的_limitOneVec不为空且参数存在于命令行中，则检查参数值是否在_limitOneVec中。
+ * 如果参数值不在_limitOneVec中，则返回失败的规则索引。
+ */
 int cppcli::Option::Option::detail::oneOfVerify(Option &opt)
 {
 
@@ -1523,6 +1533,11 @@ int cppcli::Option::Option::detail::oneOfVerify(Option &opt)
 }
 
 #ifdef CPPCLI_DEBUG
+/**
+ * @brief 打印命令行参数映射表
+ * 
+ * @details 打印命令行参数映射表，包括映射表的大小和每个映射项的键值对。
+ */
 void cppcli::Option::Option::printCommandMap()
 {
     CPPCLI_DEBUG_PRINT("-- commandMap, size = ", _commandMap.size());
@@ -1534,6 +1549,17 @@ void cppcli::Option::Option::printCommandMap()
 }
 #endif
 
+/**
+ * @brief 错误处理函数
+ * 
+ * @param errorInfo 错误信息
+ * @param index 失败规则的索引
+ * @param exitType 错误退出类型
+ * @param eventType 错误事件类型
+ * 
+ * @details 根据错误类型和事件类型，输出错误信息并根据需要退出程序。
+ * 如果是帮助文档请求，输出帮助文档并退出；否则输出错误信息并根据错误类型退出。
+ */
 void cppcli::Option::errorExitFunc(const std::string errorInfo, int index, cppcli::ErrorExitEnum exitType,
                                    cppcli::detail::ErrorEventType eventType)
 {
@@ -1556,6 +1582,14 @@ void cppcli::Option::errorExitFunc(const std::string errorInfo, int index, cppcl
     std::exit(0);
 }
 
+/**
+ * @brief 构造函数
+ * 
+ * @param argc 命令行参数个数
+ * @param argv 命令行参数数组
+ * 
+ * @details 初始化工作路径和执行路径，
+ */
 cppcli::Option::Option(int argc, char *argv[])
 {
     // init work path and exec path
@@ -1582,6 +1616,11 @@ cppcli::Option::Option(int argc, char *argv[])
 #endif
 }
 
+/**
+ * @brief 析构函数
+ * 
+ * @details 清理所有规则对象并释放内存。
+ */
 cppcli::Option::~Option()
 {
     for (cppcli::Rule *rule : _ruleVec)
@@ -1594,7 +1633,19 @@ cppcli::Option::~Option()
     _ruleVec.clear();
 }
 
-
+/**
+ * @brief 操作符重载，用于创建规则对象
+ * 
+ * @param shortParam 短参数
+ * @param longParam 长参数
+ * @param helpInfo 帮助信息
+ * 
+ * @return cppcli::Rule* 创建的规则对象
+ * 
+ * @details 检查短参数是否包含"-"，长参数是否为空或包含"-"。
+ * 如果短参数不包含"-"，输出错误信息并退出。
+ * 如果长参数不为空且不包含"-"，输出错误信息并退出。
+ */
 cppcli::Rule *cppcli::Option::operator()(const std::string &shortParam, const std::string &longParam,
                                          const std::string helpInfo)
 {
@@ -1614,6 +1665,20 @@ cppcli::Rule *cppcli::Option::operator()(const std::string &shortParam, const st
     return _ruleVec.back();
 }
 
+/**
+ * @brief 操作符重载，用于创建规则对象
+ * 
+ * @param shortParam 短参数
+ * @param longParam 长参数
+ * @param helpInfo 帮助信息
+ * @param necessary 是否为必需参数
+ * 
+ * @return cppcli::Rule* 创建的规则对象
+ * 
+ * @details 检查短参数是否包含"-"，长参数是否为空或包含"-"。
+ * 如果短参数不包含"-"，输出错误信息并退出。
+ * 如果长参数不为空且不包含"-"，输出错误信息并退出。
+ */
 cppcli::Rule *cppcli::Option::operator()(const std::string &shortParam, const std::string &longParam,
                                          const std::string helpInfo, bool necessary)
 {
@@ -1632,6 +1697,17 @@ cppcli::Rule *cppcli::Option::operator()(const std::string &shortParam, const st
     return _ruleVec.back();
 }
 
+/**
+ * @brief 初始化工作路径和执行路径
+ * 
+ * @param argc 命令行参数个数
+ * @param argv 命令行参数数组
+ * 
+ * @details 获取当前工作目录和可执行文件的路径，并存储在成员变量中。
+ * 
+ * @note 在Windows系统上使用_getcwd和GetModuleFileName函数。
+ * 在Unix系统上使用getcwd和readlink函数。
+ */
 void cppcli::Option::pathInit(int argc, char *argv[])
 {
 
@@ -1652,6 +1728,16 @@ void cppcli::Option::pathInit(int argc, char *argv[])
 #endif
 }
 
+/**
+ * @brief 获取参数的输入值
+ * 
+ * @param rule 参数规则
+ * 
+ * @return std::string 参数的输入值
+ * 
+ * @details 根据规则的短参数和长参数在命令行映射表中的值，返回对应的输入值。
+ * 如果短参数存在，返回短参数对应的值；否则返回长参数对应的值。
+ */
 std::string cppcli::Option::getInputValue(const cppcli::Rule &rule)
 {
 
@@ -1668,6 +1754,14 @@ std::string cppcli::Option::getInputValue(const cppcli::Rule &rule)
     return inputValue;
 }
 
+/**
+ * @brief 获取所有规则的输入值
+ * 
+ * @details 遍历所有规则，检查命令行映射表中是否存在对应的短参数或长参数。
+ * 如果存在，则设置规则的_existsInMap为true，并获取对应的输入值。
+ * 如果输入值不为空，则设置规则的_inputValue为输入值。
+ * 如果输入值为空且规则有默认值，则设置规则的_inputValue为默认值。
+ */
 void cppcli::Option::rulesGainInputValue()
 {
     std::string inputValue;
@@ -1693,6 +1787,17 @@ void cppcli::Option::rulesGainInputValue()
     }
 }
 
+/**
+ * @brief 检查规则是否存在于命令行映射表中
+ * 
+ * @param rule 参数规则
+ * 
+ * @return true 如果规则存在于命令行映射表中
+ * @return false 如果规则不存在于命令行映射表中
+ * 
+ * @details 检查规则的短参数和长参数是否存在于命令行映射表中。
+ * 如果存在其中任何一个，则返回true；否则返回false。
+ */
 bool cppcli::Option::mapExists(const cppcli::Rule *rule)
 {
     if (rule != nullptr)
@@ -1703,6 +1808,17 @@ bool cppcli::Option::mapExists(const cppcli::Rule *rule)
     return false;
 }
 
+/**
+ * @brief 检查规则是否存在于命令行映射表中
+ * 
+ * @param rule 参数规则
+ * 
+ * @return true 如果规则存在于命令行映射表中
+ * @return false 如果规则不存在于命令行映射表中
+ * 
+ * @details 检查规则的短参数和长参数是否存在于命令行映射表中。
+ * 如果存在其中任何一个，则返回true；否则返回false。
+ */
 bool cppcli::Option::exists(const cppcli::Rule *rule)
 {
 #ifdef CPPCLI_DEBUG
@@ -1712,6 +1828,17 @@ bool cppcli::Option::exists(const cppcli::Rule *rule)
     return mapExists(rule);
 }
 
+/**
+ * @brief 检查短参数是否存在于命令行映射表中
+ * 
+ * @param shortParam 短参数
+ * 
+ * @return true 如果短参数存在于命令行映射表中
+ * @return false 如果短参数不存在于命令行映射表中
+ * 
+ * @details 遍历所有规则，检查短参数是否存在于命令行映射表中。
+ * 如果存在，则返回true；否则返回false。
+ */
 bool cppcli::Option::exists(const std::string shortParam)
 {
 
@@ -1729,6 +1856,14 @@ bool cppcli::Option::exists(const std::string shortParam)
     return false;
 }
 
+/**
+ * @brief 构建帮助文档
+ * 
+ * @return std::string 构建的帮助文档字符串
+ * 
+ * @details 遍历所有规则，构建帮助文档字符串。
+ * 每个规则的帮助文档信息将被添加到字符串中。
+ */
 std::string cppcli::Option::buildHelpDoc()
 {
     std::ostringstream oss;
@@ -1740,6 +1875,12 @@ std::string cppcli::Option::buildHelpDoc()
     return oss.str();
 }
 
+/**
+ * @brief 打印帮助文档
+ * 
+ * @details 如果帮助文档规则存在，则打印帮助文档并退出程序。
+ * 如果帮助文档规则不存在，则不执行任何操作。
+ */
 void cppcli::Option::printHelpDoc()
 {
 #ifdef CPPCLI_DEBUG
@@ -1758,9 +1899,28 @@ void cppcli::Option::printHelpDoc()
     std::exit(0);
 }
 
+/**
+ * @brief 获取工作路径
+ * 
+ * @return const std::string 工作路径
+ */
 const std::string cppcli::Option::getWorkPath() { return _workPath; }
+
+/**
+ * @brief 获取执行路径
+ * 
+ * @return const std::string 执行路径
+ */
 const std::string cppcli::Option::getExecPath() { return _execPath; }
 
+/**
+ * @brief 解析命令行参数
+ * 
+ * @details 遍历所有规则，检查命令行映射表中是否存在对应的短参数或长参数。
+ * 如果存在，则设置规则的_existsInMap为true，并获取对应的输入值。
+ * 如果输入值不为空，则设置规则的_inputValue为输入值。
+ * 如果输入值为空且规则有默认值，则设置规则的_inputValue为默认值。
+ */
 void cppcli::Option::parse()
 {
     // rules save Unique correspondence input value
