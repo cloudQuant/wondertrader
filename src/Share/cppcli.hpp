@@ -279,120 +279,217 @@ namespace cppcli {
 
 int cppcli::detail::pathUtil::replace_all(std::string &str, const std::string &pattern, const std::string &newpat)
 {
-
+    // 记录替换次数
     int count = 0;
+    // 新模式和原模式的长度
     const size_t nsize = newpat.size();
     const size_t psize = pattern.size();
 
-    for (size_t pos = str.find(pattern, 0); pos != std::string::npos; pos = str.find(pattern, pos + nsize))
-    {
+    // 查找模式的第一次出现
+    size_t pos = str.find(pattern);
+    while (pos != std::string::npos) {
+        // 替换当前位置的模式
         str.replace(pos, psize, newpat);
-        count++;
+        // 从替换后的位置继续查找
+        pos = str.find(pattern, pos + nsize);
+        // 替换次数增加
+        ++count;
     }
+
     return count;
 }
 
+/**
+ * @brief 从路径中获取文件名
+ * 
+ * @param filePath 文件路径
+ * @return std::string 文件名（包含后缀）
+ * 
+ * @details 从完整路径中提取文件名部分，包含文件后缀。
+ * 首先将路径分隔符标准化，然后查找最后一个路径分隔符后的内容。
+ * 使用assert确保文件存在。
+ */
 std::string cppcli::detail::pathUtil::getFilename(const std::string &filePath)
 {
+    // 创建路径的副本
     std::string filePathCopy(filePath);
+    // 标准化路径分隔符
     replace_all(filePathCopy, CPPCLI_SEPARATOR_NO_TYPE, CPPCLI_SEPARATOR_TYPE);
 
+    // 确保文件存在
     assert(std::ifstream(filePathCopy.c_str()).good());
+    // 查找最后一个路径分隔符的位置，并从其后一个字符开始提取
     std::string::size_type pos = filePathCopy.find_last_of(CPPCLI_SEPARATOR_TYPE) + 1;
     return std::move(filePathCopy.substr(pos, filePathCopy.length() - pos));
 }
 
+/**
+ * @brief 从路径中获取没有后缀的文件名
+ * 
+ * @param filePath 文件路径
+ * @return std::string 没有后缀的文件名
+ * 
+ * @details 从完整路径中提取文件名部分，不包含文件后缀。
+ * 首先使用getFilename获取完整文件名，然后去除最后一个点及其后的内容。
+ */
 std::string cppcli::detail::pathUtil::getFilenameWithOutSuffix(const std::string &filePath)
 {
+    // 获取完整文件名
     std::string filename = getFilename(filePath);
+    // 提取从开头到最后一个点之前的部分
     return std::move(filename.substr(0, filename.rfind(".")));
 }
 
+/**
+ * @brief 从路径中获取文件后缀
+ * 
+ * @param filePath 文件路径
+ * @return std::string 文件后缀（不包含点）
+ * 
+ * @details 从完整路径中提取文件后缀部分，不包含点。
+ * 首先使用getFilename获取完整文件名，然后提取最后一个点后的内容。
+ */
 std::string cppcli::detail::pathUtil::getFileSuffix(const std::string &filePath)
 {
+    // 获取完整文件名
     std::string filename = getFilename(filePath);
+    // 提取最后一个点后的内容
     return std::move(filename.substr(filename.find_last_of('.') + 1));
 }
 
+/**
+ * @brief 从路径中获取文件所在目录
+ * 
+ * @param filePath 文件路径
+ * @return std::string 文件所在目录
+ * 
+ * @details 从完整路径中提取文件所在的目录部分。
+ * 首先将路径分隔符标准化，然后提取最后一个路径分隔符前的内容。
+ */
 std::string cppcli::detail::pathUtil::getFileDir(const std::string &filePath)
 {
+    // 创建路径的副本
     std::string filePathCopy(filePath);
+    // 标准化路径分隔符
     replace_all(filePathCopy, CPPCLI_SEPARATOR_NO_TYPE, CPPCLI_SEPARATOR_TYPE);
+    // 查找最后一个路径分隔符的位置
     std::string::size_type pos = filePathCopy.find_last_of(CPPCLI_SEPARATOR_TYPE);
+    // 提取从开头到最后一个路径分隔符的部分
     return std::move(filePathCopy.substr(0, pos));
 }
 
 
 
+/**
+ * @brief 初始化命令行参数映射
+ * 
+ * @param length 参数数组长度
+ * @param strArr 参数数组
+ * @param stringMap 输出参数映射
+ * 
+ * @details 将命令行参数解析并存储到映射中，键为参数名，值为参数值。
+ * 参数名以短横线开头，如"-h"或"--help"。
+ * 如果参数后面没有值或者后面跟的是另一个参数，则该参数的值为空字符串。
+ */
 void cppcli::detail::algoUtil::InitCommandMap(int length, char *strArr[], std::map<std::string, std::string> &stringMap)
 {
+    // 初始化临时变量
+    std::string keyTmp;      // 当前参数名
+    std::string valueTmp;    // 当前参数值
+    int keyIndex = -1;       // 当前参数名的索引
 
-    // command params add to map
-    std::string keyTmp;
-    std::string valueTmp;
-    int keyIndex = -1;
-
+    // 遍历命令行参数，从1开始（跳过程序名）
     for (int currentIndex = 1; currentIndex < length; currentIndex++)
     {
         std::string theStr(strArr[currentIndex]);
+        // 如果已找到参数名，并且当前字符串是其后的第一个参数
         if (keyIndex != -1 && theStr.size() > 0 && currentIndex == keyIndex + 1)
         {
-            // if theStr is command key, set value as ""
+            // 如果当前字符串是另一个参数名，则上一个参数的值为空
             if(theStr.find_first_of('-') == 0 && theStr.size() > 1 && !isdigit(theStr.at(1)))
             {
                 valueTmp = "";
             }
             else
             {   
-                valueTmp =  theStr;
+                // 否则将当前字符串作为上一个参数的值
+                valueTmp = theStr;
             }
-            // valueTmp = theStr.find_first_of('-') == 0 && theStr.size() > 1 ? "" : theStr;
 
+            // 将参数名和值添加到映射中
             stringMap.insert(std::make_pair(std::move(keyTmp), std::move(valueTmp)));
             keyTmp.clear();
             valueTmp.clear();
 
+            // 重置参数名索引
             keyIndex = -1;
         }
 
-        if (theStr.find_first_of('-') == 0  && int(std::count(theStr.begin(), theStr.end(), '-')) < theStr.size() && !isdigit(theStr.at(1)) )
+        // 检查当前字符串是否是参数名（以短横线开头，且不是负数）
+        if (theStr.find_first_of('-') == 0 && int(std::count(theStr.begin(), theStr.end(), '-')) < theStr.size() && !isdigit(theStr.at(1)))
         {
             keyIndex = currentIndex;
             keyTmp = std::move(theStr);
         }
 
+        // 如果是最后一个参数且是参数名，则其值为空
         if (currentIndex == length - 1 && keyIndex != -1)
         {
-
             stringMap.insert(std::make_pair(std::move(keyTmp), std::move("")));
         }
     }
 }
+/**
+ * @brief 检查字符串是否为整数
+ * 
+ * @param value 要检查的字符串
+ * @return bool 如果是整数返回true，否则返回false
+ * 
+ * @details 检查给定字符串是否可以表示一个有效的整数。
+ * 整数可以是负数（以短横线开头），其余字符必须全部是数字。
+ */
 bool cppcli::detail::algoUtil::isInt(const std::string &value)
 {
+    // 空字符串不是整数
     if (value.empty())
     {
         return false;
     }
 
+    // 如果第一个字符是负号，从第二个字符开始检查
     int startPos = value.at(0) == '-' ? 1 : 0;
     for (int i = startPos; i < value.size(); i++)
     {
+        // 如果有非数字字符，则不是整数
         if (isdigit(value.at(i)) == 0)
             return false;
     }
     return true;
 }
 
+/**
+ * @brief 检查字符串是否为浮点数
+ * 
+ * @param value 要检查的字符串
+ * @return bool 如果是浮点数返回true，否则返回false
+ * 
+ * @details 检查给定字符串是否可以表示一个有效的浮点数。
+ * 浮点数必须包含一个小数点，并且小数点前后都有数字。
+ * 浮点数可以是负数（以短横线开头）。
+ */
 bool cppcli::detail::algoUtil::isDouble(const std::string &value)
 {
+    // 空字符串不是浮点数
     if (value.empty())
     {
         return false;
     }
+    // 浮点数至少需要三个字符（一个数字、小数点、一个数字）
     if (value.size() < 3)
         return false;
-    std::string tmpValue = value.at(0) == '-' ?  value.substr(0, value.npos): value;
+    // 处理负数情况
+    std::string tmpValue = value.at(0) == '-' ? value.substr(0, value.npos): value;
+    // 计算数字的数量
     int numCount = 0;
     for (char const &c : tmpValue)
     {
@@ -400,6 +497,9 @@ bool cppcli::detail::algoUtil::isDouble(const std::string &value)
             numCount++;
     }
 
+    // 判断是否为浮点数：
+    // 1. 数字数量比字符串长度少一（小数点）
+    // 2. 小数点位置在中间（不在开头或结尾）
     if (numCount == tmpValue.size() - 1 && tmpValue.rfind('.') > 0 && tmpValue.rfind('.') < tmpValue.size() - 1)
     {
         return true;
@@ -407,8 +507,18 @@ bool cppcli::detail::algoUtil::isDouble(const std::string &value)
     return false;
 }
 
+/**
+ * @brief 验证字符串是否为数字（整数或浮点数）
+ * 
+ * @param value 要验证的字符串
+ * @return bool 如果是数字返回true，否则返回false
+ * 
+ * @details 检查给定字符串是否可以表示一个有效的数字（整数或浮点数）。
+ * 调用isInt和isDouble方法进行验证。
+ */
 bool cppcli::detail::algoUtil::verifyDouble(const std::string &value)
 {
+    // 如果是整数或浮点数则返回true
     if (isInt(value) || isDouble(value))
         return true;
     return false;
