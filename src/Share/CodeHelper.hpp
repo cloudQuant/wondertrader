@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file CodeHelper.hpp
  * \project	WonderTrader
  *
@@ -504,9 +504,20 @@ public:
 		return stdWrappedCode;
 	}
 
-	/*
-	 *	标准期货期权代码转原代码
-	 *	-- 暂时没有地方调用 --
+	/**
+	 * @brief 将标准期货期权代码转换为原始代码
+	 * 
+	 * @param stdCode 标准格式的期货期权代码，如"CFFEX.IO2008.C.4300"
+	 * @return std::string 原始格式的期货期权代码
+	 * 
+	 * @details 该方法将标准格式的期货期权代码转换为原始格式的期货期权代码：
+	 * - 输入：标准代码如CFFEX.IO2008.C.4300
+	 * - 输出：原始代码如IO2008-C-4300（中金所和大商所）或IO2008C4300（其他交易所）
+	 * 
+	 * 转换过程中会根据交易所的不同规则处理分隔符，中金所和大商所使用短横线分隔，
+	 * 而其他交易所则直接将分隔符移除。
+	 * 
+	 * @note 当前该方法暂时没有地方调用
 	 */
 	static inline std::string stdFutOptCodeToRawCode(const char* stdCode)
 	{
@@ -520,6 +531,21 @@ public:
 		return ret;
 	}
 
+	/**
+	 * @brief 在代码中查找第一个数字字符的位置
+	 * 
+	 * @param code 要查找的合约代码
+	 * @return int 第一个数字字符的位置索引，如果没有数字或代码为空则返回-1
+	 * 
+	 * @details 该方法用于在合约代码中查找第一个数字字符的位置，主要用于分离品种代码和月份部分。
+	 * 在期货合约代码中，通常品种部分是字母，而月份部分是数字，所以第一个数字字符的位置
+	 * 就是品种代码和月份代码的分界点。
+	 * 
+	 * 例如：
+	 * - 在"IF2106"中，第一个数字是'2'，位置索引为2，返回2
+	 * - 在"ag2112"中，第一个数字是'2'，位置索引为2，返回2
+	 * - 如果代码中没有数字或代码为空，返回-1
+	 */
 	static inline int indexCodeMonth(const char* code)
 	{
 		if (strlen(code) == 0)
@@ -537,8 +563,25 @@ public:
 		return -1;
 	}
 
-	/*
-	 *	提取标准期货期权代码的信息
+	/**
+	 * @brief 从标准期货期权代码中提取代码信息
+	 * 
+	 * @param stdCode 标准格式的期货期权代码，如"CFFEX.IO2008.C.4300"
+	 * @return CodeInfo 包含合约代码、交易所、品种等信息的结构体
+	 * 
+	 * @details 该方法从标准格式的期货期权代码中提取各种信息，并将其存储在CodeInfo结构体中。
+	 * 处理过程会根据不同交易所的规则进行特殊处理：
+	 * 
+	 * 1. 对于上期所和能源交易所（SHFE和INE）：
+	 *    - 将品种月份、看涨看跌和行权价格直接连接为原始代码
+	 * 
+	 * 2. 对于郑商所（CZCE）：
+	 *    - 需要处理特殊的年份表示方式，并将品种代码和看涨看跌标记组合
+	 * 
+	 * 3. 对于其他交易所（如中金所CFFEX和大商所DCE）：
+	 *    - 使用短横线分隔的格式处理
+	 * 
+	 * 返回的CodeInfo结构体包含交易所代码、原始合约代码和品种代码等信息。
 	 */
 	static CodeInfo extractStdChnFutOptCode(const char* stdCode)
 	{
@@ -580,8 +623,25 @@ public:
 		return codeInfo;
 	}
 
-	/*
-	 *	提起标准代码的信息
+	/**
+	 * @brief 从标准代码中提取合约信息
+	 * 
+	 * @param stdCode 标准格式的合约代码
+	 * @param hotMgr 主力合约管理器指针，用于处理主力合约相关的操作
+	 * @return CodeInfo 包含合约代码、交易所、品种等信息的结构体
+	 * 
+	 * @details 该方法从标准格式的合约代码中提取各种信息，并将其存储在CodeInfo结构体中。
+	 * 处理过程会根据不同类型的合约进行不同的处理：
+	 * 
+	 * 1. 如果是期货期权合约（通过isStdChnFutOptCode判断），则调用extractStdChnFutOptCode方法处理
+	 * 
+	 * 2. 对于其他类型的合约，根据代码的格式进行处理：
+	 *    - 先检查是否是复权代码（结尾是否为前复权或后复权标记）
+	 *    - 然后检查是否是分月合约（最后一段是否为4位数字）
+	 *    - 再检查是否是主力合约或次主力合约（结尾是否为HOT或者2ND）
+	 *    - 如果都不是，则将最后一段直接作为合约代码
+	 * 
+	 * 返回的CodeInfo结构体包含交易所代码、原始合约代码、品种代码和复权标记等信息。
 	 */
 	static CodeInfo extractStdCode(const char* stdCode, IHotMgr *hotMgr)
 	{
