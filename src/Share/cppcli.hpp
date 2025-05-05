@@ -1131,24 +1131,117 @@ namespace cppcli {
         const std::string getExecPath();
 
       private:
+        /**
+         * @brief 错误退出类型
+         * 
+         * @details 定义当解析参数发生错误时的退出行为，默认只打印规则信息然后退出
+         */
         cppcli::ErrorExitEnum _exitType = cppcli::ErrorExitEnum::EXIT_PRINT_RULE;
+        
+        /**
+         * @brief 命令行参数映射
+         * 
+         * @details 存储命令行参数的键值对，键为参数名（如"-h"或"--help"），值为参数值
+         */
         std::map<std::string, std::string> _commandMap;
+        
+        /**
+         * @brief 参数规则对象列表
+         * 
+         * @details 存储所有已定义的参数规则对象的指针，用于管理和验证命令行参数
+         */
         std::vector<cppcli::Rule *> _ruleVec;
 
-        std::string _workPath;   // exe path
-        std::string _execPath;   // exec command path
+        /**
+         * @brief 工作路径
+         * 
+         * @details 存储可执行文件所在的目录路径
+         */
+        std::string _workPath;
+        
+        /**
+         * @brief 执行路径
+         * 
+         * @details 存储程序启动时的当前目录路径
+         */
+        std::string _execPath;
 
       private:
+        /**
+         * @brief 为所有规则获取输入值
+         * 
+         * @details 遍历所有规则，获取对应的输入值或使用默认值
+         */
         void rulesGainInputValue();
+        
+        /**
+         * @brief 获取规则对应的输入值
+         * 
+         * @param rule 要获取输入值的规则
+         * @return std::string 规则对应的输入值
+         * 
+         * @details 根据规则的短参数名和长参数名在命令行参数映射中查找对应的值
+         */
         std::string getInputValue(const cppcli::Rule &rule);
+        
+        /**
+         * @brief 构建帮助文档
+         * 
+         * @return std::string 格式化的帮助文档字符串
+         * 
+         * @details 遍历所有规则，生成格式化的帮助信息
+         */
         std::string buildHelpDoc();
+        
+        /**
+         * @brief 打印帮助文档
+         * 
+         * @details 如果命令行中存在帮助参数，则打印帮助文档并退出程序
+         */
         void printHelpDoc();
+        
+        /**
+         * @brief 检查规则对应的参数是否存在于命令行中
+         * 
+         * @param rule 要检查的规则指针
+         * @return bool 如果参数存在返回true，否则返回false
+         * 
+         * @details 检查给定规则的短参数名或长参数名是否在命令行参数映射中存在
+         */
         bool mapExists(const cppcli::Rule *rule);
+        
+        /**
+         * @brief 初始化路径信息
+         * 
+         * @param argc 命令行参数数量
+         * @param argv 命令行参数数组
+         * 
+         * @details 初始化执行路径和工作路径，根据不同平台使用不同方法获取
+         */
         void pathInit(int argc, char *argv[]);
 
+        /**
+         * @brief 错误退出函数
+         * 
+         * @param errorInfo 错误信息
+         * @param index 错误参数的索引
+         * @param exitType 退出类型
+         * @param eventType 错误事件类型
+         * 
+         * @details 根据退出类型和错误事件类型执行不同的退出行为
+         */
         void errorExitFunc(const std::string errorInfo, int index, cppcli::ErrorExitEnum exitType,
                            cppcli::detail::ErrorEventType eventType);
 
+        /**
+         * @brief 获取参数值（模板函数）
+         * 
+         * @tparam T 参数值类型
+         * @param shortParam 参数的短名称
+         * @return T 参数值
+         * 
+         * @details 根据参数的短名称获取对应的参数值
+         */
         template <class T, class = typename std::enable_if<std::is_same<T, std::string>::value>::type>
         std::string get(const std::string shortParam)
         {
