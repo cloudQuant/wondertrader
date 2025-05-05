@@ -1,3 +1,19 @@
+/**
+ * @file cppcli.hpp
+ * @brief 命令行参数解析工具库
+ * 
+ * @details 该文件提供了一个轻量级的命令行参数解析库，用于处理程序启动时的命令行参数。
+ * 主要功能包括：
+ * - 命令行参数的解析和存储
+ * - 参数的类型检查和验证
+ * - 必选参数的验证
+ * - 参数值范围的验证
+ * - 帮助文档的自动生成
+ * - 路径处理工具
+ * 
+ * 使用该库可以简化命令行参数的处理流程，提高程序的健壮性和用户体验。
+ */
+
 #pragma once
 
 #include <algorithm>
@@ -14,23 +30,62 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief 平台相关定义和包含文件
+ * 
+ * @details 根据不同的操作系统平台，包含相应的头文件并定义路径分隔符
+ */
 #if defined(WIN32) || defined(_WIN64) || defined(__WIN32__)
     #include "direct.h"
     #include <windows.h>
+    /**
+     * @brief Windows平台下的路径分隔符
+     */
     #define CPPCLI_SEPARATOR_TYPE    "\\"
+    /**
+     * @brief Windows平台下非本平台的路径分隔符，用于路径转换
+     */
     #define CPPCLI_SEPARATOR_NO_TYPE "/"
 #else
     #include <unistd.h>
+    /**
+     * @brief Unix/Linux平台下的路径分隔符
+     */
     #define CPPCLI_SEPARATOR_TYPE    "/"
+    /**
+     * @brief Unix/Linux平台下非本平台的路径分隔符，用于路径转换
+     */
     #define CPPCLI_SEPARATOR_NO_TYPE "\\"
 #endif
 
 // #define CPPCLI_DEBUG
 
+/**
+ * @namespace cppcli
+ * @brief 命令行参数解析库的主命名空间
+ * 
+ * @details 该命名空间包含了命令行参数解析库的所有类、函数和工具
+ * 主要组件包括 Option 类和 Rule 类，以及各种辅助工具和枚举类型
+ */
 namespace cppcli {
+    /**
+     * @brief 用于同步控制台输出的互斥锁
+     * 
+     * @details 在多线程环境下保证控制台输出的原子性
+     */
     static std::mutex _coutMutex;
 
 #ifdef CPPCLI_DEBUG
+    /**
+     * @brief 调试信息打印函数
+     * 
+     * @tparam Args 可变参数类型
+     * @param args 要打印的参数列表
+     * 
+     * @details 该函数在定义了CPPCLI_DEBUG宏的情况下可用，用于输出调试信息。
+     * 使用互斥锁保证多线程环境下的输出安全，并在每条调试信息前添加标记。
+     * 使用可变参数模板支持打印多种类型的参数。
+     */
     template <class... Args>
     void __cppcli_debug_print(const Args &...args)
     {
@@ -52,46 +107,169 @@ namespace cppcli {
     class Option;
     class Rule;
 
+    /**
+     * @enum ErrorExitEnum
+     * @brief 错误退出类型枚举
+     * 
+     * @details 定义在遇到错误时程序应该如何退出
+     */
     enum ErrorExitEnum {
-        EXIT_PRINT_RULE = 0x00,
-        EXIT_PRINT_RULE_HELPDOC = 0x01,
+        EXIT_PRINT_RULE = 0x00,          /**< 只打印规则信息然后退出 */
+        EXIT_PRINT_RULE_HELPDOC = 0x01, /**< 打印规则信息和帮助文档然后退出 */
     };
+    
+    /**
+     * @enum HelpDocEnum
+     * @brief 帮助文档类型枚举
+     * 
+     * @details 定义使用哪种类型的帮助文档
+     */
     enum HelpDocEnum {
-        USE_DEFAULT_HELPDOC = 0x00,
-        USE_UER_DEFINED_HELPDOC = 0x01,
+        USE_DEFAULT_HELPDOC = 0x00,      /**< 使用默认的帮助文档 */
+        USE_UER_DEFINED_HELPDOC = 0x01, /**< 使用用户自定义的帮助文档 */
     };
 
+    /**
+     * @namespace detail
+     * @brief 内部实现细节的命名空间
+     * 
+     * @details 包含了cppcli库的内部实现细节，如工具类、枚举类型等
+     */
     namespace detail {
+        /**
+         * @enum ErrorEventType
+         * @brief 错误事件类型枚举
+         * 
+         * @details 定义了可能发生的不同类型的错误事件
+         */
         enum ErrorEventType {
-            MECESSARY_ERROR = 0x00,
-            VALUETYPE_ERROR = 0x01,
-            ONEOF_ERROR = 0x02,
-            NUMRANGE_ERROR = 0x03,
+            MECESSARY_ERROR = 0x00, /**< 必选参数缺失错误 */
+            VALUETYPE_ERROR = 0x01, /**< 参数值类型错误 */
+            ONEOF_ERROR = 0x02,     /**< 参数值不在指定选项中的错误 */
+            NUMRANGE_ERROR = 0x03,  /**< 参数值超出指定范围的错误 */
         };
 
+        /**
+         * @enum ValueTypeEnum
+         * @brief 参数值类型枚举
+         * 
+         * @details 定义了命令行参数可能的值类型
+         */
         enum ValueTypeEnum {
-            STRING = 0x00,
-            INT = 0x01,
-            DOUBLE = 0x02,
+            STRING = 0x00, /**< 字符串类型 */
+            INT = 0x01,    /**< 整数类型 */
+            DOUBLE = 0x02, /**< 浮点数类型 */
         };
 
+        /**
+         * @class pathUtil
+         * @brief 路径处理工具类
+         * 
+         * @details 提供了一系列静态方法来处理文件路径，如提取文件名、后缀名、目录等
+         */
         class pathUtil final {
           private:
+            /**
+             * @brief 替换字符串中所有指定模式的子串
+             * 
+             * @param str 要处理的字符串
+             * @param pattern 要替换的模式
+             * @param newpat 新的替换内容
+             * @return int 替换的次数
+             * 
+             * @details 在字符串中查找所有指定模式的子串，并替换为新的内容
+             */
             static int replace_all(std::string &str, const std::string &pattern, const std::string &newpat);
 
           public:
+            /**
+             * @brief 从路径中获取文件名
+             * 
+             * @param filePath 文件路径
+             * @return std::string 文件名（包含后缀）
+             * 
+             * @details 从完整路径中提取文件名部分，包含文件后缀
+             */
             static std::string getFilename(const std::string &filePath);
+            
+            /**
+             * @brief 从路径中获取没有后缀的文件名
+             * 
+             * @param filePath 文件路径
+             * @return std::string 没有后缀的文件名
+             * 
+             * @details 从完整路径中提取文件名部分，不包含文件后缀
+             */
             static std::string getFilenameWithOutSuffix(const std::string &filePath);
+            
+            /**
+             * @brief 从路径中获取文件后缀
+             * 
+             * @param filePath 文件路径
+             * @return std::string 文件后缀（不包含点）
+             * 
+             * @details 从完整路径中提取文件后缀部分，不包含点
+             */
             static std::string getFileSuffix(const std::string &filePath);
+            
+            /**
+             * @brief 从路径中获取文件所在目录
+             * 
+             * @param filePath 文件路径
+             * @return std::string 文件所在目录
+             * 
+             * @details 从完整路径中提取文件所在的目录部分
+             */
             static std::string getFileDir(const std::string &filePath);
         };
+        /**
+         * @class algoUtil
+         * @brief 算法工具类
+         * 
+         * @details 提供了一系列静态方法来处理命令行参数和进行类型验证
+         */
         class algoUtil final {
           private:
           public:
-            // command params add to map
+            /**
+             * @brief 初始化命令行参数映射
+             * 
+             * @param length 参数数组长度
+             * @param strArr 参数数组
+             * @param stringMap 输出参数映射
+             * 
+             * @details 将命令行参数解析并存储到映射中，键为参数名，值为参数值
+             */
             static void InitCommandMap(int length, char *strArr[], std::map<std::string, std::string> &stringMap);
+            
+            /**
+             * @brief 检查字符串是否为整数
+             * 
+             * @param value 要检查的字符串
+             * @return bool 如果是整数返回true，否则返回false
+             * 
+             * @details 检查给定字符串是否可以表示一个有效的整数
+             */
             static bool isInt(const std::string &value);
+            
+            /**
+             * @brief 检查字符串是否为浮点数
+             * 
+             * @param value 要检查的字符串
+             * @return bool 如果是浮点数返回true，否则返回false
+             * 
+             * @details 检查给定字符串是否可以表示一个有效的浮点数
+             */
             static bool isDouble(const std::string &value);
+            
+            /**
+             * @brief 验证字符串是否为数字（整数或浮点数）
+             * 
+             * @param value 要验证的字符串
+             * @return bool 如果是数字返回true，否则返回false
+             * 
+             * @details 检查给定字符串是否可以表示一个有效的数字（整数或浮点数）
+             */
             static bool verifyDouble(const std::string &value);
         };
 
@@ -244,69 +422,180 @@ bool cppcli::detail::algoUtil::verifyDouble(const std::string &value)
 
 namespace cppcli {
 
+    /**
+     * @class Rule
+     * @brief 命令行参数规则类
+     * 
+     * @details 该类表示一条命令行参数的规则，包含参数的名称、类型、限制条件、默认值等信息。
+     * 可以通过链式调用来设置各种限制条件，如类型限制、取值范围、可选值列表等。
+     */
     class Rule {
       private:
+        /**
+         * @class detail
+         * @brief Rule类的内部详细实现
+         */
         class detail {
           public:
+            /**
+             * @struct HelpDocStruct
+             * @brief 帮助文档结构
+             * 
+             * @details 存储帮助文档类型和对应的规则对象
+             */
             struct HelpDocStruct {
-                static cppcli::HelpDocEnum _helpDocType;
-                static cppcli::Rule *rule;
+                static cppcli::HelpDocEnum _helpDocType; /**< 帮助文档类型 */
+                static cppcli::Rule *rule;               /**< 帮助参数对应的规则 */
             };
         };
 
       private:
-        friend class Option;
+        friend class Option; /**< 允许Option类访问私有成员 */
 
-        std::string _inputValue;
-        std::string _shortParam;
-        std::string _longParam;
-        std::string _helpInfo;
-        bool _necessary = false;
-        std::vector<std::string> _limitOneVec;
-        std::pair<double, double> _limitNumRange;
-        cppcli::detail::ValueTypeEnum _valueType = cppcli::detail::ValueTypeEnum::STRING;
-        std::string _default = "[EMPTY]";
-        std::string _errorInfo;
-        bool _existsInMap = false;
+        std::string _inputValue;   /**< 用户输入的参数值 */
+        std::string _shortParam;   /**< 参数的短名称，如"-h" */
+        std::string _longParam;    /**< 参数的长名称，如"--help" */
+        std::string _helpInfo;     /**< 参数的帮助信息 */
+        bool _necessary = false;   /**< 参数是否必需 */
+        std::vector<std::string> _limitOneVec; /**< 参数的可选值列表 */
+        std::pair<double, double> _limitNumRange; /**< 数字参数的取值范围 */
+        cppcli::detail::ValueTypeEnum _valueType = cppcli::detail::ValueTypeEnum::STRING; /**< 参数值类型 */
+        std::string _default = "[EMPTY]"; /**< 参数的默认值 */
+        std::string _errorInfo;    /**< 错误信息 */
+        bool _existsInMap = false; /**< 参数是否存在于命令行参数映射中 */
 
       public:
+        /**
+         * @brief 默认构造函数被禁用
+         */
         Rule() = delete;
 
+        /**
+         * @brief 双参数构造函数被禁用
+         */
         Rule(const std::string &, const std::string &) = delete;
+        
+        /**
+         * @brief 单参数构造函数被禁用
+         */
         Rule(const std::string &) = delete;
 
         // Rule& operator=(const cppcli::Rule&) = delete;
+        
+        /**
+         * @brief 构造函数，创建一个非必需的参数规则
+         * 
+         * @param shortParam 参数的短名称，如"-h"
+         * @param longParam 参数的长名称，如"--help"
+         * @param helpInfo 参数的帮助信息
+         * 
+         * @details 创建一个非必需的命令行参数规则，初始化参数的短名称、长名称和帮助信息
+         */
         Rule(const std::string &shortParam, const std::string &longParam, const std::string helpInfo)
             : _shortParam(shortParam), _longParam(longParam), _helpInfo(helpInfo),
               _limitNumRange(std::make_pair(double(-1), double(-1))){};
 
+        /**
+         * @brief 构造函数，创建一个参数规则
+         * 
+         * @param shortParam 参数的短名称，如"-h"
+         * @param longParam 参数的长名称，如"--help"
+         * @param helpInfo 参数的帮助信息
+         * @param necessary 参数是否必需
+         * 
+         * @details 创建一个命令行参数规则，初始化参数的短名称、长名称、帮助信息和是否必需
+         */
         Rule(const std::string &shortParam, const std::string &longParam, const std::string helpInfo, bool necessary)
             : _shortParam(shortParam), _longParam(longParam), _helpInfo(helpInfo), _necessary(necessary),
               _limitNumRange(std::make_pair(double(-1), double(-1))){};
 
+        /**
+         * @brief 将参数值类型限制为整数
+         * 
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 设置参数值类型为整数，在解析时会进行类型检查
+         */
         Rule *limitInt();   /// valid after setting input type
+        
+        /**
+         * @brief 将参数值类型限制为浮点数
+         * 
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 设置参数值类型为浮点数，在解析时会进行类型检查
+         */
         Rule *limitDouble();
+        
+        /**
+         * @brief 将当前参数设置为帮助参数
+         * 
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 将当前参数标记为帮助参数，当该参数出现时会显示帮助文档
+         */
         Rule *asHelpParam();
+        
+        /**
+         * @brief 检查参数是否存在于命令行中
+         * 
+         * @return bool 如果参数存在于命令行中返回true，否则返回false
+         * 
+         * @details 检查当前参数是否存在于用户输入的命令行参数中
+         */
         bool exists();
 
+        /**
+         * @brief 获取参数值作为字符串
+         * 
+         * @tparam T 类型参数，必须为std::string
+         * @return const std::string 参数值的字符串表示
+         * 
+         * @details 获取参数的输入值作为字符串返回
+         */
         template <class T, class = typename std::enable_if<std::is_same<T, std::string>::value>::type>
         const std::string get()
         {
             return _inputValue;
         }
 
+        /**
+         * @brief 获取参数值作为整数
+         * 
+         * @tparam T 类型参数，必须为int
+         * @return int 参数值的整数表示
+         * 
+         * @details 将参数的输入值转换为整数返回
+         */
         template <class T, class = typename std::enable_if<std::is_same<T, int>::value>::type>
         int get()
         {
             return std::stoi(_inputValue);
         }
 
+        /**
+         * @brief 获取参数值作为浮点数
+         * 
+         * @tparam T 类型参数，必须为double
+         * @return double 参数值的浮点数表示
+         * 
+         * @details 将参数的输入值转换为浮点数返回
+         */
         template <class T, class = typename std::enable_if<std::is_same<T, double>::value>::type>
         double get()
         {
             return std::stod(_inputValue);
         }
 
+        /**
+         * @brief 限制参数值必须为指定选项之一
+         * 
+         * @tparam Args 可变参数类型
+         * @param args 允许的选项列表
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 限制参数值必须是指定选项中的一个，如limitOneOf("yes", "no", "maybe")
+         */
         template <class... Args>
         Rule *limitOneOf(Args... args)
         {
@@ -321,6 +610,16 @@ namespace cppcli {
             return this;
         }
 
+        /**
+         * @brief 限制数字参数的取值范围
+         * 
+         * @tparam T 数字类型，必须是int、float或double
+         * @param min 最小值
+         * @param max 最大值
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 限制数字参数的取值范围，如limitNumRange(1, 100)
+         */
         template <class T,
                   class = typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, float>::value ||
                                                   std::is_same<T, double>::value>::type>
@@ -330,6 +629,15 @@ namespace cppcli {
             return this;
         }
 
+        /**
+         * @brief 设置参数的默认值
+         * 
+         * @tparam T 默认值类型
+         * @param defaultValue 默认值
+         * @return Rule* 当前规则对象指针，用于链式调用
+         * 
+         * @details 设置参数的默认值，当参数没有在命令行中指定时使用该值
+         */
         template <class T>
         Rule *setDefault(const T &defaultValue)
         {
@@ -340,11 +648,33 @@ namespace cppcli {
         }
 
       private:
+        /**
+         * @brief 获取错误信息
+         * 
+         * @param errorEventType 错误事件类型
+         * @return const std::string 格式化的错误信息
+         * 
+         * @details 根据错误事件类型生成相应的错误信息字符串
+         */
         const std::string getError(cppcli::detail::ErrorEventType errorEventType);
 
+        /**
+         * @brief 构建帮助信息行
+         * 
+         * @return std::string 格式化的帮助信息行
+         * 
+         * @details 根据规则的各种属性构建一行格式化的帮助信息，用于显示在帮助文档中
+         */
         std::string buildHelpInfoLine();
 
 #ifdef CPPCLI_DEBUG
+        /**
+         * @brief 获取调试信息
+         * 
+         * @return std::string 包含规则详细信息的调试字符串
+         * 
+         * @details 返回规则的详细信息，包括参数名称、值、类型、限制条件等，用于调试
+         */
         std::string debugInfo() const;
 #endif
     };
@@ -516,29 +846,147 @@ std::string cppcli::Rule::debugInfo() const
 
 namespace cppcli {
 
+    /**
+     * @class Option
+     * @brief 命令行参数解析类
+     * 
+     * @details 该类是cppcli库的主要类，用于解析、验证和处理命令行参数。
+     * 它允许用户定义参数规则，并自动处理参数解析、验证和错误处理。
+     */
     class Option {
       private:
+        /**
+         * @class detail
+         * @brief Option类的内部详细实现
+         * 
+         * @details 包含了Option类的各种验证方法的实现
+         */
         class detail {
-            detail() = delete;
-            detail(const detail &) = delete;
-            friend class cppcli::Option;
+            detail() = delete; /**< 禁用默认构造函数 */
+            detail(const detail &) = delete; /**< 禁用拷贝构造函数 */
+            friend class cppcli::Option; /**< 允许Option类访问私有成员 */
+            
+            /**
+             * @brief 验证必需参数
+             * 
+             * @param opt Option对象引用
+             * @return int 错误参数的索引，如果没有错误返回-1
+             * 
+             * @details 检查所有必需参数是否存在于命令行中
+             */
             static int necessaryVerify(Option &opt);
+            
+            /**
+             * @brief 验证参数值类型
+             * 
+             * @param opt Option对象引用
+             * @return int 错误参数的索引，如果没有错误返回-1
+             * 
+             * @details 检查所有参数的值是否符合指定的类型
+             */
             static int valueTypeVerify(Option &opt);
+            
+            /**
+             * @brief 验证数字参数的取值范围
+             * 
+             * @param opt Option对象引用
+             * @return int 错误参数的索引，如果没有错误返回-1
+             * 
+             * @details 检查所有数字参数的值是否在指定的范围内
+             */
             static int numRangeVerify(Option &opt);
+            
+            /**
+             * @brief 验证参数值是否在指定选项中
+             * 
+             * @param opt Option对象引用
+             * @return int 错误参数的索引，如果没有错误返回-1
+             * 
+             * @details 检查所有设置了可选值列表的参数，其值是否在指定的选项中
+             */
             static int oneOfVerify(Option &opt);
         };
 
       public:
+        /**
+         * @brief 构造函数
+         * 
+         * @param argc 命令行参数数量
+         * @param argv 命令行参数数组
+         * 
+         * @details 初始化Option对象，解析命令行参数并存储到内部映射中
+         */
         Option(int argc, char *argv[]);
+        
+        /**
+         * @brief 拷贝构造函数被禁用
+         */
         Option(const cppcli::Option &) = delete;
+        
+        /**
+         * @brief 赋值运算符被禁用
+         */
         Option operator=(const cppcli::Option &) = delete;
+        
+        /**
+         * @brief 添加一个非必需的参数规则
+         * 
+         * @param shortParam 参数的短名称，如"-h"
+         * @param longParam 参数的长名称，如"--help"
+         * @param helpInfo 参数的帮助信息
+         * @return cppcli::Rule* 新创建的规则对象指针
+         * 
+         * @details 创建并添加一个非必需的参数规则，可以通过返回的指针进行链式调用设置其他属性
+         */
         cppcli::Rule *operator()(const std::string &shortParam, const std::string &longParam,
                                  const std::string helpInfo);
+        
+        /**
+         * @brief 添加一个参数规则
+         * 
+         * @param shortParam 参数的短名称，如"-h"
+         * @param longParam 参数的长名称，如"--help"
+         * @param helpInfo 参数的帮助信息
+         * @param necessary 参数是否必需
+         * @return cppcli::Rule* 新创建的规则对象指针
+         * 
+         * @details 创建并添加一个参数规则，可以指定参数是否必需，可以通过返回的指针进行链式调用设置其他属性
+         */
         cppcli::Rule *operator()(const std::string &shortParam, const std::string &longParam,
                                  const std::string helpInfo, bool necessary);
+        
+        /**
+         * @brief 析构函数
+         * 
+         * @details 释放所有分配的规则对象
+         */
         ~Option();
+        
+        /**
+         * @brief 解析命令行参数
+         * 
+         * @details 对命令行参数进行解析和验证，如果有错误则输出错误信息并退出
+         */
         void parse();
+        
+        /**
+         * @brief 检查参数是否存在于命令行中
+         * 
+         * @param shortParam 参数的短名称
+         * @return bool 如果参数存在于命令行中返回true，否则返回false
+         * 
+         * @details 通过短名称检查参数是否存在于命令行中
+         */
         bool exists(const std::string shortParam);
+        
+        /**
+         * @brief 检查参数是否存在于命令行中
+         * 
+         * @param rule 参数规则对象指针
+         * @return bool 如果参数存在于命令行中返回true，否则返回false
+         * 
+         * @details 通过规则对象指针检查参数是否存在于命令行中
+         */
         bool exists(const cppcli::Rule *rule);
 
 
@@ -546,10 +994,30 @@ namespace cppcli {
 
 
 #ifdef CPPCLI_DEBUG
+        /**
+         * @brief 打印命令行参数映射
+         * 
+         * @details 在调试模式下打印命令行参数映射的内容
+         */
         void printCommandMap();
 #endif
 
+        /**
+         * @brief 获取工作路径
+         * 
+         * @return const std::string 当前程序的工作路径
+         * 
+         * @details 返回可执行文件所在的路径
+         */
         const std::string getWorkPath();
+        
+        /**
+         * @brief 获取执行路径
+         * 
+         * @return const std::string 当前程序的执行路径
+         * 
+         * @details 返回程序启动时的工作目录
+         */
         const std::string getExecPath();
 
       private:
