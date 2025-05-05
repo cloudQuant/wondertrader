@@ -319,11 +319,13 @@ public:
 		}
 	}
 
-	/*
-	 *	检查是否以指定的字符串结束
-	 *	@str		要检查的字符串
-	 *	@pattern	要匹配的模板
-	 *	@ignroreCase是否忽略大小写
+	/**
+	 * @brief 检查字符串是否以指定的模式结尾
+	 * 
+	 * @param str 要检查的字符串
+	 * @param pattern 要匹配的模式字符串
+	 * @param ignoreCase 是否忽略大小写，默认为true
+	 * @return bool 如果字符串以指定模式结尾则返回true，否则返回false
 	 */
 	static inline bool endsWith(const char* str, const char* pattern, bool ignoreCase = true)
 	{
@@ -348,8 +350,13 @@ public:
 		}
 	}
 
-	/** Method for standardising paths - use forward slashes only, end with slash.
-	*/
+	/**
+	 * @brief 标准化路径格式 - 仅使用正斜杠，目录以斜杠结尾
+	 * 
+	 * @param init 要标准化的原始路径
+	 * @param bIsDir 是否为目录路径，默认为true。如果为true，则确保路径以斜杠结尾
+	 * @return std::string 标准化后的路径
+	 */
 	static inline std::string standardisePath( const std::string &init, bool bIsDir = true)
 	{
 		std::string path = init;
@@ -361,11 +368,14 @@ public:
 		return std::move(path);
 	}
 
-	/** Method for splitting a fully qualified filename into the base name
-	and path.
-	@remarks
-	Path is standardised as in standardisePath
-	*/
+	/**
+	 * @brief 将完整的文件路径分割为基础文件名和路径
+	 * 
+	 * @param qualifiedName 完整的文件路径
+	 * @param outBasename 输出参数，用于存储提取出的文件名
+	 * @param outPath 输出参数，用于存储提取出的路径
+	 * @note 路径会按照standardisePath方法的规则进行标准化，使用正斜杠
+	 */
 	static inline void splitFilename(const std::string& qualifiedName,std::string& outBasename, std::string& outPath)
 	{
 		std::string path = qualifiedName;
@@ -386,11 +396,14 @@ public:
 		}
 	}
 
-	/** Simple pattern-matching routine allowing a wildcard pattern.
-	@param str std::string to test
-	@param pattern Pattern to match against; can include simple '*' wildcards
-	@param caseSensitive Whether the match is case sensitive or not
-	*/
+	/**
+	 * @brief 简单的模式匹配函数，支持通配符
+	 * 
+	 * @param str 要测试的字符串
+	 * @param pattern 要匹配的模式，可以包含简单的'*'通配符
+	 * @param caseSensitive 是否区分大小写，默认为true
+	 * @return bool 如果字符串与模式匹配则返回true，否则返回false
+	 */
 	static inline bool match(const std::string& str, const std::string& pattern, bool caseSensitive = true)
 	{
 		std::string tmpStr = str;
@@ -459,14 +472,25 @@ public:
 		}
 	}
 
-	/// Constant blank std::string, useful for returning by ref where local does not exist
+	/**
+	 * @brief 返回一个空的字符串常量
+	 * 
+	 * @return const std::string 空字符串常量，当需要返回引用而本地变量不存在时非常有用
+	 */
 	static inline const std::string BLANK()
 	{
 		static const std::string temp = std::string("");
 		return std::move(temp);
 	}
 
-	//地球人都知道,恶心的std::string是没有CString的Format这个函数的,所以我们自己造
+	/**
+	 * @brief 格式化字符串，类似于 C 语言的 printf 函数
+	 * 
+	 * @param pszFormat 格式化字符串，包含格式化控制符
+	 * @param ... 可变参数列表，对应格式化字符串中的控制符
+	 * @return std::string 格式化后的字符串
+	 * @note std::string 没有类似 CString 的 Format 函数，因此自行实现
+	 */
 	static inline std::string printf(const char *pszFormat, ...)
 	{
 		va_list argptr;
@@ -476,7 +500,14 @@ public:
 		return std::move(result);
 	}
 
-	//地球人都知道,恶心的std::string是没有CString的Format这个函数的,所以我们自己造
+	/**
+	 * @brief 格式化字符串的另一个实现，类似于 C 语言的 printf 函数
+	 * 
+	 * @param pszFormat 格式化字符串，包含格式化控制符
+	 * @param ... 可变参数列表，对应格式化字符串中的控制符
+	 * @return std::string 格式化后的字符串
+	 * @note 这是另一种格式化字符串的实现方式，提供多样化的格式化选项
+	 */
 	static inline std::string printf2(const char *pszFormat, ...)
 	{
 		va_list argptr;
@@ -486,7 +517,14 @@ public:
 		return std::move(result);
 	}
 
-	//地球人都知道,恶心的std::string是没有CString的Format这个函数的,所以我们自己造
+	/**
+	 * @brief 格式化字符串的底层实现，接受va_list参数
+	 * 
+	 * @param pszFormat 格式化字符串，包含格式化控制符
+	 * @param argptr 已初始化的可变参数列表
+	 * @return std::string 格式化后的字符串
+	 * @note 这是C语言风格的可变参数字符串格式化的内部实现
+	 */
 	static inline std::string printf2(const char *pszFormat,va_list argptr)
 	{
 		int         size   = 1024;
@@ -516,6 +554,14 @@ public:
 		}
 	}
 
+	/**
+	 * @brief 将字符串通过在两端添加空格扩展到指定长度
+	 * 
+	 * @param str 要扩展的字符串
+	 * @param length 指定的目标长度
+	 * @return std::string 扩展后的字符串，如果原字符串长度已经超过指定长度，则返回原字符串
+	 * @note 扩展时会尽量平均地在字符串两端添加空格
+	 */
 	static inline std::string extend(const char* str, uint32_t length)
 	{
 		if(strlen(str) >= length)
@@ -537,7 +583,14 @@ public:
 		return std::move(ret);
 	}
 
-	//地球人都知道,恶心的std::string是没有CString的Format这个函数的,所以我们自己造
+	/**
+	 * @brief 格式化字符串的内部实现，接受va_list参数
+	 * 
+	 * @param pszFormat 格式化字符串，包含格式化控制符
+	 * @param argptr 已初始化的可变参数列表
+	 * @return std::string 格式化后的字符串
+	 * @note 这是第一个 printf 函数的内部实现，实现类似 C 语言格式化字符串的功能
+	 */
 	static inline std::string printf(const char* pszFormat, va_list argptr)
 	{
 		int size = 1024;
@@ -573,7 +626,13 @@ public:
 		return std::move(ret);
 	}
 
-	//取得右边的N个字符
+	/**
+	 * @brief 获取字符串右边的N个字符
+	 * 
+	 * @param src 输入字符串
+	 * @param nCount 要获取的字符数量
+	 * @return std::string 提取的字符串，如果要提取的字符数量大于字符串长度，则返回空字符串
+	 */
 	static inline std::string right(const std::string &src,size_t nCount)
 	{
 		if(nCount>src.length())
@@ -581,12 +640,25 @@ public:
 		return std::move(src.substr(src.length()-nCount,nCount));
 	}
 
-	//取左边的N个字符
+	/**
+	 * @brief 获取字符串左边的N个字符
+	 * 
+	 * @param src 输入字符串
+	 * @param nCount 要获取的字符数量
+	 * @return std::string 提取的字符串，如果要提取的字符数量超过字符串长度，则返回原字符串
+	 */
 	static inline std::string left(const std::string &src,size_t nCount)
 	{
 		return std::move(src.substr(0,nCount));
 	}
 
+	/**
+	 * @brief 计算字符串中指定字符的出现次数
+	 * 
+	 * @param src 要搜索的字符串
+	 * @param ch 要计数的字符
+	 * @return size_t 指定字符在字符串中的出现次数
+	 */
 	static inline size_t charCount(const std::string &src,char ch)
 	{
 		size_t result=0;
@@ -597,6 +669,13 @@ public:
 		return result;
 	}
 
+	/**
+	 * @brief 替换字符串中的所有指定子字符串
+	 * 
+	 * @param str 要处理的字符串引用，替换完成后会直接修改原字符串
+	 * @param src 要替换的目标子字符串
+	 * @param des 替换后的新字符串
+	 */
 	static inline void replace(std::string& str, const char* src, const char* des)
 	{
 		std::string ret = "";
