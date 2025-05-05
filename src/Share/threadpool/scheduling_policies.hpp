@@ -253,9 +253,11 @@ namespace boost { namespace threadpool
       m_container.pop();
     }
 
-    /*! Gets the task which should be executed next.
-    *  \return The task object to be executed.
-    */
+    /**
+     * @brief 获取将要执行的下一个任务
+     * @details 返回优先级队列中的最高优先级任务，但不从队列中移除它
+     * @return 要执行的任务对象
+     */
     task_type const & top() const
     {
       return m_container.top();
@@ -279,8 +281,10 @@ namespace boost { namespace threadpool
       return m_container.empty();
     }
 
-    /*! Removes all tasks from the scheduler.
-    */  
+    /**
+     * @brief 移除调度器中的所有任务
+     * @details 通过循环移除优先级队列中的所有任务，因为标准库的优先级队列没有提供直接清空的方法
+     */  
     void clear()
     {    
       while(!m_container.empty())
