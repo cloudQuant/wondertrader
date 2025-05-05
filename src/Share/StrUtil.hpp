@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file StrUtil.hpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 字符串处理的封装
+ * \brief 字符串处理工具类
+ * 
+ * 该文件提供了字符串处理的常用函数，包括字符串的修剪、分割、大小写转换等常用操作。
  */
 #pragma once
 #include <string>
@@ -18,7 +20,18 @@
 #include <string.h>
 #include <cctype>
 
+/**
+ * @brief 字符串数组类型
+ * 
+ * 便于存储多个字符串，通常用于字符串分割等操作的结果存储
+ */
 typedef std::vector<std::string> StringVector;
+
+/**
+ * @brief 字符串工具类
+ * 
+ * 提供各种字符串相关的处理函数，包括但不限于：字符串修剪、分割、大小写转换、匹配等功能
+ */
 
 class StrUtil
 {
@@ -26,13 +39,14 @@ public:
 
 	
 
-	/** Removes any whitespace characters, be it standard space or
-	TABs and so on.
-	@remarks
-	The user may specify wether they want to trim only the
-	beginning or the end of the std::string ( the default action is
-	to trim both).
-	*/
+	/**
+	 * @brief 修剪字符串两端的指定字符
+	 * 
+	 * @param str 要修剪的字符串引用
+	 * @param delims 要移除的字符集合，默认为空格、制表符和回车
+	 * @param left 是否修剪左端，默认为true
+	 * @param right 是否修剪右端，默认为true
+	 */
 	static inline void trim(std::string& str, const char* delims = " \t\r", bool left = true, bool right = true)
 	{
 		if(right)
@@ -41,6 +55,15 @@ public:
 			str.erase(0, str.find_first_not_of(delims));
 	}
 
+	/**
+	 * @brief 修剪字符串两端的指定字符
+	 * 
+	 * @param str 要修剪的字符串
+	 * @param delims 要移除的字符集合，默认为空白字符（空格、换页、换行、回车、制表符、垂直制表符）
+	 * @param left 是否修剪左端，默认为true
+	 * @param right 是否修剪右端，默认为true
+	 * @return std::string 修剪后的字符串
+	 */
 	static inline std::string trim(const char* str, const char* delims = " \t\r", bool left = true, bool right = true)
 	{
 		std::string ret = str;
@@ -52,7 +75,11 @@ public:
 		return std::move(ret);
 	}
 
-	//去掉所有空格
+	/**
+	 * @brief 去除字符串中的所有空格字符
+	 * 
+	 * @param str 要处理的字符串引用，处理后直接修改原字符串
+	 */
 	static inline void trimAllSpace(std::string &str)
 	{
 		std::string::iterator destEnd = std::remove_if(str.begin(), str.end(), [](const char& c){
@@ -68,6 +95,13 @@ public:
 	//	str.resize(destEnd-str.begin());
 	//}
 
+	/**
+	 * @brief 查找字符在字符串中的第一次出现位置
+	 * 
+	 * @param str 要搜索的字符串
+	 * @param ch 要查找的字符
+	 * @return std::size_t 字符首次出现的位置索引，如果未找到则返回std::string::npos
+	 */
 	static inline std::size_t findFirst(const char* str, char ch)
 	{
 		std::size_t i = 0;
@@ -85,6 +119,13 @@ public:
 		return std::string::npos;
 	}
 
+	/**
+	 * @brief 查找字符在字符串中的最后一次出现位置
+	 * 
+	 * @param str 要搜索的字符串
+	 * @param ch 要查找的字符
+	 * @return std::size_t 字符最后一次出现的位置索引，如果未找到则返回std::string::npos
+	 */
 	static inline std::size_t findLast(const char* str, char ch)
 	{
 		auto len = strlen(str);
@@ -98,14 +139,14 @@ public:
 		return std::string::npos;
 	}
 
-	/** Returns a std::stringVector that contains all the substd::strings delimited
-	by the characters in the passed <code>delims</code> argument.
-	@param
-	delims A list of delimiter characters to split by
-	@param
-	maxSplits The maximum number of splits to perform (0 for unlimited splits). If this
-	parameters is > 0, the splitting process will stop after this many splits, left to right.
-	*/
+	/**
+	 * @brief 分割字符串为多个字符串并返回字符串数组
+	 * 
+	 * @param str 要分割的字符串
+	 * @param delims 分割符列表，默认为制表符、换行和空格
+	 * @param maxSplits 最大分割数量（0表示不限制）。如果设置为大于0的值，则分割过程将在分割达到这个数量后停止（从左到右）
+	 * @return StringVector 分割后的字符串数组
+	 */
 	static inline StringVector split( const std::string& str, const std::string& delims = "\t\n ", unsigned int maxSplits = 0)
 	{
 		StringVector ret;
@@ -143,14 +184,14 @@ public:
 		return std::move(ret);
 	}
 
-	/** Returns a std::stringVector that contains all the substd::strings delimited
-	by the characters in the passed <code>delims</code> argument.
-	@param
-	delims A list of delimiter characters to split by
-	@param
-	maxSplits The maximum number of splits to perform (0 for unlimited splits). If this
-	parameters is > 0, the splitting process will stop after this many splits, left to right.
-	*/
+	/**
+	 * @brief 分割字符串为多个字符串，并将结果存储到指定的数组中
+	 * 
+	 * @param str 要分割的字符串
+	 * @param ret 存储分割结果的字符串数组引用
+	 * @param delims 分割符列表，默认为制表符、换行和空格
+	 * @param maxSplits 最大分割数量（0表示不限制）。如果设置为大于0的值，则分割过程将在分割达到这个数量后停止（从左到右）
+	 */
 	static inline void split(const std::string& str, StringVector& ret, const std::string& delims = "\t\n ", unsigned int maxSplits = 0)
 	{
 		unsigned int numSplits = 0;
@@ -186,8 +227,11 @@ public:
 		} while (pos != std::string::npos);
 	}
 
-	/** Upper-cases all the characters in the std::string.
-	*/
+	/**
+	 * @brief 将字符串转换为小写
+	 * 
+	 * @param str 要转换的字符串引用，转换后直接修改原字符串
+	 */
 	static inline void toLowerCase( std::string& str )
 	{
 		std::transform(
@@ -198,8 +242,11 @@ public:
 
 	}
 
-	/** Lower-cases all the characters in the std::string.
-	*/
+	/**
+	 * @brief 将字符串转换为大写
+	 * 
+	 * @param str 要转换的字符串引用，转换后直接修改原字符串
+	 */
 	static inline void toUpperCase( std::string& str )
 	{
 		std::transform(
@@ -209,6 +256,12 @@ public:
 			(int(*)(int))toupper);
 	}
 
+	/**
+	 * @brief 将字符串转换为小写并返回新的字符串
+	 * 
+	 * @param str 要转换的字符串
+	 * @return std::string 转换后的字符串副本
+	 */
 	static inline std::string makeLowerCase(const char* str)
 	{
 		std::string strRet = str;
@@ -220,6 +273,12 @@ public:
 		return std::move(strRet);
 	}
 
+	/**
+	 * @brief 将字符串转换为大写并返回新的字符串
+	 * 
+	 * @param str 要转换的字符串
+	 * @return std::string 转换后的字符串副本
+	 */
 	static inline std::string makeUpperCase(const char* str)
 	{
 		std::string strRet = str;
@@ -231,11 +290,13 @@ public:
 		return std::move(strRet);
 	}
 
-	/*
-	 *	检查是否以指定的字符串开始
-	 *	@str		要检查的字符串
-	 *	@pattern	要匹配的模板
-	 *	@ignroreCase是否忽略大小写
+	/**
+	 * @brief 检查字符串是否以指定的模式开头
+	 * 
+	 * @param str 要检查的字符串
+	 * @param pattern 要匹配的模式字符串
+	 * @param ignoreCase 是否忽略大小写，默认为true
+	 * @return bool 如果字符串以指定模式开头则返回true，否则返回false
 	 */
 	static inline bool startsWith(const char* str, const char* pattern, bool ignoreCase = true)
 	{
