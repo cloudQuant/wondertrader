@@ -449,36 +449,59 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 	}
 }
 
+/**
+ * @brief 实时行情回调
+ * @param stdCode 标准合约代码
+ * @param newTick 新的行情数据
+ * @details 当收到新的行情数据时调用此函数，并将其转发给相应的执行单元。
+ * 如果启用了线程池，则异步处理行情数据。
+ */
 void WtLocalExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 {
+	// 尝试获取执行单元，但不自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
 		return;
 
-	//unit->self()->on_tick(newTick);
+	// 如果有线程池，则异步处理
 	if (_pool)
 	{
+		// 增加引用计数，防止在异步执行过程中被释放
 		newTick->retain();
 		_pool->schedule([unit, newTick](){
 			unit->self()->on_tick(newTick);
+			// 异步处理完成后释放
 			newTick->release();
 		});
 	}
 	else
 	{
+		// 直接同步处理
 		unit->self()->on_tick(newTick);
 	}
 }
 
+/**
+ * @brief 成交回调
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买入
+ * @param vol 成交量
+ * @param price 成交价格
+ * @details 当收到成交回报时调用此函数，并将其转发给相应的执行单元。
+ * 如果启用了线程池，则异步处理成交数据。
+ */
 void WtLocalExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
+	// 尝试获取执行单元，但不自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
 		return;
 
-	//unit->self()->on_trade(stdCode, isBuy, vol, price);
+	// 如果有线程池，则异步处理
 	if (_pool)
 	{
+		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
 		std::string code = stdCode;
 		_pool->schedule([localid, unit, code, isBuy, vol, price](){
 			unit->self()->on_trade(localid, code.c_str(), isBuy, vol, price);
@@ -486,19 +509,34 @@ void WtLocalExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy
 	}
 	else
 	{
+		// 直接同步处理
 		unit->self()->on_trade(localid, stdCode, isBuy, vol, price);
 	}
 }
 
+/**
+ * @brief 订单状态回调
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买入
+ * @param totalQty 总数量
+ * @param leftQty 剩余数量
+ * @param price 委托价格
+ * @param isCanceled 是否已取消，默认为false
+ * @details 当订单状态变化时调用此函数，并将状态变化转发给相应的执行单元。
+ * 如果启用了线程池，则异步处理订单状态。
+ */
 void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
 {
+	// 尝试获取执行单元，但不自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
 		return;
 
-	//unit->self()->on_order(localid, stdCode, isBuy, leftQty, price, isCanceled);
+	// 如果有线程池，则异步处理
 	if (_pool)
 	{
+		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
 		std::string code = stdCode;
 		_pool->schedule([localid, unit, code, isBuy, leftQty, price, isCanceled](){
 			unit->self()->on_order(localid, code.c_str(), isBuy, leftQty, price, isCanceled);
@@ -506,19 +544,31 @@ void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy
 	}
 	else
 	{
+		// 直接同步处理
 		unit->self()->on_order(localid, stdCode, isBuy, leftQty, price, isCanceled);
 	}
 }
 
+/**
+ * @brief 委托回报回调
+ * @param localid 本地订单ID
+ * @param stdCode 标准合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 委托回报消息
+ * @details 当收到委托回报时调用此函数，并将回报信息转发给相应的执行单元。
+ * 如果启用了线程池，则异步处理委托回报。
+ */
 void WtLocalExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
+	// 尝试获取执行单元，但不自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
 		return;
 
-	//unit->self()->on_entrust(localid, stdCode, bSuccess, message);
+	// 如果有线程池，则异步处理
 	if (_pool)
 	{
+		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
 		std::string code = stdCode;
 		std::string msg = message;
 		_pool->schedule([unit, localid, code, bSuccess, msg](){
@@ -527,20 +577,29 @@ void WtLocalExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSu
 	}
 	else
 	{
+		// 直接同步处理
 		unit->self()->on_entrust(localid, stdCode, bSuccess, message);
 	}
 }
 
+/**
+ * @brief 交易通道就绪回调
+ * @details 当交易通道就绪时调用此函数，设置通道状态并将此消息转发给所有执行单元。
+ * 如果启用了线程池，则异步通知所有执行单元。
+ */
 void WtLocalExecuter::on_channel_ready()
 {
+	// 设置通道就绪状态
 	_channel_ready = true;
+	// 锁定执行单元容器以进行安全遍历
 	SpinLock lock(_mtx_units);
+	// 遍历所有执行单元
 	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
 	{
 		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
 		if (unitPtr)
 		{
-			//unitPtr->self()->on_channel_ready();
+			// 如果有线程池，则异步处理
 			if (_pool)
 			{
 				_pool->schedule([unitPtr](){
@@ -549,21 +608,31 @@ void WtLocalExecuter::on_channel_ready()
 			}
 			else
 			{
+				// 直接同步处理
 				unitPtr->self()->on_channel_ready();
 			}
 		}
 	}
 }
 
+/**
+ * @brief 交易通道断开回调
+ * @details 当交易通道断开时调用此函数，设置通道状态并将此消息转发给所有执行单元。
+ * 如果启用了线程池，则异步通知所有执行单元。
+ */
 void WtLocalExecuter::on_channel_lost()
 {
+	// 设置通道断开状态
 	_channel_ready = false;
+	// 锁定执行单元容器以进行安全遍历
 	SpinLock lock(_mtx_units);
+	// 遍历所有执行单元
 	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
 	{
 		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
 		if (unitPtr)
 		{
+			// 如果有线程池，则异步处理
 			if (_pool)
 			{
 				_pool->schedule([unitPtr](){
@@ -572,23 +641,44 @@ void WtLocalExecuter::on_channel_lost()
 			}
 			else
 			{
+				// 直接同步处理
 				unitPtr->self()->on_channel_lost();
 			}
 		}
 	}
 }
 
+/**
+ * @brief 账户资金变动回调
+ * @param currency 货币代码
+ * @param prebalance 前结余额
+ * @param balance 静态权益
+ * @param dynbalance 动态权益
+ * @param avaliable 可用资金
+ * @param closeprofit 平仓盈亏
+ * @param dynprofit 浮动盈亏
+ * @param margin 占用保证金
+ * @param fee 手续费
+ * @param deposit 入金
+ * @param withdraw 出金
+ * @details 当收到账户资金变动消息时调用此函数，并将更新信息转发给所有执行单元。
+ * 如果启用了线程池，则异步通知所有执行单元。
+ */
 void WtLocalExecuter::on_account(const char* currency, double prebalance, double balance, double dynbalance, 
 	double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
 {
+	// 锁定执行单元容器以进行安全遍历
 	SpinLock lock(_mtx_units);
+	// 遍历所有执行单元
 	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
 	{
 		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
 		if (unitPtr)
 		{
+			// 如果有线程池，则异步处理
 			if (_pool)
 			{
+				// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
 				std::string strCur = currency;
 				_pool->schedule([unitPtr, strCur, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw]() {
 					unitPtr->self()->on_account(strCur.c_str(), prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
@@ -596,6 +686,7 @@ void WtLocalExecuter::on_account(const char* currency, double prebalance, double
 			}
 			else
 			{
+				// 直接同步处理
 				unitPtr->self()->on_account(currency, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
 			}
 		}
