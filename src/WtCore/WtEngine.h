@@ -149,99 +149,344 @@ private:
 };
 typedef std::shared_ptr<WtRiskMonWrapper>	WtRiskMonPtr;
 
+/**
+ * @class IEngineEvtListener
+ * @brief 引擎事件监听器接口
+ * @details 用于监听引擎中的各种事件，如初始化事件、计划事件和交易时段事件
+ */
 class IEngineEvtListener
 {
 public:
+	/**
+	 * @brief 初始化事件回调
+	 * @details 当引擎初始化完成时触发该回调
+	 */
 	virtual void on_initialize_event() {}
+
+	/**
+	 * @brief 计划事件回调
+	 * @details 当到达计划时间点时触发该回调
+	 * @param uDate 当前日期，格式YYYYMMDD
+	 * @param uTime 当前时间，格式HHMMSS
+	 */
 	virtual void on_schedule_event(uint32_t uDate, uint32_t uTime) {}
+
+	/**
+	 * @brief 交易时段事件回调
+	 * @details 当交易时段开始或结束时触发该回调
+	 * @param uDate 当前日期，格式YYYYMMDD
+	 * @param isBegin 是否为时段开始，true表示开始，false表示结束
+	 */
 	virtual void on_session_event(uint32_t uDate, bool isBegin = true) {}
 };
 
+/**
+ * @class WtEngine
+ * @brief WonderTrader核心交易引擎类
+ * @details 继承自WtPortContext和IParserStub，同时作为组合上下文和解析器桌面
+ *          负责管理交易数据、风控、信号计算和交易执行
+ */
 class WtEngine : public WtPortContext, public IParserStub
 {
 public:
+	/**
+	 * @brief 构造函数
+	 * @details 初始化交易引擎相关参数
+	 */
 	WtEngine();
 
+	/**
+	 * @brief 设置交易适配器管理器
+	 * @param mgr 交易适配器管理器指针
+	 */
 	inline void set_adapter_mgr(TraderAdapterMgr* mgr) { _adapter_mgr = mgr; }
 
+	/**
+	 * @brief 设置当前日期时间
+	 * @param curDate 当前日期，格式YYYYMMDD
+	 * @param curTime 当前时间，格式HHMMSS
+	 * @param curSecs 当前秒数，默认为0
+	 * @param rawTime 原始时间，默认为0
+	 */
 	void set_date_time(uint32_t curDate, uint32_t curTime, uint32_t curSecs = 0, uint32_t rawTime = 0);
 
+	/**
+	 * @brief 设置交易日期
+	 * @param curTDate 当前交易日期，格式YYYYMMDD
+	 */
 	void set_trading_date(uint32_t curTDate);
 
+	/**
+	 * @brief 获取当前日期
+	 * @return 当前日期，格式YYYYMMDD
+	 */
 	inline uint32_t get_date() { return _cur_date; }
+
+	/**
+	 * @brief 获取当前分钟时间
+	 * @return 当前分钟时间，格式HHMM
+	 */
 	inline uint32_t get_min_time() { return _cur_time; }
+
+	/**
+	 * @brief 获取原始时间
+	 * @return 原始时间
+	 */
 	inline uint32_t get_raw_time() { return _cur_raw_time; }
+
+	/**
+	 * @brief 获取当前秒数
+	 * @return 当前秒数
+	 */
 	inline uint32_t get_secs() { return _cur_secs; }
+
+	/**
+	 * @brief 获取当前交易日期
+	 * @return 当前交易日期，格式YYYYMMDD
+	 */
 	inline uint32_t get_trading_date() { return _cur_tdate; }
 
+	/**
+	 * @brief 获取基础数据管理器
+	 * @return 基础数据管理器指针
+	 */
 	inline IBaseDataMgr*		get_basedata_mgr(){ return _base_data_mgr; }
+
+	/**
+	 * @brief 获取主力合约管理器
+	 * @return 主力合约管理器指针
+	 */
 	inline IHotMgr*				get_hot_mgr() { return _hot_mgr; }
+	/**
+	 * @brief 获取交易时段信息
+	 * @param sid 交易时段ID或合约代码
+	 * @param isCode 是否为合约代码，true表示传入的是合约代码，false表示传入的是交易时段ID
+	 * @return 交易时段信息指针
+	 */
 	WTSSessionInfo*		get_session_info(const char* sid, bool isCode = false);
+
+	/**
+	 * @brief 获取品种信息
+	 * @param stdCode 标准化合约代码
+	 * @return 品种信息指针
+	 */
 	WTSCommodityInfo*	get_commodity_info(const char* stdCode);
+
+	/**
+	 * @brief 获取合约信息
+	 * @param stdCode 标准化合约代码
+	 * @return 合约信息指针
+	 */
 	WTSContractInfo*	get_contract_info(const char* stdCode);
+
+	/**
+	 * @brief 获取原始合约代码
+	 * @param stdCode 标准化合约代码
+	 * @return 原始合约代码
+	 */
 	std::string			get_rawcode(const char* stdCode);
 
+	/**
+	 * @brief 获取最新的Tick数据
+	 * @param sid 数据源ID
+	 * @param stdCode 标准化合约代码
+	 * @return 最新的Tick数据指针
+	 */
 	WTSTickData*	get_last_tick(uint32_t sid, const char* stdCode);
+
+	/**
+	 * @brief 获取Tick切片数据
+	 * @param sid 数据源ID
+	 * @param stdCode 标准化合约代码
+	 * @param count 要获取的Tick数量
+	 * @return Tick切片数据指针
+	 */
 	WTSTickSlice*	get_tick_slice(uint32_t sid, const char* stdCode, uint32_t count);
+
+	/**
+	 * @brief 获取K线切片数据
+	 * @param sid 数据源ID
+	 * @param stdCode 标准化合约代码
+	 * @param period 周期字符串，如"m1"/"d1"
+	 * @param count 要获取的K线数量
+	 * @param times 倍数，默认为1
+	 * @param etime 结束时间，默认为0（当前时间）
+	 * @return K线切片数据指针
+	 */
 	WTSKlineSlice*	get_kline_slice(uint32_t sid, const char* stdCode, const char* period, uint32_t count, uint32_t times = 1, uint64_t etime = 0);
 
+	/**
+	 * @brief 订阅Tick数据
+	 * @param sid 数据源ID
+	 * @param code 合约代码
+	 */
 	void sub_tick(uint32_t sid, const char* code);
 
+	/**
+	 * @brief 获取当前价格
+	 * @param stdCode 标准化合约代码
+	 * @return 当前价格
+	 */
 	double get_cur_price(const char* stdCode);
 
+	/**
+	 * @brief 获取当日价格
+	 * @param stdCode 标准化合约代码
+	 * @param flag 价格标记，0-结算价，1-开盘价
+	 * @return 当日价格
+	 */
 	double get_day_price(const char* stdCode, int flag = 0);
 
-	/*
-	 *	获取复权因子
-	 *	@stdCode	合约代码
-	 *	@commInfo	品种信息
+	/**
+	 * @brief 获取复权因子
+	 * @param stdCode 标准化合约代码
+	 * @param commInfo 品种信息，默认为NULL
+	 * @return 复权因子
 	 */
 	double get_exright_factor(const char* stdCode, WTSCommodityInfo* commInfo = NULL);
 
+	/**
+	 * @brief 获取收盘布局调整标志
+	 * @return 收盘布局调整标志，0-无调整，1-正在调整
+	 */
 	uint32_t get_adjusting_flag();
 
+	/**
+	 * @brief 计算手续费
+	 * @param stdCode 标准化合约代码
+	 * @param price 交易价格
+	 * @param qty 交易数量
+	 * @param offset 开平标记，0-开仓，1-平仓，2-平今
+	 * @return 手续费金额
+	 */
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
 
+	/**
+	 * @brief 设置风控监控器
+	 * @param monitor 风控监控器智能指针
+	 */
 	inline void setRiskMonitor(WtRiskMonPtr& monitor)
 	{
 		_risk_mon = monitor;
 	}
 
+	/**
+	 * @brief 注册引擎事件监听器
+	 * @param listener 引擎事件监听器指针
+	 */
 	inline void regEventListener(IEngineEvtListener* listener)
 	{
 		_evt_listener = listener;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	//WtPortContext接口
+	// WtPortContext接口实现
+	/**
+	 * @brief 获取组合资金信息
+	 * @return 组合资金信息指针
+	 */
 	virtual WTSPortFundInfo* getFundInfo() override;
 
+	/**
+	 * @brief 设置仓位缩放比例
+	 * @param scale 缩放比例
+	 */
 	virtual void setVolScale(double scale) override;
 
+	/**
+	 * @brief 检查是否在交易时段内
+	 * @return 是否在交易时段内
+	 */
 	virtual bool isInTrading() override;
 
+	/**
+	 * @brief 写入风控日志
+	 * @param message 日志消息
+	 */
 	virtual void writeRiskLog(const char* message) override;
 
+	/**
+	 * @brief 获取当前日期
+	 * @return 当前日期，格式YYYYMMDD
+	 */
 	virtual uint32_t	getCurDate() override;
+
+	/**
+	 * @brief 获取当前时间
+	 * @return 当前时间，格式HHMMSS
+	 */
 	virtual uint32_t	getCurTime() override;
+
+	/**
+	 * @brief 获取交易日期
+	 * @return 交易日期，格式YYYYMMDD
+	 */
 	virtual uint32_t	getTradingDate() override;
+
+	/**
+	 * @brief 将时间转换为分钟时间
+	 * @param uTime 原始时间，格式HHMMSS
+	 * @return 分钟时间，格式HHMM
+	 */
 	virtual uint32_t	transTimeToMin(uint32_t uTime) override{ return 0; }
 
 	//////////////////////////////////////////////////////////////////////////
-	/// IParserStub接口
+	/// IParserStub接口实现
+	/**
+	 * @brief 处理推送的行情数据
+	 * @param newTick 新的Tick数据
+	 */
 	virtual void handle_push_quote(WTSTickData* newTick) override;
 
 public:
+	/**
+	 * @brief 初始化引擎
+	 * @param cfg 配置项
+	 * @param bdMgr 基础数据管理器
+	 * @param dataMgr 行情数据管理器
+	 * @param hotMgr 主力合约管理器
+	 * @param notifier 事件通知器
+	 */
 	virtual void init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHotMgr* hotMgr, EventNotifier* notifier);
 
+	/**
+	 * @brief 运行引擎
+	 * @details 纯虚函数，需要在子类中实现
+	 */
 	virtual void run() = 0;
 
+	/**
+	 * @brief Tick数据到达事件
+	 * @param stdCode 标准化合约代码
+	 * @param curTick 当前最新Tick数据
+	 */
 	virtual void on_tick(const char* stdCode, WTSTickData* curTick);
 
+	/**
+	 * @brief K线数据到达事件
+	 * @param stdCode 标准化合约代码
+	 * @param period 周期字符串
+	 * @param times 周期倍数
+	 * @param newBar 新K线数据
+	 */
 	virtual void on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) = 0;
 
+	/**
+	 * @brief 初始化完成回调
+	 * @details 当引擎初始化完成时调用该函数
+	 */
 	virtual void on_init(){}
+
+	/**
+	 * @brief 交易时段开始回调
+	 * @details 当新的交易时段开始时调用该函数
+	 */
 	virtual void on_session_begin();
+
+	/**
+	 * @brief 交易时段结束回调
+	 * @details 当交易时段结束时调用该函数
+	 */
 	virtual void on_session_end();
 
 
