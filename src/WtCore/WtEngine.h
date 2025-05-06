@@ -491,93 +491,291 @@ public:
 
 
 protected:
+	/**
+	 * @brief 加载手续费配置
+	 * @param filename 手续费配置文件名
+	 */
 	void		load_fees(const char* filename);
 
+	/**
+	 * @brief 加载数据
+	 * @details 加载引擎需要的各种数据
+	 */
 	void		load_datas();
 
+	/**
+	 * @brief 保存数据
+	 * @details 将引擎的各种数据保存到磁盘
+	 */
 	void		save_datas();
 
+	/**
+	 * @brief 添加信号
+	 * @param stdCode 标准化合约代码
+	 * @param qty 仓位数量
+	 * @param bStandBy 是否备用
+	 */
 	void		append_signal(const char* stdCode, double qty, bool bStandBy);
 
+	/**
+	 * @brief 设置仓位
+	 * @param stdCode 标准化合约代码
+	 * @param qty 目标仓位数量
+	 * @param curPx 当前价格，默认为-1（使用市场价格）
+	 */
 	void		do_set_position(const char* stdCode, double qty, double curPx = -1);
 
+	/**
+	 * @brief 任务循环
+	 * @details 处理引擎内部任务的循环函数
+	 */
 	void		task_loop();
 
+	/**
+	 * @brief 推送任务
+	 * @param task 任务项
+	 */
 	void		push_task(TaskItem task);
 
+	/**
+	 * @brief 更新资金动态盈亏
+	 * @details 计算并更新组合资金的动态盈亏
+	 */
 	void		update_fund_dynprofit();
 
+	/**
+	 * @brief 初始化风控模块
+	 * @param cfg 风控配置
+	 * @return 初始化是否成功
+	 */
 	bool		init_riskmon(WTSVariant* cfg);
 
 private:
+	/**
+	 * @brief 初始化输出模块
+	 * @details 初始化日志和数据输出模块
+	 */
 	void		init_outputs();
+
+	/**
+	 * @brief 记录交易日志
+	 * @param stdCode 标准化合约代码
+	 * @param isLong 是否做多
+	 * @param isOpen 是否开仓
+	 * @param curTime 当前时间
+	 * @param price 交易价格
+	 * @param qty 交易数量
+	 * @param fee 手续费，默认为0.0
+	 */
 	inline void	log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, double fee = 0.0);
+
+	/**
+	 * @brief 记录平仓日志
+	 * @param stdCode 标准化合约代码
+	 * @param isLong 是否做多
+	 * @param openTime 开仓时间
+	 * @param openpx 开仓价格
+	 * @param closeTime 平仓时间
+	 * @param closepx 平仓价格
+	 * @param qty 交易数量
+	 * @param profit 交易盈亏
+	 * @param totalprofit 总盈亏，默认为0
+	 */
 	inline void	log_close(const char* stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty,
 		double profit, double totalprofit = 0);
 
 protected:
-	uint32_t		_cur_date;		//当前日期
-	uint32_t		_cur_time;		//当前时间, 是1分钟线时间, 比如0900, 这个时候的1分钟线是0901, _cur_time也就是0901, 这个是为了CTA里面方便
-	uint32_t		_cur_raw_time;	//当前真实时间
-	uint32_t		_cur_secs;		//当前秒数, 包含毫秒
-	uint32_t		_cur_tdate;		//当前交易日
+	/**
+	 * @brief 当前日期，格式YYYYMMDD
+	 */
+	uint32_t		_cur_date;
 
-	uint32_t		_fund_udt_span;	//组合资金更新时间间隔
+	/**
+	 * @brief 当前时间，是1分钟线时间
+	 * @details 比如0900，这个时候的1分钟线是0901，_cur_time也就是0901，这个是为了CTA里面方便
+	 */
+	uint32_t		_cur_time;
 
-	IBaseDataMgr*	_base_data_mgr;	//基础数据管理器
-	IHotMgr*		_hot_mgr;		//主力管理器
-	WtDtMgr*		_data_mgr;		//数据管理器
+	/**
+	 * @brief 当前真实时间，格式HHMMSS
+	 */
+	uint32_t		_cur_raw_time;
+
+	/**
+	 * @brief 当前秒数，包含毫秒
+	 */
+	uint32_t		_cur_secs;
+
+	/**
+	 * @brief 当前交易日，格式YYYYMMDD
+	 */
+	uint32_t		_cur_tdate;
+
+	/**
+	 * @brief 组合资金更新时间间隔，单位毫秒
+	 */
+	uint32_t		_fund_udt_span;
+
+	/**
+	 * @brief 基础数据管理器
+	 * @details 用于管理合约、品种、交易所等基础数据
+	 */
+	IBaseDataMgr*	_base_data_mgr;
+
+	/**
+	 * @brief 主力合约管理器
+	 * @details 用于管理主力合约映射关系
+	 */
+	IHotMgr*		_hot_mgr;
+
+	/**
+	 * @brief 数据管理器
+	 * @details 用于管理行情数据
+	 */
+	WtDtMgr*		_data_mgr;
+
+	/**
+	 * @brief 引擎事件监听器
+	 * @details 用于接收引擎事件通知
+	 */
 	IEngineEvtListener*	_evt_listener;
 
-	//By Wesley @ 2022.02.07
-	//tick数据订阅项，first是contextid，second是订阅选项，0-原始订阅，1-前复权，2-后复权
+	/**
+	 * @brief 订阅选项定义
+	 * @details 由Wesley于2022.02.07添加
+	 * @details tick数据订阅项，first是contextid，second是订阅选项，0-原始订阅，1-前复权，2-后复权
+	 */
 	typedef std::pair<uint32_t, uint32_t> SubOpt;
-	typedef wt_hashmap<uint32_t, SubOpt> SubList;
-	typedef wt_hashmap<std::string, SubList>	StraSubMap;
-	StraSubMap		_tick_sub_map;	//tick数据订阅表
-	StraSubMap		_bar_sub_map;	//K线数据订阅表
 
-	//By Wesley @ 2022.02.07 
-	//这个好像没有用到，不需要了
-	//wt_hashset<std::string>		_ticksubed_raw_codes;	//tick订阅表（真实代码模式）
-	
+	/**
+	 * @brief 订阅列表类型
+	 * @details 哈希表，键为数据源ID，值为订阅选项
+	 */
+	typedef wt_hashmap<uint32_t, SubOpt> SubList;
+
+	/**
+	 * @brief 策略订阅映射类型
+	 * @details 哈希表，键为合约代码，值为订阅列表
+	 */
+	typedef wt_hashmap<std::string, SubList>	StraSubMap;
+
+	/**
+	 * @brief tick数据订阅表
+	 * @details 记录所有策略对tick数据的订阅情况
+	 */
+	StraSubMap		_tick_sub_map;
+
+	/**
+	 * @brief K线数据订阅表
+	 * @details 记录所有策略对K线数据的订阅情况
+	 */
+	StraSubMap		_bar_sub_map;
+
+	/**
+	 * @brief 已废弃的代码注释
+	 * @details 由Wesley于2022.02.07添加的注释，这个好像没有用到，不需要了
+	 * @deprecated //wt_hashset<std::string>		_ticksubed_raw_codes;	//tick订阅表（真实代码模式）
+	 */
 
 	//////////////////////////////////////////////////////////////////////////
-	//
+	/**
+	 * @brief 信号信息结构体
+	 * @details 用于存储交易信号的相关信息
+	 */
 	typedef struct _SigInfo
 	{
+		/**
+		 * @brief 交易数量
+		 */
 		double		_volume;
+
+		/**
+		 * @brief 信号生成时间
+		 */
 		uint64_t	_gentime;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化信号数量和生成时间为0
+		 */
 		_SigInfo()
 		{
 			_volume = 0;
 			_gentime = 0;
 		}
 	}SigInfo;
+	/**
+	 * @brief 信号映射类型
+	 * @details 哈希表，键为合约代码，值为信号信息
+	 */
 	typedef wt_hashmap<std::string, SigInfo>	SignalMap;
+
+	/**
+	 * @brief 信号映射表
+	 * @details 存储所有合约的信号信息
+	 */
 	SignalMap		_sig_map;
 
-	//////////////////////////////////////////////////////////////////////////
-	//信号过滤器
+	/**
+	 * @brief 信号过滤器管理器
+	 * @details 用于过滤和处理交易信号
+	 */
 	WtFilterMgr		_filter_mgr;
+
+	/**
+	 * @brief 事件通知器
+	 * @details 用于向外部发送事件通知
+	 */
 	EventNotifier*	_notifier;
 
 	//////////////////////////////////////////////////////////////////////////
-	//手续费模板
+	/**
+	 * @brief 手续费项目结构体
+	 * @details 存储合约的手续费设置
+	 */
 	typedef struct _FeeItem
 	{
+		/**
+		 * @brief 开仓手续费率
+		 */
 		double	_open;
+
+		/**
+		 * @brief 平仓手续费率
+		 */
 		double	_close;
+
+		/**
+		 * @brief 平今手续费率
+		 */
 		double	_close_today;
+
+		/**
+		 * @brief 是否按手数计算
+		 * @details true-按手数计算，false-按金额计算
+		 */
 		bool	_by_volume;
 
+		/**
+		 * @brief 构造函数
+		 * @details 初始化所有成员变量为0
+		 */
 		_FeeItem()
 		{
 			memset(this, 0, sizeof(_FeeItem));
 		}
 	} FeeItem;
+
+	/**
+	 * @brief 手续费映射类型
+	 * @details 哈希表，键为合约代码，值为手续费项目
+	 */
 	typedef wt_hashmap<std::string, FeeItem>	FeeMap;
+
+	/**
+	 * @brief 手续费映射表
+	 * @details 存储所有合约的手续费设置
+	 */
 	FeeMap		_fee_map;
 	
 
