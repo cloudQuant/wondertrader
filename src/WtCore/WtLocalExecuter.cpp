@@ -693,74 +693,95 @@ void WtLocalExecuter::on_account(const char* currency, double prebalance, double
 	}
 }
 
+/**
+ * @brief 持仓信息回调
+ * @param stdCode 标准合约代码
+ * @param isLong 是否为多头持仓
+ * @param prevol 之前持仓量
+ * @param preavail 之前可用持仓量
+ * @param newvol 新持仓量
+ * @param newavail 新可用持仓量
+ * @param tradingday 交易日
+ * @details 当收到持仓变动信息时调用此函数，并将合约代码添加到通道持仓集合中。
+ * 此函数还包含自动清理过期主力合约的逻辑，通过检查当前合约是否是上一期的主力合约，
+ * 并根据包含和排除列表决定是否进行自动清仓。
+ */
 void WtLocalExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
 {
-	_channel_holds.insert(stdCode);
+    // 将合约添加到通道持仓集合中
+    _channel_holds.insert(stdCode);
 
-	/*
-	 *	By Wesley @ 2021.12.14
-	 *	先检查自动清理过期主力合约的标记是否为true
-	 *	如果不为true，则直接退出该逻辑
-	 */
-	if (!_auto_clear)
-		return;
+    /*
+     *  By Wesley @ 2021.12.14
+     *  先检查自动清理过期主力合约的标记是否为true
+     *  如果不为true，则直接退出该逻辑
+     */
+    if (!_auto_clear)
+        return;
 
-	//如果不是分月期货合约，直接退出
-	if (!CodeHelper::isStdMonthlyFutCode(stdCode))
-		return;
+    // 如果不是分月期货合约，直接退出
+    if (!CodeHelper::isStdMonthlyFutCode(stdCode))
+        return;
 
-	IHotMgr* hotMgr = _stub->get_hot_mon();
-	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	//获取上一期的主力合约
-	std::string prevCode = hotMgr->getPrevRawCode(cInfo._exchg, cInfo._product, tradingday);
+    // 获取热力合约管理器
+    IHotMgr* hotMgr = _stub->get_hot_mon();
+    // 解析标准合约代码
+    CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
+    // 获取上一期的主力合约
+    std::string prevCode = hotMgr->getPrevRawCode(cInfo._exchg, cInfo._product, tradingday);
 
-	//如果当前合约不是上一期的主力合约，则直接退出
-	if (prevCode != cInfo._code)
-		return;
+    // 如果当前合约不是上一期的主力合约，则直接退出
+    if (prevCode != cInfo._code)
+        return;
 
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Prev hot contract of {}.{} on {} is {}", cInfo._exchg, cInfo._product, tradingday, prevCode);
+    // 记录日志，显示找到了上一期的主力合约
+    WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Prev hot contract of {}.{} on {} is {}", cInfo._exchg, cInfo._product, tradingday, prevCode);
 
-	thread_local static char fullPid[64] = { 0 };
-	fmtutil::format_to(fullPid, "{}.{}", cInfo._exchg, cInfo._product);
+    // 创建产品完整标识符
+    thread_local static char fullPid[64] = { 0 };
+    fmtutil::format_to(fullPid, "{}.{}", cInfo._exchg, cInfo._product);
 
-	//先检查排除列表
-	//如果在排除列表中，则直接退出
-	auto it = _clear_excludes.find(fullPid);
-	if(it != _clear_excludes.end())
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's in exclude list", stdCode);
-		return;
-	}
+    // 先检查排除列表
+    // 如果在排除列表中，则直接退出
+    auto it = _clear_excludes.find(fullPid);
+    if(it != _clear_excludes.end())
+    {
+        WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's in exclude list", stdCode);
+        return;
+    }
 
-	//如果包含列表不为空，再检查是否在包含列表中
-	//如果为空，则全部清理，不再进入该逻辑
-	if(!_clear_includes.empty())
-	{
-		it = _clear_includes.find(fullPid);
-		if (it == _clear_includes.end())
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's not in include list", stdCode);
-			return;
-		}
-	}
+    // 如果包含列表不为空，再检查是否在包含列表中
+    // 如果为空，则全部清理，不再进入该逻辑
+    if(!_clear_includes.empty())
+    {
+        it = _clear_includes.find(fullPid);
+        if (it == _clear_includes.end())
+        {
+            WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, won't be cleared for it's not in include list", stdCode);
+            return;
+        }
+    }
 
-	//最后再进行自动清理
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, will be cleared", stdCode);
-	ExecuteUnitPtr unit = getUnit(stdCode);
-	if (unit)
-	{
-		if (_pool)
-		{
-			std::string code = stdCode;
-			_pool->schedule([unit, code](){
-				unit->self()->clear_all_position(code.c_str());
-			});
-		}
-		else
-		{
-			unit->self()->clear_all_position(stdCode);
-		}
-	}
+    // 最后再进行自动清理
+    WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, will be cleared", stdCode);
+    // 获取执行单元
+    ExecuteUnitPtr unit = getUnit(stdCode);
+    if (unit)
+    {
+        // 如果有线程池，则异步处理
+        if (_pool)
+        {
+            std::string code = stdCode;
+            _pool->schedule([unit, code](){
+                unit->self()->clear_all_position(code.c_str());
+            });
+        }
+        else
+        {
+            // 直接同步处理
+            unit->self()->clear_all_position(stdCode);
+        }
+    }
 }
 
 #pragma endregion 外部接口
