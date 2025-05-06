@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * \file WtExecuter.cpp
  * \project	WonderTrader
  *
@@ -305,6 +305,14 @@ bool WtDiffExecuter::cancel(uint32_t localid)
 	return _trader->cancel(localid);
 }
 
+/**
+ * @brief 根据合约代码、买卖方向和数量撤销订单
+ * 
+ * @param stdCode 合约代码
+ * @param isBuy 是否为买单
+ * @param qty 要撤销的数量
+ * @return OrderIDs 撤销的订单ID列表
+ */
 OrderIDs WtDiffExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 {
 	if (!_channel_ready)
@@ -478,6 +486,12 @@ void WtDiffExecuter::set_position(const wt_hashmap<std::string, double>& targets
 	save_data();
 }
 
+/**
+ * @brief 处理行情数据更新
+ * 
+ * @param stdCode 合约代码
+ * @param newTick 最新的行情数据
+ */
 void WtDiffExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -499,6 +513,15 @@ void WtDiffExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 处理成交回报
+ * 
+ * @param localid 本地订单ID
+ * @param stdCode 合约代码
+ * @param isBuy 是否为买单
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void WtDiffExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -526,9 +549,20 @@ void WtDiffExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
 	else
 	{
 		unit->self()->on_trade(localid, stdCode, isBuy, vol, price);
-		}
+	}
 }
 
+/**
+ * @brief 处理订单状态回报
+ * 
+ * @param localid 本地订单ID
+ * @param stdCode 合约代码
+ * @param isBuy 是否为买单
+ * @param totalQty 总数量
+ * @param leftQty 剩余数量
+ * @param price 价格
+ * @param isCanceled 是否已撤销
+ */
 void WtDiffExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -548,6 +582,14 @@ void WtDiffExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy,
 	}
 }
 
+/**
+ * @brief 处理委托回报
+ * 
+ * @param localid 本地订单ID
+ * @param stdCode 合约代码
+ * @param bSuccess 是否成功
+ * @param message 回报消息
+ */
 void WtDiffExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -568,6 +610,11 @@ void WtDiffExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 	}
 }
 
+/**
+ * @brief 处理交易通道就绪事件
+ * 
+ * @details 当交易通道就绪时，通知所有执行单元并恢复差量持仓
+ */
 void WtDiffExecuter::on_channel_ready()
 {
 	_channel_ready = true;
@@ -614,6 +661,11 @@ void WtDiffExecuter::on_channel_ready()
 	}
 }
 
+/**
+ * @brief 处理交易通道断开事件
+ * 
+ * @details 当交易通道断开时，通知所有执行单元
+ */
 void WtDiffExecuter::on_channel_lost()
 {
 	_channel_ready = false;
@@ -637,6 +689,21 @@ void WtDiffExecuter::on_channel_lost()
 	}
 }
 
+/**
+ * @brief 处理账户资金更新
+ * 
+ * @param currency 货币类型
+ * @param prebalance 前结余额
+ * @param balance 结余额
+ * @param dynbalance 动态权益
+ * @param avaliable 可用资金
+ * @param closeprofit 平仓盈亏
+ * @param dynprofit 浮动盈亏
+ * @param margin 保证金
+ * @param fee 手续费
+ * @param deposit 入金
+ * @param withdraw 出金
+ */
 void WtDiffExecuter::on_account(const char* currency, double prebalance, double balance, double dynbalance,
 	double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
 {
@@ -661,9 +728,20 @@ void WtDiffExecuter::on_account(const char* currency, double prebalance, double 
 	}
 }
 
+/**
+ * @brief 处理持仓更新
+ * 
+ * @param stdCode 合约代码
+ * @param isLong 是否为多头仓位
+ * @param prevol 前持仓量
+ * @param preavail 前可用持仓量
+ * @param newvol 新持仓量
+ * @param newavail 新可用持仓量
+ * @param tradingday 交易日
+ */
 void WtDiffExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
 {
-
+	// 注意：当前实现为空，可能在子类中实现
 }
 
 #pragma endregion 外部接口
