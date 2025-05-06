@@ -1,4 +1,9 @@
-﻿#include "WtExecuterFactory.h"
+/**
+ * @file WtExecuterFactory.cpp
+ * @brief 执行器工厂实现文件
+ * @details 实现了执行器工厂类，用于加载和管理执行器工厂，创建各种类型的执行单元
+ */
+#include "WtExecuterFactory.h"
 
 #include "../Share/StdUtils.hpp"
 #include "../Share/StrUtil.hpp"
@@ -10,7 +15,13 @@
 USING_NS_WTP;
 
 //////////////////////////////////////////////////////////////////////////
-//WtExecuterFactory
+// WtExecuterFactory实现
+
+/**
+ * @brief 加载执行器工厂
+ * @param path 执行器工厂动态库所在目录路径
+ * @return 是否加载成功
+ */
 bool WtExecuterFactory::loadFactories(const char* path)
 {
 	if (!StdFile::exists(path))
@@ -64,12 +75,20 @@ bool WtExecuterFactory::loadFactories(const char* path)
 	return true;
 }
 
+/**
+ * @brief 创建普通执行单元
+ * @param factname 工厂名称
+ * @param unitname 单元名称
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* factname, const char* unitname)
 {
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createExeUnit(unitname);
 	if (unit == NULL)
@@ -77,15 +96,24 @@ ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* factname, const char
 		WTSLogger::error("Createing execution unit failed: {}.{}", factname, unitname);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
 
+/**
+ * @brief 创建差价执行单元
+ * @param factname 工厂名称
+ * @param unitname 单元名称
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* factname, const char* unitname)
 {
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建差价执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createDiffExeUnit(unitname);
 	if (unit == NULL)
@@ -93,15 +121,24 @@ ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* factname, const 
 		WTSLogger::error("Createing diff execution unit failed: {}.{}", factname, unitname);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
 
+/**
+ * @brief 创建套利执行单元
+ * @param factname 工厂名称
+ * @param unitname 单元名称
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* factname, const char* unitname)
 {
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建套利执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createArbiExeUnit(unitname);
 	if (unit == NULL)
@@ -109,11 +146,18 @@ ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* factname, const 
 		WTSLogger::error("Createing arbi execution unit failed: {}.{}", factname, unitname);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
 
+/**
+ * @brief 创建普通执行单元
+ * @param name 执行单元名称，格式为“工厂名.单元名”
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* name)
 {
+	// 将名称按点分隔符分割为工厂名和单元名
 	StringVector ay = StrUtil::split(name, ".");
 	if (ay.size() < 2)
 		return ExecuteUnitPtr();
@@ -121,10 +165,12 @@ ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* name)
 	const char* factname = ay[0].c_str();
 	const char* unitname = ay[1].c_str();
 
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createExeUnit(unitname);
 	if (unit == NULL)
@@ -132,11 +178,18 @@ ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* name)
 		WTSLogger::error("Createing execution unit failed: {}", name);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
 
+/**
+ * @brief 创建差价执行单元
+ * @param name 执行单元名称，格式为“工厂名.单元名”
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* name)
 {
+	// 将名称按点分隔符分割为工厂名和单元名
 	StringVector ay = StrUtil::split(name, ".");
 	if (ay.size() < 2)
 		return ExecuteUnitPtr();
@@ -144,10 +197,12 @@ ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* name)
 	const char* factname = ay[0].c_str();
 	const char* unitname = ay[1].c_str();
 
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建差价执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createDiffExeUnit(unitname);
 	if (unit == NULL)
@@ -155,11 +210,18 @@ ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* name)
 		WTSLogger::error("Createing execution unit failed: {}", name);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
 
+/**
+ * @brief 创建套利执行单元
+ * @param name 执行单元名称，格式为“工厂名.单元名”
+ * @return 执行单元智能指针
+ */
 ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* name)
 {
+	// 将名称按点分隔符分割为工厂名和单元名
 	StringVector ay = StrUtil::split(name, ".");
 	if (ay.size() < 2)
 		return ExecuteUnitPtr();
@@ -167,10 +229,12 @@ ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* name)
 	const char* factname = ay[0].c_str();
 	const char* unitname = ay[1].c_str();
 
+	// 查找指定名称的工厂
 	auto it = _factories.find(factname);
 	if (it == _factories.end())
 		return ExecuteUnitPtr();
 
+	// 获取工厂信息并创建套利执行单元
 	ExeFactInfo& fInfo = (ExeFactInfo&)it->second;
 	ExecuteUnit* unit = fInfo._fact->createArbiExeUnit(unitname);
 	if (unit == NULL)
@@ -178,5 +242,6 @@ ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* name)
 		WTSLogger::error("Createing execution unit failed: {}", name);
 		return ExecuteUnitPtr();
 	}
+	// 将执行单元封装到ExeUnitWrapper中
 	return ExecuteUnitPtr(new ExeUnitWrapper(unit, fInfo._fact));
 }
