@@ -1,11 +1,13 @@
 /*!
- * \file WtExecuter.cpp
+ * \file WtDiffExecuter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 差量执行器实现文件
+ * \details 差量执行器(WtDiffExecuter)用于处理目标仓位与实际仓位之间的差值，
+ *          通过计算差量并执行相应的交易操作，实现仓位的精确控制。
  */
 #include "WtDiffExecuter.h"
 #include "TraderAdapter.h"
@@ -28,6 +30,14 @@ namespace rj = rapidjson;
 USING_NS_WTP;
 
 
+/**
+ * @brief 差量执行器构造函数
+ * 
+ * @param factory 执行器工厂指针
+ * @param name 执行器名称
+ * @param dataMgr 数据管理器指针
+ * @param bdMgr 基础数据管理器指针
+ */
 WtDiffExecuter::WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr, IBaseDataMgr* bdMgr)
 	: IExecCommand(name)
 	, _factory(factory)
@@ -40,12 +50,22 @@ WtDiffExecuter::WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDa
 }
 
 
+/**
+ * @brief 差量执行器析构函数
+ * @details 等待线程池中的任务完成再退出
+ */
 WtDiffExecuter::~WtDiffExecuter()
 {
 	if (_pool)
 		_pool->wait();
 }
 
+/**
+ * @brief 设置交易适配器
+ * 
+ * @param adapter 交易适配器指针
+ * @details 设置交易适配器并检查交易通道是否就绪
+ */
 void WtDiffExecuter::setTrader(TraderAdapter* adapter)
 {
 	_trader = adapter;
@@ -54,6 +74,13 @@ void WtDiffExecuter::setTrader(TraderAdapter* adapter)
 		_channel_ready = _trader->isReady();
 }
 
+/**
+ * @brief 初始化差量执行器
+ * 
+ * @param params 配置参数
+ * @return bool 初始化是否成功
+ * @details 设置缩放比例、创建线程池并加载数据
+ */
 bool WtDiffExecuter::init(WTSVariant* params)
 {
 	if (params == NULL)
@@ -77,6 +104,12 @@ bool WtDiffExecuter::init(WTSVariant* params)
 	return true;
 }
 
+/**
+ * @brief 加载执行器数据
+ * 
+ * @details 从文件中读取执行器的目标仓位和差量数据
+ *          数据存储在JSON格式的文件中，包含“targets”和“diffs”两部分
+ */
 void WtDiffExecuter::load_data()
 {
 	//读取执行器的理论部位，以及待执行的差量
@@ -138,6 +171,12 @@ void WtDiffExecuter::load_data()
 	}
 }
 
+/**
+ * @brief 保存执行器数据
+ * 
+ * @details 将目标仓位和差量数据保存到JSON格式的文件中
+ *          文件包含“targets”和“diffs”两部分，分别存储目标仓位和差量仓位
+ */
 void WtDiffExecuter::save_data()
 {
 	std::string filename = WtHelper::getExecDataDir();
@@ -192,6 +231,15 @@ void WtDiffExecuter::save_data()
 	}
 }
 
+/**
+ * @brief 获取指定合约的执行单元
+ * 
+ * @param stdCode 标准合约代码
+ * @param bAutoCreate 如果不存在是否自动创建
+ * @return ExecuteUnitPtr 执行单元指针
+ * @details 根据合约代码获取执行单元，如果不存在且bAutoCreate为true，
+ *          则根据配置创建新的执行单元
+ */
 ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
@@ -240,7 +288,19 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 
 //////////////////////////////////////////////////////////////////////////
 //ExecuteContext
+/**
+ * @brief 以下是ExecuteContext接口的实现
+ * @details 这些方法提供了执行单元与执行器之间的交互接口
+ */
 #pragma region Context回调接口
+/**
+ * @brief 获取指定合约的tick数据切片
+ * 
+ * @param stdCode 标准合约代码
+ * @param count 需要获取的tick数量
+ * @param etime 结束时间，默认为0
+ * @return WTSTickSlice* tick数据切片指针
+ */
 WTSTickSlice* WtDiffExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_data_mgr == NULL)
@@ -249,6 +309,12 @@ WTSTickSlice* WtDiffExecuter::getTicks(const char* stdCode, uint32_t count, uint
 	return _data_mgr->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取指定合约的最新tick数据
+ * 
+ * @param stdCode 标准合约代码
+ * @return WTSTickData* 最新tick数据指针
+ */
 WTSTickData* WtDiffExecuter::grabLastTick(const char* stdCode)
 {
 	if (_data_mgr == NULL)
@@ -257,6 +323,14 @@ WTSTickData* WtDiffExecuter::grabLastTick(const char* stdCode)
 	return _data_mgr->grab_last_tick(stdCode);
 }
 
+/**
+ * @brief 获取指定合约的持仓量
+ * 
+ * @param stdCode 标准合约代码
+ * @param validOnly 是否只返回有效持仓，默认为true
+ * @param flag 持仓标记，默认为3（同时返回多空持仓）
+ * @return double 持仓量
+ */
 double WtDiffExecuter::getPosition(const char* stdCode, bool validOnly /* = true */, int32_t flag /* = 3 */)
 {
 	if (NULL == _trader)
@@ -265,6 +339,12 @@ double WtDiffExecuter::getPosition(const char* stdCode, bool validOnly /* = true
 	return _trader->getPosition(stdCode, validOnly, flag);
 }
 
+/**
+ * @brief 获取指定合约的未完成委托数量
+ * 
+ * @param stdCode 标准合约代码
+ * @return double 未完成委托数量
+ */
 double WtDiffExecuter::getUndoneQty(const char* stdCode)
 {
 	if (NULL == _trader)
@@ -273,6 +353,12 @@ double WtDiffExecuter::getUndoneQty(const char* stdCode)
 	return _trader->getUndoneQty(stdCode);
 }
 
+/**
+ * @brief 获取指定合约的订单列表
+ * 
+ * @param stdCode 标准合约代码
+ * @return OrderMap* 订单映射表指针
+ */
 OrderMap* WtDiffExecuter::getOrders(const char* stdCode)
 {
 	if (NULL == _trader)
@@ -281,6 +367,15 @@ OrderMap* WtDiffExecuter::getOrders(const char* stdCode)
 	return _trader->getOrders(stdCode);
 }
 
+/**
+ * @brief 发送买入委托
+ * 
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return OrderIDs 订单ID列表
+ */
 OrderIDs WtDiffExecuter::buy(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
 	if (!_channel_ready)
@@ -289,6 +384,15 @@ OrderIDs WtDiffExecuter::buy(const char* stdCode, double price, double qty, bool
 	return _trader->buy(stdCode, price, qty, 0, bForceClose);
 }
 
+/**
+ * @brief 发送卖出委托
+ * 
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return OrderIDs 订单ID列表
+ */
 OrderIDs WtDiffExecuter::sell(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
 	if (!_channel_ready)
@@ -297,6 +401,12 @@ OrderIDs WtDiffExecuter::sell(const char* stdCode, double price, double qty, boo
 	return _trader->sell(stdCode, price, qty, 0, bForceClose);
 }
 
+/**
+ * @brief 根据本地订单ID撤销订单
+ * 
+ * @param localid 本地订单ID
+ * @return bool 撤单是否成功
+ */
 bool WtDiffExecuter::cancel(uint32_t localid)
 {
 	if (!_channel_ready)
@@ -321,6 +431,12 @@ OrderIDs WtDiffExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 	return _trader->cancel(stdCode, isBuy, qty);
 }
 
+/**
+ * @brief 写入日志
+ * 
+ * @param message 日志消息
+ * @details 将消息写入日志系统，并自动添加执行器名称前缀
+ */
 void WtDiffExecuter::writeLog(const char* message)
 {
 	static thread_local char szBuf[2048] = { 0 };
@@ -328,16 +444,36 @@ void WtDiffExecuter::writeLog(const char* message)
 	WTSLogger::log_dyn_raw("executer", _name.c_str(), LL_INFO, szBuf);
 }
 
+/**
+ * @brief 获取商品信息
+ * 
+ * @param stdCode 标准合约代码
+ * @return WTSCommodityInfo* 商品信息指针
+ * @details 从引擎中获取指定合约的商品信息
+ */
 WTSCommodityInfo* WtDiffExecuter::getCommodityInfo(const char* stdCode)
 {
 	return _stub->get_comm_info(stdCode);
 }
 
+/**
+ * @brief 获取交易时段信息
+ * 
+ * @param stdCode 标准合约代码
+ * @return WTSSessionInfo* 交易时段信息指针
+ * @details 从引擎中获取指定合约的交易时段信息
+ */
 WTSSessionInfo* WtDiffExecuter::getSessionInfo(const char* stdCode)
 {
 	return _stub->get_sess_info(stdCode);
 }
 
+/**
+ * @brief 获取当前时间
+ * 
+ * @return uint64_t 当前时间戳
+ * @details 从引擎中获取当前实时时间
+ */
 uint64_t WtDiffExecuter::getCurTime()
 {
 	return _stub->get_real_time();
@@ -349,7 +485,19 @@ uint64_t WtDiffExecuter::getCurTime()
 //////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @brief 以下是外部接口的实现
+ * @details 这些方法提供了与外部系统交互的接口，包括处理仓位变化、行情更新、交易回报等
+ */
 #pragma region 外部接口
+/**
+ * @brief 处理仓位变化
+ * 
+ * @param stdCode 标准合约代码
+ * @param diffPos 仓位变化量
+ * @details 当收到仓位变化通知时，更新目标仓位和差量仓位，
+ *          并通知相应的执行单元进行处理
+ */
 void WtDiffExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, true);
@@ -396,6 +544,13 @@ void WtDiffExecuter::on_position_changed(const char* stdCode, double diffPos)
 	}
 }
 
+/**
+ * @brief 设置一组目标仓位
+ * 
+ * @param targets 目标仓位映射表，键为合约代码，值为目标仓位量
+ * @details 批量设置目标仓位，并计算差量。如果原目标仓位中的合约不在新的目标中，
+ *          则自动将其设置为0。最后保存数据到文件。
+ */
 void WtDiffExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	for (auto it = targets.begin(); it != targets.end(); it++)
