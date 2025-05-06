@@ -1,11 +1,12 @@
-﻿/*!
+/*!
  * \file WtExecuter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  *
- * \brief
+ * \brief 本地执行器实现文件
+ * \details 实现了本地执行器类，用于处理交易指令的执行、仓位管理和交易回报等
  */
 #include "WtLocalExecuter.h"
 #include "TraderAdapter.h"
@@ -22,6 +23,13 @@
 USING_NS_WTP;
 
 
+/**
+ * @brief 构造函数
+ * @param factory 执行器工厂指针
+ * @param name 执行器名称
+ * @param dataMgr 数据管理器指针
+ * @details 初始化执行器的基本参数，包括名称、工厂、数据管理器等
+ */
 WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr)
 	: IExecCommand(name)
 	, _factory(factory)
