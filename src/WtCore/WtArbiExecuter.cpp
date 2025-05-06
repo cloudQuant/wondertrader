@@ -1,11 +1,12 @@
-﻿/*!
- * \file WtExecuter.cpp
+/*!
+ * \file WtArbiExecuter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  *
- * \brief
+ * \brief 套利交易执行器实现
+ * \details 该文件实现了套利交易执行器，用于执行多个相关合约的组合交易策略
  */
 #include "WtArbiExecuter.h"
 #include "TraderAdapter.h"
@@ -22,6 +23,13 @@
 USING_NS_WTP;
 
 
+/*!
+ * \brief 构造函数
+ * \details 初始化套利交易执行器对象，设置基本参数和初始状态
+ * \param factory 执行器工厂指针，用于创建执行单元
+ * \param name 执行器名称
+ * \param dataMgr 数据管理器指针，用于获取市场数据
+ */
 WtArbiExecuter::WtArbiExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr)
 	: IExecCommand(name)
 	, _factory(factory)
@@ -34,12 +42,21 @@ WtArbiExecuter::WtArbiExecuter(WtExecuterFactory* factory, const char* name, IDa
 }
 
 
+/*!
+ * \brief 析构函数
+ * \details 清理套利交易执行器资源，等待线程池中的任务完成
+ */
 WtArbiExecuter::~WtArbiExecuter()
 {
 	if (_pool)
 		_pool->wait();
 }
 
+/*!
+ * \brief 设置交易适配器
+ * \details 设置交易适配器并读取其当前状态以更新通道就绪状态
+ * \param adapter 交易适配器指针
+ */
 void WtArbiExecuter::setTrader(TraderAdapter* adapter)
 {
 	_trader = adapter;
@@ -48,6 +65,12 @@ void WtArbiExecuter::setTrader(TraderAdapter* adapter)
 		_channel_ready = _trader->isReady();
 }
 
+/*!
+ * \brief 初始化执行器
+ * \details 根据传入的参数配置初始化套利执行器，设置缩放倍数、自动清理策略、线程池和合约组
+ * \param params 初始化参数，包含执行器的各种配置
+ * \return 是否初始化成功
+ */
 bool WtArbiExecuter::init(WTSVariant* params)
 {
 	if (params == NULL)
@@ -130,6 +153,13 @@ bool WtArbiExecuter::init(WTSVariant* params)
 	return true;
 }
 
+/*! 
+ * \brief 获取执行单元
+ * \details 根据标准合约代码获取执行单元，如果单元不存在且允许自动创建，则创建新的执行单元
+ * \param stdCode 标准合约代码
+ * \param bAutoCreate 是否自动创建，默认为true
+ * \return 执行单元指针
+ */
 ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
@@ -175,6 +205,15 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 //////////////////////////////////////////////////////////////////////////
 //ExecuteContext
 #pragma region Context回调接口
+
+/*! 
+ * \brief 获取Tick切片数据
+ * \details 从数据管理器获取指定合约的Tick切片数据
+ * \param stdCode 标准合约代码
+ * \param count 请求的Tick数量
+ * \param etime 结束时间，默认为0表示当前
+ * \return Tick切片数据指针
+ */
 WTSTickSlice* WtArbiExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (_data_mgr == NULL)
@@ -183,6 +222,12 @@ WTSTickSlice* WtArbiExecuter::getTicks(const char* stdCode, uint32_t count, uint
 	return _data_mgr->get_tick_slice(stdCode, count);
 }
 
+/*! 
+ * \brief 获取最新Tick数据
+ * \details 从数据管理器中获取指定合约的最新Tick数据
+ * \param stdCode 标准合约代码
+ * \return 最新Tick数据指针
+ */
 WTSTickData* WtArbiExecuter::grabLastTick(const char* stdCode)
 {
 	if (_data_mgr == NULL)
@@ -191,6 +236,14 @@ WTSTickData* WtArbiExecuter::grabLastTick(const char* stdCode)
 	return _data_mgr->grab_last_tick(stdCode);
 }
 
+/*! 
+ * \brief 获取持仓量
+ * \details 从交易适配器中获取指定合约的持仓量
+ * \param stdCode 标准合约代码
+ * \param validOnly 是否只计算有效仓位，默认为true
+ * \param flag 仓位标记，默认为3
+ * \return 持仓数量
+ */
 double WtArbiExecuter::getPosition(const char* stdCode, bool validOnly /* = true */, int32_t flag /* = 3 */)
 {
 	if (NULL == _trader)
@@ -199,6 +252,12 @@ double WtArbiExecuter::getPosition(const char* stdCode, bool validOnly /* = true
 	return _trader->getPosition(stdCode, validOnly, flag);
 }
 
+/*! 
+ * \brief 获取未完成数量
+ * \details 从交易适配器中获取指定合约的未完成委托数量
+ * \param stdCode 标准合约代码
+ * \return 未完成委托数量
+ */
 double WtArbiExecuter::getUndoneQty(const char* stdCode)
 {
 	if (NULL == _trader)
@@ -207,6 +266,12 @@ double WtArbiExecuter::getUndoneQty(const char* stdCode)
 	return _trader->getUndoneQty(stdCode);
 }
 
+/*! 
+ * \brief 获取委托映射
+ * \details 从交易适配器中获取指定合约的委托映射
+ * \param stdCode 标准合约代码
+ * \return 委托映射指针
+ */
 OrderMap* WtArbiExecuter::getOrders(const char* stdCode)
 {
 	if (NULL == _trader)
@@ -215,6 +280,15 @@ OrderMap* WtArbiExecuter::getOrders(const char* stdCode)
 	return _trader->getOrders(stdCode);
 }
 
+/*!
+ * \brief 买入委托
+ * \details 发出买入委托，需要交易通道就绪
+ * \param stdCode 标准合约代码
+ * \param price 委托价格
+ * \param qty 委托数量
+ * \param bForceClose 是否强制平仓，默认为false
+ * \return 委托ID列表
+ */
 OrderIDs WtArbiExecuter::buy(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
 	if (!_channel_ready)
@@ -223,6 +297,15 @@ OrderIDs WtArbiExecuter::buy(const char* stdCode, double price, double qty, bool
 	return _trader->buy(stdCode, price, qty, 0, bForceClose);
 }
 
+/*!
+ * \brief 卖出委托
+ * \details 发出卖出委托，需要交易通道就绪
+ * \param stdCode 标准合约代码
+ * \param price 委托价格
+ * \param qty 委托数量
+ * \param bForceClose 是否强制平仓，默认为false
+ * \return 委托ID列表
+ */
 OrderIDs WtArbiExecuter::sell(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
 	if (!_channel_ready)
@@ -231,6 +314,12 @@ OrderIDs WtArbiExecuter::sell(const char* stdCode, double price, double qty, boo
 	return _trader->sell(stdCode, price, qty, 0, bForceClose);
 }
 
+/*!
+ * \brief 撤销委托
+ * \details 根据委托ID撤销指定委托，需要交易通道就绪
+ * \param localid 本地委托ID
+ * \return 是否撤销成功
+ */
 bool WtArbiExecuter::cancel(uint32_t localid)
 {
 	if (!_channel_ready)
@@ -239,6 +328,14 @@ bool WtArbiExecuter::cancel(uint32_t localid)
 	return _trader->cancel(localid);
 }
 
+/*!
+ * \brief 撤销委托
+ * \details 根据合约代码、方向和数量撤销委托，需要交易通道就绪
+ * \param stdCode 标准合约代码
+ * \param isBuy 是否买入方向
+ * \param qty 要撤销的数量
+ * \return 撤销的委托ID列表
+ */
 OrderIDs WtArbiExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 {
 	if (!_channel_ready)
@@ -247,6 +344,11 @@ OrderIDs WtArbiExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 	return _trader->cancel(stdCode, isBuy, qty);
 }
 
+/*!
+ * \brief 输出日志
+ * \details 输出日志信息，并添加执行器名称前缀
+ * \param message 日志消息
+ */
 void WtArbiExecuter::writeLog(const char* message)
 {
 	static thread_local char szBuf[2048] = { 0 };
@@ -255,16 +357,33 @@ void WtArbiExecuter::writeLog(const char* message)
 	WTSLogger::log_dyn_raw("executer", _name.c_str(), LL_INFO, szBuf);
 }
 
+/*!
+ * \brief 获取商品信息
+ * \details 从执行器绑定的执行核心中获取商品信息
+ * \param stdCode 标准合约代码
+ * \return 商品信息指针
+ */
 WTSCommodityInfo* WtArbiExecuter::getCommodityInfo(const char* stdCode)
 {
 	return _stub->get_comm_info(stdCode);
 }
 
+/*!
+ * \brief 获取交易时段信息
+ * \details 从执行器绑定的执行核心中获取交易时段信息
+ * \param stdCode 标准合约代码
+ * \return 交易时段信息指针
+ */
 WTSSessionInfo* WtArbiExecuter::getSessionInfo(const char* stdCode)
 {
 	return _stub->get_sess_info(stdCode);
 }
 
+/*!
+ * \brief 获取当前时间
+ * \details 从执行器绑定的执行核心中获取当前时间
+ * \return 当前时间戳
+ */
 uint64_t WtArbiExecuter::getCurTime()
 {
 	return _stub->get_real_time();
@@ -277,32 +396,11 @@ uint64_t WtArbiExecuter::getCurTime()
 
 
 #pragma region 外部接口
-void WtArbiExecuter::on_position_changed(const char* stdCode, double diffPos)
-{
-	ExecuteUnitPtr unit = getUnit(stdCode);
-	if (unit == NULL)
-		return;
-
-	double oldVol = _target_pos[stdCode];
-	double newVol = oldVol + diffPos;
-	_target_pos[stdCode] = newVol;
-
-	double traderTarget = round(newVol * _scale);
-
-	if(!decimal::eq(diffPos, 0))
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
-	}
-
-	if (_trader && !_trader->checkOrderLimits(stdCode))
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
-		return;
-	}
-
-	unit->self()->set_position(stdCode, traderTarget);
-}
-
+/*!
+ * \brief 设置目标仓位
+ * \details 根据传入的目标仓位映射表设置合约的目标仓位，并自动处理交易逻辑
+ * \param targets 目标仓位映射表，键为标准合约代码，值为目标仓位
+ */
 void WtArbiExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	/*
@@ -441,6 +539,12 @@ void WtArbiExecuter::set_position(const wt_hashmap<std::string, double>& targets
 	}
 }
 
+/*!
+ * \brief 处理实时行情
+ * \details 接收并处理实时行情数据，将行情转发给相应执行单元
+ * \param stdCode 标准合约代码
+ * \param newTick 最新的行情数据
+ */
 void WtArbiExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -462,6 +566,52 @@ void WtArbiExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
+/*!
+ * \brief 处理仓位变更
+ * \details 接收仓位变更通知，并更新内部仓位缓存
+ *          如果合约已存在于仓位缓存中，则将差值叠加到现有仓位
+ *          如果合约不存在于仓位缓存中，则创建新的仓位记录
+ *          最后记录日志，输出最新的仓位信息
+ * \param stdCode 标准合约代码
+ * \param diffPos 仓位变化量
+ */
+void WtArbiExecuter::on_position_changed(const char* stdCode, double diffPos)
+{
+	ExecuteUnitPtr unit = getUnit(stdCode);
+	if (unit == NULL)
+		return;
+
+	double oldVol = _target_pos[stdCode];
+	double newVol = oldVol + diffPos;
+	_target_pos[stdCode] = newVol;
+
+	double traderTarget = round(newVol * _scale);
+
+	if(!decimal::eq(diffPos, 0))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
+	}
+
+	if (_trader && !_trader->checkOrderLimits(stdCode))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
+		return;
+	}
+
+	unit->self()->set_position(stdCode, traderTarget);
+}
+
+/*!
+ * \brief 处理成交回报
+ * \details 接收并处理成交回报，将成交信息转发给相应的执行单元
+ *          如果启用了线程池，则在独立线程中异步处理成交信息
+ *          否则在当前线程中同步处理
+ * \param localid 本地委托ID
+ * \param stdCode 标准合约代码
+ * \param isBuy 是否买入方向
+ * \param vol 成交数量
+ * \param price 成交价格
+ */
 void WtArbiExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -482,6 +632,19 @@ void WtArbiExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
 	}
 }
 
+/*!
+ * \brief 处理委托回报
+ * \details 接收并处理委托回报，将委托信息转发给相应的执行单元
+ *          如果启用了线程池，则在独立线程中异步处理委托信息
+ *          否则在当前线程中同步处理
+ * \param localid 本地委托ID
+ * \param stdCode 标准合约代码
+ * \param isBuy 是否买入方向
+ * \param totalQty 总委托数量
+ * \param leftQty 剩余委托数量
+ * \param price 委托价格
+ * \param isCanceled 是否已撤销，默认为false
+ */
 void WtArbiExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -502,6 +665,17 @@ void WtArbiExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy,
 	}
 }
 
+/*!
+ * \brief 处理委托下达回报
+ * \details 接收并处理委托下达回报，将委托下达结果转发给相应的执行单元
+ *          委托下达回报包含委托是否成功下达以及相关消息
+ *          如果启用了线程池，则在独立线程中异步处理
+ *          否则在当前线程中同步处理
+ * \param localid 本地委托ID
+ * \param stdCode 标准合约代码
+ * \param bSuccess 委托是否成功下达
+ * \param message 相关消息，如错误原因
+ */
 void WtArbiExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -523,6 +697,13 @@ void WtArbiExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 	}
 }
 
+/*!
+ * \brief 处理交易通道就绪事件
+ * \details 当交易通道就绪时，更新内部通道就绪状态并通知所有执行单元
+ *          通过循环遍历所有执行单元，将通道就绪事件转发给每一个执行单元
+ *          如果启用了线程池，则在独立线程中异步处理
+ *          否则在当前线程中同步处理
+ */
 void WtArbiExecuter::on_channel_ready()
 {
 	_channel_ready = true;
@@ -547,6 +728,13 @@ void WtArbiExecuter::on_channel_ready()
 	}
 }
 
+/*!
+ * \brief 处理交易通道丢失事件
+ * \details 当交易通道丢失时，更新内部通道状态并通知所有执行单元
+ *          通过循环遍历所有执行单元，将通道丢失事件转发给每一个执行单元
+ *          如果启用了线程池，则在独立线程中异步处理
+ *          否则在当前线程中同步处理
+ */
 void WtArbiExecuter::on_channel_lost()
 {
 	_channel_ready = false;
@@ -570,6 +758,24 @@ void WtArbiExecuter::on_channel_lost()
 	}
 }
 
+/*!
+ * \brief 处理账户资金更新
+ * \details 接收并处理账户资金更新通知，将资金信息转发给所有的执行单元
+ *          通过循环遍历所有执行单元，将账户资金信息转发给每一个执行单元
+ *          如果启用了线程池，则在独立线程中异步处理
+ *          否则在当前线程中同步处理
+ * \param currency 货币代码
+ * \param prebalance 前一交易日结算后的账户余额
+ * \param balance 当前结算后的账户余额
+ * \param dynbalance 动态权益（包含浮动盈亏）
+ * \param avaliable 可用资金
+ * \param closeprofit 平仓盈亏
+ * \param dynprofit 浮动盈亏
+ * \param margin 保证金
+ * \param fee 手续费
+ * \param deposit 入金
+ * \param withdraw 出金
+ */
 void WtArbiExecuter::on_account(const char* currency, double prebalance, double balance, double dynbalance, 
 	double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
 {
@@ -594,6 +800,24 @@ void WtArbiExecuter::on_account(const char* currency, double prebalance, double 
 	}
 }
 
+/*!
+ * \brief 处理持仓更新通知
+ * \details 接收交易账户持仓更新通知，处理两个主要功能：
+ *          1. 记录交易通道持有的合约到集合中，用于后续严格同步功能
+ *          2. 实现过期主力合约自动清理功能：
+ *             - 首先检查是否启用了自动清理功能
+ *             - 然后判断是否为分月期货合约
+ *             - 确认当前合约是否为上一期的主力合约
+ *             - 考虑排除列表和包含列表的设置
+ *             - 最后执行自动清理操作
+ * \param stdCode 标准合约代码
+ * \param isLong 是否为多头持仓
+ * \param prevol 之前的持仓量
+ * \param preavail 之前的可用持仓量
+ * \param newvol 新的持仓量
+ * \param newavail 新的可用持仓量
+ * \param tradingday 交易日
+ */
 void WtArbiExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
 {
 	_channel_holds.insert(stdCode);
