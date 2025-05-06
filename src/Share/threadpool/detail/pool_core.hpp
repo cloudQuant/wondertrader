@@ -1,17 +1,17 @@
-/*! \file
-* \brief Thread pool core.
+/*! \file pool_core.hpp
+* \brief 线程池核心实现
 *
-* This file contains the threadpool's core class: pool<Task, SchedulingPolicy>.
+* \details 本文件包含线程池的核心类：pool_core<Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy>。
 *
-* Thread pools are a mechanism for asynchronous and parallel processing 
-* within the same process. The pool class provides a convenient way 
-* for dispatching asynchronous tasks as functions objects. The scheduling
-* of these tasks can be easily controlled by using customized schedulers. 
+* 线程池是一种在同一进程内进行异步和并行处理的机制。
+* pool_core 类提供了一种方便的方式来调度异步任务（以函数对象的形式）。
+* 这些任务的调度可以通过使用自定义的调度器轻松控制。
+* 该类是线程池实现的基础，提供了任务管理、线程管理和调度策略。
 *
 * Copyright (c) 2005-2007 Philipp Henkel
 *
-* Use, modification, and distribution are  subject to the
-* Boost Software License, Version 1.0. (See accompanying  file
+* Use, modification, and distribution are subject to the
+* Boost Software License, Version 1.0. (See accompanying file
 * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 *
 * http://threadpool.sourceforge.net
@@ -42,28 +42,37 @@
 #include <vector>
 
 
-/// The namespace threadpool contains a thread pool and related utility classes.
+/**
+ * @brief threadpool 命名空间包含了线程池及相关的实用工具类
+ * @details detail 子命名空间包含线程池库的内部实现细节，这些组件
+ *          通常不由用户直接使用，而是由高级接口调用
+ */
 namespace boost { namespace threadpool { namespace detail 
 {
 
-  /*! \brief Thread pool. 
-  *
-  * Thread pools are a mechanism for asynchronous and parallel processing 
-  * within the same process. The pool class provides a convenient way 
-  * for dispatching asynchronous tasks as functions objects. The scheduling
-  * of these tasks can be easily controlled by using customized schedulers. 
-  * A task must not throw an exception.
-  *
-  * A pool_impl is DefaultConstructible and NonCopyable.
-  *
-  * \param Task A function object which implements the operator 'void operator() (void) const'. The operator () is called by the pool to execute the task. Exceptions are ignored.
-  * \param Scheduler A task container which determines how tasks are scheduled. It is guaranteed that this container is accessed only by one thread at a time. The scheduler shall not throw exceptions.
-  *
-  * \remarks The pool class is thread-safe.
-  * 
-  * \see Tasks: task_func, prio_task_func
-  * \see Scheduling policies: fifo_scheduler, lifo_scheduler, prio_scheduler
-  */ 
+  /**
+   * @brief 线程池核心实现类
+   * 
+   * @details 线程池是一种在同一进程内进行异步和并行处理的机制。
+   * pool_core 类提供了一种方便的方式来调度异步任务（以函数对象的形式）。
+   * 这些任务的调度可以通过使用自定义的调度器轻松控制。
+   * 任务执行时不应抛出异常。
+   *
+   * pool_core 类可以默认构造，但不可复制。
+   *
+   * @tparam Task 任务函数对象类型，实现了 'void operator() (void) const' 操作符。
+   *               该操作符由线程池调用来执行任务。异常将被忽略。
+   * @tparam SchedulingPolicy 任务调度策略，决定任务如何调度。
+   *                          保证同一时间只有一个线程访问该容器。调度器不应抛出异常。
+   * @tparam SizePolicy 线程数量策略，控制线程池中线程的数量
+   * @tparam SizePolicyController 线程数量控制器，管理线程池大小的调整
+   * @tparam ShutdownPolicy 关闭策略，定义线程池关闭时的行为
+   * 
+   * @note 线程池类是线程安全的。
+   * 
+   * @see 任务类型: task_func, prio_task_func
+   * @see 调度策略: fifo_scheduler, lifo_scheduler, prio_scheduler
+   */
   template <
     typename Task, 
 
@@ -78,27 +87,56 @@ namespace boost { namespace threadpool { namespace detail
   {
 
   public: // Type definitions
+    /**
+     * @brief 任务类型
+     * @details 指定线程池处理的任务函数对象类型
+     */
     typedef Task task_type;                                 //!< Indicates the task's type.
+    /**
+     * @brief 调度器类型
+     * @details 指定用于任务调度的策略类型
+     */
     typedef SchedulingPolicy<task_type> scheduler_type;     //!< Indicates the scheduler's type.
+    /**
+     * @brief 线程池类型
+     * @details 指定当前线程池类型，用于内部类型定义和引用
+     */
     typedef pool_core<Task, 
                       SchedulingPolicy, 
                       SizePolicy,
                       SizePolicyController,
                       ShutdownPolicy > pool_type;           //!< Indicates the thread pool's type.
+    /**
+     * @brief 大小策略类型
+     * @details 指定控制线程池大小的策略类型
+     */
     typedef SizePolicy<pool_type> size_policy_type;         //!< Indicates the sizer's type.
-    //typedef typename size_policy_type::size_controller size_controller_type;
-
+    /**
+     * @brief 大小控制器类型
+     * @details 指定用于操作线程池大小的控制器类型
+     */
     typedef SizePolicyController<pool_type> size_controller_type;
-
-//    typedef SizePolicy<pool_type>::size_controller size_controller_type;
+    /**
+     * @brief 关闭策略类型
+     * @details 指定线程池关闭时的行为策略
+     */
     typedef ShutdownPolicy<pool_type> shutdown_policy_type;//!< Indicates the shutdown policy's type.  
-
+    /**
+     * @brief 工作线程类型
+     * @details 指定线程池中工作线程的类型
+     */
     typedef worker_thread<pool_type> worker_type;
 
-    // The task is required to be a nullary function.
+    /**
+     * @brief 静态断言：确保任务是无参数函数
+     * @details 检查任务函数类型的参数数量必须为 0，即无参数函数
+     */
     BOOST_STATIC_ASSERT(function_traits<task_type()>::arity == 0);
 
-    // The task function's result type is required to be void.
+    /**
+     * @brief 静态断言：确保任务函数的返回类型为 void
+     * @details 检查任务函数的返回值类型必须为 void，因为线程池不处理返回值
+     */
     BOOST_STATIC_ASSERT(is_void<typename result_of<task_type()>::type >::value);
 
 
@@ -114,26 +152,76 @@ namespace boost { namespace threadpool { namespace detail
 #endif
 
   private: // The following members may be accessed by _multiple_ threads at the same time:
-    volatile size_t m_worker_count;	
-    volatile size_t m_target_worker_count;	
+    /**
+     * @brief 当前工作线程数量
+     * @details 记录线程池中当前工作线程的总数，可被多个线程同时访问
+     */
+    volatile size_t m_worker_count;
+    
+    /**
+     * @brief 目标工作线程数量
+     * @details 线程池要维持的目标线程数量，用于动态调整线程池大小
+     */
+    volatile size_t m_target_worker_count;
+    
+    /**
+     * @brief 活动的工作线程数量
+     * @details 当前正在执行任务的工作线程数量
+     */
     volatile size_t m_active_worker_count;
       
 
 
   private: // The following members are accessed only by _one_ thread at the same time:
+    /**
+     * @brief 任务调度器
+     * @details 负责任务的存储和调度，根据策略决定任务执行的顺序
+     */
     scheduler_type  m_scheduler;
-    scoped_ptr<size_policy_type> m_size_policy; // is never null
     
-    bool  m_terminate_all_workers;								// Indicates if termination of all workers was triggered.
-    std::vector<shared_ptr<worker_type> > m_terminated_workers; // List of workers which are terminated but not fully destructed.
+    /**
+     * @brief 线程池大小策略
+     * @details 控制线程池大小策略的智能指针，保证不为空，负责线程的自动扩容和缩小
+     */
+    scoped_ptr<size_policy_type> m_size_policy;
+    
+    /**
+     * @brief 终止所有工作线程标志
+     * @details 指示是否触发了所有工作线程的终止操作
+     */
+    bool  m_terminate_all_workers;
+    
+    /**
+     * @brief 已终止的工作线程列表
+     * @details 存储已经终止但尚未完全析构的工作线程
+     */
+    std::vector<shared_ptr<worker_type> > m_terminated_workers;
     
   private: // The following members are implemented thread-safe:
+    /**
+     * @brief 递归互斥锁
+     * @details 用于保护方法访问共享数据，支持同一线程多次锁定
+     */
     mutable recursive_mutex  m_monitor;
-    mutable condition m_worker_idle_or_terminated_event;	// A worker is idle or was terminated.
-    mutable condition m_task_or_terminate_workers_event;  // Task is available OR total worker count should be reduced.
+    
+    /**
+     * @brief 工作线程空闲或终止事件
+     * @details 当工作线程变为空闲状态或被终止时触发的条件变量
+     */
+    mutable condition m_worker_idle_or_terminated_event;
+    
+    /**
+     * @brief 任务可用或终止线程事件
+     * @details 当有新任务可用或需要减少工作线程总数时触发的条件变量
+     */
+    mutable condition m_task_or_terminate_workers_event;
 
   public:
-    /// Constructor.
+    /**
+     * @brief 构造函数
+     * @details 初始化线程池核心对象，设置线程计数器和终止标志
+     *          初始状态下线程池不包含任何工作线程，需要调用resize方法增加线程
+     */
     pool_core()
       : m_worker_count(0) 
       , m_target_worker_count(0)
@@ -147,38 +235,56 @@ namespace boost { namespace threadpool { namespace detail
     }
 
 
-    /// Destructor.
+    /**
+     * @brief 析构函数
+     * @details 释放线程池相关资源
+     *          注意：根据 RAII 原则，智能指针成员和容器会自动清理
+     */
     ~pool_core()
     {
     }
 
-    /*! Gets the size controller which manages the number of threads in the pool. 
-    * \return The size controller.
-    * \see SizePolicy
-    */
+    /**
+     * @brief 获取线程池大小控制器
+     * @details 返回用于管理线程池中线程数量的大小控制器对象
+     *          通过该控制器可以动态调整线程池大小
+     * @return 大小控制器对象
+     * @see SizePolicy
+     */
     size_controller_type size_controller()
     {
       return size_controller_type(*m_size_policy, this->shared_from_this());
     }
 
-    /*! Gets the number of threads in the pool.
-    * \return The number of threads.
-    */
+    /**
+     * @brief 获取线程池中线程的数量
+     * @details 返回当前线程池中存在的工作线程总数
+     *          这包括空闲和正在执行任务的线程
+     * @return 线程数量
+     */
     size_t size()	const volatile
     {
       return m_worker_count;
     }
 
-// TODO is only called once
+    /**
+     * @brief 关闭线程池
+     * @details 使用指定的关闭策略关闭线程池
+     *          根据关闭策略不同，可能等待所有任务完成、只等待活动任务或者立即关闭
+     * @note 该方法只会被调用一次
+     */
     void shutdown()
     {
       ShutdownPolicy<pool_type>::shutdown(*this);
     }
 
-    /*! Schedules a task for asynchronous execution. The task will be executed once only.
-    * \param task The task function object. It should not throw execeptions.
-    * \return true, if the task could be scheduled and false otherwise. 
-    */  
+    /**
+     * @brief 调度任务进行异步执行
+     * @details 将任务添加到线程池的任务队列中进行异步执行
+     *          任务将仅执行一次。调度后，通知一个空闲的工作线程来执行此任务
+     * @param task 要执行的任务函数对象，不应抛出异常
+     * @return 如果任务成功调度返回 true，否则返回 false
+     */  
     bool schedule(task_type const & task) volatile
     {	
       locking_ptr<pool_type, recursive_mutex> lockedThis(*this, m_monitor); 
@@ -195,18 +301,24 @@ namespace boost { namespace threadpool { namespace detail
     }	
 
 
-    /*! Returns the number of tasks which are currently executed.
-    * \return The number of active tasks. 
-    */  
+    /**
+     * @brief 返回当前正在执行的任务数量
+     * @details 获取当前线程池中正在执行任务的工作线程数量
+     *          此值表示线程池的当前负载情况
+     * @return 活动任务数量
+     */  
     size_t active() const volatile
     {
       return m_active_worker_count;
     }
 
 
-    /*! Returns the number of tasks which are ready for execution.    
-    * \return The number of pending tasks. 
-    */  
+    /**
+     * @brief 返回待执行的任务数量
+     * @details 获取已添加到调度器中但尚未开始执行的任务数量
+     *          这些任务正在等待可用的工作线程来执行它们
+     * @return 待执行的任务数量
+     */  
     size_t pending() const volatile
     {
       locking_ptr<const pool_type, recursive_mutex> lockedThis(*this, m_monitor);
@@ -214,8 +326,11 @@ namespace boost { namespace threadpool { namespace detail
     }
 
 
-    /*! Removes all pending tasks from the pool's scheduler.
-    */  
+    /**
+     * @brief 清除所有待处理的任务
+     * @details 从线程池的调度器中移除所有尚未开始执行的任务
+     *          注意：已经开始执行的任务不会被中断
+     */  
     void clear() volatile
     { 
       locking_ptr<pool_type, recursive_mutex> lockedThis(*this, m_monitor);
@@ -223,10 +338,12 @@ namespace boost { namespace threadpool { namespace detail
     }    
 
 
-    /*! Indicates that there are no tasks pending. 
-    * \return true if there are no tasks ready for execution.	
-    * \remarks This function is more efficient that the check 'pending() == 0'.
-    */   
+    /**
+     * @brief 检查是否没有待处理的任务
+     * @details 判断调度器中是否没有任务等待执行
+     *          这个函数比检查 'pending() == 0' 更高效，因为它不需要获取实际数量
+     * @return 如果没有任务等待执行则返回 true
+     */   
     bool empty() const volatile
     {
       locking_ptr<const pool_type, recursive_mutex> lockedThis(*this, m_monitor);
@@ -234,10 +351,12 @@ namespace boost { namespace threadpool { namespace detail
     }	
 
 
-    /*! The current thread of execution is blocked until the sum of all active
-    *  and pending tasks is equal or less than a given threshold. 
-    * \param task_threshold The maximum number of tasks in pool and scheduler.
-    */     
+    /**
+     * @brief 等待任务数量降低到指定阈值
+     * @details 阻塞当前执行线程，直到所有活动任务和待处理任务的总和小于或等于给定的阈值
+     *          当阈值为 0 时，表示等待所有任务完成
+     * @param task_threshold 任务数量阈值，默认为 0（等待所有任务完成）
+     */     
     void wait(size_t const task_threshold = 0) const volatile
     {
       const pool_type* self = const_cast<const pool_type*>(this);
@@ -259,13 +378,14 @@ namespace boost { namespace threadpool { namespace detail
       }
     }	
 
-    /*! The current thread of execution is blocked until the timestamp is met
-    * or the sum of all active and pending tasks is equal or less 
-    * than a given threshold.  
-    * \param timestamp The time when function returns at the latest.
-    * \param task_threshold The maximum number of tasks in pool and scheduler.
-    * \return true if the task sum is equal or less than the threshold, false otherwise.
-    */       
+    /**
+     * @brief 带超时的任务等待
+     * @details 阻塞当前执行线程，直到达到指定的时间戳或所有活动任务和待处理任务的总和
+     *          小于或等于给定的阈值。该方法提供了超时机制，避免无限期等待
+     * @param timestamp 最迟返回的时间戳
+     * @param task_threshold 任务数量阈值，默认为 0（等待所有任务完成）
+     * @return 如果任务总和小于或等于阈值返回 true，如果超时返回 false
+     */       
     bool wait(xtime const & timestamp, size_t const task_threshold = 0) const volatile
     {
       const pool_type* self = const_cast<const pool_type*>(this);
@@ -292,7 +412,14 @@ namespace boost { namespace threadpool { namespace detail
 
   private:	
 
-
+    /**
+     * @brief 终止所有工作线程
+     * @details 触发所有工作线程的终止过程。将目标线程数量设置为 0，
+     *          并发送信号通知所有工作线程考虑终止
+     * @param wait 是否等待所有线程终止完成
+     *              当为 true 时，方法会阻塞直到所有工作线程终止
+     *              当为 false 时，只发送终止信号然后立即返回
+     */
     void terminate_all_workers(bool const wait) volatile
     {
       pool_type* self = const_cast<pool_type*>(this);
@@ -321,11 +448,14 @@ namespace boost { namespace threadpool { namespace detail
     }
 
 
-    /*! Changes the number of worker threads in the pool. The resizing 
-    *  is handled by the SizePolicy.
-    * \param threads The new number of worker threads.
-    * \return true, if pool will be resized and false if not. 
-    */
+    /**
+     * @brief 改变线程池中工作线程的数量
+     * @details 根据指定的目标线程数量调整线程池大小
+     *          如果目标线程数量大于当前数量，则创建新线程
+     *          如果目标线程数量小于当前数量，则通知工作线程终止
+     * @param worker_count 新的工作线程数量
+     * @return 如果线程池将被调整大小返回 true，否则返回 false
+     */
     bool resize(size_t const worker_count) volatile
     {
       locking_ptr<pool_type, recursive_mutex> lockedThis(*this, m_monitor); 
@@ -365,7 +495,13 @@ namespace boost { namespace threadpool { namespace detail
     }
 
 
-    // worker died with unhandled exception
+    /**
+     * @brief 处理工作线程意外终止的情况
+     * @details 当工作线程由于未处理的异常而意外终止时调用此方法
+     *          更新工作线程计数并通知等待线程
+     *          根据线程池状态决定是将线程添加到终止列表还是通知大小策略
+     * @param worker 意外终止的工作线程指针
+     */
     void worker_died_unexpectedly(shared_ptr<worker_type> worker) volatile
     {
       locking_ptr<pool_type, recursive_mutex> lockedThis(*this, m_monitor);
@@ -384,6 +520,13 @@ namespace boost { namespace threadpool { namespace detail
       }
     }
 
+    /**
+     * @brief 处理工作线程正常析构
+     * @details 当工作线程正常终止并被析构时调用此方法
+     *          更新工作线程计数并通知等待线程
+     *          如果线程池处于终止状态，将线程添加到终止列表中
+     * @param worker 被析构的工作线程指针
+     */
     void worker_destructed(shared_ptr<worker_type> worker) volatile
     {
       locking_ptr<pool_type, recursive_mutex> lockedThis(*this, m_monitor);
@@ -398,6 +541,13 @@ namespace boost { namespace threadpool { namespace detail
     }
 
 
+    /**
+     * @brief 执行任务
+     * @details 从调度器中获取一个任务并执行它
+     *          该方法会根据当前线程池状态决定是执行任务还是终止工作线程
+     *          当没有任务时，工作线程会进入等待状态，直到有新的任务或需要终止
+     * @return 如果工作线程应该继续工作返回 true，如果工作线程应该终止返回 false
+     */
     bool execute_task() volatile
     {
       function0<void> task;
