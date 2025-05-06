@@ -319,20 +319,11 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 		// 发送到消息队列，主题为"TRD_ORDER"
 		if (_publisher)
 			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (unsigned long)data.size());
-		// 释放订单信息对象
-		ordInfo->release();
 	});
+
+	
 }
 
-/**
- * @brief 将成交信息转换为JSON格式
- * @details 根据成交信息对象的各个字段构造JSON对象
- * @param trader 交易者标识
- * @param localid 本地订单ID
- * @param stdCode 标准合约代码
- * @param trdInfo 成交信息对象
- * @param output 输出的JSON字符串
- */
 void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output)
 {
 	// 检查成交信息是否为空
@@ -354,7 +345,7 @@ void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char
 
 		// 添加交易者和基本信息
 		root.AddMember("trader", rj::Value(trader, allocator), allocator);
-		root.AddMember("time", (uint64_t)trdInfo->getTradeTime(), allocator);
+		root.AddMember("time", TimeUtils::getLocalTimeNow(), allocator);
 		root.AddMember("localid", localid, allocator);
 		root.AddMember("code", rj::Value(stdCode, allocator), allocator);
 		root.AddMember("islong", isLong, allocator);
