@@ -1,4 +1,15 @@
-﻿#include "IndexWorker.h"
+/*!
+ * \file IndexWorker.cpp
+ * \project	WonderTrader
+ *
+ * \author Wesley
+ * \date 2020/03/30
+ * 
+ * \brief 指数计算器实现
+ * \details 该文件实现了指数计算器IndexWorker类，负责单个指数的具体计算逻辑，
+ *          包括成分合约管理、权重计算以及指数实时生成
+ */
+#include "IndexWorker.h"
 #include "IndexFactory.h"
 
 #include "../Includes/IBaseDataMgr.h"
@@ -19,6 +30,13 @@ const char* WEIGHT_ALGS[] =
 	"DynamicVolume"
 };
 
+/**
+ * @brief 初始化指数计算器
+ * @details 根据配置初始化指数计算器，设置指数代码、触发机制、计算参数等
+ *          并订阅指数成分合约的实时行情数据
+ * @param config 指数配置对象，包含所有必要的配置项
+ * @return bool 初始化是否成功
+ */
 bool IndexWorker::init(WTSVariant* config)
 {
 	if (config == NULL)
@@ -176,6 +194,13 @@ bool IndexWorker::init(WTSVariant* config)
 	return true;
 }
 
+/**
+ * @brief 处理实时行情数据
+ * @details 接收并处理成分合约的新Tick数据，更新权重因子中的行情数据
+ *          并根据触发条件决定是否重新计算指数
+ *          如果是触发合约或者时间触发方式，则触发指数计算
+ * @param newTick 新的Tick数据指针
+ */
 void IndexWorker::handle_quote(WTSTickData* newTick)
 {
 	const char* fullCode = newTick->getContractInfo()->getFullCode();
@@ -239,6 +264,13 @@ void IndexWorker::handle_quote(WTSTickData* newTick)
 	}
 }
 
+/**
+ * @brief 生成指数Tick数据
+ * @details 根据各成分合约的实时数据和权重计算指数值
+ *          生成指数的Tick数据，并通过指数工厂推送这些数据
+ *          支持三种权重计算算法：固定权重、动态总持、动态成交量
+ *          并对生成的指数做标准化处理
+ */
 void IndexWorker::generate_tick()
 {
 	//然后开始计算指数
