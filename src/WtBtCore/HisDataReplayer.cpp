@@ -2335,6 +2335,21 @@ void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTD
 		_listener->handle_schedule(uDate, uTime);
 }
 
+/*!*
+ * @brief 获取K线切片数据
+ * @param stdCode 标准合约代码
+ * @param period 周期标识符
+ * @param count 请求的数据条数
+ * @param times 周期倍数，默认为1
+ * @param isMain 是否为主图指标，默认为false
+ * @return WTSKlineSlice* K线切片数据对象指针
+ * 
+ * @details 该方法获取指定合约、指定周期和指定数量的K线数据。
+ *          如果isMain为true，则该数据作为主图数据使用。
+ *          方法首先尝试从缓存中获取数据，如果缓存中不存在，则从原始CSV文件或数据加载器中加载。
+ *          对于股票数据，还会处理除权因子进行复权。
+ *          返回的切片数据是根据当前回测时间截取的历史数据。
+ */
 WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, bool isMain /* = false */)
 {
 	thread_local static char key[64] = { 0 };
@@ -2643,6 +2658,18 @@ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char*
 	return kline;
 }
 
+/*!*
+ * @brief 获取Tick数据切片
+ * @param stdCode 标准合约代码
+ * @param count 请求的数据条数
+ * @param etime 结束时间，如果为0则使用当前回测时间
+ * @return WTSTickSlice* Tick切片数据对象指针，如果没有数据则返回NULL
+ * 
+ * @details 该方法获取指定合约、指定数量和指定结束时间的Tick数据。
+ *          首先检查Tick模块是否启用，以及指定合约的Tick数据是否存在。
+ *          然后根据指定的时间和数量参数，从缓存中检索并返回适当的Tick数据切片。
+ *          返回的数据是将结束时间之前的count条数据构成的切片。
+ */
 WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime)
 {
 	if (!_tick_enabled)
@@ -2720,6 +2747,18 @@ WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t coun
 	return ticks;
 }
 
+/*!*
+ * @brief 获取委托明细数据切片
+ * @param stdCode 标准合约代码
+ * @param count 请求的数据条数
+ * @param etime 结束时间，格式为YYYYMMDDHHMMSS，默认为0表示使用当前回测时间
+ * @return WTSOrdDtlSlice* 委托明细数据切片对象指针，如果没有数据则返回NULL
+ * 
+ * @details 该方法获取指定合约、指定数量和指定结束时间的委托明细数据切片。
+ *          首先检查并加载当前交易日的委托明细数据。
+ *          然后根据指定的时间和数量参数，从缓存中检索并返回适当的数据切片。
+ *          返回的数据是将结束时间之前的count条数据构成的切片。
+ */
 WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (!checkOrderDetails(stdCode, _cur_tdate))
@@ -2768,6 +2807,18 @@ WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uin
 	return ticks;
 }
 
+/*!*
+ * @brief 获取委托队列数据切片
+ * @param stdCode 标准合约代码
+ * @param count 请求的数据条数
+ * @param etime 结束时间，格式为YYYYMMDDHHMMSS，默认为0表示使用当前回测时间
+ * @return WTSOrdQueSlice* 委托队列数据切片对象指针，如果没有数据则返回NULL
+ * 
+ * @details 该方法获取指定合约、指定数量和指定结束时间的委托队列数据切片。
+ *          首先检查并加载当前交易日的委托队列数据。
+ *          然后根据指定的时间和数量参数，从缓存中检索并返回适当的数据切片。
+ *          返回的数据是将结束时间之前的count条数据构成的切片。
+ */
 WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (!checkOrderQueues(stdCode, _cur_tdate))
@@ -2816,6 +2867,18 @@ WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint
 	return ticks;
 }
 
+/*!*
+ * @brief 获取成交数据切片
+ * @param stdCode 标准合约代码
+ * @param count 请求的数据条数
+ * @param etime 结束时间，格式为YYYYMMDDHHMMSS，默认为0表示使用当前回测时间
+ * @return WTSTransSlice* 成交数据切片对象指针，如果没有数据则返回NULL
+ * 
+ * @details 该方法获取指定合约、指定数量和指定结束时间的成交数据切片。
+ *          首先检查并加载当前交易日的成交数据。
+ *          然后根据指定的时间和数量参数，从缓存中检索并返回适当的数据切片。
+ *          返回的数据是将结束时间之前的count条数据构成的切片。
+ */
 WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	if (!checkTransactions(stdCode, _cur_tdate))
@@ -2864,6 +2927,15 @@ WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint3
 	return ticks;
 }
 
+/*!*
+ * @brief 检查所有已订阅合约的Tick数据
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否有至少一个合约的Tick数据可用
+ * 
+ * @details 该方法遍历所有已订阅的合约，检查并加载其在指定交易日的Tick数据。
+ *          只要有一个合约的数据加载成功，就返回true。
+ *          这个方法主要用于在回测开始前预加载所有需要的Tick数据。
+ */
 bool HisDataReplayer::checkAllTicks(uint32_t uDate)
 {
 	bool bHasTick = false;
@@ -2875,6 +2947,18 @@ bool HisDataReplayer::checkAllTicks(uint32_t uDate)
 	return bHasTick;
 }
 
+/*!*
+ * @brief 检查并加载委托明细数据
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法检查并加载指定合约在指定交易日的委托明细数据。
+ *          首先检查缓存中是否已存在该合约当日的委托明细数据，
+ *          如果不存在或日期不匹配，则尝试从数据源加载数据。
+ *          目前只支持从二进制文件加载委托明细数据，CSV模式不支持。
+ *          如果没有数据可用，则创建一个空的数据缓存并返回false。
+ */
 bool HisDataReplayer::checkOrderDetails(const char* stdCode, uint32_t uDate)
 {
 	bool bNeedCache = false;
@@ -2917,6 +3001,18 @@ bool HisDataReplayer::checkOrderDetails(const char* stdCode, uint32_t uDate)
 	return true;
 }
 
+/*!*
+ * @brief 检查并加载委托队列数据
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法检查并加载指定合约在指定交易日的委托队列数据。
+ *          首先检查缓存中是否已存在该合约当日的委托队列数据，
+ *          如果不存在或日期不匹配，则尝试从数据源加载数据。
+ *          目前只支持从二进制文件加载委托队列数据，CSV模式不支持。
+ *          如果没有数据可用，则创建一个空的数据缓存并返回false。
+ */
 bool HisDataReplayer::checkOrderQueues(const char* stdCode, uint32_t uDate)
 {
 	bool bNeedCache = false;
@@ -2959,6 +3055,18 @@ bool HisDataReplayer::checkOrderQueues(const char* stdCode, uint32_t uDate)
 	return true;
 }
 
+/*!*
+ * @brief 检查并加载成交数据
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法检查并加载指定合约在指定交易日的成交数据。
+ *          首先检查缓存中是否已存在该合约当日的成交数据，
+ *          如果不存在或日期不匹配，则尝试从数据源加载数据。
+ *          目前只支持从二进制文件加载成交数据，CSV模式不支持。
+ *          如果没有数据可用，则创建一个空的数据缓存并返回false。
+ */
 bool HisDataReplayer::checkTransactions(const char* stdCode, uint32_t uDate)
 {
 	bool bNeedCache = false;
@@ -3001,6 +3109,17 @@ bool HisDataReplayer::checkTransactions(const char* stdCode, uint32_t uDate)
 	return true;
 }
 
+/*!*
+ * @brief 检查并加载指定合约的Tick数据
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法检查并加载指定合约在指定交易日的Tick数据。
+ *          首先检查缓存中是否已存在该合约当日的Tick数据，
+ *          如果不存在或日期不匹配，则根据当前模式（内存、CSV、二进制）从相应源加载数据。
+ *          如果没有数据可用，则创建一个空的数据缓存并返回false。
+ */
 bool HisDataReplayer::checkTicks(const char* stdCode, uint32_t uDate)
 {
 	if (strlen(stdCode) == 0)
@@ -3054,6 +3173,16 @@ bool HisDataReplayer::checkTicks(const char* stdCode, uint32_t uDate)
 	return true;
 }
 
+/*!*
+ * @brief 获取指定合约的最新Tick数据
+ * @param stdCode 标准合约代码
+ * @return WTSTickData* 最新的Tick数据对象指针，如果没有数据则返回NULL
+ * 
+ * @details 该方法获取当前时间点前指定合约的最新Tick数据。
+ *          首先检查并加载当日的Tick数据。
+ *          如果数据已经开始遍历（cursor 不为 UINT_MAX），则直接返回当前cursor指向的数据。
+ *          如果还未开始遍历，则通过二分查找定位到当前时间之前的最后一条数据。
+ */
 WTSTickData* HisDataReplayer::get_last_tick(const char* stdCode)
 {
 	if (!checkTicks(stdCode, _cur_tdate))
@@ -3106,6 +3235,17 @@ std::string HisDataReplayer::get_rawcode(const char* stdCode)
 	return "";
 }
 
+/*!*
+ * @brief 获取交易时段信息
+ * @param sid 交易时段ID或合约代码
+ * @param isCode 是否为合约代码，默认为false
+ * @return 交易时段信息对象指针
+ * 
+ * @details 该方法根据输入参数获取交易时段信息。
+ *          如果isCode为true，则sid被视为标准合约代码，函数会提取其交易所和商品信息，并查询相应的交易时段。
+ *          如果isCode为false，则sid直接被视为交易时段ID。
+ *          如果找不到对应的交易时段，则返回默认交易时段信息（DEFAULT_SESSIONID）。
+ */
 WTSSessionInfo* HisDataReplayer::get_session_info(const char* sid, bool isCode /* = false */)
 {
 	if (!isCode)
@@ -3258,6 +3398,15 @@ double HisDataReplayer::get_day_price(const char* stdCode, int flag /* = 0 */)
 	}
 }
 
+/*!*
+ * @brief 订阅合约的Tick数据
+ * @param sid 订阅者ID
+ * @param stdCode 标准合约代码
+ * 
+ * @details 将指定的订阅者添加到特定合约的Tick数据订阅列表中。
+ *          如果该合约是一个主力合约，则会解析其收取规则，并订阅相应的实际合约代码。
+ *          每个订阅者只会在最终订阅列表中出现一次。
+ */
 void HisDataReplayer::sub_tick(uint32_t sid, const char* stdCode)
 {
 	if (strlen(stdCode) == 0)
@@ -3282,6 +3431,15 @@ void HisDataReplayer::sub_tick(uint32_t sid, const char* stdCode)
 	_unsubbed_in_need.insert(hitCode);
 }
 
+/*!*
+ * @brief 订阅合约的委托明细数据
+ * @param sid 订阅者ID
+ * @param stdCode 标准合约代码
+ * 
+ * @details 将指定的订阅者添加到特定合约的委托明细数据订阅列表中。
+ *          如果该合约是一个主力合约，则会在指定长度内截取其代码以便于正确订阅。
+ *          每个订阅者只会在最终订阅列表中出现一次。
+ */
 void HisDataReplayer::sub_order_detail(uint32_t sid, const char* stdCode)
 {
 	if (strlen(stdCode) == 0)
@@ -3300,6 +3458,15 @@ void HisDataReplayer::sub_order_detail(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, flag);
 }
 
+/*!*
+ * @brief 订阅合约的委托队列数据
+ * @param sid 订阅者ID
+ * @param stdCode 标准合约代码
+ * 
+ * @details 将指定的订阅者添加到特定合约的委托队列数据订阅列表中。
+ *          如果是主力合约，则会在指定长度内截取其代码。
+ *          每个订阅者只会在最终订阅列表中出现一次。
+ */
 void HisDataReplayer::sub_order_queue(uint32_t sid, const char* stdCode)
 {
 	if (strlen(stdCode) == 0)
@@ -3318,6 +3485,15 @@ void HisDataReplayer::sub_order_queue(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, flag);
 }
 
+/*!*
+ * @brief 订阅合约的成交数据
+ * @param sid 订阅者ID
+ * @param stdCode 标准合约代码
+ * 
+ * @details 将指定的订阅者添加到特定合约的成交数据订阅列表中。
+ *          如果是主力合约，则会在指定长度内截取其代码。
+ *          每个订阅者只会在最终订阅列表中出现一次。
+ */
 void HisDataReplayer::sub_transaction(uint32_t sid, const char* stdCode)
 {
 	if (strlen(stdCode) == 0)
@@ -3476,6 +3652,19 @@ uint32_t strToDate(const char* strDate)
 	return strtoul(ss.str().c_str(), NULL, 10);
 }
 
+/*!*
+ * @brief 从二进制文件中缓存Tick数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法从二进制文件中加载并缓存特定合约在特定交易日的Tick数据。
+ *          首先提取合约信息，并检查是否需要处理主力合约替换。
+ *          然后尝试从数据存储目录或数据加载器读取数据。
+ *          如果找到数据，则将其转换为WTSTickStruct格式存储到缓存中。
+ *          如果没有找到数据，则记录警告日志并返回false。
+ */
 bool HisDataReplayer::cacheRawTicksFromBin(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3533,6 +3722,18 @@ bool HisDataReplayer::cacheRawTicksFromBin(const std::string& key, const char* s
 	return true;
 }
 
+/*!*
+ * @brief 从二进制文件中缓存委托明细数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法从二进制文件中加载并缓存特定合约在特定交易日的委托明细数据。
+ *          首先提取合约信息，然后通过历史数据管理器加载原始委托明细数据。
+ *          如果找到数据，则将其转换为WTSOrdDtlStruct格式存储到缓存中。
+ *          如果没有找到数据，则记录警告日志并返回false。
+ */
 bool HisDataReplayer::cacheRawOrdDtlFromBin(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3562,6 +3763,18 @@ bool HisDataReplayer::cacheRawOrdDtlFromBin(const std::string& key, const char* 
 	return true;
 }
 
+/*!*
+ * @brief 从二进制文件中缓存委托队列数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法从二进制文件中加载并缓存特定合约在特定交易日的委托队列数据。
+ *          首先提取合约信息，然后通过历史数据管理器加载原始委托队列数据。
+ *          如果找到数据，则将其转换为WTSOrdQueStruct格式存储到缓存中。
+ *          如果没有找到数据，则记录警告日志并返回false。
+ */
 bool HisDataReplayer::cacheRawOrdQueFromBin(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3591,6 +3804,18 @@ bool HisDataReplayer::cacheRawOrdQueFromBin(const std::string& key, const char* 
 	return true;
 }
 
+/*!*
+ * @brief 从二进制文件中缓存成交数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法从二进制文件中加载并缓存特定合约在特定交易日的成交数据。
+ *          首先提取合约信息，然后通过历史数据管理器加载原始成交数据。
+ *          如果找到数据，则将其转换为WTSTransStruct格式存储到缓存中。
+ *          如果没有找到数据，则记录警告日志并返回false。
+ */
 bool HisDataReplayer::cacheRawTransFromBin(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3647,6 +3872,18 @@ bool HisDataReplayer::cacheRawTicksFromLoader(const std::string& key, const char
 	return true;
 }
 
+/*!*
+ * @brief 从CSV文件中缓存原始Tick数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 该方法从CSV文件中加载并缓存特定合约在特定交易日的Tick数据。
+ *          首先检查是否存在二进制形式的数据文件，如果存在则直接从二进制文件加载。
+ *          如果不存在，则尝试从CSV文件加载数据，并将其转换为WTSTickStruct格式存储到缓存中。
+ *          该方法还支持将加载的数据转存为二进制文件，以提高后续访问效率。
+ */
 bool HisDataReplayer::cacheRawTicksFromCSV(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	if (strlen(stdCode) == 0)
