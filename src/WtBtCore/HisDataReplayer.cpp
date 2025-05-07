@@ -861,9 +861,11 @@ void HisDataReplayer::run(bool bNeedDump/* = false*/)
  * @brief 基于Tick数据运行回测
  * @param bNeedDump 是否需要将回测进度写入文件，默认为false
  * 
- * @details 基于Tick数据进行精确回测，按照时间顺序回放所有的Tick数据，
+ * @details 基于Tick数据进行精确回测，按照时间顺序回放所有的Tick数据。
+ *          该方法按交易日循环执行，对每个交易日调用replayHftDatasByDay方法回放高频数据。
  *          如果没有实际的Tick数据，会根据K线数据模拟Tick进行回测。
- *          这种方式提供更高精度的回测结果，尤其适用于高频策略的测试
+ *          这种方式提供更高精度的回测结果，尤其适用于高频策略的测试。
+ *          整个回测过程会模拟交易日开始和结束的事件，以及每个Tick到来时的事件。
  */
 void HisDataReplayer::run_by_ticks(bool bNeedDump /* = false */)
 {
@@ -903,6 +905,16 @@ void HisDataReplayer::run_by_ticks(bool bNeedDump /* = false */)
  *          在此模式下，程序会先加载所有已订阅合约的K线数据，然后按照时间顺序
  *          一根一根K线向前推进，并在每根K线结束时触发相应的回调函数。
  *          这种方式运行速度较快，适合非高频策略的回测
+ */
+/*!*
+ * @brief 基于K线数据运行回测
+ * @param bNeedDump 是否需要将回测进度写入文件，默认为false
+ * 
+ * @details 基于K线数据进行回测，按照时间顺序依次回放所有K线数据。
+ *          在此模式下，程序会先加载所有已订阅合约的K线数据，然后按照时间顺序
+ *          一根一根K线向前推进，并在每根K线结束时触发相应的回调函数。
+ *          如果开启了tick模拟，还会根据K线数据模拟生成tick数据。
+ *          整个回测过程会模拟交易日开始和结束的事件，以及交易时段结束的事件。
  */
 void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 {
@@ -2100,6 +2112,14 @@ uint64_t HisDataReplayer::replayHftDatasByDay(uint32_t curTDate)
  * 
  * @details 回放指定时间范围内的所有高频数据，包括Tick、委托队列、委托明细和成交数据。
  *          该方法会根据时间顺序对所有类型的高频数据进行回放，并通过事件监听器将数据触发给监听者。
+ *          具体实现流程如下：
+ *          1. 首先检查各种高频数据（Tick、委托明细、委托队列、成交）的缓存是否存在
+ *          2. 对于每种类型的数据，找出下一个时间点的数据
+ *          3. 比较所有类型数据的下一个时间点，选出最早的一个
+ *          4. 触发相应的数据事件，并更新合约价格
+ *          5. 重复上述步骤直到所有数据处理完毕或超出时间范围
+ *          
+ *          该方法在高频策略回测中非常重要，可以提供更精确的市场数据模拟。
  *          如果没有可用的数据，则返回false，否则返回true。
  */
 bool HisDataReplayer::replayHftDatas(uint64_t stime, uint64_t etime)
@@ -3217,12 +3237,32 @@ WTSTickData* HisDataReplayer::get_last_tick(const char* stdCode)
 	return WTSTickData::create(tickList._items[tickList._cursor - 1]);
 }
 
+/*!*
+ * @brief 获取品种信息
+ * @param stdCode 标准合约代码
+ * @return 品种信息对象指针，如果不存在则返回NULL
+ * 
+ * @details 从标准合约代码提取品种信息。
+ *          首先通过CodeHelper提取合约代码的交易所和品种信息，
+ *          然后从行情数据管理器中获取相应的品种信息对象。
+ *          该方法用于回测过程中获取品种相关信息，如合约乘数、最小变动价等。
+ */
 WTSCommodityInfo* HisDataReplayer::get_commodity_info(const char* stdCode)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
 	return _bd_mgr.getCommodity(codeInfo._exchg, codeInfo._product);
 }
 
+/*!*
+ * @brief 获取原始合约代码
+ * @param stdCode 标准合约代码
+ * @return 原始合约代码字符串
+ * 
+ * @details 从标准合约代码中获取原始合约代码。
+ *          标准合约代码可能包含特殊后缀，如主力合约标记(HOT)或二最近月标记(2ND)。
+ *          该方法会过滤掉这些特殊标记，返回实际参与交易的原始合约代码。
+ *          该功能在连接实时交易接口或统计持仓情况时非常实用。
+ */
 std::string HisDataReplayer::get_rawcode(const char* stdCode)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3259,6 +3299,16 @@ WTSSessionInfo* HisDataReplayer::get_session_info(const char* sid, bool isCode /
 	return cInfo->getSessionInfo();
 }
 
+/*!*
+ * @brief 加载手续费模板文件
+ * @param filename 手续费模板文件路径
+ * 
+ * @details 从指定的模板文件中加载交易品种的手续费配置。
+ *          模板文件为JSON格式，其中关键字为品种代码，值为包含手续费配置的对象。
+ *          手续费配置对象包含：是否按手数计算(byvolume)、开仓手续费率(open)、
+ *          平仓手续费率(close)、平今仓手续费率(closetoday)。
+ *          所有已加载的手续费模板存储在_fee_map中。
+ */
 void HisDataReplayer::loadFees(const char* filename)
 {
 	if (strlen(filename) == 0)
@@ -3294,6 +3344,20 @@ void HisDataReplayer::loadFees(const char* filename)
 }
 
 
+/*!*
+ * @brief 计算交易手续费
+ * @param stdCode 标准合约代码
+ * @param price 交易价格
+ * @param qty 交易数量
+ * @param offset 交易类型，0-开仓，1-平仓，2-平今仓
+ * @return 计算得到的手续费（精确到分）
+ * 
+ * @details 根据不同的交易品种和交易类型计算手续费。
+ *          首先从标准合约代码中提取出标准品种编码，然后查找相应的手续费配置。
+ *          如果配置为按手数计算，则直接用手续费率乘以手数；
+ *          如果配置为按金额计算，则先计算交易金额，再乘以手续费率。
+ *          最终结果四舍五入到分。
+ */
 double HisDataReplayer::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
 {
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -3330,6 +3394,15 @@ double HisDataReplayer::calc_fee(const char* stdCode, double price, double qty, 
 	return (int32_t)(ret * 100 + 0.5) / 100.0;
 }
 
+/*!*
+ * @brief 获取合约当前价格
+ * @param stdCode 标准合约代码
+ * @return 合约当前价格，如果不存在则返回0.0
+ * 
+ * @details 从价格缓存中获取指定合约的当前价格。
+ *          此函数主要用于回测过程中获取合约的实时价格，
+ *          当前价格由回测引擎在处理Tick数据时使用update_price方法更新。
+ */
 double HisDataReplayer::get_cur_price(const char* stdCode)
 {
 	auto it = _price_map.find(stdCode);
@@ -3343,6 +3416,17 @@ double HisDataReplayer::get_cur_price(const char* stdCode)
 	}
 }
 
+/*!*
+ * @brief 获取合约当日价格
+ * @param stdCode 标准合约代码
+ * @param flag 价格类型标记，0-开盘价，1-最高价，2-最低价，3-收盘价，默认为0
+ * @return 指定类型的当日价格，如果不存在则返回0.0
+ * 
+ * @details 获取合约当日的指定类型价格（开盘价、最高价、最低价或收盘价）。
+ *          如果开启了tick模式，则尝试从最新的tick数据中获取价格。
+ *          否则从当日缓存(_day_cache)中获取价格。
+ *          当日缓存由回测引擎在处理新交易日的数据时更新。
+ */
 double HisDataReplayer::get_day_price(const char* stdCode, int flag /* = 0 */)
 {
 	if(_tick_enabled)
@@ -3613,6 +3697,18 @@ void HisDataReplayer::checkUnbars()
 	}
 }
 
+/*!*
+ * @brief 将时间字符串转换为时间整数
+ * @param strTime 时间字符串，格式为"HH:MM:SS"或"HH:MM"
+ * @param bHasSec 是否包含秒数，默认为false
+ * @return 时间整数，HHMMSS或HHMM格式
+ * 
+ * @details 将带分隔符的时间字符串转换为时间整数。
+ *          首先移除字符串中的分隔符(如":").
+ *          然后将结果转换为整数。
+ *          如果字符串长度大于4且bHasSec为false，则会移除秒数(除以100)。
+ *          用于数据解析和时间处理过程中。
+ */
 uint32_t strToTime(const char* strTime, bool bHasSec = false)
 {
 	std::string str;
@@ -3633,6 +3729,17 @@ uint32_t strToTime(const char* strTime, bool bHasSec = false)
 	return ret;
 }
 
+/*!*
+ * @brief 将日期字符串转换为日期整数
+ * @param strDate 日期字符串，格式为"YYYY/MM/DD"或"YYYY-MM-DD"
+ * @return 日期整数，YYYYMMDD格式
+ * 
+ * @details 将带分隔符的日期字符串转换为整数格式的日期。
+ *          首先按照“/”分割字符串，如果分割结果只有1项，则试用“-”进行分割。
+ *          然后处理分割后的结果，确保月份和日期都是两位数（单位数前面补零）。
+ *          最后将年、月、日拼接成YYYYMMDD格式的整数。
+ *          如果日期字符串包含空格，会被自动去除。
+ */
 uint32_t strToDate(const char* strDate)
 {
 	StringVector ay = StrUtil::split(strDate, "/");
@@ -3845,6 +3952,19 @@ bool HisDataReplayer::cacheRawTransFromBin(const std::string& key, const char* s
 	return true;
 }
 
+/*!*
+ * @brief 从外部加载器中缓存Tick数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return 是否成功加载数据
+ * 
+ * @details 从外部数据加载器(_bt_loader)加载特定合约在特定交易日的Tick数据。
+ *          如果没有设置外部加载器，则返回false。
+ *          否则，调用外部加载器的loadRawHisTicks方法加载数据，
+ *          并通过回调函数将数据存储到缓存中。
+ *          如果加载成功且数据非空，则记录日志并返回true。
+ */
 bool HisDataReplayer::cacheRawTicksFromLoader(const std::string& key, const char* stdCode, uint32_t uDate)
 {
 	if (NULL == _bt_loader)
@@ -4003,6 +4123,20 @@ bool HisDataReplayer::cacheRawTicksFromCSV(const std::string& key, const char* s
 	return true;
 }
 
+/*!*
+ * @brief 从外部加载器缓存最终K线数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param bSubbed 是否已订阅，默认为true
+ * @return 是否成功加载数据
+ * 
+ * @details 从外部数据加载器加载最终处理过的K线数据。
+ *          首先尝试从转储的.dsb文件中直接加载数据，如果成功则直接返回true。
+ *          如果没有找到转储文件或者文件无效，则调用外部加载器的loadFinalHisBars方法加载数据。
+ *          根据是否订阅，将数据保存到_bars_cache或_unbars_cache中。
+ *          如果外部加载器支持自动转储，还会把加载的数据转储为.dsb文件以加快后续访问速度。
+ */
 bool HisDataReplayer::cacheFinalBarsFromLoader(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed /* = true */)
 {
 	if (NULL == _bt_loader)
@@ -4327,6 +4461,21 @@ bool HisDataReplayer::cacheRawBarsFromCSV(const std::string& key, const char* st
 	return true;
 }
 
+/*!*
+ * @brief 从二进制文件缓存期货连续合约K线数据
+ * @param codeInfo 合约代码信息指针
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param bSubbed 是否已订阅，默认为true
+ * @return 是否成功加载数据
+ * 
+ * @details 从二进制文件加载期货连续合约的K线数据。
+ *          该方法用于加载如主力合约或按照特定规则组合的连续合约历史数据。
+ *          首先计算交易日期范围，然后加载该合约在利率调整日期范围的化合访问。
+ *          对于主力合约，需要识别主力合约的切换日期，并对不同主力合约的数据进行组合。
+ *          最终将数据保存到缓存中，并根据是否订阅分别存入_bars_cache或_unbars_cache中。
+ */
 bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed /* = true */)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -4619,6 +4768,21 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 	return true;
 }
 
+/*!*
+ * @brief 获取股票复权因子列表
+ * @param code 股票代码
+ * @param exchg 交易所代码
+ * @param pid 品种代码，默认为空字符串
+ * @return 复权因子列表引用
+ * 
+ * @details 获取指定股票的复权因子列表。
+ *          首先根据交易所、品种和股票代码生成唯一的键值。
+ *          如果该键值对应的复权因子列表不存在，且外部加载器已设置，
+ *          则会尝试从外部加载器加载复权因子。
+ *          当从外部加载器加载复权因子时，会自动添加一个日期为19900101、因子为1的项，
+ *          确保前复权时能正确处理最早的数据。
+ *          加载后的复权因子列表会按日期升序排序。
+ */
 const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char* code, const char* exchg, const char* pid /* = "" */)
 {
 	static char key[20] = { 0 };
@@ -4663,6 +4827,23 @@ const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char*
 	return _adj_factors[key];
 }
 
+/*!*
+ * @brief 从二进制文件缓存复权后的股票K线数据
+ * @param codeInfo 合约代码信息指针
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param bSubbed 是否已订阅，默认为true
+ * @return 是否成功加载数据
+ * 
+ * @details 从二进制文件加载经过复权处理的股票K线数据。
+ *          复权是股票数据处理中相当重要的一步，用于消除除权除息等事件对价格的影响。
+ *          该方法首先从源文件加载原始K线数据，然后根据复权类型（前复权或后复权）和复权因子表对数据进行处理。
+ *          处理的目的是使不同时段的价格数据具有可比性。
+ *          对于前复权，会将历史数据调整为当前的权重；
+ *          而对于后复权，则会将所有数据调整为最出叡时的权重。
+ *          处理后的数据将保存到缓存中，并根据是否订阅分别存入_bars_cache或_unbars_cache中。
+ */
 bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed /* = true */)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
@@ -4911,6 +5092,21 @@ bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::str
 }
 
 
+/*!*
+ * @brief 从二进制文件缓存原始K线数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param bSubbed 是否已订阅，默认为true
+ * @return 是否成功加载数据
+ * 
+ * @details 从二进制文件加载原始K线数据，没有进行复权或其他特殊处理。
+ *          首先提取合约信息并计算交易日期。
+ *          然后创建新的BarsList对象，根据是否订阅将其保存到_bars_cache或_unbars_cache中。
+ *          接着根据周期类型确定相应的文件路径并加载数据。
+ *          加载的数据包括开盘价、最高价、最低价、收盘价、交易量、持仓量等信息。
+ *          与复权和连续合约数据加载不同，该方法加载的是原始未经处理的K线数据。
+ */
 bool HisDataReplayer::cacheRawBarsFromBin(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed/* = true*/)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
