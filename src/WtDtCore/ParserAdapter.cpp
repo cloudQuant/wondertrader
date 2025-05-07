@@ -1,11 +1,12 @@
-﻿/*!
+/*!
  * \file ParserAdapter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 行情解析模块适配器实现
+ * \details 实现了ParserAdapter和ParserAdapterMgr类，用于封装和管理第三方行情解析模块
  */
 #include "ParserAdapter.h"
 #include "DataManager.h"
@@ -27,6 +28,13 @@
 
 //////////////////////////////////////////////////////////////////////////
 //ParserAdapter
+/**
+ * @brief 构造函数
+ * @details 初始化ParserAdapter对象
+ * @param bgMgr 基础数据管理器指针，用于获取合约信息
+ * @param dtMgr 数据管理器指针，用于存储行情数据
+ * @param idxFactory 指数工厂指针，用于处理行情数据生成指数
+ */
 ParserAdapter::ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr, IndexFactory *idxFactory)
 	: _parser_api(NULL)
 	, _remover(NULL)
@@ -39,10 +47,21 @@ ParserAdapter::ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr, IndexFa
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 释放适配器相关资源
+ */
 ParserAdapter::~ParserAdapter()
 {
 }
 
+/**
+ * @brief 使用外部提供的API初始化适配器
+ * @details 外部创建的行情解析API对象的初始化方式，负责注册回调接口并订阅合约
+ * @param id 适配器唯一标识
+ * @param api 外部提供的行情解析API对象
+ * @return bool 初始化是否成功
+ */
 bool ParserAdapter::initExt(const char* id, IParserApi* api)
 {
 	if (api == NULL)
@@ -81,6 +100,14 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api)
 }
 
 
+/**
+ * @brief 根据配置初始化适配器
+ * @details 加载解析模块，创建API对象，并订阅合约
+ *          支持通过交易所过滤器和合约过滤器进行筛选
+ * @param id 适配器唯一标识
+ * @param cfg 适配器配置对象
+ * @return bool 初始化是否成功
+ */
 bool ParserAdapter::init(const char* id, WTSVariant* cfg)
 {
 	if (cfg == NULL)
@@ -253,6 +280,10 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg)
 	return true;
 }
 
+/**
+ * @brief 释放适配器资源
+ * @details 标记适配器为停止状态，释放解析API资源
+ */
 void ParserAdapter::release()
 {
 	_stopped = true;
@@ -267,6 +298,11 @@ void ParserAdapter::release()
 		delete _parser_api;
 }
 
+/**
+ * @brief 启动适配器
+ * @details 调用解析API的connect方法连接行情源
+ * @return bool 启动是否成功
+ */
 bool ParserAdapter::run()
 {
 	if (_parser_api == NULL)
@@ -276,11 +312,21 @@ bool ParserAdapter::run()
 	return true;
 }
 
+/**
+ * @brief 处理合约列表
+ * @details 处理行情解析API返回的合约列表
+ * @param aySymbols 合约列表数组
+ */
 void ParserAdapter::handleSymbolList( const WTSArray* aySymbols )
 {
 	
 }
 
+/**
+ * @brief 处理逆向成交数据
+ * @details 接收行情解析API返回的成交数据，并存储到数据管理器中
+ * @param transData 逆向成交数据指针
+ */
 void ParserAdapter::handleTransaction(WTSTransData* transData)
 {
 	if (_stopped)
@@ -298,6 +344,11 @@ void ParserAdapter::handleTransaction(WTSTransData* transData)
 	_dt_mgr->writeTransaction(transData);
 }
 
+/**
+ * @brief 处理逆向逆向委托明细数据
+ * @details 接收行情解析API返回的委托明细数据，并存储到数据管理器中
+ * @param ordDetailData 委托明细数据指针
+ */
 void ParserAdapter::handleOrderDetail(WTSOrdDtlData* ordDetailData)
 {
 	if (_stopped)
@@ -315,6 +366,11 @@ void ParserAdapter::handleOrderDetail(WTSOrdDtlData* ordDetailData)
 	_dt_mgr->writeOrderDetail(ordDetailData);
 }
 
+/**
+ * @brief 处理委托队列数据
+ * @details 接收行情解析API返回的委托队列数据，并存储到数据管理器中
+ * @param ordQueData 委托队列数据指针
+ */
 void ParserAdapter::handleOrderQueue(WTSOrdQueData* ordQueData)
 {
 	if (_stopped)
@@ -332,6 +388,12 @@ void ParserAdapter::handleOrderQueue(WTSOrdQueData* ordQueData)
 	_dt_mgr->writeOrderQueue(ordQueData);
 }
 
+/**
+ * @brief 处理行情数据
+ * @details 接收行情解析API返回的Tick数据，存储到数据管理器中，并传递给指数工厂处理
+ * @param quote Tick数据指针
+ * @param procFlag 处理标记，用于指示如何处理数据
+ */
 void ParserAdapter::handleQuote( WTSTickData *quote, uint32_t procFlag )
 {
 	if (_stopped)
@@ -357,6 +419,12 @@ void ParserAdapter::handleQuote( WTSTickData *quote, uint32_t procFlag )
 		_idx_fact->handle_quote(quote);
 }
 
+/**
+ * @brief 处理解析器日志
+ * @details 接收行情解析API输出的日志信息，并转发到日志系统
+ * @param ll 日志级别
+ * @param message 日志消息内容
+ */
 void ParserAdapter::handleParserLog( WTSLogLevel ll, const char* message)
 {
 	if (_stopped)
@@ -365,6 +433,11 @@ void ParserAdapter::handleParserLog( WTSLogLevel ll, const char* message)
 	WTSLogger::log_raw_by_cat("parser", ll, message);
 }
 
+/**
+ * @brief 获取基础数据管理器
+ * @details 实现IParserSpi接口中的方法，返回适配器的基础数据管理器
+ * @return IBaseDataMgr* 基础数据管理器指针
+ */
 IBaseDataMgr* ParserAdapter::getBaseDataMgr()
 {
 	return _bd_mgr;
@@ -373,6 +446,10 @@ IBaseDataMgr* ParserAdapter::getBaseDataMgr()
 
 //////////////////////////////////////////////////////////////////////////
 //ParserAdapterMgr
+/**
+ * @brief 释放所有适配器资源
+ * @details 遍历并释放管理器中的所有解析适配器实例
+ */
 void ParserAdapterMgr::release()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
@@ -383,6 +460,13 @@ void ParserAdapterMgr::release()
 	_adapters.clear();
 }
 
+/**
+ * @brief 添加解析适配器
+ * @details 将解析适配器实例添加到管理器中，不允许重复的ID
+ * @param id 适配器唯一标识
+ * @param adapter 适配器智能指针引用
+ * @return bool 添加是否成功
+ */
 bool ParserAdapterMgr::addAdapter(const char* id, ParserAdapterPtr& adapter)
 {
 	if (adapter == NULL || strlen(id) == 0)
@@ -400,6 +484,12 @@ bool ParserAdapterMgr::addAdapter(const char* id, ParserAdapterPtr& adapter)
 	return true;
 }
 
+/**
+ * @brief 获取指定的解析适配器
+ * @details 根据适配器ID从管理器中获取相应的适配器实例
+ * @param id 适配器唯一标识
+ * @return ParserAdapterPtr 适配器智能指针，如果不存在则返回空指针
+ */
 ParserAdapterPtr ParserAdapterMgr::getAdapter(const char* id)
 {
 	auto it = _adapters.find(id);
@@ -411,6 +501,10 @@ ParserAdapterPtr ParserAdapterMgr::getAdapter(const char* id)
 	return ParserAdapterPtr();
 }
 
+/**
+ * @brief 运行所有解析适配器
+ * @details 遍历并启动所有适配器实例，并输出日志信息
+ */
 void ParserAdapterMgr::run()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
