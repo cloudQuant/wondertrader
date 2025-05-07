@@ -683,31 +683,57 @@ private:
 	 * @param elapse 经过的时间（毫秒）
 	 */
 	void		dump_btstate(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress, int64_t elapse);
+	
+	/**
+	 * @brief 通知回测状态给监听器
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param times 回测次数
+	 * @param stime 开始时间戳
+	 * @param etime 结束时间戳
+	 * @param progress 回测进度，0.0-1.0之间
+	 */
 	void		notify_state(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress);
 
+	/**
+	 * @brief 定位特定时间点在K线数据中的索引位置
+	 * 
+	 * @param key 缓存键值，通常是合约代码+周期
+	 * @param curTime 当前时间戳
+	 * @param bUpperBound 是否返回上界位置，默认为false
+	 * @return uint32_t 返回找到的索引位置
+	 */
 	uint32_t	locate_barindex(const std::string& key, uint64_t curTime, bool bUpperBound = false);
 
-	/*
-	 *	按照K线进行回测
-	 *
-	 *	@bNeedDump	是否将回测进度落地到文件中
+	/**
+	 * @brief 按照K线进行回测
+	 * @details 使用K线数据执行回测过程，按照K线周期逐时间推进
+	 * 
+	 * @param bNeedDump 是否将回测进度落地到文件中，默认为false
 	 */
 	void	run_by_bars(bool bNeedDump = false);
 
-	/*
-	 *	按照定时任务进行回测
-	 *
-	 *	@bNeedDump	是否将回测进度落地到文件中
+	/**
+	 * @brief 按照定时任务进行回测
+	 * @details 使用定时任务机制执行回测过程，按照任务的时间周期触发
+	 * 
+	 * @param bNeedDump 是否将回测进度落地到文件中，默认为false
 	 */
 	void	run_by_tasks(bool bNeedDump = false);
 
-	/*
-	 *	按照tick进行回测
-	 *
-	 *	@bNeedDump	是否将回测进度落地到文件中
+	/**
+	 * @brief 按照Tick数据进行回测
+	 * @details 使用Tick数据执行回测过程，每个Tick逐一处理，提供最精细的回测粒度
+	 * 
+	 * @param bNeedDump 是否将回测进度落地到文件中，默认为false
 	 */
 	void	run_by_ticks(bool bNeedDump = false);
 
+	/**
+	 * @brief 检查数据缓存中的交易日
+	 * @details 扫描所有缓存的数据，生成完整的交易日列表，用于回测时间推进
+	 */
 	void	check_cache_days();
 
 public:
