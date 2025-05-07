@@ -820,6 +820,13 @@ void cta_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 	}
 }
 
+/**
+ * @brief 保存用户数据
+ * @details 在CTA策略中保存用户自定义数据，可用于存储策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param val 数据值
+ */
 void cta_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -829,6 +836,14 @@ void cta_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 	ctx->stra_save_user_data(key, val);
 }
 
+/**
+ * @brief 加载用户数据
+ * @details 在CTA策略中加载用户自定义数据，用于恢复策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param defVal 默认值，当指定键名的数据不存在时返回此值
+ * @return WtString 加载的数据值
+ */
 WtString cta_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -838,6 +853,12 @@ WtString cta_load_userdata(CtxHandler cHandle, const char* key, const char* defV
 	return ctx->stra_load_user_data(key, defVal);
 }
 
+/**
+ * @brief 订阅合约的tick数据
+ * @details 在CTA策略中订阅指定合约的tick实时行情数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void cta_sub_ticks(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -847,6 +868,13 @@ void cta_sub_ticks(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_ticks(stdCode);
 }
 
+/**
+ * @brief 订阅K线事件
+ * @details 在CTA策略中订阅指定合约和周期的K线事件，当新的K线形成时会收到通知
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如m1/m5/d1等
+ */
 void cta_sub_bar_events(CtxHandler cHandle, const char* stdCode, const char* period)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -856,6 +884,12 @@ void cta_sub_bar_events(CtxHandler cHandle, const char* stdCode, const char* per
 	ctx->stra_sub_bar_events(stdCode, period);
 }
 
+/**
+ * @brief 执行一步策略计算
+ * @details 在异步模式下执行策略的单步计算，用于手动控制回测步伐
+ * @param cHandle 策略上下文句柄
+ * @return bool 返回计算是否成功
+ */
 bool cta_step(CtxHandler cHandle)
 {
 	//只有异步模式才有意义
@@ -869,6 +903,13 @@ bool cta_step(CtxHandler cHandle)
 	return ctx->step_calc();
 }
 
+/**
+ * @brief 设置图表K线
+ * @details 在CTA策略中设置图表显示的K线，用于回测结果可视化
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如m1/m5/d1等
+ */
 void cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* period)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -878,6 +919,14 @@ void cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* pe
 	ctx->set_chart_kline(stdCode, period);
 }
 
+/**
+ * @brief 添加图表标记
+ * @details 在CTA策略图表上添加标记，用于标记重要价格位置或交易信号
+ * @param cHandle 策略上下文句柄
+ * @param price 标记所在的价格位置
+ * @param icon 标记图标，如"buy"/"sell"等
+ * @param tag 标记标签，用于显示标记的说明文字
+ */
 void cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, const char* tag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -887,6 +936,13 @@ void cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, cons
 	ctx->add_chart_mark(price, icon, tag);
 }
 
+/**
+ * @brief 注册指标
+ * @details 在CTA策略中注册一个自定义指标，用于图表展示或分析
+ * @param cHandle 策略上下文句柄
+ * @param idxName 指标名称
+ * @param indexType 指标类型
+ */
 void cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexType)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -896,6 +952,15 @@ void cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexT
 	ctx->register_index(idxName, indexType);
 }
 
+/**
+ * @brief 注册指标线
+ * @details 在CTA策略中为已注册的指标添加一条线型数据
+ * @param cHandle 策略上下文句柄
+ * @param idxName 指标名称
+ * @param lineName 线型名称
+ * @param lineType 线型类型
+ * @return bool 返回注册是否成功
+ */
 bool cta_register_index_line(CtxHandler cHandle, const char* idxName, const char* lineName, WtUInt32 lineType)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -904,6 +969,15 @@ bool cta_register_index_line(CtxHandler cHandle, const char* idxName, const char
 
 	return ctx->register_index_line(idxName, lineName, lineType);
 }
+/**
+ * @brief 添加指标基准线
+ * @details 在CTA策略指标中添加一条基准线，用于参考或对比
+ * @param cHandle 策略上下文句柄
+ * @param idxName 指标名称
+ * @param lineName 基准线名称
+ * @param val 基准线值
+ * @return bool 返回添加是否成功
+ */
 bool cta_add_index_baseline(CtxHandler cHandle, const char* idxName, const char* lineName, double val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -913,6 +987,15 @@ bool cta_add_index_baseline(CtxHandler cHandle, const char* idxName, const char*
 	return ctx->add_index_baseline(idxName, lineName, val);
 }
 
+/**
+ * @brief 设置指标线数据值
+ * @details 在CTA策略中设置指定指标线的当前数据值
+ * @param cHandle 策略上下文句柄
+ * @param idxName 指标名称
+ * @param lineName 线型名称
+ * @param val 数据值
+ * @return bool 返回设置是否成功
+ */
 bool cta_set_index_value(CtxHandler cHandle, const char* idxName, const char* lineName, double val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -925,6 +1008,13 @@ bool cta_set_index_value(CtxHandler cHandle, const char* idxName, const char* li
 #pragma endregion "CTA策略接口"
 
 #pragma region "SEL策略接口"
+/**
+ * @brief 保存SEL策略用户数据
+ * @details 在选股策略中保存用户自定义数据，可用于存储策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param val 数据值
+ */
 void sel_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -934,6 +1024,14 @@ void sel_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 	ctx->stra_save_user_data(key, val);
 }
 
+/**
+ * @brief 加载SEL策略用户数据
+ * @details 在选股策略中加载用户自定义数据，用于恢复策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param defVal 默认值，当指定键名的数据不存在时返回此值
+ * @return WtString 加载的数据值
+ */
 WtString sel_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -943,6 +1041,13 @@ WtString sel_load_userdata(CtxHandler cHandle, const char* key, const char* defV
 	return ctx->stra_load_user_data(key, defVal);
 }
 
+/**
+ * @brief SEL策略日志输出
+ * @details 在选股策略中输出指定级别的日志
+ * @param cHandle 策略上下文句柄
+ * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
+ * @param message 日志内容
+ */
 void sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -968,21 +1073,43 @@ void sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 	}
 }
 
+/**
+ * @brief 获取SEL策略合约当前价格
+ * @details 在选股策略中获取当前回测时点指定合约的最新价格
+ * @param stdCode 标准合约代码
+ * @return double 当前合约价格
+ */
 double sel_get_price(const char* stdCode)
 {
 	return getRunner().replayer().get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略当前日期
+ * @details 在选股策略中获取当前回测时点的自然日期（公历日）
+ * @return WtUInt32 当前日期，格式为YYYYMMDD
+ */
 WtUInt32 sel_get_date()
 {
 	return getRunner().replayer().get_date();
 }
 
+/**
+ * @brief 获取SEL策略当前时间
+ * @details 在选股策略中获取当前回测时点的时间
+ * @return WtUInt32 当前时间，格式为HHMMSS或HHMMSS000
+ */
 WtUInt32 sel_get_time()
 {
 	return getRunner().replayer().get_min_time();
 }
 
+/**
+ * @brief 获取SEL策略所有持仓
+ * @details 在选股策略中获取并枚举所有合约的当前持仓量
+ * @param cHandle 策略上下文句柄
+ * @param cb 持仓回调函数，用于接收持仓数据
+ */
 void sel_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -999,6 +1126,15 @@ void sel_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
 	cb(cHandle, "", 0, true);
 }
 
+/**
+ * @brief 获取SEL策略持仓
+ * @details 在选股策略中获取指定合约和标签的当前持仓量
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只计算可用持仓（非冲销中）
+ * @param openTag 开仓标签，用于区分不同的开仓来源
+ * @return double 合约持仓量，正数为多头仓位，负数为空头仓位
+ */
 double sel_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1008,6 +1144,16 @@ double sel_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid
 	return ctx->stra_get_position(stdCode, bOnlyValid, openTag);
 }
 
+/**
+ * @brief 获取SEL策略K线数据
+ * @details 在选股策略中获取指定合约和周期的历史K线数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如m1/m5/d1等
+ * @param barCnt 请求的K线条数
+ * @param cb K线数据回调函数，用于接收K线数据
+ * @return WtUInt32 实际返回的K线条数
+ */
 WtUInt32 sel_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, FuncGetBarsCallback cb)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1037,6 +1183,14 @@ WtUInt32 sel_get_bars(CtxHandler cHandle, const char* stdCode, const char* perio
 	}
 }
 
+/**
+ * @brief 设置SEL策略持仓
+ * @details 在选股策略中直接设置指定合约的目标仓位
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位，正数表示多头仓位，负数表示空头仓位
+ * @param userTag 用户自定义标签，用于标记仓位的来源
+ */
 void sel_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1047,6 +1201,15 @@ void sel_set_position(CtxHandler cHandle, const char* stdCode, double qty, const
 	ctx->stra_set_position(stdCode, qty, userTag);
 }
 
+/**
+ * @brief 获取SEL策略Tick数据
+ * @details 在选股策略中获取指定合约的历史Tick数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param tickCnt 请求的Tick数据条数
+ * @param cb Tick数据回调函数，用于接收Tick数据
+ * @return WtUInt32 实际返回的Tick数据条数
+ */
 WtUInt32	sel_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1076,6 +1239,12 @@ WtUInt32	sel_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
 	}
 }
 
+/**
+ * @brief 订阅SEL策略Tick数据
+ * @details 在选股策略中订阅指定合约的tick实时行情数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void sel_sub_ticks(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1085,16 +1254,35 @@ void sel_sub_ticks(CtxHandler cHandle, const char* stdCode)
 	ctx->stra_sub_ticks(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略日线价格
+ * @details 在选股策略中获取当前交易日的指定合约的开盘价/收盘价/最高价/最低价
+ * @param stdCode 标准合约代码
+ * @param flag 价格标志，0-开盘价，1-收盘价，2-最高价，3-最低价
+ * @return double 对应的价格
+ */
 double sel_get_day_price(const char* stdCode, int flag)
 {
 	return getRunner().replayer().get_day_price(stdCode, flag);
 }
 
+/**
+ * @brief 获取SEL策略当前交易日
+ * @details 在选股策略中获取当前回测时点的交易日期
+ * @return WtUInt32 交易日期，格式为YYYYMMDD
+ */
 WtUInt32 sel_get_tdate()
 {
 	return getRunner().replayer().get_trading_date();
 }
 
+/**
+ * @brief 获取SEL策略资金数据
+ * @details 在选股策略中获取资金相关数据，如动态权益、各类资金指标等
+ * @param cHandle 策略上下文句柄
+ * @param flag 资金数据标志，0-动态权益，1-静态权益，2-各类资金指标
+ * @return double 对应的资金数据值
+ */
 double sel_get_fund_data(CtxHandler cHandle, int flag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1104,6 +1292,13 @@ double sel_get_fund_data(CtxHandler cHandle, int flag)
 	return ctx->stra_get_fund_data(flag);
 }
 
+/**
+ * @brief 获取SEL策略持仓盈亏
+ * @details 在选股策略中获取指定合约的持仓盈亏
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 持仓盈亏数值
+ */
 double sel_get_position_profit(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1113,6 +1308,14 @@ double sel_get_position_profit(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_position_profit(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略持仓明细入场时间
+ * @details 在选股策略中获取指定合约和开仓标签的入场时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @return WtUInt64 入场时间，格式为时间戳
+ */
 WtUInt64 sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1122,6 +1325,14 @@ WtUInt64 sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const
 	return ctx->stra_get_detail_entertime(stdCode, openTag);
 }
 
+/**
+ * @brief 获取SEL策略持仓明细成本
+ * @details 在选股策略中获取指定合约和开仓标签的持仓成本
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @return double 持仓成本
+ */
 double sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1131,6 +1342,15 @@ double sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* 
 	return ctx->stra_get_detail_cost(stdCode, openTag);
 }
 
+/**
+ * @brief 获取SEL策略持仓明细盈亏
+ * @details 在选股策略中获取指定合约和开仓标签的持仓盈亏
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @param flag 盈亏标志，0-浮动盈亏，1-平仓盈亏
+ * @return double 持仓盈亏
+ */
 double sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1140,6 +1360,13 @@ double sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char
 	return ctx->stra_get_detail_profit(stdCode, openTag, flag);
 }
 
+/**
+ * @brief 获取SEL策略持仓平均价
+ * @details 在选股策略中获取指定合约的当前持仓平均价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 持仓平均价
+ */
 double sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1149,6 +1376,13 @@ double sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_position_avgpx(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略首次入场时间
+ * @details 在选股策略中获取指定合约的首次入场（开仓）交易的时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 入场时间，格式为时间戳
+ */
 WtUInt64 sel_get_first_entertime(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1158,6 +1392,13 @@ WtUInt64 sel_get_first_entertime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_first_entertime(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略最近一次入场时间
+ * @details 在选股策略中获取指定合约的最近一次入场（开仓）交易的时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 入场时间，格式为时间戳
+ */
 WtUInt64 sel_get_last_entertime(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1167,6 +1408,13 @@ WtUInt64 sel_get_last_entertime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_entertime(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略最近一次离场时间
+ * @details 在选股策略中获取指定合约的最近一次离场（平仓）交易的时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 离场时间，格式为时间戳
+ */
 WtUInt64 sel_get_last_exittime(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1176,6 +1424,13 @@ WtUInt64 sel_get_last_exittime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_exittime(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略最近一次入场价格
+ * @details 在选股策略中获取指定合约的最近一次入场交易的价格
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 入场价格
+ */
 double sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1185,6 +1440,13 @@ double sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_enterprice(stdCode);
 }
 
+/**
+ * @brief 获取SEL策略最近一次入场标签
+ * @details 在选股策略中获取指定合约的最近一次入场交易的标签
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtString 入场标签字符串
+ */
 WtString sel_get_last_entertag(CtxHandler cHandle, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
@@ -1197,6 +1459,14 @@ WtString sel_get_last_entertag(CtxHandler cHandle, const char* stdCode)
 #pragma endregion "SEL策略接口"
 
 #pragma region "HFT策略接口"
+/**
+ * @brief 获取HFT策略持仓
+ * @details 在高频策略中获取指定合约的当前持仓量
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只计算可用持仓（非冲销中）
+ * @return double 合约持仓量，正数为多头仓位，负数为空头仓位
+ */
 double hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1206,6 +1476,13 @@ double hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid
 	return mocker->stra_get_position(stdCode, bOnlyValid);
 }
 
+/**
+ * @brief 获取HFT策略持仓盈亏
+ * @details 在高频策略中获取指定合约当前持仓的浮动盈亏
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 当前持仓浮动盈亏
+ */
 double hft_get_position_profit(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1215,6 +1492,13 @@ double hft_get_position_profit(CtxHandler cHandle, const char* stdCode)
 	return mocker->stra_get_position_profit(stdCode);
 }
 
+/**
+ * @brief 获取HFT策略持仓均价
+ * @details 在高频策略中获取指定合约当前持仓的平均价格
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 当前持仓平均价格
+ */
 double hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1225,6 +1509,13 @@ double hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 }
 
 
+/**
+ * @brief 获取HFT策略未完成委托数量
+ * @details 在高频策略中获取指定合约的未完成委托数量
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 未完成委托数量
+ */
 double hft_get_undone(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1234,26 +1525,57 @@ double hft_get_undone(CtxHandler cHandle, const char* stdCode)
 	return mocker->stra_get_undone(stdCode);
 }
 
+/**
+ * @brief 获取HFT策略合约当前价格
+ * @details 在高频策略中获取指定合约的当前实时最新价格
+ * @param stdCode 标准合约代码
+ * @return double 合约当前价格
+ */
 double hft_get_price(const char* stdCode)
 {
 	return getRunner().replayer().get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取HFT策略当前日期
+ * @details 在高频策略中获取当前回测时点的交易日期
+ * @return WtUInt32 当前日期，格式为YYYYMMDD
+ */
 WtUInt32 hft_get_date()
 {
 	return getRunner().replayer().get_date();
 }
 
+/**
+ * @brief 获取HFT策略当前时间
+ * @details 在高频策略中获取当前回测时点的时间
+ * @return WtUInt32 当前时间，格式为HHMMSS或HHMMSS000
+ */
 WtUInt32 hft_get_time()
 {
 	return getRunner().replayer().get_raw_time();
 }
 
+/**
+ * @brief 获取HFT策略当前秒数
+ * @details 在高频策略中获取当前回测时点的秒数，距离今日开盘的秒数
+ * @return WtUInt32 当前秒数
+ */
 WtUInt32 hft_get_secs()
 {
 	return getRunner().replayer().get_secs();
 }
 
+/**
+ * @brief 获取HFT策略K线数据
+ * @details 在高频策略中获取指定合约和周期的历史K线数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param period K线周期，如m1/m5/d1等
+ * @param barCnt 请求的K线条数
+ * @param cb K线数据回调函数，用于接收K线数据
+ * @return WtUInt32 实际返回的K线条数
+ */
 WtUInt32 hft_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, FuncGetBarsCallback cb)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1284,6 +1606,15 @@ WtUInt32 hft_get_bars(CtxHandler cHandle, const char* stdCode, const char* perio
 	}
 }
 
+/**
+ * @brief 获取HFT策略Tick数据
+ * @details 在高频策略中获取指定合约的历史Tick数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param tickCnt 请求的Tick数据条数
+ * @param cb Tick数据回调函数，用于接收Tick数据
+ * @return WtUInt32 实际返回的Tick数据条数
+ */
 WtUInt32 hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1313,6 +1644,15 @@ WtUInt32 hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
 	}
 }
 
+/**
+ * @brief 获取HFT策略委托队列数据
+ * @details 在高频策略中获取指定合约的委托队列数据，用于分析市场深度
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param itemCnt 请求的委托队列数据条数
+ * @param cb 委托队列数据回调函数，用于接收委托队列数据
+ * @return WtUInt32 实际返回的委托队列数据条数
+ */
 WtUInt32 hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetOrdQueCallback cb)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1339,6 +1679,15 @@ WtUInt32 hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCn
 	}
 }
 
+/**
+ * @brief 获取HFT策略委托明细数据
+ * @details 在高频策略中获取指定合约的委托明细数据，用于分析市场成交细节
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param itemCnt 请求的委托明细数据条数
+ * @param cb 委托明细数据回调函数，用于接收委托明细数据
+ * @return WtUInt32 实际返回的委托明细数据条数
+ */
 WtUInt32 hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetOrdDtlCallback cb)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1365,6 +1714,15 @@ WtUInt32 hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCn
 	}
 }
 
+/**
+ * @brief 获取HFT策略逐笔成交数据
+ * @details 在高频策略中获取指定合约的逐笔成交数据，用于分析市场成交情况
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param itemCnt 请求的逐笔成交数据条数
+ * @param cb 逐笔成交数据回调函数，用于接收逐笔成交数据
+ * @return WtUInt32 实际返回的逐笔成交数据条数
+ */
 WtUInt32 hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt, FuncGetTransCallback cb)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1391,6 +1749,13 @@ WtUInt32 hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt
 	}
 }
 
+/**
+ * @brief HFT策略日志输出
+ * @details 在高频策略中输出指定级别的日志
+ * @param cHandle 策略上下文句柄
+ * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
+ * @param message 日志内容
+ */
 void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 {
 	HftMocker* ctx = getRunner().hft_mocker();
@@ -1416,6 +1781,12 @@ void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 	}
 }
 
+/**
+ * @brief 订阅HFT策略Tick数据
+ * @details 在高频策略中订阅指定合约的tick实时行情数据
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1425,6 +1796,12 @@ void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
 	mocker->stra_sub_ticks(stdCode);
 }
 
+/**
+ * @brief 订阅HFT策略委托明细数据
+ * @details 在高频策略中订阅指定合约的委托明细数据，用于分析市场成交细节
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1434,6 +1811,12 @@ void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
 	mocker->stra_sub_order_details(stdCode);
 }
 
+/**
+ * @brief 订阅HFT策略委托队列数据
+ * @details 在高频策略中订阅指定合约的委托队列数据，用于分析市场深度
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1443,6 +1826,12 @@ void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
 	mocker->stra_sub_order_queues(stdCode);
 }
 
+/**
+ * @brief 订阅HFT策略逐笔成交数据
+ * @details 在高频策略中订阅指定合约的逐笔成交数据，用于分析市场成交情况
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ */
 void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1452,6 +1841,13 @@ void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
 	mocker->stra_sub_transactions(stdCode);
 }
 
+/**
+ * @brief 取消HFT策略特定委托
+ * @details 在高频策略中根据委托本地ID取消特定委托
+ * @param cHandle 策略上下文句柄
+ * @param localid 要取消的委托的本地ID
+ * @return bool 取消操作是否成功
+ */
 bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1461,6 +1857,14 @@ bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
 	return mocker->stra_cancel(localid);
 }
 
+/**
+ * @brief 取消HFT策略指定合约的所有委托
+ * @details 在高频策略中取消指定合约的全部委托，可指定购买/卖出方向
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码，为空则取消所有合约的委托
+ * @param isBuy 是否为买入委托，true为买入，false为卖出
+ * @return WtString 返回被取消的委托ID组成的字符串，以逗号分隔
+ */
 WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1482,6 +1886,17 @@ WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
 	return ret.c_str();
 }
 
+/**
+ * @brief HFT策略买入操作
+ * @details 在高频策略中发出买入委托
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param price 买入价格
+ * @param qty 买入数量
+ * @param userTag 用户自定义标签
+ * @param flag 下单标志
+ * @return WtString 返回多个委托ID组成的字符串，以逗号分隔
+ */
 WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1502,6 +1917,17 @@ WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double q
 	return ret.c_str();
 }
 
+/**
+ * @brief HFT策略卖出操作
+ * @details 在高频策略中发出卖出委托
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param price 卖出价格
+ * @param qty 卖出数量
+ * @param userTag 用户自定义标签
+ * @param flag 下单标志
+ * @return WtString 返回多个委托ID组成的字符串，以逗号分隔
+ */
 WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1522,6 +1948,13 @@ WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double 
 	return ret.c_str();
 }
 
+/**
+ * @brief 保存HFT策略用户数据
+ * @details 在高频策略中保存用户自定义数据，可用于存储策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param val 数据值
+ */
 void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
@@ -1531,6 +1964,14 @@ void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
 	mocker->stra_save_user_data(key, val);
 }
 
+/**
+ * @brief 加载HFT策略用户数据
+ * @details 在高频策略中读取用户自定义数据，用于恢复策略运行状态
+ * @param cHandle 策略上下文句柄
+ * @param key 数据键名
+ * @param defVal 默认值，当键不存在时返回此值
+ * @return WtString 返回数据值，如果键不存在则返回默认值
+ */
 WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
