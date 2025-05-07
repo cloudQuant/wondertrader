@@ -454,43 +454,68 @@ uint64_t WtLocalExecuter::getCurTime()
 
 
 #pragma region 外部接口
+/**
+ * @brief 持仓变动回调
+ * @param stdCode 标准合约代码
+ * @param diffPos 持仓变动量，正值表示增加，负值表示减少
+ * @details 当策略引擎要求修改目标仓位时调用此函数。
+ * 函数将更新内部持仓目标，并将缩放后的持仓目标传送给执行单元。
+ * 同时考虑了订单限制和缩放比例。
+ */
 void WtLocalExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
+	// 获取合约对应的执行单元，如果不存在会自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode);
 	if (unit == NULL)
 		return;
 
+	// 计算新的目标仓位
 	double oldVol = _target_pos[stdCode];
 	double newVol = oldVol + diffPos;
 	_target_pos[stdCode] = newVol;
 
+	// 应用缩放比例并四舍五入
 	double traderTarget = round(newVol * _scale);
 
+	// 如果持仓有变化，记录日志
 	if(!decimal::eq(diffPos, 0))
 	{
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
 	}
 
+	// 检查合约是否有订单限制
 	if (_trader && !_trader->checkOrderLimits(stdCode))
 	{
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
 		return;
 	}
 
+	// 通知执行单元设置新的目标仓位
 	unit->self()->set_position(stdCode, traderTarget);
 }
 
+/**
+ * @brief 批量设置多个合约的目标仓位
+ * @param targets 目标仓位哈希表，键为合约代码，值为目标仓位
+ * @details 该函数会处理多个合约的目标仓位设置。
+ * 首先处理组合合约情况，将组合合约转换为实际合约的目标仓位。
+ * 然后对每个合约分别设置目标仓位，并处理旧目标中存在但新目标中不存在的合约。
+ * 如果配置了线程池，将使用线程池并行处理仓位设置。
+ */
 void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	/*
-	 *	先要把目标头寸进行组合匹配
+	 *	先要把目标头寒进行组合匹配
 	 */
+	// 创建实际目标仓位的副本，用于处理组合合约
 	auto real_targets = targets;
+	// 遍历所有的合约组合
 	for(auto& v : _groups)
 	{
 		const CodeGroupPtr& gpInfo = v.second;
 		bool bHit = false;
 		double gpQty = DBL_MAX;
+		// 检查组合中的每个合约是否存在于目标仓位中
 		for(auto& vi : gpInfo->_items)
 		{
 			double unit = vi.second;
@@ -508,9 +533,12 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 			}
 		}
 
+		// 如果组合成功匹配且数量大于0
 		if(bHit && decimal::gt(gpQty, 0))
 		{
+			// 设置组合合约的目标仓位
 			real_targets[gpInfo->_name] = gpQty;
+			// 从原始合约中减去组合合约占用的部分
 			for (auto& vi : gpInfo->_items)
 			{
 				double unit = vi.second;
@@ -519,31 +547,36 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		}
 	}
 
-
+	// 遍历所有目标仓位，设置执行单元的目标仓位
 	for (auto it = targets.begin(); it != targets.end(); it++)
 	{
 		const char* stdCode = it->first.c_str();
 		double newVol = it->second;
+		// 获取或创建执行单元
 		ExecuteUnitPtr unit = getUnit(stdCode);
 		if (unit == NULL)
 			continue;
 
+		// 更新内部目标仓位记录
 		double oldVol = _target_pos[stdCode];
 		_target_pos[stdCode] = newVol;
-		// 账户的理论持仓要经过修正
+		// 账户的理论持仓要经过缩放比例修正
 		double traderTarget = round(newVol * _scale);
 
+		// 如果仓位变化，记录日志
 		if(!decimal::eq(oldVol, newVol))
 		{
 			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale{}", stdCode, oldVol, newVol, traderTarget, _scale);
 		}
 
+		// 检查合约是否有订单限制
 		if (_trader && !_trader->checkOrderLimits(stdCode))
 		{
 			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "{} is disabled due to entrust limit control ", stdCode);
 			continue;
 		}
 
+		// 如果配置了线程池，使用线程池并行处理
 		if (_pool)
 		{
 			std::string code = stdCode;
@@ -553,19 +586,22 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		}
 		else
 		{
+			// 直接设置执行单元的目标仓位
 			unit->self()->set_position(stdCode, traderTarget);
 		}
 	}
 
-	//在原来的目标头寸中，但是不在新的目标头寸中，则需要自动设置为0
+	//在原来的目标头寒中，但是不在新的目标头寒中，则需要自动设置为0
 	for (auto it = _target_pos.begin(); it != _target_pos.end(); it++)
 	{
 		const char* code = it->first.c_str();
 		double& pos = (double&)it->second;
 		auto tit = targets.find(code);
+		// 如果新目标中存在该合约，跳过
 		if(tit != targets.end())
 			continue;
 
+		// 旧目标中有，新目标中没有的合约，自动设置为0
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is not in target, set to 0 automatically", code);
 
 		ExecuteUnitPtr unit = getUnit(code);
@@ -573,6 +609,7 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 			continue;
 
 		//unit->self()->set_position(code, 0);
+		// 如果配置了线程池，使用线程池并行处理
 		if (_pool)
 		{
 			_pool->schedule([unit, code](){
@@ -581,9 +618,11 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		}
 		else
 		{
+			// 直接设置执行单元的目标仓位为0
 			unit->self()->set_position(code, 0);
 		}
 
+		// 更新内部目标仓位记录
 		pos = 0;
 	}
 
