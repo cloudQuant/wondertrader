@@ -1981,6 +1981,12 @@ WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defV
 	return mocker->stra_load_user_data(key, defVal);
 }
 
+/**
+ * @brief HFT策略执行单步回测
+ * @details 在异步模式下执行高频策略的单步回测，处理一个tick数据
+ * @param cHandle 策略上下文句柄
+ * @note 该函数仅在异步模式下有意义，同步模式下将直接返回
+ */
 void hft_step(CtxHandler cHandle)
 {
 	//只有异步模式才有意义
