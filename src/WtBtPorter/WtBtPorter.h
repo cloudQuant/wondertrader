@@ -526,44 +526,64 @@ extern "C"
 	 */
 	EXPORT_FLAG	bool		cta_step(CtxHandler cHandle);
 
-	/*
-	 *	设置图表K线
+		/**
+	 * @brief 设置图表K线
+	 * @details 设置回测图表中显示的K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param period 周期类型，如"m1"表示1分钟，"d1"表示日线
 	 */
 	EXPORT_FLAG void		cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* period);
 
-	/*
-	 *	添加信号
+		/**
+	 * @brief 添加图表标记
+	 * @details 在回测图表中添加交易信号或标记点
+	 * @param cHandle 策略上下文句柄
+	 * @param price 标记位置的价格
+	 * @param icon 图标类型，用于图表显示
+	 * @param tag 标记的文字描述
 	 */
 	EXPORT_FLAG void		cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, const char* tag);
 
-	/*
-	 *	添加指标
-	 *	@idxName	指标名称
-	 *	@indexType	指标类型：0-主图指标，1-副图指标
+		/**
+	 * @brief 注册图表指标
+	 * @details 在回测图表中添加自定义技术指标
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称
+	 * @param indexType 指标类型：0-主图指标，1-副图指标
 	 */
 	EXPORT_FLAG void		cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexType);
 
-	/*
-	 *	添加指标线
-	 *	@idxName	指标名称
-	 *	@lineName	线条名称
-	 *	@lineType	线性，0-曲线
+		/**
+	 * @brief 注册指标线
+	 * @details 为已注册的指标添加线条
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称，必须是已经注册过的指标
+	 * @param lineName 线条名称
+	 * @param lineType 线条类型，0-曲线
+	 * @return bool 返回是否注册成功
 	 */
 	EXPORT_FLAG bool		cta_register_index_line(CtxHandler cHandle, const char* idxName, const char* lineName, WtUInt32 lineType);
 
-	/*
-	 *	添加基准线
-	 *	@idxName	指标名称
-	 *	@lineName	线条名称
-	 *	@val		数值
+		/**
+	 * @brief 添加指标基准线
+	 * @details 为指标添加水平基准线，如超买超卖线
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称，必须是已经注册过的指标
+	 * @param lineName 基准线名称
+	 * @param val 基准线数值
+	 * @return bool 返回是否添加成功
 	 */
 	EXPORT_FLAG bool		cta_add_index_baseline(CtxHandler cHandle, const char* idxName, const char* lineName, double val);
 
-	/*
-	 *	设置指标值
-	 *	@idxName	指标名称
-	 *	@lineName	线条名称
-	 *	@val		指标值
+		/**
+	 * @brief 设置指标线数值
+	 * @details 设置指定指标线的当前值，用于更新图表显示
+	 * @param cHandle 策略上下文句柄
+	 * @param idxName 指标名称，必须是已经注册过的指标
+	 * @param lineName 线条名称，必须是已经注册过的线条
+	 * @param val 指标线的当前值
+	 * @return bool 返回是否设置成功
 	 */
 	EXPORT_FLAG bool		cta_set_index_value(CtxHandler cHandle, const char* idxName, const char* lineName, double val);
 
@@ -572,56 +592,235 @@ extern "C"
 	//////////////////////////////////////////////////////////////////////////
 	//选股策略接口
 #pragma  region "SEL接口"
+	/**
+	 * @brief 获取选股策略持仓量
+	 * @details 获取选股策略中指定合约的持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param bOnlyValid 是否只计算有效仓位
+	 * @param openTag 开仓标记，用于区分不同来源的仓位
+	 * @return double 返回持仓量
+	 */
 	EXPORT_FLAG	double		sel_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag);
 
+	/**
+	 * @brief 设置选股策略持仓量
+	 * @details 设置选股策略中指定合约的目标持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param qty 目标持仓量
+	 * @param uesrTag 用户自定义标记，用于识别交易来源
+	 */
 	EXPORT_FLAG	void		sel_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* uesrTag);
 
+	/**
+	 * @brief 获取合约最新价格
+	 * @details 获取选股策略中指定合约的最新价格
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回合约最新价格
+	 */
 	EXPORT_FLAG	double 		sel_get_price(const char* stdCode);
 
+	/**
+	 * @brief 获取当前日期
+	 * @details 获取选股策略回测引擎中当前的自然日期
+	 * @return WtUInt32 返回自然日期，格式YYYYMMDD
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_date();
 
+	/**
+	 * @brief 获取当前时间
+	 * @details 获取选股策略回测引擎中当前的交易时间
+	 * @return WtUInt32 返回交易时间，格式HHMMSS
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_time();
 
+	/**
+	 * @brief 获取K线数据
+	 * @details 获取选股策略中指定合约的历史K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param period 周期类型，如"m1"表示1分钟，"d1"表示日线
+	 * @param barCnt 请求的K线数量
+	 * @param cb 回调函数，用于接收K线数据
+	 * @return WtUInt32 返回实际获取的K线数量
+	 */
 	EXPORT_FLAG	WtUInt32	sel_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt,FuncGetBarsCallback cb);
 
+	/**
+	 * @brief 获取Tick数据
+	 * @details 获取选股策略中指定合约的历史Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param tickCnt 请求的Tick数量
+	 * @param cb 回调函数，用于接收Tick数据
+	 * @return WtUInt32 返回实际获取的Tick数量
+	 */
 	EXPORT_FLAG	WtUInt32	sel_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt,FuncGetTicksCallback cb);
 
+	/**
+	 * @brief 获取所有持仓
+	 * @details 获取选股策略的所有合约持仓信息
+	 * @param cHandle 策略上下文句柄
+	 * @param cb 回调函数，用于接收持仓信息
+	 */
 	EXPORT_FLAG void		sel_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb);
 
+	/**
+	 * @brief 输出日志信息
+	 * @details 在选股策略中输出日志信息
+	 * @param cHandle 策略上下文句柄
+	 * @param level 日志级别
+	 * @param message 日志消息内容
+	 */
 	EXPORT_FLAG	void		sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message);
 
+	/**
+	 * @brief 保存用户数据
+	 * @details 将用户自定义数据保存到选股策略上下文中
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param val 数据值
+	 */
 	EXPORT_FLAG	void		sel_save_userdata(CtxHandler cHandle, const char* key, const char* val);
 
+	/**
+	 * @brief 加载用户数据
+	 * @details 从选股策略上下文中加载用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param defVal 默认值，当键名不存在时返回此值
+	 * @return WtString 返回加载的数据值
+	 */
 	EXPORT_FLAG	WtString	sel_load_userdata(CtxHandler cHandle, const char* key, const char* defVal);
 
+	/**
+	 * @brief 订阅Tick数据
+	 * @details 在选股策略中订阅指定合约的Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 */
 	EXPORT_FLAG	void		sel_sub_ticks(CtxHandler cHandle, const char* stdCode);
 
 	//By Wesley @ 2023.05.17
 	//扩展SEL的接口，主要是和CTA接口做一个同步
+	/**
+	 * @brief 获取持仓盈亏
+	 * @details 获取选股策略中指定合约的持仓盈亏
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回持仓盈亏金额
+	 */
 	EXPORT_FLAG	double		sel_get_position_profit(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取详细开仓时间
+	 * @details 获取选股策略中指定合约和标记的开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param openTag 开仓标记，用于区分不同来源的仓位
+	 * @return WtUInt64 返回开仓时间，格式为YYYYMMDDHHMMSSmmm
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取详细开仓成本
+	 * @details 获取选股策略中指定合约和标记的开仓成本
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param openTag 开仓标记，用于区分不同来源的仓位
+	 * @return double 返回开仓成本
+	 */
 	EXPORT_FLAG	double		sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag);
 
+	/**
+	 * @brief 获取详细盈亏
+	 * @details 获取选股策略中指定合约和标记的盈亏信息
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param openTag 开仓标记，用于区分不同来源的仓位
+	 * @param flag 盈亏标志，0-浮动盈亏，1-平仓盈亏
+	 * @return double 返回盈亏金额
+	 */
 	EXPORT_FLAG	double		sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag);
 
+	/**
+	 * @brief 获取持仓均价
+	 * @details 获取选股策略中指定合约的持仓均价
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回持仓均价
+	 */
 	EXPORT_FLAG	double		sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取日线价格数据
+	 * @details 获取选股策略中指定合约的日线价格数据
+	 * @param stdCode 标准化合约代码
+	 * @param flag 价格标志，0-开盘价，1-最高价，2-最低价，3-收盘价
+	 * @return double 返回对应的价格数据
+	 */
 	EXPORT_FLAG	double 		sel_get_day_price(const char* stdCode, int flag);
 
+	/**
+	 * @brief 获取选股策略资金数据
+	 * @details 获取选股策略账户的资金相关数据
+	 * @param cHandle 策略上下文句柄
+	 * @param flag 资金数据标志，0-动态权益，1-静态权益，2-可用资金
+	 * @return double 返回资金数据
+	 */
 	EXPORT_FLAG	double		sel_get_fund_data(CtxHandler cHandle, int flag);
 
+	/**
+	 * @brief 获取当前交易日期
+	 * @details 获取选股策略回测引擎中当前的交易日期
+	 * @return WtUInt32 返回交易日期，格式YYYYMMDD
+	 */
 	EXPORT_FLAG	WtUInt32 	sel_get_tdate();
 
+	/**
+	 * @brief 获取首次开仓时间
+	 * @details 获取选股策略中指定合约的首次开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return WtUInt64 返回首次开仓时间，格式为YYYYMMDDHHMMSSmmm
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_first_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取最后一次开仓时间
+	 * @details 获取选股策略中指定合约的最后一次开仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return WtUInt64 返回最后一次开仓时间，格式为YYYYMMDDHHMMSSmmm
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_last_entertime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取最后一次平仓时间
+	 * @details 获取选股策略中指定合约的最后一次平仓时间
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return WtUInt64 返回最后一次平仓时间，格式为YYYYMMDDHHMMSSmmm
+	 */
 	EXPORT_FLAG	WtUInt64	sel_get_last_exittime(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取最后一次开仓价格
+	 * @details 获取选股策略中指定合约的最后一次开仓价格
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回最后一次开仓价格
+	 */
 	EXPORT_FLAG	double		sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取最后一次开仓标记
+	 * @details 获取选股策略中指定合约的最后一次开仓标记
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return WtString 返回最后一次开仓标记
+	 */
 	EXPORT_FLAG	WtString	sel_get_last_entertag(CtxHandler cHandle, const char* stdCode);
 
 #pragma endregion "SEL接口"
@@ -630,54 +829,238 @@ extern "C"
 //HFT策略接口
 #pragma  region "HFT接口"
 
+	/**
+	 * @brief 获取HFT策略持仓量
+	 * @details 获取高频策略中指定合约的持仓量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param bOnlyValid 是否只计算有效仓位
+	 * @return double 返回持仓量
+	 */
 	EXPORT_FLAG	double		hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid);
 
+	/**
+	 * @brief 获取持仓盈亏
+	 * @details 获取高频策略中指定合约的持仓盈亏
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回持仓盈亏金额
+	 */
 	EXPORT_FLAG	double		hft_get_position_profit(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取持仓均价
+	 * @details 获取高频策略中指定合约的持仓均价
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回持仓均价
+	 */
 	EXPORT_FLAG	double		hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取未完成数量
+	 * @details 获取高频策略中指定合约的未完成委托数量
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回未完成委托数量
+	 */
 	EXPORT_FLAG	double		hft_get_undone(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 获取合约最新价格
+	 * @details 获取高频策略中指定合约的最新价格
+	 * @param stdCode 标准化合约代码
+	 * @return double 返回合约最新价格
+	 */
 	EXPORT_FLAG	double 		hft_get_price(const char* stdCode);
 
+	/**
+	 * @brief 获取当前日期
+	 * @details 获取高频策略回测引擎中当前的自然日期
+	 * @return WtUInt32 返回自然日期，格式YYYYMMDD
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_date();
 
+	/**
+	 * @brief 获取当前时间
+	 * @details 获取高频策略回测引擎中当前的交易时间
+	 * @return WtUInt32 返回交易时间，格式HHMMSS
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_time();
 
+	/**
+	 * @brief 获取当前秒数
+	 * @details 获取高频策略回测引擎中当前的秒数，用于高精度时间控制
+	 * @return WtUInt32 返回当前秒数
+	 */
 	EXPORT_FLAG	WtUInt32 	hft_get_secs();
 
+	/**
+	 * @brief 获取K线数据
+	 * @details 获取高频策略中指定合约的历史K线数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param period 周期类型，如"m1"表示1分钟，"d1"表示日线
+	 * @param barCnt 请求的K线数量
+	 * @param cb 回调函数，用于接收K线数据
+	 * @return WtUInt32 返回实际获取的K线数量
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, FuncGetBarsCallback cb);
 
+	/**
+	 * @brief 获取Tick数据
+	 * @details 获取高频策略中指定合约的历史Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param tickCnt 请求的Tick数量
+	 * @param cb 回调函数，用于接收Tick数据
+	 * @return WtUInt32 返回实际获取的Tick数量
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb);
 
+	/**
+	 * @brief 获取委托队列数据
+	 * @details 获取高频策略中指定合约的历史委托队列数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param tickCnt 请求的委托队列数量
+	 * @param cb 回调函数，用于接收委托队列数据
+	 * @return WtUInt32 返回实际获取的委托队列数量
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_ordque(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetOrdQueCallback cb);
 
+	/**
+	 * @brief 获取委托明细数据
+	 * @details 获取高频策略中指定合约的历史委托明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param tickCnt 请求的委托明细数量
+	 * @param cb 回调函数，用于接收委托明细数据
+	 * @return WtUInt32 返回实际获取的委托明细数量
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_orddtl(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetOrdDtlCallback cb);
 
+	/**
+	 * @brief 获取成交明细数据
+	 * @details 获取高频策略中指定合约的历史成交明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param tickCnt 请求的成交明细数量
+	 * @param cb 回调函数，用于接收成交明细数据
+	 * @return WtUInt32 返回实际获取的成交明细数量
+	 */
 	EXPORT_FLAG	WtUInt32	hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTransCallback cb);
 
+	/**
+	 * @brief 输出日志信息
+	 * @details 在高频策略中输出日志信息
+	 * @param cHandle 策略上下文句柄
+	 * @param level 日志级别
+	 * @param message 日志消息内容
+	 */
 	EXPORT_FLAG	void		hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message);
 
+	/**
+	 * @brief 订阅Tick数据
+	 * @details 在高频策略中订阅指定合约的Tick数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 */
 	EXPORT_FLAG	void		hft_sub_ticks(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 订阅委托队列数据
+	 * @details 在高频策略中订阅指定合约的委托队列数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 */
 	EXPORT_FLAG	void		hft_sub_order_queue(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 订阅委托明细数据
+	 * @details 在高频策略中订阅指定合约的委托明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 */
 	EXPORT_FLAG	void		hft_sub_order_detail(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 订阅成交明细数据
+	 * @details 在高频策略中订阅指定合约的成交明细数据
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 */
 	EXPORT_FLAG	void		hft_sub_transaction(CtxHandler cHandle, const char* stdCode);
 
+	/**
+	 * @brief 撤销委托
+	 * @details 在高频策略中撤销指定本地ID的委托
+	 * @param cHandle 策略上下文句柄
+	 * @param localid 委托的本地ID
+	 * @return bool 返回是否撤单成功
+	 */
 	EXPORT_FLAG	bool		hft_cancel(CtxHandler cHandle, WtUInt32 localid);
 
+	/**
+	 * @brief 撤销所有委托
+	 * @details 在高频策略中撤销指定合约的所有委托
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param isBuy 是否只撤销买单，true-只撤销买单，false-只撤销卖单
+	 * @return WtString 返回撤单结果信息
+	 */
 	EXPORT_FLAG	WtString	hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy);
 
+	/**
+	 * @brief 发出买入委托
+	 * @details 在高频策略中发出买入委托
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param price 委托价格
+	 * @param qty 委托数量
+	 * @param userTag 用户自定义标记
+	 * @param flag 委托标志，如市价单、限价单等
+	 * @return WtString 返回委托ID
+	 */
 	EXPORT_FLAG	WtString	hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 
+	/**
+	 * @brief 发出卖出委托
+	 * @details 在高频策略中发出卖出委托
+	 * @param cHandle 策略上下文句柄
+	 * @param stdCode 标准化合约代码
+	 * @param price 委托价格
+	 * @param qty 委托数量
+	 * @param userTag 用户自定义标记
+	 * @param flag 委托标志，如市价单、限价单等
+	 * @return WtString 返回委托ID
+	 */
 	EXPORT_FLAG	WtString	hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 
+	/**
+	 * @brief 保存用户数据
+	 * @details 将用户自定义数据保存到高频策略上下文中
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param val 数据值
+	 */
 	EXPORT_FLAG	void		hft_save_userdata(CtxHandler cHandle, const char* key, const char* val);
 
+	/**
+	 * @brief 加载用户数据
+	 * @details 从高频策略上下文中加载用户自定义数据
+	 * @param cHandle 策略上下文句柄
+	 * @param key 数据键名
+	 * @param defVal 默认值，当键名不存在时返回此值
+	 * @return WtString 返回加载的数据值
+	 */
 	EXPORT_FLAG	WtString	hft_load_userdata(CtxHandler cHandle, const char* key, const char* defVal);
 
+	/**
+	 * @brief 执行策略单步
+	 * @details 手动执行高频策略的单步运行，用于手动控制策略运行节奏
+	 * @param cHandle 策略上下文句柄
+	 */
 	EXPORT_FLAG	void		hft_step(CtxHandler cHandle);
 #pragma endregion "HFT接口"
 #ifdef __cplusplus
