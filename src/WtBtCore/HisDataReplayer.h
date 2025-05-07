@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file HisDataReplayer.h
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 历史数据回放器声明
+ * \details 定义了历史数据回放器类，用于重放历史行情数据并接收策略回调。
+ * 包含了回放各种周期的历史K线、Tick数据等，可以快速模拟交易全过程。
  */
 #pragma once
 #include <string>
