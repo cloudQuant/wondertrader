@@ -275,6 +275,13 @@ void clear_cache()
 	getRunner().clear_cache();
 }
 
+/**
+ * @brief 写入日志
+ * @details 将日志信息写入到日志系统中，可指定日志级别和分类
+ * @param level 日志级别，对应WTSLogLevel枚举
+ * @param message 日志消息内容
+ * @param catName 日志分类名称，如果为空则使用默认分类
+ */
 void write_log(WtUInt32 level, const char* message, const char* catName)
 {
 	if (strlen(catName) > 0)
@@ -287,22 +294,63 @@ void write_log(WtUInt32 level, const char* message, const char* catName)
 	}
 }
 
+/**
+ * @brief 初始化CTA策略模拟器
+ * @details 创建并初始化一个CTA策略的模拟器实例，用于回测过程
+ * @param name 策略名称
+ * @param slippage 滑点设置，默认为0
+ * @param hook 是否启用钩子函数，默认为false
+ * @param persistData 是否持久化数据，默认为true
+ * @param bIncremental 是否为增量模式，默认为false
+ * @param bRatioSlp 是否使用比例滑点，默认为false
+ * @return CtxHandler 策略上下文句柄
+ */
 CtxHandler init_cta_mocker(const char* name, int slippage/* = 0*/, bool hook/* = false*/, bool persistData/* = true*/, bool bIncremental/* = false*/, bool bRatioSlp/* = false*/)
 {
 	return getRunner().initCtaMocker(name, slippage, hook, persistData, bIncremental, bRatioSlp);
 }
 
+/**
+ * @brief 初始化高频策略模拟器
+ * @details 创建并初始化一个高频策略的模拟器实例，用于回测过程
+ * @param name 策略名称
+ * @param hook 是否启用钩子函数，默认为false
+ * @return CtxHandler 策略上下文句柄
+ */
 CtxHandler init_hft_mocker(const char* name, bool hook/* = false*/)
 {
 	return getRunner().initHftMocker(name, hook);
 }
 
+/**
+ * @brief 初始化选股策略模拟器
+ * @details 创建并初始化一个选股策略的模拟器实例，用于回测过程
+ * @param name 策略名称
+ * @param date 日期，格式为YYYYMMDD
+ * @param time 时间，格式为HHMMSS或HHMMSS000
+ * @param period 周期标识符，如"d1"表示日线
+ * @param trdtpl 交易模板，默认为"CHINA"
+ * @param session 交易时段，默认为"TRADING"
+ * @param slippage 滑点设置，默认为0
+ * @param bRatioSlp 是否使用比例滑点，默认为false
+ * @return CtxHandler 策略上下文句柄
+ */
 CtxHandler init_sel_mocker(const char* name, WtUInt32 date, WtUInt32 time, const char* period, const char* trdtpl/* = "CHINA"*/, const char* session/* = "TRADING"*/, int slippage/* = 0*/, bool bRatioSlp/* = false*/)
 {
 	return getRunner().initSelMocker(name, date, time, period, trdtpl, session, slippage, bRatioSlp);
 }
 
 #pragma region "CTA策略接口"
+/**
+ * @brief CTA策略做多入场
+ * @details 在CTA策略中执行做多入场操作，可以指定限价和止损价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 交易数量
+ * @param userTag 用户自定义标签，用于识别交易
+ * @param limitprice 限价，为0则为市价单
+ * @param stopprice 止损价，为0则不设止损
+ */
 void cta_enter_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -312,6 +360,16 @@ void cta_enter_long(CtxHandler cHandle, const char* stdCode, double qty, const c
 	ctx->stra_enter_long(stdCode, qty, userTag, limitprice, stopprice);
 }
 
+/**
+ * @brief CTA策略平多出场
+ * @details 在CTA策略中执行平多出场操作，可以指定限价和止损价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 交易数量
+ * @param userTag 用户自定义标签，用于识别交易
+ * @param limitprice 限价，为0则为市价单
+ * @param stopprice 止损价，为0则不设止损
+ */
 void cta_exit_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -321,6 +379,16 @@ void cta_exit_long(CtxHandler cHandle, const char* stdCode, double qty, const ch
 	ctx->stra_exit_long(stdCode, qty, userTag, limitprice, stopprice);
 }
 
+/**
+ * @brief CTA策略做空入场
+ * @details 在CTA策略中执行做空入场操作，可以指定限价和止损价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 交易数量
+ * @param userTag 用户自定义标签，用于识别交易
+ * @param limitprice 限价，为0则为市价单
+ * @param stopprice 止损价，为0则不设止损
+ */
 void cta_enter_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -330,6 +398,16 @@ void cta_enter_short(CtxHandler cHandle, const char* stdCode, double qty, const 
 	ctx->stra_enter_short(stdCode, qty, userTag, limitprice, stopprice);
 }
 
+/**
+ * @brief CTA策略平空出场
+ * @details 在CTA策略中执行平空出场操作，可以指定限价和止损价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 交易数量
+ * @param userTag 用户自定义标签，用于识别交易
+ * @param limitprice 限价，为0则为市价单
+ * @param stopprice 止损价，为0则不设止损
+ */
 void cta_exit_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -339,6 +417,17 @@ void cta_exit_short(CtxHandler cHandle, const char* stdCode, double qty, const c
 	ctx->stra_exit_short(stdCode, qty, userTag, limitprice, stopprice);
 }
 
+/**
+ * @brief 获取K线数据
+ * @details 在CTA策略中获取指定合约的K线数据，并通过回调函数返回
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param period 周期标识符，如"d1"表示日线
+ * @param barCnt 请求的K线数量
+ * @param isMain 是否为主图指标
+ * @param cb 获取K线数据的回调函数
+ * @return WtUInt32 实际返回的K线数量
+ */
 WtUInt32 cta_get_bars(CtxHandler cHandle, const char* stdCode, const char* period, WtUInt32 barCnt, bool isMain, FuncGetBarsCallback cb)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -368,6 +457,15 @@ WtUInt32 cta_get_bars(CtxHandler cHandle, const char* stdCode, const char* perio
 	}
 }
 
+/**
+ * @brief 获取Tick数据
+ * @details 在CTA策略中获取指定合约的Tick数据，并通过回调函数返回
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param tickCnt 请求的Tick数量
+ * @param cb 获取Tick数据的回调函数
+ * @return WtUInt32 实际返回的Tick数量
+ */
 WtUInt32	cta_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt, FuncGetTicksCallback cb)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -398,6 +496,13 @@ WtUInt32	cta_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
 	}
 }
 
+/**
+ * @brief 获取持仓盈亏
+ * @details 在CTA策略中获取指定合约的持仓盈亏
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 持仓盈亏金额
+ */
 double cta_get_position_profit(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -407,6 +512,14 @@ double cta_get_position_profit(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_position_profit(stdCode);
 }
 
+/**
+ * @brief 获取详细入场时间
+ * @details 在CTA策略中获取指定合约和标签的入场时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @return WtUInt64 入场时间，格式为YYYYMMDDHHmmss
+ */
 WtUInt64 cta_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -416,6 +529,14 @@ WtUInt64 cta_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const
 	return ctx->stra_get_detail_entertime(stdCode, openTag);
 }
 
+/**
+ * @brief 获取详细开仓成本
+ * @details 在CTA策略中获取指定合约和标签的开仓成本
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @return double 开仓成本
+ */
 double cta_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -425,6 +546,15 @@ double cta_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* 
 	return ctx->stra_get_detail_cost(stdCode, openTag);
 }
 
+/**
+ * @brief 获取详细盈亏
+ * @details 在CTA策略中获取指定合约和标签的盈亏情况
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param openTag 开仓标签
+ * @param flag 盈亏标志，0-浮动盈亏，1-平仓盈亏
+ * @return double 盈亏金额
+ */
 double cta_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -434,6 +564,13 @@ double cta_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char
 	return ctx->stra_get_detail_profit(stdCode, openTag, flag);
 }
 
+/**
+ * @brief 获取持仓均价
+ * @details 在CTA策略中获取指定合约的持仓均价
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 持仓均价
+ */
 double cta_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -443,6 +580,12 @@ double cta_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_position_avgpx(stdCode);
 }
 
+/**
+ * @brief 获取所有持仓
+ * @details 在CTA策略中获取所有合约的持仓情况，通过回调函数返回
+ * @param cHandle 策略上下文句柄
+ * @param cb 获取持仓的回调函数，会多次调用，每次返回一个合约的持仓，最后一次调用的标准代码为空字符串，表示枚举结束
+ */
 void cta_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -459,6 +602,15 @@ void cta_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
 	cb(cHandle, "", 0, true);
 }
 
+/**
+ * @brief 获取持仓量
+ * @details 在CTA策略中获取指定合约的持仓量
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param bOnlyValid 是否只返回有效持仓
+ * @param openTag 开仓标签，如果不为空，则只返回指定标签的持仓
+ * @return double 持仓量，正数表示多头持仓，负数表示空头持仓
+ */
 double cta_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -468,6 +620,13 @@ double cta_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid
 	return ctx->stra_get_position(stdCode, bOnlyValid, openTag);
 }
 
+/**
+ * @brief 获取资金数据
+ * @details 在CTA策略中获取资金相关数据，如动态权益、静态权益等
+ * @param cHandle 策略上下文句柄
+ * @param flag 资金数据标志，0-动态权益，1-静态权益，2-浮动盈亏
+ * @return double 资金数据值
+ */
 double cta_get_fund_data(CtxHandler cHandle, int flag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -477,6 +636,16 @@ double cta_get_fund_data(CtxHandler cHandle, int flag)
 	return ctx->stra_get_fund_data(flag);
 }
 
+/**
+ * @brief 设置目标仓位
+ * @details 在CTA策略中设置指定合约的目标仓位，系统会自动根据当前仓位进行调整
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @param qty 目标仓位量，正数表示多头仓位，负数表示空头仓位
+ * @param userTag 用户自定义标签
+ * @param limitprice 限价，为0则为市价单
+ * @param stopprice 止损价，为0则不设止损
+ */
 void cta_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -486,6 +655,13 @@ void cta_set_position(CtxHandler cHandle, const char* stdCode, double qty, const
 	ctx->stra_set_position(stdCode, qty, userTag, limitprice, stopprice);
 }
 
+/**
+ * @brief 获取首次入场时间
+ * @details 在CTA策略中获取指定合约的首次入场时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 首次入场时间，格式为YYYYMMDDHHmmss
+ */
 WtUInt64 cta_get_first_entertime(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -495,6 +671,13 @@ WtUInt64 cta_get_first_entertime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_first_entertime(stdCode);
 }
 
+/**
+ * @brief 获取最近入场时间
+ * @details 在CTA策略中获取指定合约的最后一次入场时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 最近入场时间，格式为YYYYMMDDHHmmss
+ */
 WtUInt64 cta_get_last_entertime(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -504,6 +687,13 @@ WtUInt64 cta_get_last_entertime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_entertime(stdCode);
 }
 
+/**
+ * @brief 获取最近出场时间
+ * @details 在CTA策略中获取指定合约的最后一次出场时间
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtUInt64 最近出场时间，格式为YYYYMMDDHHmmss
+ */
 WtUInt64 cta_get_last_exittime(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -513,6 +703,13 @@ WtUInt64 cta_get_last_exittime(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_exittime(stdCode);
 }
 
+/**
+ * @brief 获取最近入场价格
+ * @details 在CTA策略中获取指定合约的最近一次入场价格
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return double 最近入场价格
+ */
 double cta_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -522,6 +719,13 @@ double cta_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_enterprice(stdCode);
 }
 
+/**
+ * @brief 获取最近入场标签
+ * @details 在CTA策略中获取指定合约的最近一次入场标签
+ * @param cHandle 策略上下文句柄
+ * @param stdCode 标准合约代码
+ * @return WtString 最近入场标签
+ */
 WtString cta_get_last_entertag(CtxHandler cHandle, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
@@ -531,31 +735,66 @@ WtString cta_get_last_entertag(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_last_entertag(stdCode);
 }
 
+/**
+ * @brief 获取当前合约价格
+ * @details 获取当前回测时点指定合约的最新价格
+ * @param stdCode 标准合约代码
+ * @return double 当前合约价格
+ */
 double cta_get_price(const char* stdCode)
 {
 	return getRunner().replayer().get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取合约日线价格
+ * @details 获取当前交易日的指定合约的开盘价/收盘价/最高价/最低价
+ * @param stdCode 标准合约代码
+ * @param flag 价格标志，0-开盘价，1-收盘价，2-最高价，3-最低价
+ * @return double 对应的价格
+ */
 double cta_get_day_price(const char* stdCode, int flag)
 {
 	return getRunner().replayer().get_day_price(stdCode, flag);
 }
 
+/**
+ * @brief 获取当前交易日
+ * @details 获取当前回测时点的交易日期
+ * @return WtUInt32 交易日期，格式为YYYYMMDD
+ */
 WtUInt32 cta_get_tdate()
 {
 	return getRunner().replayer().get_trading_date();
 }
 
+/**
+ * @brief 获取当前自然日
+ * @details 获取当前回测时点的自然日期（公历日）
+ * @return WtUInt32 自然日期，格式为YYYYMMDD
+ */
 WtUInt32 cta_get_date()
 {
 	return getRunner().replayer().get_date();
 }
 
+/**
+ * @brief 获取当前时间
+ * @details 获取当前回测时点的时间
+ * @return WtUInt32 时间，格式为HHMMSS或HHMMSS000
+ */
 WtUInt32 cta_get_time()
 {
 	return getRunner().replayer().get_min_time();
 }
 
+/**
+ * @brief CTA策略日志输出
+ * @details 在CTA策略中输出指定级别的日志
+ * @param cHandle 策略上下文句柄
+ * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
+ * @param message 日志内容
+ */
 void cta_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
