@@ -334,22 +334,30 @@ private:
 	typedef std::shared_ptr<BarsList> BarsListPtr;
 	typedef wt_hashmap<std::string, BarsListPtr>	BarsCache;
 
+	/**
+	 * @brief 任务周期类型枚举
+	 * @details 定义了定时任务的周期性类型，包括不重复、分钟线、日、周、月、年等周期
+	 */
 	typedef enum tagTaskPeriodType
 	{
-		TPT_None,		//不重复
-		TPT_Minute = 4,	//分钟线周期
-		TPT_Daily = 8,	//每个交易日
-		TPT_Weekly,		//每周,遇到节假日的话要顺延
-		TPT_Monthly,	//每月,遇到节假日顺延
-		TPT_Yearly		//每年,遇到节假日顺延
+		TPT_None,		///< 不重复，只执行一次
+		TPT_Minute = 4,	///< 分钟线周期，每分钟执行
+		TPT_Daily = 8,	///< 每个交易日执行
+		TPT_Weekly,		///< 每周执行，遇到节假日的话要顺延
+		TPT_Monthly,	///< 每月执行，遇到节假日顺延
+		TPT_Yearly		///< 每年执行，遇到节假日顺延
 	}TaskPeriodType;
 
+	/**
+	 * @brief 任务信息结构体
+	 * @details 定义了定时任务的各项配置信息，包括任务ID、名称、时间设置等
+	 */
 	typedef struct _TaskInfo
 	{
-		uint32_t	_id;
-		char		_name[16];		//任务名
-		char		_trdtpl[16];	//交易日模板
-		char		_session[16];	//交易时间模板
+		uint32_t	_id;			///< 任务全局唯一ID
+		char		_name[16];		///< 任务名称
+		char		_trdtpl[16];	///< 交易日模板
+		char		_session[16];	///< 交易时间模板
 		uint32_t	_day;			//日期,根据周期变化,每日为0,每周为0~6,对应周日到周六,每月为1~31,每年为0101~1231
 		uint32_t	_time;			//时间,精确到分钟
 		bool		_strict_time;	//是否是严格时间,严格时间即只有时间相等才会执行,不是严格时间,则大于等于触发时间都会执行
