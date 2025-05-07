@@ -1,11 +1,12 @@
-﻿/*!
+/*!
  * \file WtBtPorter.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 回测引擎接口封装实现
+ * \details 本文件实现了WtBtPorter.h中声明的回测引擎接口，为上层应用提供了CTA、SEL和HFT策略的回测功能
  */
 #include "WtBtPorter.h"
 #include "WtBtRunner.h"
@@ -31,29 +32,75 @@ char PLATFORM_NAME[] = "UNIX";
 #endif
 
 
+/**
+ * @brief 获取回测引擎单例
+ * @details 使用单例模式获取WtBtRunner实例，确保整个程序中只有一个回测引擎实例
+ * @return WtBtRunner& 返回回测引擎单例的引用
+ */
 WtBtRunner& getRunner()
 {
 	static WtBtRunner runner;
 	return runner;
 }
 
+/**
+ * @brief 注册事件回调函数
+ * @details 将事件回调函数注册到回测引擎中，用于接收回测过程中的事件通知
+ * @param cbEvt 事件回调函数指针
+ */
 void register_evt_callback(FuncEventCallback cbEvt)
 {
 	getRunner().registerEvtCallback(cbEvt);
 }
 
+/**
+ * @brief 注册CTA策略回调函数
+ * @details 将CTA策略的各种回调函数注册到回测引擎中
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick Tick数据到达回调函数
+ * @param cbCalc 策略计算回调函数
+ * @param cbBar K线数据到达回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ * @param cbCalcDone 计算完成回调函数，默认为NULL
+ * @param cbCondTrigger 条件触发回调函数
+ */
 void register_cta_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 	FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone/* = NULL*/, FuncStraCondTriggerCallback cbCondTrigger)
 {
 	getRunner().registerCtaCallbacks(cbInit, cbTick, cbCalc, cbBar, cbSessEvt, cbCalcDone, cbCondTrigger);
 }
 
+/**
+ * @brief 注册选股策略回调函数
+ * @details 将选股策略的各种回调函数注册到回测引擎中
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick Tick数据到达回调函数
+ * @param cbCalc 策略计算回调函数
+ * @param cbBar K线数据到达回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ * @param cbCalcDone 计算完成回调函数，默认为NULL
+ */
 void register_sel_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, 
 	FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt, FuncStraCalcCallback cbCalcDone/* = NULL*/)
 {
 	getRunner().registerSelCallbacks(cbInit, cbTick, cbCalc, cbBar, cbSessEvt, cbCalcDone);
 }
 
+/**
+ * @brief 注册高频策略回调函数
+ * @details 将高频策略的各种回调函数注册到回测引擎中
+ * @param cbInit 策略初始化回调函数
+ * @param cbTick Tick数据到达回调函数
+ * @param cbBar K线数据到达回调函数
+ * @param cbChnl 通道数据回调函数
+ * @param cbOrd 订单回调函数
+ * @param cbTrd 成交回调函数
+ * @param cbEntrust 委托回调函数
+ * @param cbOrdDtl 逆序委托明细回调函数
+ * @param cbOrdQue 逆序委托队列回调函数
+ * @param cbTrans 逆序逐笔成交回调函数
+ * @param cbSessEvt 交易时段事件回调函数
+ */
 void register_hft_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar,
 	FuncHftChannelCallback cbChnl, FuncHftOrdCallback cbOrd, FuncHftTrdCallback cbTrd, FuncHftEntrustCallback cbEntrust,
 	FuncStraOrdDtlCallback cbOrdDtl, FuncStraOrdQueCallback cbOrdQue, FuncStraTransCallback cbTrans, FuncSessionEvtCallback cbSessEvt)
@@ -61,21 +108,50 @@ void register_hft_callbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cb
 	getRunner().registerHftCallbacks(cbInit, cbTick, cbBar, cbChnl, cbOrd, cbTrd, cbEntrust, cbOrdDtl, cbOrdQue, cbTrans, cbSessEvt);
 }
 
+/**
+ * @brief 注册外部数据加载器
+ * @details 将外部数据加载器注册到回测引擎中，用于加载历史数据
+ * @param fnlBarLoader 完整K线加载器函数
+ * @param rawBarLoader 原始K线加载器函数
+ * @param fctLoader 除权因子加载器函数
+ * @param tickLoader Tick数据加载器函数
+ * @param bAutoTrans 是否自动转换数据
+ */
 void register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader, bool bAutoTrans)
 {
 	getRunner().registerExtDataLoader(fnlBarLoader, rawBarLoader, fctLoader, tickLoader, bAutoTrans);
 }
 
+/**
+ * @brief 向回测引擎输入原始K线数据
+ * @details 将外部加载的原始K线数据输入到回测引擎中进行处理
+ * @param bars K线数据结构指针
+ * @param count K线数据数量
+ */
 void feed_raw_bars(WTSBarStruct* bars, WtUInt32 count)
 {
 	getRunner().feedRawBars(bars, count);
 }
 
+/**
+ * @brief 向回测引擎输入原始Tick数据
+ * @details 将外部加载的原始Tick数据输入到回测引擎中进行处理
+ * @param ticks Tick数据结构指针
+ * @param count Tick数据数量
+ */
 void feed_raw_ticks(WTSTickStruct* ticks, WtUInt32 count)
 {
 	getRunner().feedRawTicks(ticks, count);
 }
 
+/**
+ * @brief 初始化回测引擎
+ * @details 初始化回测引擎的环境，包括日志配置和输出目录等设置
+ * @param logProfile 日志配置文件或内容
+ * @param isFile 是否为文件路径，如果为true则logProfile为文件路径，否则为配置内容
+ * @param outDir 输出目录
+ * @note 该函数只会执行一次，重复调用会被忽略
+ */
 void init_backtest(const char* logProfile, bool isFile, const char* outDir)
 {
 	static bool inited = false;
@@ -88,6 +164,13 @@ void init_backtest(const char* logProfile, bool isFile, const char* outDir)
 	inited = true;
 }
 
+/**
+ * @brief 配置回测引擎
+ * @details 设置回测引擎的配置参数，包括交易日历、品种信息等
+ * @param cfgfile 配置文件路径或配置内容字符串
+ * @param isFile 是否为文件路径，如果为true则cfgfile为文件路径，否则为配置内容
+ * @note 该函数只会执行一次，重复调用会被忽略。如果cfgfile为空，则使用默认配置文件"configbt.json"
+ */
 void config_backtest(const char* cfgfile, bool isFile)
 {
 	static bool inited = false;
@@ -101,36 +184,72 @@ void config_backtest(const char* cfgfile, bool isFile)
 		getRunner().config(cfgfile, isFile);
 }
 
+/**
+ * @brief 设置回测的时间范围
+ * @details 设置回测起止时间，用于控制回测的时间范围
+ * @param stime 开始时间，格式为YYYYMMDDHHmmss
+ * @param etime 结束时间，格式YYYYMMDDHHmmss
+ */
 void set_time_range(WtUInt64 stime, WtUInt64 etime)
 {
 	getRunner().set_time_range(stime, etime);
 }
 
+/**
+ * @brief 启用Tick数据回测
+ * @details 设置是否启用Tick数据进行回测，如果启用则使用Tick级别回测，否则使用K线回测
+ * @param bEnabled 是否启用Tick数据回测，默认为true
+ */
 void enable_tick(bool bEnabled /* = true */)
 {
 	getRunner().enable_tick(bEnabled);
 }
 
+/**
+ * @brief 运行回测
+ * @details 启动回测引擎并运行回测过程
+ * @param bNeedDump 是否需要输出回测结果
+ * @param bAsync 是否使用异步模式运行回测
+ */
 void run_backtest(bool bNeedDump, bool bAsync)
 {
 	getRunner().run(bNeedDump, bAsync);
 }
 
+/**
+ * @brief 停止回测
+ * @details 停止正在运行的回测过程，主要用于异步模式下的回测控制
+ */
 void stop_backtest()
 {
 	getRunner().stop();
 }
 
+/**
+ * @brief 释放回测资源
+ * @details 释放回测引擎占用的内存和资源，在回测结束后调用
+ */
 void release_backtest()
 {
 	getRunner().release();
 }
 
+/**
+ * @brief 获取原始标准代码
+ * @details 将组合商品代码转换为原始标准代码
+ * @param stdCode 标准代码
+ * @return WtString 原始标准代码
+ */
 WtString get_raw_stdcode(const char* stdCode)
 {
 	return getRunner().get_raw_stdcode(stdCode);
 }
 
+/**
+ * @brief 获取版本信息
+ * @details 获取WonderTrader的版本信息，包括平台、版本号和构建时间
+ * @return const char* 版本信息字符串
+ */
 const char* get_version()
 {
 	static std::string _ver;
@@ -147,6 +266,10 @@ const char* get_version()
 	return _ver.c_str();
 }
 
+/**
+ * @brief 清理缓存
+ * @details 清理回测引擎中的数据缓存，释放内存资源
+ */
 void clear_cache()
 {
 	getRunner().clear_cache();
