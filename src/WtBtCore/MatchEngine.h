@@ -22,8 +22,16 @@ NS_WTP_END
 
 USING_NS_WTP;
 
+/**
+ * @brief 订单ID列表类型
+ * @details 定义了订单ID的列表类型，用于存储和返回多个订单ID
+ */
 typedef std::vector<uint32_t> OrderIDs;
 
+/**
+ * @brief Tick数据缓存类型
+ * @details 定义了以合约代码为键的Tick数据缓存映射表，用于快速查找和缓存Tick数据
+ */
 typedef WTSHashMap<std::string>	WTSTickCache;
 
 /**
@@ -233,9 +241,17 @@ private:
 		}
 	} OrderInfo;
 
+	/**
+	 * @brief 订单存储容器类型
+	 * @details 定义了以订单ID为键的订单信息映射表，用于存储和管理所有订单
+	 */
 	typedef wt_hashmap<uint32_t, OrderInfo> Orders;
-	Orders	_orders;
+	Orders	_orders;    ///< 订单存储容器，管理所有活跃订单
 
+	/**
+	 * @brief 委托账本条目类型
+	 * @details 定义了价格与委托量的映射关系，价格使用整数表示（乘以10000后的值）
+	 */
 	typedef std::map<uint32_t, double>	LOBItems;
 
 	/**
@@ -272,8 +288,12 @@ private:
 			_bid_px = 0;
 		}
 	} LmtOrdBook;
+	/**
+	 * @brief 限价委托账本存储容器类型
+	 * @details 定义了以合约代码为键的委托账本映射表，用于存储和管理所有合约的委托账本
+	 */
 	typedef wt_hashmap<std::string, LmtOrdBook> LmtOrdBooks;
-	LmtOrdBooks	_lmt_ord_books;
+	LmtOrdBooks	_lmt_ord_books;    ///< 限价委托账本存储容器，管理所有合约的委托账本
 
 	IMatchSink*	_sink;          ///< 撮合引擎回调接口指针
 
