@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file WtBtRunner.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 回测引擎运行器实现
+ * \details 本文件实现了WonderTrader回测引擎的独立运行器，用于执行各类策略的回测测试
+ * 支持CTA策略、SEL选股策略、HFT高频策略、UFT策略和Exec执行器策略的回测
  */
 #include "../WtBtCore/HisDataReplayer.h"
 #include "../WtBtCore/CtaMocker.h"
@@ -27,6 +29,14 @@
 #include "../Common/mdump.h"
 #endif
 
+/**
+ * @brief 回测引擎的主函数
+ * @details 实现了回测引擎的入口点，包括命令行参数解析、配置文件加载、回测环境初始化、
+ * 策略实例创建和注册、回测执行等功能
+ * @param argc 命令行参数数量
+ * @param argv 命令行参数数组
+ * @return int 程序返回值，0表示成功，非0表示出错
+ */
 int main(int argc, char* argv[])
 {
 #ifdef _MSC_VER

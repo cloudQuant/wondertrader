@@ -1,4 +1,8 @@
-/*!\n * \brief WonderTrader数据随机访问器头文件\n * \author Wesley\n * \date 2020/03/30\n * \details 该文件定义了WonderTrader数据随机访问器的实现类WtRdmDtReader，\n *          提供对各种类型历史和实时行情数据的随机访问功能\n */
+/*!\n 
+* \brief WonderTrader数据随机访问器头文件\n 
+* \author Wesley\n * \date 2020/03/30\n 
+* \details 该文件定义了WonderTrader数据随机访问器的实现类WtRdmDtReader，\n 
+*          提供对各种类型历史和实时行情数据的随机访问功能\n */
 
 #pragma once
 #include <string>
