@@ -1,11 +1,16 @@
-﻿/*!
+/*!
  * \file HisDataReplayer.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 历史数据回放器实现文件
+ * \details 该文件实现了历史数据回放器的核心功能，包括：
+ *          1. 历史K线、Tick等数据的加载与缓存
+ *          2. 数据按时间顺序回放的控制逻辑
+ *          3. 回测过程中的事件触发和回调处理
+ *          4. 支持基于K线、Tick和定时任务的多种回测模式
  */
 #include "HisDataReplayer.h"
 #include "EventNotifier.h"
@@ -40,8 +45,16 @@ namespace rj = rapidjson;
 
 using namespace std;
 
-/*
- *	处理块数据
+/*!*
+ * @brief 处理数据块
+ * 
+ * @param tag 数据标签，用于日志输出
+ * @param content 数据内容，传入传出参数，处理后的数据将存储在此
+ * @param isBar 是否为K线数据，true为K线数据，false为Tick数据
+ * @param bKeepHead 是否保留数据块头部，默认为true
+ * @return bool 处理是否成功
+ * 
+ * @details 处理二进制数据块，支持数据的解压缩以及新旧版本数据结构的转换
  */
 bool proc_block_data(const char* tag, std::string& content, bool isBar, bool bKeepHead = true)
 {
@@ -140,6 +153,10 @@ bool proc_block_data(const char* tag, std::string& content, bool isBar, bool bKe
 	return true;
 }
 
+/*!*
+ * @brief 历史数据回放器构造函数
+ * @details 初始化历史数据回放器的成员变量，设置默认参数
+ */
 HisDataReplayer::HisDataReplayer()
 	: _listener(NULL)
 	, _cur_date(0)
@@ -161,11 +178,24 @@ HisDataReplayer::HisDataReplayer()
 }
 
 
+/*!*
+ * @brief 历史数据回放器析构函数
+ * @details 清理历史数据回放器分配的资源
+ */
 HisDataReplayer::~HisDataReplayer()
 {
 }
 
 
+/*!*
+ * @brief 初始化历史数据回放器
+ * @param cfg 配置项参数，包含所有回测相关的设置
+ * @param notifier 事件通知器，用于处理回测过程中的事件，默认为NULL
+ * @param dataLoader 数据加载器，用于自定义数据源的加载，默认为NULL
+ * @return 初始化是否成功
+ * 
+ * @details 根据配置初始化回放器，包括设置数据路径、回测时间范围、手续费模板等
+ */
 bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */, IBtDataLoader* dataLoader /* = NULL */)
 {
 	_notifier = notifier;
@@ -297,6 +327,12 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 	return true;
 }
 
+/*!*
+ * @brief 从数据加载器中加载股票除权因子
+ * @return 加载是否成功
+ * 
+ * @details 通过外部数据加载器加载所有股票的除权因子数据，这些因子用于股票数据的前复权或后复权计算
+ */
 bool HisDataReplayer::loadStkAdjFactorsFromLoader()
 {
 	if (NULL == _bt_loader)
@@ -330,6 +366,13 @@ bool HisDataReplayer::loadStkAdjFactorsFromLoader()
 	return ret;
 }
 
+/*!*
+ * @brief 从文件中加载股票除权因子
+ * @param adjfile 除权因子文件路径
+ * @return 加载是否成功
+ * 
+ * @details 从指定的CSV文件中加载股票除权因子数据，文件格式为代码,日期,除权因子
+ */
 bool HisDataReplayer::loadStkAdjFactorsFromFile(const char* adjfile)
 {
 	if (!StdFile::exists(adjfile))
@@ -402,6 +445,17 @@ bool HisDataReplayer::loadStkAdjFactorsFromFile(const char* adjfile)
 	return true;
 }
 
+/*!*
+ * @brief 注册定时任务
+ * @param taskid 任务ID
+ * @param date 日期参数，根据任务周期不同而变化：每日为0，每周为0~6（周日到周六），每月为1~31，每年为0101~1231
+ * @param time 时间，精确到分钟，格式为HHMM
+ * @param period 时间周期，可以是“d”(天)、“w”(周)、“m”(月)、“y”(年)
+ * @param trdtpl 交易日模板，默认为"CHINA"
+ * @param session 交易时段模板，默认为"TRADING"
+ * 
+ * @details 注册一个定时任务，用于回测中定期触发特定操作，如定时交易、信号生成等
+ */
 void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t time, const char* period, const char* trdtpl /* = "CHINA" */, const char* session /* = "TRADING" */)
 {
 	TaskPeriodType ptype;
@@ -431,6 +485,11 @@ void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t tim
 	WTSLogger::info("Timed task registration succeed, frequency: {}", period);
 }
 
+/*!*
+ * @brief 清理数据缓存
+ * 
+ * @details 清除所有历史数据的缓存，包括Tick数据、K线数据、委托队列、委托明细和成交数据缓存，释放内存
+ */
 void HisDataReplayer::clear_cache()
 {
 	_ticks_cache.clear();
@@ -454,6 +513,11 @@ void HisDataReplayer::clear_cache()
 	WTSLogger::log_raw(LL_WARN, "All cached data cleared");
 }
 
+/*!*
+ * @brief 重置回放器状态
+ * 
+ * @details 重置历史数据回放器的内部状态，主要重置数据游标而不清除缓存，以便重新开始回测
+ */
 void HisDataReplayer::reset()
 {
 	//重置不会清除掉缓存，而是将读取的标记还原，这样不用重复加载主句
@@ -513,6 +577,18 @@ void HisDataReplayer::reset()
 	_tick_simulated = true;
 }
 
+/*!*
+ * @brief 输出回测状态到文件
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param times 周期倍数
+ * @param stime 起始时间
+ * @param etime 结束时间
+ * @param progress 进度百分比
+ * @param elapse 消耗时间（毫秒）
+ * 
+ * @details 将当前回测进度状态以JSON格式输出到文件，包含合约信息、周期、时间范围、进度和时间消耗
+ */
 void HisDataReplayer::dump_btstate(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress, int64_t elapse)
 {
 	std::string output;
@@ -552,6 +628,18 @@ void HisDataReplayer::dump_btstate(const char* stdCode, WTSKlinePeriod period, u
 	StdFile::write_file_content(filename.c_str(), output.c_str(), output.size());
 }
 
+/*!*
+ * @brief 通知回测状态
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param times 周期倍数
+ * @param stime 起始时间
+ * @param etime 结束时间
+ * @param progress 回测进度百分比
+ * 
+ * @details 通过事件通知器向外部组件通知当前回测状态，不同于dump_btstate方法将状态写入文件，
+ *          该方法是将状态数据通过事件机制发送给监听器，用于实时展示回测进度
+ */
 void HisDataReplayer::notify_state(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress)
 {
 	if (!_notifier)
@@ -588,6 +676,17 @@ void HisDataReplayer::notify_state(const char* stdCode, WTSKlinePeriod period, u
 	_notifier->notifyData("BT_STATE", (void*)output.c_str(), output.size());
 }
 
+/*!*
+ * @brief 定位K线数据的索引位置
+ * @param key 合约缓存的键值
+ * @param now 当前时间点
+ * @param bUpperBound 是否使用上界查找模式，默认为false
+ * @return 定位到的K线索引
+ * 
+ * @details 根据时间定位K线数据的索引位置，支持上界和下界两种查找方式。
+ *          当设置bUpperBound为true时，找到第一个大于指定时间的K线索引；
+ *          当设置bUpperBound为false时，找到最后一个小于等于指定时间的K线索引。
+ */
 uint32_t HisDataReplayer::locate_barindex(const std::string& key, uint64_t now, bool bUpperBound /* = false */)
 {
 	uint32_t curDate, curTime;
@@ -629,6 +728,13 @@ uint32_t HisDataReplayer::locate_barindex(const std::string& key, uint64_t now, 
 	return idx;
 }
 
+/*!*
+ * @brief 停止回测
+ * 
+ * @details 停止正在运行的回测过程。设置终止标志(_terminated)为true，
+ *          这样在循环中将会检测到该标志并停止回测过程。
+ *          如果设置了事件通知器，还会发送BT_STOP事件。
+ */
 void HisDataReplayer::stop()
 {
 	if(!_running)
@@ -644,6 +750,14 @@ void HisDataReplayer::stop()
 	WTSLogger::log_raw(LL_WARN, "Terminating flag reset to true, backtesting will quit at next round");
 }
 
+/*!*
+ * @brief 准备回测环境
+ * @return 准备是否成功
+ * 
+ * @details 在运行回测前准备必要的环境，包括重置状态、加载除权因子等。
+ *          如果回测已经在运行中，则会返回false。
+ *          该方法必须在run方法调用前执行。
+ */
 bool HisDataReplayer::prepare()
 {
 	if (_running)
@@ -672,6 +786,13 @@ bool HisDataReplayer::prepare()
 	return true;
 }
 
+/*!*
+ * @brief 运行回测
+ * @param bNeedDump 是否需要将回测状态输出到文件，默认为false
+ * 
+ * @details 根据回测配置执行历史数据回测，会根据任务类型分别调用相应的回测方法，
+ *          支持基于K线(run_by_bars)、Tick(run_by_ticks)和定时任务(run_by_tasks)的回测方式
+ */
 void HisDataReplayer::run(bool bNeedDump/* = false*/)
 {
 	if(_task == NULL)
@@ -736,6 +857,14 @@ void HisDataReplayer::run(bool bNeedDump/* = false*/)
 	_running = false;
 }
 
+/*!*
+ * @brief 基于Tick数据运行回测
+ * @param bNeedDump 是否需要将回测进度写入文件，默认为false
+ * 
+ * @details 基于Tick数据进行精确回测，按照时间顺序回放所有的Tick数据，
+ *          如果没有实际的Tick数据，会根据K线数据模拟Tick进行回测。
+ *          这种方式提供更高精度的回测结果，尤其适用于高频策略的测试
+ */
 void HisDataReplayer::run_by_ticks(bool bNeedDump /* = false */)
 {
 	//如果没有订阅K线，且tick回测是打开的，则按照每日的tick进行回放
@@ -766,6 +895,15 @@ void HisDataReplayer::run_by_ticks(bool bNeedDump /* = false */)
 		_notifier->notifyEvent("BT_END");
 }
 
+/*!*
+ * @brief 基于K线数据运行回测
+ * @param bNeedDump 是否需要将回测进度写入文件，默认为false
+ * 
+ * @details 基于K线数据进行回测，按照时间顺序依次回放所有K线数据。
+ *          在此模式下，程序会先加载所有已订阅合约的K线数据，然后按照时间顺序
+ *          一根一根K线向前推进，并在每根K线结束时触发相应的回调函数。
+ *          这种方式运行速度较快，适合非高频策略的回测
+ */
 void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 {
 	TimeUtils::Ticker ticker;
@@ -935,6 +1073,14 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 	_listener->handle_replay_done();
 }
 
+/*!*
+ * @brief 基于定时任务运行回测
+ * @param bNeedDump 是否需要将回测进度写入文件，默认为false
+ * 
+ * @details 基于定时任务进行回测，按照配置的任务周期(年、月、周、日等)和指定时间点
+ *          在时间轨上执行特定任务。这种方式适用于定时交易策略的回测，
+ *          如每天收盘前15分钟交易或每周一开盘后调整组合等。
+ */
 void HisDataReplayer::run_by_tasks(bool bNeedDump /* = false */)
 {
 	//时间调度任务不为空,则按照时间调度任务回放
@@ -1219,6 +1365,17 @@ void HisDataReplayer::run_by_tasks(bool bNeedDump /* = false */)
 	}
 }
 
+/*!*
+ * @brief 模拟Tick数据
+ * @param uDate 当前日期，格式为YYYYMMDD
+ * @param uTime 当前时间，格式为HHMMSS
+ * @param endTDate 结束交易日，默认为0
+ * @param pxType 价格类型，0-开盘价，1-最高价，2-最低价，3-收盘价，默认为0
+ * 
+ * @details 根据K线数据模拟Tick数据，当没有实际Tick数据时使用。
+ *          模拟方式是将K线的开盘价、最高价、最低价和收盘价分别生成四个Tick，
+ *          用于保证回测时能调用到相应的回调函数
+ */
 void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */, int pxType /* = 0 */)
 {
 	//这里应该触发检查
@@ -1365,6 +1522,16 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 	}
 }
 
+/*!*
+ * @brief 使用未订阅的K线模拟Tick数据
+ * @param stime 起始时间，格式为YYYYMMDDHHMMSS
+ * @param nowTime 当前时间，格式为YYYYMMDDHHMMSS
+ * @param endTDate 结束交易日，默认为0
+ * @param pxType 价格类型，0-开盘价，1-最高价，2-最低价，3-收盘价，默认为0
+ * 
+ * @details 根据未订阅的K线数据模拟Tick数据，主要用于需要交易但未订阅的合约。
+ *          这些合约可能是复权数据的原始合约或者是交易时才需要的合约。
+ */
 void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uint32_t endTDate /* = 0 */, int pxType /* = 0 */)
 {
 	//uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;
@@ -1512,6 +1679,15 @@ void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uin
 	}
 }
 
+/*!*
+ * @brief 获取下一个Tick数据的时间
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @param stime 起始时间，默认为UINT64_MAX
+ * @return 下一个Tick时间，如果没有则返回UINT64_MAX
+ * 
+ * @details 遍历所有合约的Tick缓存，计算大于起始时间的最近一个Tick数据的时间
+ *          主要用于确定回测过程中下一个需要处理的时间点
+ */
 uint64_t HisDataReplayer::getNextTickTime(uint32_t curTDate, uint64_t stime /* = UINT64_MAX */)
 {
 	uint64_t nextTime = UINT64_MAX;
@@ -1602,6 +1778,15 @@ uint64_t HisDataReplayer::getNextTickTime(uint32_t curTDate, uint64_t stime /* =
 }
 
 
+/*!*
+ * @brief 获取下一个成交数据的时间
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @param stime 起始时间，默认为UINT64_MAX
+ * @return 下一个成交数据的时间，如果没有则返回UINT64_MAX
+ * 
+ * @details 遍历所有合约的成交数据缓存，计算大于起始时间的最近一个成交数据的时间
+ *          在高频回测中用于计算下一个需要处理的成交时间
+ */
 uint64_t HisDataReplayer::getNextTransTime(uint32_t curTDate, uint64_t stime /* = UINT64_MAX */)
 {
 	uint64_t nextTime = UINT64_MAX;
@@ -1650,6 +1835,15 @@ uint64_t HisDataReplayer::getNextTransTime(uint32_t curTDate, uint64_t stime /* 
 }
 
 
+/*!*
+ * @brief 获取下一个委托明细数据的时间
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @param stime 起始时间，默认为UINT64_MAX
+ * @return 下一个委托明细数据的时间，如果没有则返回UINT64_MAX
+ * 
+ * @details 遍历所有合约的委托明细数据缓存，计算大于起始时间的最近一个委托明细数据的时间
+ *          在高频回测中用于计算下一个需要处理的委托明细时间
+ */
 uint64_t HisDataReplayer::getNextOrdDtlTime(uint32_t curTDate, uint64_t stime /* = UINT64_MAX */)
 {
 	uint64_t nextTime = UINT64_MAX;
@@ -1698,6 +1892,15 @@ uint64_t HisDataReplayer::getNextOrdDtlTime(uint32_t curTDate, uint64_t stime /*
 }
 
 
+/*!*
+ * @brief 获取下一个委托队列数据的时间
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @param stime 起始时间，默认为UINT64_MAX
+ * @return 下一个委托队列数据的时间，如果没有则返回UINT64_MAX
+ * 
+ * @details 遍历所有合约的委托队列数据缓存，计算大于起始时间的最近一个委托队列数据的时间
+ *          在高频回测中用于计算下一个需要处理的委托队列时间
+ */
 uint64_t HisDataReplayer::getNextOrdQueTime(uint32_t curTDate, uint64_t stime /* = UINT64_MAX */)
 {
 	uint64_t nextTime = UINT64_MAX;
@@ -1745,6 +1948,15 @@ uint64_t HisDataReplayer::getNextOrdQueTime(uint32_t curTDate, uint64_t stime /*
 	return nextTime;
 }
 
+/*!*
+ * @brief 按交易日回放高频数据
+ * @param curTDate 当前交易日，格式为YYYYMMDD
+ * @return 处理的数据条数
+ * 
+ * @details 按单个交易日回放高频数据，包括Tick、委托队列、委托明细和成交数据
+ *          该方法先找出所有类型数据中的下一个时间点，然后将相应的数据通过监听器回调函数触发
+ *          该方法会在每一步更新合约当前价格，并统计总共处理的数据条数
+ */
 uint64_t HisDataReplayer::replayHftDatasByDay(uint32_t curTDate)
 {
 	uint64_t total_ticks = 0;
@@ -1880,6 +2092,16 @@ uint64_t HisDataReplayer::replayHftDatasByDay(uint32_t curTDate)
 	return total_ticks;
 }
 
+/*!*
+ * @brief 回放指定时间范围内的高频数据
+ * @param stime 开始时间，格式为YYYYMMDDHHMMSS
+ * @param etime 结束时间，格式为YYYYMMDDHHMMSS
+ * @return 回放是否成功
+ * 
+ * @details 回放指定时间范围内的所有高频数据，包括Tick、委托队列、委托明细和成交数据。
+ *          该方法会根据时间顺序对所有类型的高频数据进行回放，并通过事件监听器将数据触发给监听者。
+ *          如果没有可用的数据，则返回false，否则返回true。
+ */
 bool HisDataReplayer::replayHftDatas(uint64_t stime, uint64_t etime)
 {	
 	WTSLogger::log_raw(LL_DEBUG, "replaying hft data...");
@@ -1989,6 +2211,19 @@ bool HisDataReplayer::replayHftDatas(uint64_t stime, uint64_t etime)
 	return true;
 }
 
+/*!*
+ * @brief 分钟结束时的回调处理
+ * @param uDate 当前日期，格式为YYYYMMDD
+ * @param uTime 当前时间，格式为HHMM
+ * @param endTDate 结束交易日，默认为0
+ * @param tickSimulated 是否已模拟Tick数据，默认为true
+ * 
+ * @details 在每分钟结束时执行的回调函数，主要处理以下工作：
+ *          1. 更新所有缓存的K线数据的游标位置，将游标移动到当前时间之后
+ *          2. 模拟Tick数据（如果已启用）
+ *          3. 触发事件通知，调用handle_schedule回调函数
+ *          该方法在基于时间或K线的回测中起关键作用，控制数据游标的前进
+ */
 void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */, bool tickSimulated /* = true */)
 {
 	//这里应该触发检查
@@ -3101,6 +3336,14 @@ void HisDataReplayer::sub_transaction(uint32_t sid, const char* stdCode)
 	sids[sid] = std::make_pair(sid, flag);
 }
 
+/*!*
+ * @brief 检查未订阅的K线数据
+ * 
+ * @details 检查未订阅但需要的合约K线数据，主要用于处理复权数据的原始合约。
+ *          如果该合约已经在未订阅缓存中存在或已经在已订阅缓存中存在，
+ *          则不会重复加载。否则，将加载并保存到未订阅缓存中。
+ *          该方法会为每个需要的未订阅合约发送提示信息。
+ */
 void HisDataReplayer::checkUnbars()
 {
 	for(const std::string& stdCode : _unsubbed_in_need)
@@ -3671,6 +3914,19 @@ bool HisDataReplayer::cacheFinalBarsFromLoader(const std::string& key, const cha
 	return true;
 }
 
+/*!*
+ * @brief 从CSV文件中缓存原始K线数据
+ * @param key 缓存键值
+ * @param stdCode 标准合约代码
+ * @param period K线周期
+ * @param bSubbed 是否已订阅，默认为true
+ * @return 缓存数据是否成功
+ * 
+ * @details 从CSV文件中加载并缓存原始K线数据。根据周期和合约信息确定文件路径。
+ *          该方法会解析CSV文件内容，处理日期和时间格式，并将数据转换为WTSBarStruct结构。
+ *          如果设置bSubbed为true，则数据缓存到_bars_cache，否则缓存到_unbars_cache。
+ *          对于复权数据，会根据除权因子进行处理。
+ */
 bool HisDataReplayer::cacheRawBarsFromCSV(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed/* = true*/)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
@@ -4541,6 +4797,14 @@ bool HisDataReplayer::cacheRawBarsFromBin(const std::string& key, const char* st
 	return true;
 }
 
+/*!*
+ * @brief 检查并清理过期的缓存数据
+ * 
+ * @details 检查K线缓存数据的不活跃天数，如果超过指定的天数(_cache_clear_days)，
+ *          则会清除该缓存数据以节省内存。主数据(_main_key)不会被清除。
+ *          当_cache_clear_days设置为0时，不会清除任何缓存。
+ *          该方法在每个交易日开始时被调用。
+ */
 void HisDataReplayer::check_cache_days()
 {
 	if (_cache_clear_days == 0)
