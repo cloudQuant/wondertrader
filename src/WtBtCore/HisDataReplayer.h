@@ -358,13 +358,13 @@ private:
 		char		_name[16];		///< 任务名称
 		char		_trdtpl[16];	///< 交易日模板
 		char		_session[16];	///< 交易时间模板
-		uint32_t	_day;			//日期,根据周期变化,每日为0,每周为0~6,对应周日到周六,每月为1~31,每年为0101~1231
-		uint32_t	_time;			//时间,精确到分钟
-		bool		_strict_time;	//是否是严格时间,严格时间即只有时间相等才会执行,不是严格时间,则大于等于触发时间都会执行
+		uint32_t	_day;			///< 日期设置，根据周期变化：每日为0，每周为0~6（对应周日到周六），每月为1~31，每年为0101~1231
+		uint32_t	_time;			///< 时间设置，格式为HHMM，精确到分钟
+		bool		_strict_time;	///< 是否严格时间，严格时间即只有时间相等才会执行，非严格时间则大于等于触发时间都会执行
 
-		uint64_t	_last_exe_time;	//上次执行时间,主要为了防止重复执行
+		uint64_t	_last_exe_time;	///< 上次执行时间，用于防止重复执行
 
-		TaskPeriodType	_period;	//任务周期
+		TaskPeriodType	_period;	///< 任务周期类型
 	} TaskInfo;
 
 	typedef std::shared_ptr<TaskInfo> TaskInfoPtr;
@@ -376,97 +376,312 @@ public:
 	~HisDataReplayer();
 
 private:
-	/*
-	 *	从自定义数据文件缓存历史数据
+	/**
+	 * @brief 从自定义数据文件缓存历史K线数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param bForBars 是否用于K线回放，默认为true
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawBarsFromBin(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bForBars = true);
 
-	/*
-	 *	从csv文件缓存历史数据
+	/**
+	 * @brief 从CSV文件缓存历史K线数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param bSubbed 是否已订阅，默认为true
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawBarsFromCSV(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true);
 
-	/*
-	 *	从自定义数据文件缓存历史tick数据
+	/**
+	 * @brief 从自定义数据文件缓存历史Tick数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawTicksFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	从自定义数据文件缓存历史委托明细数据
+	/**
+	 * @brief 从自定义数据文件缓存历史委托明细数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawOrdDtlFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	从自定义数据文件缓存历史委托队列
+	/**
+	 * @brief 从自定义数据文件缓存历史委托队列数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawOrdQueFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	从自定义数据文件缓存历史成交明细数据
+	/**
+	 * @brief 从自定义数据文件缓存历史成交明细数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawTransFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	从csv文件缓存历史tick数据
+	/**
+	 * @brief 从CSV文件缓存历史Tick数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawTicksFromCSV(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	从外部加载器缓存历史数据
+	/**
+	 * @brief 从外部数据加载器缓存历史K线数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param bSubbed 是否已订阅，默认为true
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheFinalBarsFromLoader(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true);
 
-	/*
-	 *	从外部加载器缓存历史tick数据
+	/**
+	 * @brief 从外部数据加载器缓存历史Tick数据
+	 * 
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheRawTicksFromLoader(const std::string& key, const char* stdCode, uint32_t uDate);
 
-	/*
-	 *	缓存整合的期货合约历史K线（针对.HOT//2ND）
+	/**
+	 * @brief 缓存整合的期货合约历史K线数据（针对.HOT和.2ND等主力合约）
+	 * 
+	 * @param codeInfo 合约信息指针
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param bSubbed 是否已订阅，默认为true
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheIntegratedFutBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true);
 
-	/*
-	 *	缓存复权股票K线数据
+	/**
+	 * @brief 缓存复权后的股票K线数据
+	 * 
+	 * @param codeInfo 合约信息指针
+	 * @param key 缓存键值
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param bSubbed 是否已订阅，默认为true
+	 * @return true 缓存成功
+	 * @return false 缓存失败
 	 */
 	bool		cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true);
 
+	/**
+	 * @brief 分钟结束时执行的回调函数
+	 * 
+	 * @param uDate 日期，格式为YYYYMMDD
+	 * @param uTime 时间，格式为HHMMSS
+	 * @param endTDate 结束交易日，默认为0
+	 * @param tickSimulated 是否为tick模拟的分钟线，默认为true
+	 */
 	void		onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0, bool tickSimulated = true);
 
+	/**
+	 * @brief 从配置文件加载手续费设置
+	 * 
+	 * @param filename 手续费配置文件路径
+	 */
 	void		loadFees(const char* filename);
 
+	/**
+	 * @brief 回放高频数据（Tick、委托明细、委托队列、成交明细）
+	 * 
+	 * @param stime 开始时间，格式为时间戳
+	 * @param etime 结束时间，格式为时间戳
+	 * @return true 回放成功
+	 * @return false 回放失败
+	 */
 	bool		replayHftDatas(uint64_t stime, uint64_t etime);
 
+	/**
+	 * @brief 按交易日回放高频数据
+	 * 
+	 * @param curTDate 当前交易日，格式为YYYYMMDD
+	 * @return uint64_t 返回当日最后一条数据的时间戳
+	 */
 	uint64_t	replayHftDatasByDay(uint32_t curTDate);
 
+	/**
+	 * @brief 使用未订阅的K线模拟Tick数据
+	 * 
+	 * @param stime 开始时间戳
+	 * @param etime 结束时间戳
+	 * @param endTDate 结束交易日，默认为0
+	 * @param pxType 价格类型，0-均价，1-最高价，2-最低价，3-收盘价，默认为0
+	 */
 	void		simTickWithUnsubBars(uint64_t stime, uint64_t etime, uint32_t endTDate = 0, int pxType = 0);
 
+	/**
+	 * @brief 模拟Tick数据
+	 * 
+	 * @param uDate 当前日期，格式为YYYYMMDD
+	 * @param uTime 当前时间，格式为HHMMSS
+	 * @param endTDate 结束交易日，默认为0
+	 * @param pxType 价格类型，0-均价，1-最高价，2-最低价，3-收盘价，默认为0
+	 */
 	void		simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0, int pxType = 0);
 
+	/**
+	 * @brief 检查指定合约在指定交易日的Tick数据是否存在
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param uDate 交易日，格式为YYYYMMDD
+	 * @return true 存在数据
+	 * @return false 数据不存在
+	 */
 	inline bool		checkTicks(const char* stdCode, uint32_t uDate);
 
+	/**
+	 * @brief 检查指定合约在指定交易日的委托明细数据是否存在
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param uDate 交易日，格式为YYYYMMDD
+	 * @return true 存在数据
+	 * @return false 数据不存在
+	 */
 	inline bool		checkOrderDetails(const char* stdCode, uint32_t uDate);
 
+	/**
+	 * @brief 检查指定合约在指定交易日的委托队列数据是否存在
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param uDate 交易日，格式为YYYYMMDD
+	 * @return true 存在数据
+	 * @return false 数据不存在
+	 */
 	inline bool		checkOrderQueues(const char* stdCode, uint32_t uDate);
 
+	/**
+	 * @brief 检查指定合约在指定交易日的成交明细数据是否存在
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param uDate 交易日，格式为YYYYMMDD
+	 * @return true 存在数据
+	 * @return false 数据不存在
+	 */
 	inline bool		checkTransactions(const char* stdCode, uint32_t uDate);
 
+	/**
+	 * @brief 检查未订阅的K线数据
+	 * @details 检查并处理未订阅的K线数据，用于模拟Tick的生成
+	 */
 	void		checkUnbars();
 
+	/**
+	 * @brief 从文件加载股票复权因子
+	 * 
+	 * @param adjfile 复权因子文件路径
+	 * @return true 加载成功
+	 * @return false 加载失败
+	 */
 	bool		loadStkAdjFactorsFromFile(const char* adjfile);
 
+	/**
+	 * @brief 从数据加载器加载股票复权因子
+	 * 
+	 * @return true 加载成功
+	 * @return false 加载失败
+	 */
 	bool		loadStkAdjFactorsFromLoader();
 
+	/**
+	 * @brief 检查指定交易日所有合约的Tick数据是否存在
+	 * 
+	 * @param uDate 交易日，格式为YYYYMMDD
+	 * @return true 存在所有合约的数据
+	 * @return false 存在数据缺失
+	 */
 	bool		checkAllTicks(uint32_t uDate);
 
+	/**
+	 * @brief 获取下一个Tick数据的时间
+	 * 
+	 * @param curTDate 当前交易日，格式为YYYYMMDD
+	 * @param stime 起始时间戳，默认为UINT64_MAX
+	 * @return uint64_t 下一个Tick数据的时间戳
+	 */
 	inline	uint64_t	getNextTickTime(uint32_t curTDate, uint64_t stime = UINT64_MAX);
+	/**
+	 * @brief 获取下一个委托队列数据的时间
+	 * 
+	 * @param curTDate 当前交易日，格式为YYYYMMDD
+	 * @param stime 起始时间戳，默认为UINT64_MAX
+	 * @return uint64_t 下一个委托队列数据的时间戳
+	 */
 	inline	uint64_t	getNextOrdQueTime(uint32_t curTDate, uint64_t stime = UINT64_MAX);
+	/**
+	 * @brief 获取下一个委托明细数据的时间
+	 * 
+	 * @param curTDate 当前交易日，格式为YYYYMMDD
+	 * @param stime 起始时间戳，默认为UINT64_MAX
+	 * @return uint64_t 下一个委托明细数据的时间戳
+	 */
 	inline	uint64_t	getNextOrdDtlTime(uint32_t curTDate, uint64_t stime = UINT64_MAX);
+	/**
+	 * @brief 获取下一个成交明细数据的时间
+	 * 
+	 * @param curTDate 当前交易日，格式为YYYYMMDD
+	 * @param stime 起始时间戳，默认为UINT64_MAX
+	 * @return uint64_t 下一个成交明细数据的时间戳
+	 */
 	inline	uint64_t	getNextTransTime(uint32_t curTDate, uint64_t stime = UINT64_MAX);
 
+	/**
+	 * @brief 重置回测状态
+	 * @details 重置所有内部状态和数据缓存，为新一轮回测做准备
+	 */
 	void		reset();
 
 
+	/**
+	 * @brief 将回测状态保存到文件
+	 * 
+	 * @param stdCode 标准合约代码
+	 * @param period K线周期
+	 * @param times 回测次数
+	 * @param stime 开始时间戳
+	 * @param etime 结束时间戳
+	 * @param progress 回测进度，0.0-1.0之间
+	 * @param elapse 经过的时间（毫秒）
+	 */
 	void		dump_btstate(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress, int64_t elapse);
 	void		notify_state(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress);
 
