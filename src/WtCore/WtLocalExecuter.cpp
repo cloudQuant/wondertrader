@@ -42,12 +42,21 @@ WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, I
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理执行器资源，如果存在线程池，会等待所有任务完成再销毁对象
+ */
 WtLocalExecuter::~WtLocalExecuter()
 {
 	if (_pool)
 		_pool->wait();
 }
 
+/**
+ * @brief 设置交易适配器
+ * @param adapter 交易适配器指针
+ * @details 设置交易适配器并检查交易通道是否就绪，更新内部通道状态
+ */
 void WtLocalExecuter::setTrader(TraderAdapter* adapter)
 {
 	_trader = adapter;
@@ -56,6 +65,13 @@ void WtLocalExecuter::setTrader(TraderAdapter* adapter)
 		_channel_ready = _trader->isReady();
 }
 
+/**
+ * @brief 初始化执行器
+ * @param params 配置参数对象
+ * @return 初始化是否成功
+ * @details 根据配置参数初始化执行器，包括设置缩放比例、严格同步模式、创建线程池、
+ * 读取自动清理策略和代码组等配置。这些配置将影响执行器的行为和性能。
+ */
 bool WtLocalExecuter::init(WTSVariant* params)
 {
 	if (params == NULL)
@@ -64,9 +80,12 @@ bool WtLocalExecuter::init(WTSVariant* params)
 	_config = params;
 	_config->retain();
 
+	// 设置缩放比例
 	_scale = params->getDouble("scale");
+	// 设置是否严格同步
 	_strict_sync  = params->getBoolean("strict_sync");
 
+	// 创建线程池（如果配置了池大小）
 	uint32_t poolsize = params->getUInt32("poolsize");
 	if(poolsize > 0)
 	{
@@ -138,33 +157,56 @@ bool WtLocalExecuter::init(WTSVariant* params)
 	return true;
 }
 
+/**
+ * @brief 获取执行单元
+ * @param stdCode 标准合约代码
+ * @param bAutoCreate 是否自动创建，默认为true
+ * @return 执行单元指针
+ * @details 根据标准合约代码获取相应的执行单元。如果已存在，直接返回；
+ * 如果不存在且bAutoCreate为true，则创建新的执行单元并初始化。
+ * 执行单元的策略配置来自配置文件中的policy部分，优先使用与商品ID匹配的策略，
+ * 如果找不到对应策略，则使用default策略。
+ */
 ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
 {
+	// 提取合约信息
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
+	// 获取商品ID
 	std::string commID = codeInfo.stdCommID();
 
+	// 获取策略配置
 	WTSVariant* policy = _config->get("policy");
+	// 默认使用商品ID作为策略名
 	std::string des = commID;
+	// 如果没有对应的策略，使用default策略
 	if (!policy->has(commID.c_str()))
 		des = "default";
 
+	// 锁定单元容器进行线程安全的访问
 	SpinLock lock(_mtx_units);
 
+	// 检查执行单元是否已存在
 	auto it = _unit_map.find(stdCode);
 	if(it != _unit_map.end())
 	{
 		return it->second;
 	}
 
+	// 如果需要自动创建
 	if (bAutoCreate)
 	{
+		// 获取策略配置
 		WTSVariant* cfg = policy->get(des.c_str());
 
+		// 获取执行单元类型名称
 		const char* name = cfg->getCString("name");
+		// 创建执行单元
 		ExecuteUnitPtr unit = _factory->createExeUnit(name);
 		if (unit != NULL)
 		{
+			// 将新建的执行单元添加到映射中
 			_unit_map[stdCode] = unit;
+			// 初始化执行单元
 			unit->self()->init(this, stdCode, cfg);
 
 			//如果通道已经就绪，则直接通知执行单元
@@ -183,98 +225,225 @@ ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /*
 //////////////////////////////////////////////////////////////////////////
 //ExecuteContext
 #pragma region Context回调接口
+/**
+ * @brief 获取tick数据切片
+ * @param stdCode 标准合约代码
+ * @param count 请求的tick数量
+ * @param etime 结束时间，默认为0（不使用）
+ * @return tick数据切片指针
+ * @details 从数据管理器中获取指定合约的最近count个tick数据。
+ * 如果数据管理器不可用，则返回NULL。
+ */
 WTSTickSlice* WtLocalExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	// 检查数据管理器是否可用
 	if (_data_mgr == NULL)
 		return NULL;
 
+	// 从数据管理器获取tick切片
 	return _data_mgr->get_tick_slice(stdCode, count);
 }
 
+/**
+ * @brief 获取最新的tick数据
+ * @param stdCode 标准合约代码
+ * @return 最新的tick数据指针
+ * @details 从数据管理器中获取指定合约的最新tick数据。
+ * 如果数据管理器不可用，则返回NULL。
+ * 注意：这个函数会增加返回的tick数据的引用计数，使用后需要调用release释放。
+ */
 WTSTickData* WtLocalExecuter::grabLastTick(const char* stdCode)
 {
+	// 检查数据管理器是否可用
 	if (_data_mgr == NULL)
 		return NULL;
 
+	// 从数据管理器获取最新tick数据
 	return _data_mgr->grab_last_tick(stdCode);
 }
 
+/**
+ * @brief 获取指定合约的持仓量
+ * @param stdCode 标准合约代码
+ * @param validOnly 是否只计算有效持仓，默认为true
+ * @param flag 持仓标记，默认为3（全部持仓），1表示多头持仓，2表示空头持仓
+ * @return 持仓量
+ * @details 从交易适配器中获取指定合约的持仓量。
+ * 如果交易适配器不可用，则返回0。
+ */
 double WtLocalExecuter::getPosition(const char* stdCode, bool validOnly /* = true */, int32_t flag /* = 3 */)
 {
+	// 检查交易适配器是否可用
 	if (NULL == _trader)
 		return 0.0;
 
+	// 从交易适配器获取持仓量
 	return _trader->getPosition(stdCode, validOnly, flag);
 }
 
+/**
+ * @brief 获取未完成的委托数量
+ * @param stdCode 标准合约代码
+ * @return 未完成的委托数量
+ * @details 从交易适配器中获取指定合约的未完成委托数量。
+ * 如果交易适配器不可用，则返回0。
+ */
 double WtLocalExecuter::getUndoneQty(const char* stdCode)
 {
+	// 检查交易适配器是否可用
 	if (NULL == _trader)
 		return 0.0;
 
+	// 从交易适配器获取未完成委托数量
 	return _trader->getUndoneQty(stdCode);
 }
 
+/**
+ * @brief 获取指定合约的订单列表
+ * @param stdCode 标准合约代码
+ * @return 订单映射指针
+ * @details 从交易适配器中获取指定合约的所有订单。
+ * 如果交易适配器不可用，则返回NULL。
+ */
 OrderMap* WtLocalExecuter::getOrders(const char* stdCode)
 {
+	// 检查交易适配器是否可用
 	if (NULL == _trader)
 		return NULL;
 
+	// 从交易适配器获取订单列表
 	return _trader->getOrders(stdCode);
 }
 
+/**
+ * @brief 发送买入委托
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return 订单ID集合
+ * @details 通过交易适配器发送买入委托。
+ * 如果交易通道未就绪，则返回空的订单ID集合。
+ */
 OrderIDs WtLocalExecuter::buy(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
+	// 检查交易通道是否就绪
 	if (!_channel_ready)
 		return OrderIDs();
 
+	// 通过交易适配器发送买入委托，偏移量设置为0
 	return _trader->buy(stdCode, price, qty, 0, bForceClose);
 }
 
+/**
+ * @brief 发送卖出委托
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param bForceClose 是否强制平仓，默认为false
+ * @return 订单ID集合
+ * @details 通过交易适配器发送卖出委托。
+ * 如果交易通道未就绪，则返回空的订单ID集合。
+ */
 OrderIDs WtLocalExecuter::sell(const char* stdCode, double price, double qty, bool bForceClose/* = false*/)
 {
+	// 检查交易通道是否就绪
 	if (!_channel_ready)
 		return OrderIDs();
 
+	// 通过交易适配器发送卖出委托，偏移量设置为0
 	return _trader->sell(stdCode, price, qty, 0, bForceClose);
 }
 
+/**
+ * @brief 取消指定订单
+ * @param localid 本地订单ID
+ * @return 取消是否成功
+ * @details 通过交易适配器取消指定的订单。
+ * 如果交易通道未就绪，则返回false。
+ */
 bool WtLocalExecuter::cancel(uint32_t localid)
 {
+	// 检查交易通道是否就绪
 	if (!_channel_ready)
 		return false;
 
+	// 通过交易适配器取消订单
 	return _trader->cancel(localid);
 }
 
+/**
+ * @brief 批量取消指定合约的委托
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买入委托
+ * @param qty 要取消的数量
+ * @return 被取消的订单ID集合
+ * @details 通过交易适配器批量取消指定合约、指定方向的委托。
+ * 如果交易通道未就绪，则返回空的订单ID集合。
+ */
 OrderIDs WtLocalExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 {
+	// 检查交易通道是否就绪
 	if (!_channel_ready)
 		return OrderIDs();
 
+	// 通过交易适配器批量取消委托
 	return _trader->cancel(stdCode, isBuy, qty);
 }
 
+/**
+ * @brief 写入日志
+ * @param message 日志消息
+ * @details 将消息写入到日志系统中，并自动添加执行器名称前缀。
+ * 使用线程本地存储的缓冲区来提高性能。
+ */
 void WtLocalExecuter::writeLog(const char* message)
 {
+	// 使用线程本地存储的缓冲区，避免多线程冲突
 	static thread_local char szBuf[2048] = { 0 };
+	// 格式化消息，添加执行器名称前缀
 	fmtutil::format_to(szBuf, "[{}]", _name.c_str());
+	// 连接原始消息
 	strcat(szBuf, message);
+	// 写入日志
 	WTSLogger::log_dyn_raw("executer", _name.c_str(), LL_INFO, szBuf);
 }
 
+/**
+ * @brief 获取商品信息
+ * @param stdCode 标准合约代码
+ * @return 商品信息指针
+ * @details 从交易引擎核心中获取指定合约的商品信息。
+ * 商品信息包含合约的交易所、品种、合约代码、手续费率、保证金率等信息。
+ */
 WTSCommodityInfo* WtLocalExecuter::getCommodityInfo(const char* stdCode)
 {
+	// 从交易引擎核心获取商品信息
 	return _stub->get_comm_info(stdCode);
 }
 
+/**
+ * @brief 获取交易时段信息
+ * @param stdCode 标准合约代码
+ * @return 交易时段信息指针
+ * @details 从交易引擎核心中获取指定合约的交易时段信息。
+ * 交易时段信息包含开盘时间、收盘时间、交易时段等信息。
+ */
 WTSSessionInfo* WtLocalExecuter::getSessionInfo(const char* stdCode)
 {
+	// 从交易引擎核心获取交易时段信息
 	return _stub->get_sess_info(stdCode);
 }
 
+/**
+ * @brief 获取当前时间
+ * @return 当前时间戳，格式为时间戳格式
+ * @details 从交易引擎核心中获取当前的真实时间。
+ * 这个时间用于执行器的时间同步和交易决策。
+ */
 uint64_t WtLocalExecuter::getCurTime()
 {
+	// 从交易引擎核心获取当前真实时间
 	return _stub->get_real_time();
 	//return TimeUtils::makeTime(_stub->get_date(), _stub->get_raw_time() * 100000 + _stub->get_secs());
 }
