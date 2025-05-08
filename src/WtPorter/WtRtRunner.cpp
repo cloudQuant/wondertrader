@@ -1002,6 +1002,11 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	return true;
 }
 
+/**
+ * @brief 初始化CTA策略
+ * @details 从配置中加载CTA策略并创建相应的策略上下文
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initCtaStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
@@ -1031,6 +1036,11 @@ bool WtRtRunner::initCtaStrategies()
 	return true;
 }
 
+/**
+ * @brief 初始化SEL选股策略
+ * @details 从配置中加载SEL选股策略并创建相应的策略上下文
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initSelStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
@@ -1077,6 +1087,11 @@ bool WtRtRunner::initSelStrategies()
 	return true;
 }
 
+/**
+ * @brief 初始化HFT高频策略
+ * @details 从配置中加载HFT高频策略并创建相应的策略上下文
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initHftStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
@@ -1124,6 +1139,11 @@ bool WtRtRunner::initHftStrategies()
 	return true;
 }
 
+/**
+ * @brief 初始化交易引擎
+ * @details 根据环境配置初始化交易引擎，设置相应的引擎类型（CTA、SEL或HFT）
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initEngine()
 {
 	WTSVariant* cfg = _config->get("env");
@@ -1170,6 +1190,11 @@ bool WtRtRunner::initEngine()
 	return true;
 }
 
+/**
+ * @brief 初始化数据管理器
+ * @details 根据配置初始化数据管理器，设置数据存储路径
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initDataMgr()
 {
 	WTSVariant* cfg = _config->get("data");
@@ -1179,11 +1204,16 @@ bool WtRtRunner::initDataMgr()
 	_data_mgr.regsiter_loader(this);
 
 	_data_mgr.init(cfg, _engine, true);
-
 	WTSLogger::log_raw(LL_INFO, "Data manager initialized");
 	return true;
 }
 
+/**
+ * @brief 初始化行情解析器
+ * @details 根据配置初始化各类行情解析器，包括内置解析器和外部解析器
+ * @param cfgParsers 解析器配置
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 {
 	if (cfgParsers == NULL || cfgParsers->type() != WTSVariant::VT_Array)
@@ -1219,6 +1249,12 @@ bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 	return true;
 }
 
+/**
+ * @brief 初始化执行器
+ * @details 根据配置初始化交易指令执行器，包括内置执行器和外部执行器
+ * @param cfgExecuter 执行器配置
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 {
 	if (cfgExecuter == NULL || cfgExecuter->type() != WTSVariant::VT_Array)
@@ -1340,6 +1376,11 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 	return true;
 }
 
+/**
+ * @brief 初始化事件通知器
+ * @details 根据配置初始化事件通知器，用于处理系统事件的通知
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initEvtNotifier()
 {
 	WTSVariant* cfg = _config->get("notifier");
@@ -1351,6 +1392,12 @@ bool WtRtRunner::initEvtNotifier()
 	return true;
 }
 
+/**
+ * @brief 初始化交易适配器
+ * @details 根据配置初始化各类交易适配器，用于实际交易指令的执行
+ * @param cfgTraders 交易适配器配置
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initTraders(WTSVariant* cfgTraders)
 {
 	if (cfgTraders == NULL || cfgTraders->type() != WTSVariant::VT_Array)
@@ -1377,6 +1424,11 @@ bool WtRtRunner::initTraders(WTSVariant* cfgTraders)
 	return true;
 }
 
+/**
+ * @brief 运行交易引擎
+ * @details 启动交易引擎，可以选择同步或异步运行模式
+ * @param bAsync 是否异步运行，默认为false
+ */
 void WtRtRunner::run(bool bAsync /* = false */)
 {
 	try
@@ -1422,16 +1474,31 @@ const char* LOG_TAGS[] = {
 	"none",
 };
 
+/**
+ * @brief 处理日志追加
+ * @details 处理日志追加事件，将日志消息通过通知器发送
+ * @param ll 日志级别
+ * @param msg 日志消息
+ */
 void WtRtRunner::handleLogAppend(WTSLogLevel ll, const char* msg)
 {
 	_notifier.notify_log(LOG_TAGS[ll-100], msg);
 }
 
+/**
+ * @brief 释放资源
+ * @details 清理并释放交易引擎相关的所有资源
+ */
 void WtRtRunner::release()
 {
 	WTSLogger::stop();
 }
 
+/**
+ * @brief 初始化交易行为策略
+ * @details 根据配置初始化交易行为策略，加载交易限制和风控策略
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::initActionPolicy()
 {
 	const char* action_file = _config->getCString("bspolicy");
@@ -1443,11 +1510,12 @@ bool WtRtRunner::initActionPolicy()
 	return ret;
 }
 
-bool WtRtRunner::addCtaFactories(const char* folder)
-{
-	return _cta_mgr.loadFactories(folder);
-}
-
+/**
+ * @brief 添加SEL选股策略工厂
+ * @details 从指定文件夹加载SEL选股策略工厂
+ * @param folder 工厂文件夹路径
+ * @return 是否加载成功
+ */
 bool WtRtRunner::addSelFactories(const char* folder)
 {
 	return _sel_mgr.loadFactories(folder);
@@ -1458,6 +1526,12 @@ bool WtRtRunner::addExeFactories(const char* folder)
 	return _exe_factory.loadFactories(folder);
 }
 
+/**
+ * @brief 添加HFT高频策略工厂
+ * @details 从指定文件夹加载HFT高频策略工厂
+ * @param folder 工厂文件夹路径
+ * @return 是否加载成功
+ */
 bool WtRtRunner::addHftFactories(const char* folder)
 {
 	return _hft_mgr.loadFactories(folder);
