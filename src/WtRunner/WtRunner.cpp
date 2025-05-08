@@ -1,11 +1,12 @@
-﻿/*!
- * /file WtRunner.cpp
- * /project	WonderTrader
+/*!
+ * @file WtRunner.cpp
+ * @project	WonderTrader
  *
- * /author Wesley
- * /date 2020/03/30
+ * @author Wesley
+ * @date 2020/03/30
  * 
- * /brief 
+ * @brief WtRunner类实现，实现交易引擎的运行管理
+ * @details WtRunner是WonderTrader的主要运行器，负责管理交易引擎的初始化、配置和运行
  */
 #include "WtRunner.h"
 
@@ -22,6 +23,11 @@
 #include "../Share/StrUtil.hpp"
 
 
+/**
+ * @brief 获取当前可执行文件所在目录
+ * @details 获取当前运行程序的初始路径，并进行标准化处理
+ * @return 标准化后的路径字符串
+ */
 const char* getBinDir()
 {
 	static std::string basePath;
@@ -36,7 +42,10 @@ const char* getBinDir()
 }
 
 
-
+/**
+ * @brief 构造函数
+ * @details 初始化成员变量并安装信号钩子，用于捕获系统信号并进行处理
+ */
 WtRunner::WtRunner()
 	: _data_store(NULL)
 	, _is_hft(false)
@@ -52,10 +61,19 @@ WtRunner::WtRunner()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理资源
+ */
 WtRunner::~WtRunner()
 {
 }
 
+/**
+ * @brief 初始化日志系统
+ * @details 根据配置文件初始化日志系统和设置安装目录
+ * @param filename 日志配置文件路径
+ */
 void WtRunner::init(const std::string& filename)
 {
 	WTSLogger::init(filename.c_str());
@@ -68,6 +86,12 @@ void WtRunner::init(const std::string& filename)
 	}
 }
 
+/**
+ * @brief 配置交易引擎
+ * @details 加载配置文件并初始化各个组件，包括基础数据、交易引擎、数据管理器等
+ * @param filename 配置文件路径
+ * @return 是否配置成功
+ */
 bool WtRunner::config(const std::string& filename)
 {
 	_config = WTSCfgLoader::load_from_file(filename);
@@ -283,6 +307,11 @@ bool WtRunner::config(const std::string& filename)
 	return true;
 }
 
+/**
+ * @brief 初始化CTA策略
+ * @details 从配置中加载CTA策略并创建相应的策略上下文
+ * @return 是否初始化成功
+ */
 bool WtRunner::initCtaStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
@@ -315,6 +344,11 @@ bool WtRunner::initCtaStrategies()
 	return true;
 }
 
+/**
+ * @brief 初始化HFT高频策略
+ * @details 从配置中加载HFT高频策略并创建相应的策略上下文
+ * @return 是否初始化成功
+ */
 bool WtRunner::initHftStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
@@ -365,6 +399,11 @@ bool WtRunner::initHftStrategies()
 }
 
 
+/**
+ * @brief 初始化交易引擎
+ * @details 根据环境配置初始化交易引擎，设置相应的引擎类型（CTA、HFT或SEL）
+ * @return 是否初始化成功
+ */
 bool WtRunner::initEngine()
 {
 	WTSVariant* cfg = _config->get("env");
@@ -411,11 +450,21 @@ bool WtRunner::initEngine()
 	return true;
 }
 
+/**
+ * @brief 初始化交易行为策略
+ * @details 根据配置初始化交易行为策略，加载交易限制和风控策略
+ * @return 是否初始化成功
+ */
 bool WtRunner::initActionPolicy()
 {
 	return _act_policy.init(_config->getCString("bspolicy"));
 }
 
+/**
+ * @brief 初始化数据管理器
+ * @details 根据配置初始化数据管理器，设置数据存储路径
+ * @return 是否初始化成功
+ */
 bool WtRunner::initDataMgr()
 {
 	WTSVariant*cfg = _config->get("data");
@@ -428,6 +477,12 @@ bool WtRunner::initDataMgr()
 	return true;
 }
 
+/**
+ * @brief 初始化行情解析器
+ * @details 根据配置初始化行情解析器，建立行情数据通道
+ * @param cfgParser 解析器配置
+ * @return 是否初始化成功
+ */
 bool WtRunner::initParsers(WTSVariant* cfgParser)
 {
 	if (cfgParser == NULL)
@@ -461,6 +516,12 @@ bool WtRunner::initParsers(WTSVariant* cfgParser)
 	return true;
 }
 
+/**
+ * @brief 初始化执行器
+ * @details 根据配置初始化交易指令执行器，包括本地执行器、差异执行器和分布式执行器
+ * @param cfgExecuter 执行器配置
+ * @return 是否初始化成功
+ */
 bool WtRunner::initExecuters(WTSVariant* cfgExecuter)
 {
 	if (cfgExecuter == NULL || cfgExecuter->type() != WTSVariant::VT_Array)
@@ -551,6 +612,12 @@ bool WtRunner::initExecuters(WTSVariant* cfgExecuter)
 	return true;
 }
 
+/**
+ * @brief 初始化交易适配器
+ * @details 根据配置初始化交易适配器，建立交易通道
+ * @param cfgTrader 交易适配器配置
+ * @return 是否初始化成功
+ */
 bool WtRunner::initTraders(WTSVariant* cfgTrader)
 {
 	if (cfgTrader == NULL || cfgTrader->type() != WTSVariant::VT_Array)
@@ -578,6 +645,11 @@ bool WtRunner::initTraders(WTSVariant* cfgTrader)
 	return true;
 }
 
+/**
+ * @brief 运行交易引擎
+ * @details 启动解析器、交易适配器和交易引擎，可以选择同步或异步运行模式
+ * @param bAsync 是否异步运行，默认为false
+ */
 void WtRunner::run(bool bAsync /* = false */)
 {
 	try
@@ -613,11 +685,22 @@ const char* LOG_TAGS[] = {
 	"none"
 };
 
+/**
+ * @brief 处理日志追加
+ * @details 实现ILogHandler接口，处理日志追加事件，将日志消息通过通知器发送
+ * @param ll 日志级别
+ * @param msg 日志消息
+ */
 void WtRunner::handleLogAppend(WTSLogLevel ll, const char* msg)
 {
 	_notifier.notify_log(LOG_TAGS[ll - 100], msg);
 }
 
+/**
+ * @brief 初始化事件通知器
+ * @details 根据配置初始化事件通知器，用于处理系统事件的通知
+ * @return 是否初始化成功
+ */
 bool WtRunner::initEvtNotifier()
 {
 	WTSVariant* cfg = _config->get("notifier");
