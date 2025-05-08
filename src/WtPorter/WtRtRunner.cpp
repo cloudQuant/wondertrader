@@ -1537,18 +1537,39 @@ bool WtRtRunner::addHftFactories(const char* folder)
 	return _hft_mgr.loadFactories(folder);
 }
 
+/**
+ * @brief HFT委托队列回调
+ * @details 处理HFT高频交易的委托队列数据更新事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param newOrdQue 新的委托队列数据
+ */
 void WtRtRunner::hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	if (_cb_hft_ordque)
 		_cb_hft_ordque(id, stdCode, &newOrdQue->getOrdQueStruct());
 }
 
+/**
+ * @brief HFT委托明细回调
+ * @details 处理HFT高频交易的委托明细数据更新事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param newOrdDtl 新的委托明细数据
+ */
 void WtRtRunner::hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	if (_cb_hft_orddtl)
 		_cb_hft_orddtl(id, stdCode, &newOrdDtl->getOrdDtlStruct());
 }
 
+/**
+ * @brief HFT逆回成交回调
+ * @details 处理HFT高频交易的逆回成交数据更新事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param newTrans 新的逆回成交数据
+ */
 void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransData* newTrans)
 {
 	if (_cb_hft_trans)
@@ -1556,42 +1577,81 @@ void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransDa
 }
 
 #pragma region "Extended Parser"
+/**
+ * @brief 初始化外部解析器
+ * @details 触发外部解析器的初始化事件
+ * @param id 解析器ID
+ */
 void WtRtRunner::parser_init(const char* id)
 {
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_INIT, id);
 }
 
+/**
+ * @brief 连接外部解析器
+ * @details 触发外部解析器的连接事件
+ * @param id 解析器ID
+ */
 void WtRtRunner::parser_connect(const char* id)
 {
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_CONNECT, id);
 }
 
+/**
+ * @brief 断开外部解析器连接
+ * @details 触发外部解析器的断开连接事件
+ * @param id 解析器ID
+ */
 void WtRtRunner::parser_disconnect(const char* id)
 {
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_DISCONNECT, id);
 }
 
+/**
+ * @brief 释放外部解析器
+ * @details 触发外部解析器的释放事件
+ * @param id 解析器ID
+ */
 void WtRtRunner::parser_release(const char* id)
 {
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_RELEASE, id);
 }
 
+/**
+ * @brief 订阅外部解析器行情
+ * @details 触发外部解析器的订阅行情事件
+ * @param id 解析器ID
+ * @param code 合约代码
+ */
 void WtRtRunner::parser_subscribe(const char* id, const char* code)
 {
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, true);
 }
 
+/**
+ * @brief 取消订阅外部解析器行情
+ * @details 触发外部解析器的取消订阅行情事件
+ * @param id 解析器ID
+ * @param code 合约代码
+ */
 void WtRtRunner::parser_unsubscribe(const char* id, const char* code)
 {
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, false);
 }
 
+/**
+ * @brief 外部解析器行情回调
+ * @details 处理外部解析器提供的行情数据
+ * @param id 解析器ID
+ * @param curTick 当前行情数据
+ * @param uProcFlag 处理标志
+ */
 void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag)
 {
 	ParserAdapterPtr adapter = _parsers.getAdapter(id);
@@ -1610,12 +1670,24 @@ void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uin
 #pragma endregion 
 
 #pragma region "Extended Executer"
+/**
+ * @brief 初始化外部执行器
+ * @details 触发外部执行器的初始化事件
+ * @param id 执行器ID
+ */
 void WtRtRunner::executer_init(const char* id)
 {
 	if (_cb_exec_init)
 		_cb_exec_init(id);
 }
 
+/**
+ * @brief 设置外部执行器持仓
+ * @details 触发外部执行器的持仓设置事件
+ * @param id 执行器ID
+ * @param stdCode 标准化合约代码
+ * @param target 目标仓位
+ */
 void WtRtRunner::executer_set_position(const char* id, const char* stdCode, double target)
 {
 	if (_cb_exec_cmd)
