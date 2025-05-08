@@ -652,43 +652,63 @@ void WtTWapExeUnit::do_calc()
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
 	}
 
-	//如果相比上次没有更新的tick进来，则先不下单，防止开盘前集中下单导致通道被封
+	// 检查行情是否有更新，如果相比上次没有更新的tick，则先不下单
+	// 这是为了防止开盘前集中下单导致交易通道被封
 	uint64_t curTickTime = (uint64_t)_last_tick->actiondate() * 1000000000 + _last_tick->actiontime();
+	
+	// 如果当前行情时间小于等于上次行情时间，说明行情未更新
 	if (curTickTime <= _last_tick_time)
 	{
+		// 记录日志并等待下次执行
 		_ctx->writeLog(fmtutil::format("No tick of {} updated, {} <= {}, execute later", _code, curTickTime, _last_tick_time));
 		return;
 	}
+	
+	// 更新最新行情时间
 	_last_tick_time = curTickTime;
-	double this_qty = _order_lots; 	//单次发单手数
+	
+	// 设置单次发单手数
+	double this_qty = _order_lots;
 	/***---end---23.5.26---zhaoyk***/
 
+	// 计算剩余的发单次数
 	uint32_t leftTimes = _total_times - _fired_times;
+	
 	/***---begin---23.5.22---zhaoyk***/
+	// 记录当前发单次数日志
 	//_ctx->writeLog(fmt::format("第 {} 次发单", _fired_times).c_str());
 	_ctx->writeLog(fmt::format("第 {} 次发单", _fired_times+1).c_str());
-
 	/***---end---23.5.22---zhaoyk***/
+	
+	// 标记是否需要全部发单（即“打板”）
 	bool bNeedShowHand = false;
-	//剩余次数为0,剩余数量不为0,说明要全部发出去了
-	//剩余次数为0,说明已经到了兜底时间了,如果这个时候还有未完成数量,则需要发单
+	
+	// 计算本次发单数量
+	// 如果剩余发单次数为0且还有未完成的仓位差异，则需要全部发单
+	// 否则将剩余数量平均分配到剩余发单次数中
 	/***---begin---23.5.22---zhaoyk***/
-	//如果剩余此处为0 ,则需要全部下单
-	//否则,取整(剩余数量/剩余次数)与1的最大值,即最小为_min_open_lots,但是要注意符号处理
+	// 计算本次发单数量
 	double curQty = 0;
+	
+	// 如果剩余次数为0，则需要全部发单（打板）
 	if (leftTimes == 0 && !decimal::eq(diffQty, 0))
 	{
+		// 标记需要打板
 		bNeedShowHand = true;
+		
+		// 取最小开仓数量和差异数量的最大值
 		curQty = max(_min_open_lots, diffQty); 
 	}
 	else {
+		// 如果还有剩余次数，则将差异数量平均分配
+		// 取最小开仓数量和平均分配数量的最大值，并保持原始符号
 		curQty = std::max(_min_open_lots, round(abs(diffQty) / leftTimes)) * abs(diffQty) / diffQty;
 	}
-	
+	/***---end---23.5.22---zhaoyk***/
 	/***---end---23.5.22---zhaoyk***/
 	
-	//设定本轮目标仓位
-	_this_target = realPos + curQty;	//现仓位量+本轮下单量
+	// 设定本轮目标仓位（当前实际仓位 + 本次发单数量）
+	_this_target = realPos + curQty;
 
 	WTSTickData* curTick = _last_tick;
 	uint64_t now = TimeUtils::getLocalTimeNow();
@@ -749,19 +769,31 @@ void WtTWapExeUnit::do_calc()
 	curTick->release();
 }
 
+/**
+ * @brief 设置目标仓位
+ * @details 设置执行单元的目标仓位，并触发仓位计算和发单操作
+ *          当目标仓位与当前目标仓位不同时，重置发单次数并触发do_calc方法
+ * @param stdCode 标准化合约代码
+ * @param newVol 新的目标仓位
+ */
 void WtTWapExeUnit::set_position(const char* stdCode, double newVol)
 {
+	// 检查合约代码是否匹配，如果不匹配则直接返回
 	if (_code.compare(stdCode) != 0)
 		return;
 
+	// 检查新的目标仓位是否与当前目标仓位相同，相同则直接返回
 	//double diff = newVol - _target_pos;
 	if (decimal::eq(newVol, _target_pos))
 		return;
 
+	// 更新目标仓位
 	_target_pos = newVol;
 
+	// 重置发单次数计数，开始新一轮的仓位调整
 	_fired_times = 0;
 
+	// 触发仓位计算和发单操作
 	do_calc();
 }
 
