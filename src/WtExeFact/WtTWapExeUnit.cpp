@@ -320,13 +320,22 @@ void WtTWapExeUnit::on_channel_lost()
 }
 
 
+/**
+ * @brief 处理行情数据回调
+ * @details 当收到新的行情数据时调用，更新内部行情缓存并触发相关的交易逻辑
+ *          包括首次行情处理、交易时间校验、计算目标仓位等
+ * @param newTick 新的行情数据指针
+ */
 void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 {
+	// 如果行情数据为空或者合约代码不匹配，则直接返回
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
 
+	// 标记是否为首次收到行情
 	bool isFirstTick = false;
-	//如果原来的tick不为空,则要释放掉
+	
+	// 如果已有缓存的行情数据，需要先释放内存
 	if (_last_tick)
 	{
 		_last_tick->release();
@@ -334,105 +343,172 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 	/***---begin---23.5.18---zhaoyk***/
 	else
 	{
+		// 标记为首次收到行情
 		isFirstTick = true;
-		//如果行情时间不在交易时间,这种情况一般是集合竞价的行情进来,下单会失败,所以直接过滤掉这笔行情
+		
+		// 首次行情需要检查是否在交易时间内
+		// 如果行情时间不在交易时间内（如集合竞价时段），则过滤掉该行情
 		if (_sess_info != NULL && !_sess_info->isInTradingTime(newTick->actiontime() / 100000))
 			return;
 	}
 	/***---end---23.5.18---zhaoyk***/
 
-	//新的tick数据,要保留
+	// 保存新的行情数据并增加引用计数
 	_last_tick = newTick;
 	_last_tick->retain();
 
 	/*
-	*	这里可以考虑一下
-	*	如果写的上一次丢出去的单子不够达到目标仓位
-	*	那么在新的行情数据进来的时候可以再次触发核心逻辑
-	*/
+	 * 这里可以考虑一下
+	 * 如果写的上一次丢出去的单子不够达到目标仓位
+	 * 那么在新的行情数据进来的时候可以再次触发核心逻辑
+	 */
 
-	if (isFirstTick)	//如果是第一笔tick,则检查目标仓位,不符合则下单
+	// 如果是首次收到行情，需要检查目标仓位与实际仓位是否一致
+	if (isFirstTick)
 	{
+		// 获取目标仓位
 		double newVol = _target_pos;
 		const char* stdCode = _code.c_str();
+		
+		// 获取未完成订单数量和实际仓位
 		double undone = _ctx->getUndoneQty(stdCode);
 		double realPos = _ctx->getPosition(stdCode);
-		if (!decimal::eq(newVol, undone + realPos)) //仓位变化要交易 
+		
+		// 如果目标仓位与当前仓位加未完成订单不一致，需要调整仓位
+		if (!decimal::eq(newVol, undone + realPos))
 		{
+			// 触发仓位计算和调整
 			do_calc();
 		}
 	}
+	// 非首次行情处理，主要检查订单超时和定时发单
 	else
 	{
+		// 获取当前时间
 		uint64_t now = TimeUtils::getLocalTimeNow();
+		
+		// 标记是否有订单被撤销
 		bool hasCancel = false;
+		
+		// 如果设置了订单超时时间且有未完成订单，检查是否有订单需要撤销
 		if (_ord_sticky != 0 && _orders_mon.has_order()) 
 		{			
+			// 检查订单是否超时，并对超时订单执行撤单操作
 			_orders_mon.check_orders(_ord_sticky, now, [this, &hasCancel](uint32_t localid) {
+				// 尝试撤销超时订单
 				if (_ctx->cancel(localid))
 				{
+					// 增加撤单计数
 					_cancel_cnt++;
+					
+					// 记录订单超时撤销日志
 					_ctx->writeLog(fmt::format("Order expired, cancelcnt updated to {}", _cancel_cnt).c_str());
+					
+					// 标记有订单被撤销
 					hasCancel = true;
 				}
 			});
 
 		}
 
+		// 如果没有订单被撤销，并且距离上次发单时间超过了设定的发单间隔，触发新一轮发单
 		if (!hasCancel && (now - _last_fire_time >= _fire_span * 1000)) 
 		{
+			// 执行仓位计算和发单操作
 			do_calc();
 		}
 	}
 }
 
+/**
+ * @brief 处理成交回报
+ * @details 当收到成交回报时调用，当前实现中不在此处触发交易逻辑，而是在on_tick中处理
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入成交
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void WtTWapExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
-	//不用触发,这里在ontick里触发吧
+	// 不在此处触发交易逻辑，而是在on_tick中处理
 }
 
+/**
+ * @brief 处理委托回报
+ * @details 当收到委托回报时调用，主要处理委托失败的情况
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 委托回报消息
+ */
 void WtTWapExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
+	// 如果委托失败，需要处理
 	if (!bSuccess)
 	{
-		//如果不是我发出去的订单,我就不管了
+		// 如果不是由本执行单元发出的订单，则忽略
 		if (!_orders_mon.has_order(localid))
 			return;
 
+		// 从订单监控器中移除失败的订单
 		_orders_mon.erase_order(localid);
 
+		// 重新计算并发送新的订单
 		do_calc();
 	}
 }
 
+/**
+ * @brief 立即发单
+ * @details 根据给定的数量立即发送交易订单，包括计算委托价格、确定交易方向等
+ *          当发生撤单后重发或者需要立即执行交易时使用
+ * @param qty 目标交易数量，正数表示买入，负数表示卖出
+ */
 void WtTWapExeUnit::fire_at_once(double qty)
 {
+	// 如果数量为0，则直接返回
 	if (decimal::eq(qty, 0))
 		return;
 
+	// 增加行情数据引用计数，防止在使用过程中被释放
 	_last_tick->retain();
 	WTSTickData* curTick = _last_tick;
+	
+	// 获取合约代码和当前时间
 	const char* code = _code.c_str();
 	uint64_t now = TimeUtils::getLocalTimeNow();
+	
+	// 根据数量正负确定交易方向，正数为买入，负数为卖出
 	bool isBuy = decimal::gt(qty, 0);
+	
+	// 初始化目标价格
 	double targetPx = 0;
-	//根据价格模式设置,确定委托基准价格: 0-最新价,1-最优价,2-对手价
+	
+	// 根据价格模式设置确定委托基准价格
+	// 0-最新价, 1-最优价(买入用买一价，卖出用卖一价), 2-对手价(买入用卖一价，卖出用买一价)
 	if (_price_mode == 0)
 	{
+		// 模式0: 使用最新成交价
 		targetPx = curTick->price();
 	}
 	else if (_price_mode == 1)
 	{
+		// 模式1: 使用最优价（买入用买一价，卖出用卖一价）
 		targetPx = isBuy ? curTick->bidprice(0) : curTick->askprice(0);
 	}
-	else // if(_price_mode == 2)
+	else if (_price_mode == 2)
 	{
+		// 模式2: 使用对手价（买入用卖一价，卖出用买一价）
 		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);
 	}
 
 	/***---begin---23.5.22---zhaoyk***/
+	// 根据撤单次数调整目标价格
 	targetPx += _comm_info->getPriceTick() * _cancel_times* (isBuy ? 1 : -1);  
 	/***---end---23.5.22---zhaoyk***/
+
+	// 检查涨跌停价
 	//检查涨跌停价
 	isCanCancel = true;
 	if (isBuy && !decimal::eq(_last_tick->upperlimit(), 0) && decimal::gt(targetPx, _last_tick->upperlimit()))
@@ -459,77 +535,120 @@ void WtTWapExeUnit::fire_at_once(double qty)
 	curTick->release();
 }
 
+/**
+ * @brief 执行仓位计算和发单操作
+ * @details 根据目标仓位和当前实际仓位计算需要发送的订单数量和价格
+ *          包含订单撤销、价格计算、数量分配等逻辑
+ *          该方法是执行单元的核心逻辑，在多个地方被触发
+ */
 void WtTWapExeUnit::do_calc()
 {
+	// 使用标记类防止重入，确保同一时间只有一个线程在执行计算
 	CalcFlag flag(&_in_calc);
 	if (flag)
 		return;
 
+	// 如果交易通道未就绪，则直接返回
 	if (!_channel_ready)
 		return;
-//这里加一个锁，主要原因是实盘过程中发现
-//在修改目标仓位的时候，会触发一次do_calc
-//而ontick也会触发一次do_calc，两次调用是从两个线程分别触发的，所以会出现同时触发的情况
-//如果不加锁，就会引起问题
-//这种情况在原来的SimpleExecUnit没有出现，因为SimpleExecUnit只在set_position的时候触发
+
+	// 这里加一个锁，主要原因是实盘过程中发现
+	// 在修改目标仓位的时候，会触发一次do_calc
+	// 而ontick也会触发一次do_calc，两次调用是从两个线程分别触发的，所以会出现同时触发的情况
+	// 如果不加锁，就会引起问题
+	// 这种情况在原来的SimpleExecUnit没有出现，因为SimpleExecUnit只在set_position的时候触发
 	StdUniqueLock lock(_mtx_calc);
 
+	// 获取合约代码
 	const char* code = _code.c_str();
+	
+	// 获取未完成订单数量
 	double undone = _ctx->getUndoneQty(code);
-	double newVol = get_real_target(_target_pos);//真实目标价格
+	
+	// 获取真实目标仓位（处理清仓标记DBL_MAX的情况）
+	double newVol = get_real_target(_target_pos);
+	
+	// 获取当前实际仓位
 	double realPos = _ctx->getPosition(code);
+	
+	// 计算目标仓位与实际仓位的差值，即需要交易的数量
 	double diffQty = newVol - realPos;
 
-	//有正在撤销的订单,则不能进行下一轮计算
+	// 检查是否有正在撤销的订单，如果有则不能进行下一轮计算
 	if (_cancel_cnt != 0)
 	{
+		// 记录日志并退出本轮执行
 		_ctx->writeLog(fmt::format("{}尚有未完成撤单指令,暂时退出本轮执行", _code).c_str());
 		return;
 	}
 
+	// 如果目标仓位与实际仓位相等，则无需发单，直接返回
 	if (decimal::eq(diffQty, 0))
 		return;
-	//每一次发单要保障成交,所以如果有未完成单,说明上一轮没完成
-	//有未完成订单，与实际仓位变动方向相反
-	//则需要撤销现有订单
+	
+	// 检查是否有与目标仓位变动方向相反的未完成订单
+	// 每一次发单要保障成交，如果有与目标相反的未完成单，需要先撤销
 	if (decimal::lt(diffQty * undone, 0))
 	{
+		// 确定未完成订单的方向（正数为买入，负数为卖出）
 		bool isBuy = decimal::gt(undone, 0);   
+		
+		// 撤销相应方向的所有订单
 		OrderIDs ids = _ctx->cancel(code, isBuy);
+		
+		// 如果成功撤销了订单，需要更新订单监控状态
 		if (!ids.empty())
 		{
+			// 将撤销的订单添加到监控器中
 			_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime());
+			
+			// 增加撤单计数
 			_cancel_cnt += ids.size();
-			_ctx->writeLog(fmtutil::format("[{}@{}] live opposite order of {} canceled, cancelcnt -> {}", __FILE__, __LINE__, _code.c_str(), _cancel_cnt));//相反的订单已取消
+			
+			// 记录撤单日志
+			_ctx->writeLog(fmtutil::format("[{}@{}] live opposite order of {} canceled, cancelcnt -> {}", __FILE__, __LINE__, _code.c_str(), _cancel_cnt));
 		}
+		
+		// 撤单后退出本轮执行，等待撤单回报
 		return;
 	}
-	//因为是逐笔发单，所以如果有不需要撤销的未完成单，则暂不发单
+	// 因为采用逐笔发单策略，如果有同向的未完成订单，则暂不发新单
 	if (!decimal::eq(undone, 0))
 	{
+		// 记录日志并退出本轮执行
 		_ctx->writeLog(fmt::format("{}上一轮有挂单未完成,暂时退出本轮执行", _code).c_str());
 		return;
 	}
+	
+	// 保存当前仓位
 	double curPos = realPos;
+	
+	// 检查是否有最新的行情数据
 	if (_last_tick == NULL)
 	{
+		// 没有行情数据则无法计算价格，退出执行
 		_ctx->writeLog(fmt::format("{}没有最新tick数据,退出执行逻辑", _code).c_str());
 		return;
 	}
+	// 检查当前仓位是否已经达到目标仓位
 	if (decimal::eq(curPos, newVol))
 	{
-		//当前仓位和最新仓位匹配时，如果不是全部清仓的需求，则直接退出计算了
+		// 如果当前仓位和目标仓位匹配，且不是清仓指令，则直接退出
 		if (!is_clear(_target_pos))
 			return;
 
-		//如果是清仓的需求，还要再进行对比
-		//如果多头为0，说明已经全部清理掉了，则直接退出
+		// 如果是清仓指令，需要进一步检查多头仓位
+		// 获取多头仓位
 		double lPos = _ctx->getPosition(code, true, 1); 
+		
+		// 如果多头仓位已经为0，说明已经完全清仓，直接退出
 		if (decimal::eq(lPos, 0))
 			return;
 
-		//如果还有多头仓位，则将目标仓位设置为非0，强制触发                      
+		// 如果还有多头仓位，则将目标仓位设置为卖出指令，强制触发清仓                      
 		newVol = -min(lPos, _order_lots);
+		
+		// 记录清仓过程触发日志
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
 	}
 
