@@ -690,33 +690,49 @@ void WtStockVWapExeUnit::fire_at_once(double qty)
 	}
 	else // if(_price_mode == 2)
 	{
-		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);//买入方向：卖价，卖出方向：买价
+		// 使用对手价：买入时用卖一价，卖出时用买一价
+		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);
 	}
 
-	targetPx += _comm_info->getPriceTick()*_cancel_times *(isBuy ? 1 : -1);//增加价格偏移
-	//检查涨跌停价
-	isCanCancel = true;
+	// 根据撤单次数增加价格偏移，买入时价格上移，卖出时价格下移
+	targetPx += _comm_info->getPriceTick()*_cancel_times *(isBuy ? 1 : -1);
+	
+	// 检查并处理涨跌停限制
+	isCanCancel = true;  // 默认订单可撤销
+	
+	// 如果是买入订单，检查是否超过涨停价
 	if (isBuy && !decimal::eq(_last_tick->upperlimit(), 0) && decimal::gt(targetPx, _last_tick->upperlimit()))
 	{
+		// 记录日志并将价格修正为涨停价
 		_ctx->writeLog(fmt::format("Buy price {} of {} modified to upper limit price", targetPx, _code.c_str(), _last_tick->upperlimit()).c_str());
 		targetPx = _last_tick->upperlimit();
-		isCanCancel = false;//如果价格被修正为涨跌停价，订单不可撤销
-	}
-	if (isBuy != 1 && !decimal::eq(_last_tick->lowerlimit(), 0) && decimal::lt(targetPx, _last_tick->lowerlimit()))
-	{
-		_ctx->writeLog(fmt::format("Sell price {} of {} modified to lower limit price", targetPx, _code.c_str(), _last_tick->lowerlimit()).c_str());
-		targetPx = _last_tick->lowerlimit();
-		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
+		isCanCancel = false;  // 涨停价订单不可撤销
 	}
 	
+	// 如果是卖出订单，检查是否低于跌停价
+	if (isBuy != 1 && !decimal::eq(_last_tick->lowerlimit(), 0) && decimal::lt(targetPx, _last_tick->lowerlimit()))
+	{
+		// 记录日志并将价格修正为跌停价
+		_ctx->writeLog(fmt::format("Sell price {} of {} modified to lower limit price", targetPx, _code.c_str(), _last_tick->lowerlimit()).c_str());
+		targetPx = _last_tick->lowerlimit();
+		isCanCancel = false;  // 跌停价订单不可撤销
+	}
+	
+	// 创建订单ID容器
 	OrderIDs ids;
+	
+	// 根据数量正负发送买入或卖出订单
 	if (qty > 0)
+		// 发送买入订单
 		ids = _ctx->buy(code, targetPx, abs(qty));
 	else
+		// 发送卖出订单
 		ids = _ctx->sell(code, targetPx, abs(qty));
 
+	// 将订单添加到监控器中
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
 
+	// 释放行情数据
 	curTick->release();
 }
 
