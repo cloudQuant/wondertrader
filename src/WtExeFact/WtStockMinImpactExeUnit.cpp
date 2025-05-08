@@ -156,11 +156,24 @@ void WtStockMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTS
 		stdCode, PriceModeNames[_price_mode + 1], _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots, _min_order, _is_cancel_unmanaged_order ? "true" : "false").c_str());
 }
 
+/**
+ * @brief 订单状态回调处理
+ * @details 处理订单状态变化的回调信息，包括订单成交或撤销等情况
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入订单
+ * @param leftover 剩余未成交数量
+ * @param price 订单委托价格
+ * @param isCanceled 是否已撤销
+ */
 void WtStockMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
 {
 	{
+		// 加锁保护共享数据
 		StdUniqueLock lock(_mtx_calc);
 		_ctx->writeLog(fmtutil::format("on_order localid:{} stdCode:{} isBuy:{} leftover:{} price:{} isCanceled:{}", localid, stdCode, isBuy, leftover, price, isCanceled));
+		
+		// 检查是否为受管理的订单
 		if (!_orders_mon.has_order(localid))
 		{
 			// 非管理的合约订单
@@ -168,6 +181,7 @@ void WtStockMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bo
 			return;
 		}
 
+		// 处理订单完成或撤销情况
 		if (isCanceled || leftover == 0)
 		{
 			_orders_mon.erase_order(localid);
@@ -177,11 +191,12 @@ void WtStockMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bo
 				_ctx->writeLog(fmtutil::format("{} {} done, earse from mon", stdCode, localid));
 		}
 
+		// 订单全部成交时重置撤单次数
 		if (leftover == 0 && !isCanceled)
 			_cancel_times = 0;
 	}
 
-	//如果有撤单,也触发重新计算
+	// 如果有撤单,增加撤单计数并触发重新计算
 	if (isCanceled)
 	{
 		_ctx->writeLog(fmt::format("Order {} of {} canceled, recalc will be done", localid, stdCode).c_str());
@@ -190,6 +205,11 @@ void WtStockMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bo
 	}
 }
 
+/**
+ * @brief 交易通道就绪回调
+ * @details 当交易通道连接成功并准备就绪时触发此回调方法
+ *          标记通道为就绪状态，并触发交易计算
+ */
 void WtStockMinImpactExeUnit::on_channel_ready()
 {
 	_ctx->writeLog("=================================channle ready==============================");
@@ -198,12 +218,33 @@ void WtStockMinImpactExeUnit::on_channel_ready()
 	do_calc();
 }
 
+/**
+ * @brief 交易通道丢失回调
+ * @details 当交易通道断开连接或发生错误时触发此回调方法
+ *          当前实现为空，可以在此处添加通道断开时的清理操作
+ */
 void WtStockMinImpactExeUnit::on_channel_lost()
 {
 }
 
+/**
+ * @brief 账户资金信息回调
+ * @details 接收并处理账户资金更新信息，只处理人民币账户，更新内部可用资金状态
+ * @param currency 货币类型代码
+ * @param prebalance 前结余额
+ * @param balance 静态余额
+ * @param dynbalance 动态余额
+ * @param avaliable 可用资金
+ * @param closeprofit 平仓盈亏
+ * @param dynprofit 浮动盈亏
+ * @param margin 占用保证金
+ * @param fee 手续费
+ * @param deposit 入金
+ * @param withdraw 出金
+ */
 void WtStockMinImpactExeUnit::on_account(const char* currency, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
 {
+	// 只处理人民币账户信息
 	if (strcmp(currency, "CNY") == 0)
 	{
 		_ctx->writeLog(fmtutil::format("avaliable update {}->:{}", _avaliable, avaliable));
@@ -211,25 +252,44 @@ void WtStockMinImpactExeUnit::on_account(const char* currency, double prebalance
 	}
 }
 
+/**
+ * @brief 检查并清理未被管理的订单
+ * @details 检测当前是否有未完成的未被管理订单，如果有且配置为撤销未管理订单，
+ *          则自动撤销这些订单并将其添加到订单监控器中
+ */
 void WtStockMinImpactExeUnit::check_unmanager_order()
 {
+	// 获取当前未完成数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
+	// 清空订单监控器
 	_orders_mon.clear_orders();
 
+	// 如果有未完成订单且配置为撤销未管理订单
 	if (!decimal::eq(undone, 0) && _is_cancel_unmanaged_order)
 	{
 		_ctx->writeLog(fmt::format("{} Unmanaged live orders with qty {} of {} found, cancel all", _code, undone, _code.c_str()).c_str());
+		// 根据数量正负判断是买入还是卖出订单
 		bool isBuy = (undone > 0);
+		// 撤销对应方向的所有订单
 		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
+		// 将撤销订单添加到订单监控器中
 		_orders_mon.push_order(ids.data(), ids.size(), _now);
+		// 记录撤单日志
 		for (auto id : ids)
 			_ctx->writeLog(fmt::format("{} mon push unmanager order {} enter time:{}", _code.c_str(), id, _now).c_str());
 	}
 }
 
+/**
+ * @brief 处理市场行情数据
+ * @details 接收并处理新的市场行情数据，更新内部状态，检查超时订单，并触发交易计算
+ * @param newTick 最新的市场行情数据
+ */
 void WtStockMinImpactExeUnit::on_tick(WTSTickData* newTick)
 {
+	// 获取当前时间
 	_now = TimeUtils::getLocalTimeNow();
+	// 检查行情数据是否有效或是否属于当前合约
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
 
@@ -265,16 +325,19 @@ void WtStockMinImpactExeUnit::on_tick(WTSTickData* newTick)
 	 *	那么在新的行情数据进来的时候可以再次触发核心逻辑
 	 */
 
+	// 输出当前管理的订单状态
 	_orders_mon.enumOrder([this](uint32_t localid, uint64_t entertime, bool cancancel) {
 		_ctx->writeLog(fmtutil::format("[{}]{} entertime:{} cancancel:{} now:{} last_tick_time:{} live_time:{}", _code, localid, entertime, cancancel, _now, _last_tick_time, _now - entertime));
 	});
 
+	// 检查并处理超时订单
 	if (_expire_secs != 0 && _orders_mon.has_order())
 	{
 		_orders_mon.check_orders(_expire_secs, _now, [this](uint32_t localid) {
 			if (_ctx->cancel(localid))
 			{
 				_ctx->writeLog(fmt::format("[{}] Expired order of {} canceled", localid, _code.c_str()).c_str());
+				// 记录撤单次数
 				if (_cancel_map.find(localid) == _cancel_map.end())
 				{
 					_cancel_map[localid] = 0;
@@ -283,6 +346,8 @@ void WtStockMinImpactExeUnit::on_tick(WTSTickData* newTick)
 			}
 		});
 	}
+	
+	// 处理撤单次数超过限制的订单，可能是错单
 	if (!_cancel_map.empty())
 	{
 		std::vector<uint32_t> erro_cancel_orders{};
@@ -301,13 +366,31 @@ void WtStockMinImpactExeUnit::on_tick(WTSTickData* newTick)
 		}
 	}
 
+	// 触发交易计算
 	do_calc();
 }
 
+/**
+ * @brief 处理成交回报
+ * @details 接收并处理订单成交的回报信息，当前实现为空
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入成交
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void WtStockMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
 }
 
+/**
+ * @brief 处理委托回报
+ * @details 接收并处理订单委托的回报结果，如果委托失败则移除该订单并重新计算
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 委托结果消息
+ */
 void WtStockMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	if (!bSuccess)
@@ -324,8 +407,15 @@ void WtStockMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, 
 	do_calc();
 }
 
+/**
+ * @brief 设置目标仓位
+ * @details 设置股票的目标股数仓位，根据目标仓位与当前仓位的差异触发交易计算
+ * @param stdCode 标准化合约代码
+ * @param newVol 新的目标仓位（股数）
+ */
 void WtStockMinImpactExeUnit::set_position(const char* stdCode, double newVol)
 {
+	// 检查是否为当前管理的合约
 	if (_code.compare(stdCode) != 0)
 		return;
 
@@ -336,54 +426,81 @@ void WtStockMinImpactExeUnit::set_position(const char* stdCode, double newVol)
 		_ctx->writeLog(fmt::format("{} is in clearing processing, position can not be set to 0", stdCode).c_str());
 		return;
 	}
+	// 获取当前实际仓位
 	double cur_pos = _ctx->getPosition(stdCode);
 
+	// 目标仓位与当前仓位相等，无需操作
 	if (decimal::eq(cur_pos, newVol))
 		return;
 
+	// 目标仓位不能为负数
 	if (decimal::lt(newVol, 0))
 	{
 		_ctx->writeLog(fmt::format("{} is an error stock target position", newVol).c_str());
 		return;
 	}
 
+	// 设置新的目标仓位
 	_target_pos = newVol;
 
+	// 设置目标模式为股数模式
 	_target_mode = TargetMode::stocks;
+	// 输出目标仓位设置日志
 	if (is_clear())
 		_ctx->writeLog(fmt::format("{} is set to be in clearing processing", stdCode).c_str());
 	else
 		_ctx->writeLog(fmt::format("Target position of {} is set tb be {}", stdCode, _target_pos).c_str());
 
+	// 重置执行状态
 	_is_finish = false;
 	_start_time = TimeUtils::getLocalTimeNow();
+	// 获取当前市场价格作为开始价格
 	WTSTickData* tick = _ctx->grabLastTick(_code.c_str());
 	if (tick)
 	{
 		_start_price = tick->price();
 		tick->release();
 	}
+	// 触发交易计算
 	do_calc();
 }
 
+/**
+ * @brief 清空所有仓位
+ * @details 将指定合约的仓位设置为0，并进入清仓模式
+ * @param stdCode 标准化合约代码
+ */
 void WtStockMinImpactExeUnit::clear_all_position(const char* stdCode)
 {
+	// 检查是否为当前管理的合约
 	if (_code.compare(stdCode) != 0)
 		return;
 
+	// 设置清仓标志和目标仓位
 	_is_clear = true;
 	_target_pos = 0;
 	_target_amount = 0;
+	// 触发交易计算
 	do_calc();
 }
 
+/**
+ * @brief 检查是否处于清仓模式
+ * @return 如果处于清仓状态返回true，否则返回false
+ */
 inline bool WtStockMinImpactExeUnit::is_clear()
 {
 	return _is_clear;
 }
 
+/**
+ * @brief 执行交易计算
+ * @details 根据当前市场状态和目标仓位计算并执行交易操作
+ *          该方法是执行单元的核心交易逻辑，实现最小市场冲击策略
+ */
 void WtStockMinImpactExeUnit::do_calc()
 {
+	// 如果没有最新行情数据，无法计算
 	if (!_last_tick)
 		return;
 	if (_is_finish)
