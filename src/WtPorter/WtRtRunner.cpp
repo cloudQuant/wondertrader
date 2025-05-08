@@ -1,11 +1,13 @@
-﻿/*!
+/*!
  * \file WtRtRunner.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 实时交易运行器实现文件
+ * \details 该文件实现了WtRtRunner类，用于管理实时交易环境，包括CTA策略、HFT高频策略和SEL选股策略的初始化、
+ *          运行和事件处理，以及与外部模块的交互接口。
  */
 #include "WtRtRunner.h"
 #include "ExpCtaContext.h"
@@ -48,6 +50,10 @@ const char* getModuleName()
 }
 #endif
 
+/**
+ * @brief 构造函数
+ * @details 初始化WtRtRunner的所有成员变量为默认值，包括各种回调函数指针、引擎标记和数据加载器等
+ */
 WtRtRunner::WtRtRunner()
 	: _data_store(NULL)
 	, _cb_cta_init(NULL)
@@ -96,10 +102,22 @@ WtRtRunner::WtRtRunner()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理WtRtRunner对象占用的资源
+ */
 WtRtRunner::~WtRtRunner()
 {
 }
 
+/**
+ * @brief 初始化运行器
+ * @details 初始化日志系统和目录路径，在Windows平台上还会初始化崩溃转储机制
+ * @param logCfg 日志配置文件或内容，默认为"logcfg.prop"
+ * @param isFile 是否为文件路径，true表示文件路径，false表示配置内容，默认为true
+ * @param genDir 数据生成目录
+ * @return 是否初始化成功
+ */
 bool WtRtRunner::init(const char* logCfg /* = "logcfg.prop" */, bool isFile /* = true */, const char* genDir)
 {
 #ifdef _MSC_VER
@@ -122,6 +140,11 @@ bool WtRtRunner::init(const char* logCfg /* = "logcfg.prop" */, bool isFile /* =
 	return true;
 }
 
+/**
+ * @brief 注册事件回调函数
+ * @details 注册事件回调函数，并将当前对象注册为各个引擎的事件监听器
+ * @param cbEvt 事件回调函数
+ */
 void WtRtRunner::registerEvtCallback(FuncEventCallback cbEvt)
 {
 	_cb_evt = cbEvt;
@@ -131,6 +154,12 @@ void WtRtRunner::registerEvtCallback(FuncEventCallback cbEvt)
 	_sel_engine.regEventListener(this);
 }
 
+/**
+ * @brief 注册Parser解析器回调函数
+ * @details 注册外部Parser解析器的事件和订阅回调函数
+ * @param cbEvt 事件回调函数，用于处理Parser解析器事件
+ * @param cbSub 订阅回调函数，用于处理订阅和取消订阅请求
+ */
 void WtRtRunner::registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub)
 {
 	_cb_parser_evt = cbEvt;
@@ -139,6 +168,12 @@ void WtRtRunner::registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSub
 	WTSLogger::info("Callbacks of Extented Parser registration done");
 }
 
+/**
+ * @brief 注册Executer执行器回调函数
+ * @details 注册外部Executer执行器的初始化和命令回调函数
+ * @param cbInit 初始化回调函数，用于初始化执行器
+ * @param cbExec 命令回调函数，用于处理执行器命令
+ */
 void WtRtRunner::registerExecuterPorter(FuncExecInitCallback cbInit, FuncExecCmdCallback cbExec)
 {
 	_cb_exec_init = cbInit;
@@ -147,6 +182,16 @@ void WtRtRunner::registerExecuterPorter(FuncExecInitCallback cbInit, FuncExecCmd
 	WTSLogger::info("Callbacks of Extented Executer registration done");
 }
 
+/**
+ * @brief 注册CTA策略回调函数
+ * @details 注册CTA策略的各种事件回调函数，包括初始化、Tick数据、计算、K线、交易日事件和条件触发等
+ * @param cbInit 初始化回调函数
+ * @param cbTick Tick数据回调函数
+ * @param cbCalc 计算回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbSessEvt 交易日事件回调函数
+ * @param cbCondTrigger 条件触发回调函数，可选参数，默认为NULL
+ */
 void WtRtRunner::registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, FuncStraBarCallback cbBar, 
 		FuncSessionEvtCallback cbSessEvt, FuncStraCondTriggerCallback cbCondTrigger /* = NULL */)
 {
@@ -160,6 +205,15 @@ void WtRtRunner::registerCtaCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of CTA engine registration done");
 }
 
+/**
+ * @brief 注册SEL选股策略回调函数
+ * @details 注册SEL选股策略的各种事件回调函数，包括初始化、Tick数据、计算、K线和交易日事件等
+ * @param cbInit 初始化回调函数
+ * @param cbTick Tick数据回调函数
+ * @param cbCalc 计算回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbSessEvt 交易日事件回调函数
+ */
 void WtRtRunner::registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraCalcCallback cbCalc, FuncStraBarCallback cbBar, FuncSessionEvtCallback cbSessEvt)
 {
 	_cb_sel_init = cbInit;
@@ -172,6 +226,22 @@ void WtRtRunner::registerSelCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of SEL engine registration done");
 }
 
+/**
+ * @brief 注册HFT高频策略回调函数
+ * @details 注册HFT高频策略的各种事件回调函数，包括初始化、Tick数据、K线、通道事件、订单、成交、委托等
+ * @param cbInit 初始化回调函数
+ * @param cbTick Tick数据回调函数
+ * @param cbBar K线数据回调函数
+ * @param cbChnl 通道事件回调函数
+ * @param cbOrd 订单回调函数
+ * @param cbTrd 成交回调函数
+ * @param cbEntrust 委托回调函数
+ * @param cbOrdDtl 订单明细回调函数
+ * @param cbOrdQue 订单队列回调函数
+ * @param cbTrans 成交明细回调函数
+ * @param cbSessEvt 交易日事件回调函数
+ * @param cbPosition 持仓回调函数
+ */
 void WtRtRunner::registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickCallback cbTick, FuncStraBarCallback cbBar, 
 	FuncHftChannelCallback cbChnl, FuncHftOrdCallback cbOrd, FuncHftTrdCallback cbTrd, FuncHftEntrustCallback cbEntrust,
 	FuncStraOrdDtlCallback cbOrdDtl, FuncStraOrdQueCallback cbOrdQue, FuncStraTransCallback cbTrans, FuncSessionEvtCallback cbSessEvt, FuncHftPosCallback cbPosition)
@@ -196,6 +266,15 @@ void WtRtRunner::registerHftCallbacks(FuncStraInitCallback cbInit, FuncStraTickC
 	WTSLogger::info("Callbacks of HFT engine registration done");
 }
 
+/**
+ * @brief 加载最终历史K线数据
+ * @details 实现IHisDataLoader接口方法，加载指定合约的最终历史K线数据，已经过滤和调整
+ * @param obj 传入的上下文指针
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param cb 数据读取回调函数
+ * @return 是否成功加载数据
+ */
 bool WtRtRunner::loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -221,6 +300,15 @@ bool WtRtRunner::loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod
 	}
 }
 
+/**
+ * @brief 加载原始历史K线数据
+ * @details 实现IHisDataLoader接口方法，加载指定合约的原始历史K线数据，未经过滤和调整
+ * @param obj 传入的上下文指针
+ * @param stdCode 标准化合约代码
+ * @param period K线周期
+ * @param cb 数据读取回调函数
+ * @return 是否成功加载数据
+ */
 bool WtRtRunner::loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -246,6 +334,13 @@ bool WtRtRunner::loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod p
 	}
 }
 
+/**
+ * @brief 加载所有复权因子
+ * @details 实现IHisDataLoader接口方法，加载系统中所有合约的复权因子
+ * @param obj 传入的上下文指针
+ * @param cb 数据读取回调函数
+ * @return 是否成功加载数据
+ */
 bool WtRtRunner::loadAllAdjFactors(void* obj, FuncReadFactors cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -258,6 +353,14 @@ bool WtRtRunner::loadAllAdjFactors(void* obj, FuncReadFactors cb)
 	return _ext_adj_fct_loader("");
 }
 
+/**
+ * @brief 加载指定合约的复权因子
+ * @details 实现IHisDataLoader接口方法，加载指定合约的复权因子
+ * @param obj 传入的上下文指针
+ * @param stdCode 标准化合约代码
+ * @param cb 数据读取回调函数
+ * @return 是否成功加载数据
+ */
 bool WtRtRunner::loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb)
 {
 	StdUniqueLock lock(_feed_mtx);
@@ -270,12 +373,26 @@ bool WtRtRunner::loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors 
 	return _ext_adj_fct_loader(stdCode);
 }
 
+/**
+ * @brief 输入复权因子数据
+ * @details 用于外部模块向运行器提供复权因子数据
+ * @param stdCode 标准化合约代码
+ * @param dates 日期数组
+ * @param factors 因子数组
+ * @param count 数据数量
+ */
 void WtRtRunner::feedAdjFactors(const char* stdCode, uint32_t* dates, double* factors, uint32_t count)
 {
 	_feeder_fcts(_feed_obj, stdCode, dates, factors, count);
 }
 
 
+/**
+ * @brief 输入原始K线数据
+ * @details 用于外部模块向运行器提供原始K线数据
+ * @param bars K线数据数组
+ * @param count 数据数量
+ */
 void WtRtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 {
 	if (_ext_fnl_bar_loader == NULL)
@@ -288,6 +405,12 @@ void WtRtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 }
 
 
+/**
+ * @brief 创建外部数据解析器
+ * @details 创建一个外部数据解析器，用于处理外部数据源
+ * @param id 解析器ID
+ * @return 是否创建成功
+ */
 bool WtRtRunner::createExtParser(const char* id)
 {
 	ParserAdapterPtr adapter(new ParserAdapter);
@@ -298,6 +421,12 @@ bool WtRtRunner::createExtParser(const char* id)
 	return true;
 }
 
+/**
+ * @brief 创建外部执行器
+ * @details 创建一个外部执行器，用于处理外部交易指令
+ * @param id 执行器ID
+ * @return 是否创建成功
+ */
 bool WtRtRunner::createExtExecuter(const char* id)
 {
 	ExpExecuter* executer = new ExpExecuter(id);
@@ -307,6 +436,13 @@ bool WtRtRunner::createExtExecuter(const char* id)
 	return true;
 }
 
+/**
+ * @brief 创建CTA策略上下文
+ * @details 创建一个CTA策略的运行上下文，并添加到CTA引擎中
+ * @param name 策略名称
+ * @param slippage 滑点设置，默认为0
+ * @return 上下文ID
+ */
 uint32_t WtRtRunner::createCtaContext(const char* name, int32_t slippage /* = 0 */)
 {
 	ExpCtaContext* ctx = new ExpCtaContext(&_cta_engine, name, slippage);
@@ -314,6 +450,15 @@ uint32_t WtRtRunner::createCtaContext(const char* name, int32_t slippage /* = 0 
 	return ctx->id();
 }
 
+/**
+ * @brief 创建HFT高频策略上下文
+ * @details 创建一个HFT高频策略的运行上下文，并绑定交易适配器
+ * @param name 策略名称
+ * @param trader 交易适配器ID
+ * @param bAgent 是否为代理模式
+ * @param slippage 滑点设置，默认为0
+ * @return 上下文ID
+ */
 uint32_t WtRtRunner::createHftContext(const char* name, const char* trader, bool bAgent, int32_t slippage /* = 0 */)
 {
 	ExpHftContext* ctx = new ExpHftContext(&_hft_engine, name, bAgent, slippage);
@@ -331,29 +476,48 @@ uint32_t WtRtRunner::createHftContext(const char* name, const char* trader, bool
 	return ctx->id();
 }
 
+/**
+ * @brief 创建SEL选股策略上下文
+ * @details 创建一个SEL选股策略的运行上下文，并设置执行周期
+ * @param name 策略名称
+ * @param date 日期，格式为YYYYMMDD
+ * @param time 时间，格式为HHMMSS
+ * @param period 周期设置，可以为"d"(日)、"w"(周)、"m"(月)、"y"(年)、"min"(分钟)
+ * @param slippage 滑点设置
+ * @param trdtpl 交易模板，默认为"CHINA"
+ * @param session 交易时段，默认为"TRADING"
+ * @return 上下文ID
+ */
 uint32_t WtRtRunner::createSelContext(const char* name, uint32_t date, uint32_t time, const char* period, int32_t slippage, const char* trdtpl /* = "CHINA" */, const char* session/* ="TRADING" */)
 {
-	TaskPeriodType ptype;
-	if (wt_stricmp(period, "d") == 0)
-		ptype = TPT_Daily;
-	else if (wt_stricmp(period, "w") == 0)
-		ptype = TPT_Weekly;
-	else if (wt_stricmp(period, "m") == 0)
-		ptype = TPT_Monthly;
-	else if (wt_stricmp(period, "y") == 0)
-		ptype = TPT_Yearly;
-	else if (wt_stricmp(period, "min") == 0)
-		ptype = TPT_Minute;
-	else
-		ptype = TPT_None;
+    TaskPeriodType ptype;
+    if (wt_stricmp(period, "d") == 0)
+        ptype = TPT_Daily;
+    else if (wt_stricmp(period, "w") == 0)
+        ptype = TPT_Weekly;
+    else if (wt_stricmp(period, "m") == 0)
+        ptype = TPT_Monthly;
+    else if (wt_stricmp(period, "y") == 0)
+        ptype = TPT_Yearly;
+    else if (wt_stricmp(period, "min") == 0)
+        ptype = TPT_Minute;
+    else
+        ptype = TPT_None;
 
-	ExpSelContext* ctx = new ExpSelContext(&_sel_engine, name, slippage);
+    ExpSelContext* ctx = new ExpSelContext(&_sel_engine, name, slippage);
 
-	_sel_engine.addContext(SelContextPtr(ctx), date, time, ptype, true, trdtpl, session);
+    _sel_engine.addContext(SelContextPtr(ctx), date, time, ptype, true, trdtpl, session);
 
-	return ctx->id();
+    return ctx->id();
 }
 
+
+/**
+ * @brief 获取原始标准化合约代码
+ * @details 将标准化合约代码转换为原始格式
+ * @param stdCode 标准化合约代码
+ * @return 原始格式的合约代码
+ */
 const char* WtRtRunner::get_raw_stdcode(const char* stdCode)
 {
 	static thread_local std::string s;
@@ -362,21 +526,48 @@ const char* WtRtRunner::get_raw_stdcode(const char* stdCode)
 }
 
 
+/**
+ * @brief 获取CTA策略上下文
+ * @details 根据ID获取CTA策略上下文对象
+ * @param id 上下文ID
+ * @return CTA策略上下文指针
+ */
 CtaContextPtr WtRtRunner::getCtaContext(uint32_t id)
 {
 	return _cta_engine.getContext(id);
 }
 
+/**
+ * @brief 获取HFT高频策略上下文
+ * @details 根据ID获取HFT高频策略上下文对象
+ * @param id 上下文ID
+ * @return HFT高频策略上下文指针
+ */
 HftContextPtr WtRtRunner::getHftContext(uint32_t id)
 {
 	return _hft_engine.getContext(id);
 }
 
+/**
+ * @brief 获取SEL选股策略上下文
+ * @details 根据ID获取SEL选股策略上下文对象
+ * @param id 上下文ID
+ * @return SEL选股策略上下文指针
+ */
 SelContextPtr WtRtRunner::getSelContext(uint32_t id)
 {
 	return _sel_engine.getContext(id);
 }
 
+/**
+ * @brief K线周期数据事件回调
+ * @details 处理不同策略引擎的K线周期数据事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param period 周期标识
+ * @param newBar 新K线数据
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period, WTSBarStruct* newBar, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -389,6 +580,14 @@ void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period
 	}
 }
 
+/**
+ * @brief 策略计算事件回调
+ * @details 处理CTA和SEL策略引擎的计算事件
+ * @param id 上下文ID
+ * @param curDate 当前日期，格式为YYYYMMDD
+ * @param curTime 当前时间，格式为HHMMSS
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -400,6 +599,16 @@ void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, En
 	}
 }
 
+/**
+ * @brief 条件触发事件回调
+ * @details 处理CTA策略引擎的条件触发事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param target 目标价格
+ * @param price 当前价格
+ * @param usertag 用户标签
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double target, double price, const char* usertag, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -410,6 +619,12 @@ void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double 
 	}
 }
 
+/**
+ * @brief 策略初始化事件回调
+ * @details 处理各类策略引擎的初始化事件
+ * @param id 上下文ID
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 {
 	switch (eType)
@@ -422,6 +637,14 @@ void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 	}
 }
 
+/**
+ * @brief 交易时段事件回调
+ * @details 处理各类策略引擎的交易时段开始或结束事件
+ * @param id 上下文ID
+ * @param curTDate 当前交易日期，格式为YYYYMMDD
+ * @param isBegin 是否为交易时段开始事件，默认为true
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin /* = true */, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -434,6 +657,14 @@ void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBeg
 	}
 }
 
+/**
+ * @brief 实时行情数据回调
+ * @details 处理各类策略引擎的行情数据更新事件
+ * @param id 上下文ID
+ * @param stdCode 标准化合约代码
+ * @param newTick 新行情数据
+ * @param eType 引擎类型，默认为CTA引擎
+ */
 void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newTick, EngineType eType /* = ET_CTA */)
 {
 	switch (eType)
@@ -446,42 +677,106 @@ void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newT
 	}
 }
 
+/**
+ * @brief 通道丢失事件回调
+ * @details 处理HFT策略引擎的通道丢失事件
+ * @param cHandle 通道句柄
+ * @param trader 交易适配器ID
+ */
 void WtRtRunner::hft_on_channel_lost(uint32_t cHandle, const char* trader)
 {
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_LOST);
 }
 
+/**
+ * @brief HFT交易通道就绪回调
+ * @details 处理HFT高频交易的通道就绪事件
+ * @param cHandle 上下文句柄
+ * @param trader 交易器ID
+ */
 void WtRtRunner::hft_on_channel_ready(uint32_t cHandle, const char* trader)
 {
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_READY);
 }
 
+/**
+ * @brief HFT委托回报回调
+ * @details 处理HFT高频交易的委托回报事件
+ * @param cHandle 上下文句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 是否委托成功
+ * @param message 错误消息
+ * @param userTag 用户标签
+ */
 void WtRtRunner::hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag)
 {
 	if (_cb_hft_entrust)
 		_cb_hft_entrust(cHandle, localid, stdCode, bSuccess, message, userTag);
 }
 
+/**
+ * @brief HFT委托状态回调
+ * @details 处理HFT高频交易的委托状态变化事件
+ * @param cHandle 上下文句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入委托
+ * @param totalQty 总委托量
+ * @param leftQty 剩余委托量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤单
+ * @param userTag 用户标签
+ */
 void WtRtRunner::hft_on_order(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag)
 {
 	if (_cb_hft_ord)
 		_cb_hft_ord(cHandle, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
 
+/**
+ * @brief HFT成交回调
+ * @details 处理HFT高频交易的成交事件
+ * @param cHandle 上下文句柄
+ * @param localid 本地委托ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入成交
+ * @param vol 成交量
+ * @param price 成交价格
+ * @param userTag 用户标签
+ */
 void WtRtRunner::hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
 {
 	if (_cb_hft_trd)
 		_cb_hft_trd(cHandle, localid, stdCode, isBuy, vol, price, userTag);
 }
 
+/**
+ * @brief HFT持仓回调
+ * @details 处理HFT高频交易的持仓变化事件
+ * @param cHandle 上下文句柄
+ * @param stdCode 标准化合约代码
+ * @param isLong 是否为多头持仓
+ * @param prevol 之前的总仓位
+ * @param preavail 之前的可用仓位
+ * @param newvol 新的总仓位
+ * @param newavail 新的可用仓位
+ */
 void WtRtRunner::hft_on_position(uint32_t cHandle, const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail)
 {
 	if (_cb_hft_position)
 		_cb_hft_position(cHandle, stdCode, isLong, prevol, preavail, newvol, newavail);
 }
 
+/**
+ * @brief 配置运行器
+ * @details 根据配置文件或内容初始化运行器，加载基础数据、交易时段、品种、合约等信息
+ * @param cfgFile 配置文件路径或内容
+ * @param isFile 是否为文件路径，true表示文件路径，false表示配置内容
+ * @return 是否配置成功
+ */
 bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 {
 	_config = isFile ? WTSCfgLoader::load_from_file(cfgFile) : WTSCfgLoader::load_from_content(cfgFile, false);
