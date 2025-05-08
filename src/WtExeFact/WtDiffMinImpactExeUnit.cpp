@@ -1,10 +1,13 @@
-﻿/*!
+/*!
  * \file WtDiffMinImpactExeUnit.cpp
  *
  * \author Wesley
  * \date 2020/03/30
  *
- * 
+ * \brief 差量最小冲击执行单元的实现
+ * \details 本文件实现了WonderTrader的差量最小冲击执行单元类，
+ *          该执行单元基于差量交易策略，通过控制委托价格、交易时机和交易量，
+ *          实现对市场影响最小化的执行策略，适用于大单交易场景
  */
 #include "WtDiffMinImpactExeUnit.h"
 
@@ -19,6 +22,10 @@ extern const char* FACT_NAME;
 
 extern const char* PriceModeNames[4];
 
+/**
+ * @brief 构造函数
+ * @details 初始化差量最小冲击执行单元的成员变量，将指针设置为空，数值设置为初始值
+ */
 WtDiffMinImpactExeUnit::WtDiffMinImpactExeUnit()
 	: _last_tick(NULL)
 	, _comm_info(NULL)
@@ -35,6 +42,10 @@ WtDiffMinImpactExeUnit::WtDiffMinImpactExeUnit()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理差量最小冲击执行单元的资源，释放行情和商品信息所占用的内存
+ */
 WtDiffMinImpactExeUnit::~WtDiffMinImpactExeUnit()
 {
 	if (_last_tick)
@@ -44,16 +55,31 @@ WtDiffMinImpactExeUnit::~WtDiffMinImpactExeUnit()
 		_comm_info->release();
 }
 
+/**
+ * @brief 获取所属执行器工厂名称
+ * @return 执行器工厂名称
+ */
 const char* WtDiffMinImpactExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @return 执行单元名称
+ */
 const char* WtDiffMinImpactExeUnit::getName()
 {
 	return "WtDiffMinImpactExeUnit";
 }
 
+/**
+ * @brief 初始化执行单元
+ * @details 根据给定的配置初始化差量最小冲击执行单元的各项参数
+ * @param ctx 执行单元运行环境
+ * @param stdCode 管理的合约代码
+ * @param cfg 执行单元配置
+ */
 void WtDiffMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
 	ExecuteUnit::init(ctx, stdCode, cfg);
@@ -78,6 +104,16 @@ void WtDiffMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSV
 		stdCode, PriceModeNames[_price_mode + 1], _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots));
 }
 
+/**
+ * @brief 订单回报处理
+ * @details 处理交易所返回的订单状态变化，包括订单成交和撤单情况
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param isBuy 是否买入
+ * @param leftover 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤销
+ */
 void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
 {
 	{
