@@ -654,22 +654,38 @@ void WtStockVWapExeUnit::do_calc()
 	curTick->release();
 }
 
+/**
+ * @brief 立即发送订单
+ * @details 根据指定的数量立即发送买入或卖出订单
+ *          计算目标价格基于当前价格模式设置（最新价、最优价或对手价）
+ *          并处理涅跌停板限制和订单监控
+ * @param qty 待下单数量，正数表示买入，负数表示卖出
+ */
 void WtStockVWapExeUnit::fire_at_once(double qty)
 {
+	// 如果数量为0，直接返回
 	if (decimal::eq(qty, 0))
 		return;
+	// 增加行情数据的引用计数
 	_last_tick->retain();
 	WTSTickData* curTick = _last_tick;
+	
+	// 获取合约代码、当前时间
 	const char* code = _code.c_str();
 	uint64_t now = TimeUtils::getLocalTimeNow();
+	
+	// 根据数量正负判断是买入还是卖出
 	bool isBuy = decimal::gt(qty, 0);
 	double targetPx = 0;
 
-	//根据价格模式设置,确定委托基准价格: 0-最新价,1-最优价,2-对手价
+	// 根据价格模式设置确定委托基准价格: 
+	// 0-最新价, 1-最优价, 2-对手价
 	if (_price_mode == 0) {
+		// 使用最新成交价格
 		targetPx = curTick->price();
 	}
 	else if (_price_mode == 1) {
+		// 使用最优价：买入时用卖一价，卖出时用买一价
 		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);
 	}
 	else // if(_price_mode == 2)
