@@ -146,6 +146,14 @@ void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, boo
 	}
 }
 
+/**
+ * @brief 交易通道就绪回调
+ * @details 当交易通道连接就绪时触发，检查未完成订单并重新计算交易策略
+ *          处理三种情况：
+ *          1. 存在未完成单但本地没有监控，则撤销全部
+ *          2. 本地有监控的订单但交易所无订单，则清理本地订单
+ *          3. 其他未识别情况记录日志
+ */
 void WtDiffMinImpactExeUnit::on_channel_ready()
 {
 	double undone = _ctx->getUndoneQty(_code.c_str());
@@ -189,11 +197,20 @@ void WtDiffMinImpactExeUnit::on_channel_ready()
 	do_calc();
 }
 
+/**
+ * @brief 交易通道丢失回调
+ * @details 当交易通道断开连接时触发，当前版本未实现具体处理逻辑
+ */
 void WtDiffMinImpactExeUnit::on_channel_lost()
 {
 	
 }
 
+/**
+ * @brief 处理行情数据
+ * @details 处理新到的行情数据，更新内部状态，判断是否撤销过期订单，并触发交易计算
+ * @param newTick 最新的市场行情数据
+ */
 void WtDiffMinImpactExeUnit::on_tick(WTSTickData* newTick)
 {
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
@@ -237,6 +254,15 @@ void WtDiffMinImpactExeUnit::on_tick(WTSTickData* newTick)
 	do_calc();
 }
 
+/**
+ * @brief 成交回报处理
+ * @details 处理订单成交信息，更新差量仓位信息
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param isBuy 买卖方向，true表示买入，false表示卖出
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
 	//如果是本地订单，则更新差量
@@ -248,6 +274,14 @@ void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, boo
 	_ctx->writeLog(fmtutil::format("Left diff of {} updated to {}", _code.c_str(), _left_diff));
 }
 
+/**
+ * @brief 委托回报处理
+ * @details 处理委托单的下单结果回报，当下单失败时清空监控结构并重新计算
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param bSuccess 是否下单成功
+ * @param message 错误消息，当bSuccess为false时有效
+ */
 void WtDiffMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	if (!bSuccess)
@@ -262,6 +296,16 @@ void WtDiffMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, b
 	}
 }
 
+/**
+ * @brief 执行差量交易的核心计算逻辑
+ * @details 根据差量、市场状态和配置参数计算并发出订单。具体流程包括：
+ *          1. 使用互斥锁和原子布尔变量防止重复计算
+ *          2. 检查是否有未成交订单或正在撤销的订单
+ *          3. 根据价格模式计算委托价格
+ *          4. 根据下单方式(固定手数或比例)、差仓量和当前持仓计算交易数量
+ *          5. 检查并调整涨跌停价格
+ *          6. 发送买卖订单
+ */
 void WtDiffMinImpactExeUnit::do_calc()
 {
 	CalcFlag flag(&_in_calc);
@@ -436,6 +480,13 @@ void WtDiffMinImpactExeUnit::do_calc()
 	_last_place_time = now;
 }
 
+/**
+ * @brief 设置新的目标仓位差量
+ * @details 更新差量最小冲击执行单元的目标仓位差量，并在差量发生变化时触发交易计算
+ *          注意该执行单元不支持清仓命令（newDiff = DBL_MAX）
+ * @param stdCode 合约代码
+ * @param newDiff 新的目标仓位差量
+ */
 void WtDiffMinImpactExeUnit::set_position(const char* stdCode, double newDiff)
 {
 	if (_code.compare(stdCode) != 0)
@@ -459,6 +510,11 @@ void WtDiffMinImpactExeUnit::set_position(const char* stdCode, double newDiff)
 	}
 }
 
+/**
+ * @brief 清空所有持仓
+ * @details 清空合约的全部持仓。差量最小冲击执行单元不支持此操作，只会记录日志而不进行任何操作
+ * @param stdCode 合约代码
+ */
 void WtDiffMinImpactExeUnit::clear_all_position(const char* stdCode)
 {
 	_ctx->writeLog("Diff execute unit do not support clear command");
