@@ -106,21 +106,56 @@ public:
 	}
 
 private:
+	/// @brief 服务器连接地址
+	/// @details 存储nanomsg服务器的URL，格式如"tcp://127.0.0.1:5555"
 	std::string		m_strURL;
+
+	/// @brief 客户端就绪状态标志
+	/// @details 标记客户端是否已成功初始化并准备好接收消息
 	bool			m_bReady;
+
+	/// @brief nanomsg套接字描述符
+	/// @details 用于与消息服务器通信的套接字，-1表示无效套接字
 	int				_sock;
+
+	/// @brief 消息队列管理器指针
+	/// @details 用于日志记录和客户端管理的管理器对象
 	MQManager*		_mgr;
+
+	/// @brief 客户端唯一标识符
+	/// @details 由makeMQCientId函数生成的唯一ID，从5001开始递增
 	uint32_t		_id;
 
+	/// @brief 接收线程指针
+	/// @details 负责接收消息的后台线程
 	StdThreadPtr	m_thrdRecv;
+
+	/// @brief 终止标志
+	/// @details 标记客户端是否已请求终止，用于控制接收线程退出
 	bool			m_bTerminated;
+
+	/// @brief 最后一次接收数据的时间戳
+	/// @details 用于检测连接超时，单位为毫秒
 	int64_t			m_iCheckTime;
+
+	/// @brief 需要检查连接状态的标志
+	/// @details 标记是否需要进行连接超时检查
 	bool			m_bNeedCheck;
 
+	/// @brief 接收数据缓冲区
+	/// @details 存储从套接字接收的原始数据，等待解析
 	std::string		_buffer;
+
+	/// @brief 消息回调函数
+	/// @details 当接收到消息时调用的回调函数，用于处理消息
 	FuncMQCallback	_cb_message;
 
+	/// @brief 订阅主题集合
+	/// @details 存储已订阅的主题列表，空集合表示接收所有主题
 	wt_hashset<std::string> _topics;
+
+	/// @brief 接收缓冲区
+	/// @details 用于从套接字接收数据的临时缓冲区，大小为1MB
 	char			_recv_buf[1024 * 1024];
 };
 
