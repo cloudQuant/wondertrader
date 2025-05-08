@@ -1,6 +1,10 @@
-﻿/*
-23.5.23--zhaoyk--VWAP
-*/
+/**
+ * @file WtVWapExeUnit.cpp
+ * @brief VWAP(成交量加权平均价格)执行单元实现
+ * @details 实现基于VWAP算法的智能交易执行单元，通过预测成交量分布来优化订单执行
+ * @author zhaoyk
+ * @date 2023-05-23
+ */
 #include "WtVWapExeUnit.h"
 
 #include "../Share/TimeUtils.hpp"
@@ -13,6 +17,11 @@
 
 extern const char* FACT_NAME;
 
+/**
+ * @brief VWAP执行单元的构造函数
+ * @details 初始化VWAP执行单元对象，设置所有成员变量的默认值
+ *          包括行情数据、品种信息、交易参数和状态标记等
+ */
 WtVWapExeUnit::WtVWapExeUnit()
 	:_last_tick(NULL)
 	,_comm_info(NULL)//品种信息
@@ -33,6 +42,11 @@ WtVWapExeUnit::WtVWapExeUnit()
 {
 }
 
+/**
+ * @brief VWAP执行单元的析构函数
+ * @details 清理VWAP执行单元对象的资源，释放行情数据和品种信息等内存
+ *          释放内存前会检查指针是否为空，避免释放空指针
+ */
 WtVWapExeUnit::~WtVWapExeUnit()
 {
 	if (_last_tick)
@@ -41,21 +55,49 @@ WtVWapExeUnit::~WtVWapExeUnit()
 	if (_comm_info)
 		_comm_info->release();
 }
+/**
+ * @brief 获取真实目标仓位
+ * @details 如果目标仓位是DBL_MAX（表示清仓标记），则返回0，否则返回原始目标值
+ * @param _target 原始目标仓位值
+ * @return 处理后的目标仓位值
+ */
 inline double get_real_target(double _target) {
 	if (_target == DBL_MAX)
 		return 0;
 
 	return _target;
 }
+/**
+ * @brief 检查是否为清仓指令
+ * @details 判断目标仓位是否为DBL_MAX，该值在系统中用于表示清仓指令
+ * @param target 目标仓位值
+ * @return 如果是清仓指令返回true，否则返回false
+ */
 inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
+/**
+ * @brief 计算两个时间点之间的秒数
+ * @details 将HHMM格式的时间转换为秒数，并计算它们之间的差值
+ *          例如：1030和1130之间的3600秒
+ * @param begintime 开始时间，格式为HHMM，如1030表示10:30
+ * @param endtime 结束时间，格式为HHMM，如1130表示11:30
+ * @return 两个时间点之间的秒数
+ */
 inline uint32_t calTmSecs(uint32_t begintime, uint32_t endtime) //计算执行时间：s
 {
 	return   ((endtime / 100) * 3600 + (endtime % 100) * 60) - ((begintime / 100) * 3600 + (begintime % 100) * 60);
 
 }
+/**
+ * @brief 计算时间戳在交易时间中的分钟位置
+ * @details 将HHMMSS格式的时间转换为交易日内的分钟数，考虑了交易时段和中午休市
+ *          主要用于将当前时间映射到VWAP成交量分布数组中的位置
+ *          交易时间分为上午和下午两段：9:30-11:30和13:30-15:00
+ * @param actiontime 时间戳，格式为HHMMSS或HHMMSSMMM
+ * @return 交易日内的分钟数，范围0-240，其中0表示开盘前，240表示收盘时
+ */
 inline double calTmStamp(uint32_t actiontime) //计算tick时间属于哪个时间单元
 {
 	string timestamp = to_string(actiontime);
@@ -84,16 +126,35 @@ inline double calTmStamp(uint32_t actiontime) //计算tick时间属于哪个时�
 	total_minute += stoi(timestamp.substr(6, 3)) / 60000;
 	return total_minute ;//这里应该+1，对应vector 所以再-1
 }
+/**
+ * @brief 获取所属执行器工厂名称
+ * @details 返回该执行单元所属的工厂名称，用于执行单元的注册和管理
+ * @return 工厂名称字符串
+ */
 const char * WtVWapExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @details 返回该执行单元的名称，用于标识不同类型的执行单元
+ * @return 执行单元名称字符串
+ */
 const char * WtVWapExeUnit::getName()
 {
 	return "WtVWapExeUnit";
 }
 
+/**
+ * @brief 初始化VWAP执行单元
+ * @details 根据提供的执行上下文、合约代码和配置参数初始化VWAP执行单元
+ *          设置各种交易参数如执行时间、价格模式、发单间隔等
+ *          并加载历史VWAP成交量分布数据用于预测
+ * @param ctx 执行单元运行环境，提供交易接口和市场数据
+ * @param stdCode 标准化合约代码，指定要交易的合约
+ * @param cfg 配置参数，包含执行单元的各种设置
+ */
 void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant * cfg)
 {
 	ExecuteUnit::init(ctx, stdCode, cfg);
@@ -115,11 +176,12 @@ void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant 
 	_order_lots = cfg->getDouble("lots");		//单次发单手数
 	if (cfg->has("minopenlots"))
 	_min_open_lots = cfg->getDouble("minopenlots");	//最小开仓数量
-	_fire_span = (_total_secs - _tail_secs) / _total_times;		//单次发单时间间隔,要去掉尾部时间计算,这样的话,最后剩余的数量就有一个兜底发单的机制了
+	_fire_span = (_total_secs - _tail_secs) / _total_times;		//单次发单时间间隔,要去掉尾部时间计算,这样的话,最后剩余的数量就有一个兵底发单的机制了
 
 	ctx->writeLog(fmt::format("执行单元WtVWapExeUnit[{}] 初始化完成,订单超时 {} 秒,执行时限 {} 秒,收尾时间 {} 秒", stdCode, _ord_sticky, _total_secs, _tail_secs).c_str());
 	_total_secs = calTmSecs(_begin_time, _end_time);//执行总时间：秒
 
+	// 加载VWAP成交量分布数据
 	std::string filename = "Vwap_";
 	filename += _comm_info->getName();
 	filename += ".txt";
@@ -143,6 +205,18 @@ void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant 
 	}
 } 
 
+/**
+ * @brief 处理订单回报
+ * @details 处理订单状态变化，包括成交、撤销等情况，并更新内部订单管理状态
+ *          如果订单被撤销且目标仓位未达到，则会重新发送订单
+ *          在VWAP执行策略中，这个方法还会跟踪当前的成交进度以调整执行计划
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入订单
+ * @param leftover 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤销
+ */
 void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool isBuy, double leftover, double price, bool isCanceled)
 {
 	if (!_orders_mon.has_order(localid))
@@ -180,6 +254,15 @@ void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool isBuy,
 	}
 }
 
+/**
+ * @brief 处理交易通道就绪
+ * @details 当交易通道就绪时调用，设置内部通道状态标记并检查未完成订单
+ *          处理三种情况：
+ *          1. 有未完成订单但本地无记录：撤销这些外部订单
+ *          2. 无未完成订单但本地有记录：清理本地错误订单
+ *          3. 其他情况：记录日志
+ *          最后触发仓位计算和发单操作
+ */
 void WtVWapExeUnit::on_channel_ready()
 {
 	_channel_ready = true;
@@ -221,6 +304,15 @@ void WtVWapExeUnit::on_channel_ready()
 }
 
 
+/**
+ * @brief 处理行情数据回调
+ * @details 当收到新的行情数据时调用，更新内部行情缓存并触发相关的交易逻辑
+ *          处理两种情况：
+ *          1. 首次行情：检查目标仓位与实际仓位的差异，如有差异则触发计算和发单
+ *          2. 后续行情：检查订单超时情况并撤单，或根据时间间隔触发新一轮计算
+ *          这是VWAP执行单元的核心方法，负责根据当前市场状况调整执行计划
+ * @param newTick 新的行情数据指针
+ */
 void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 {
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
@@ -283,16 +375,16 @@ void WtVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool isBuy,
 */
 void WtVWapExeUnit::on_entrust(uint32_t localid, const char * stdCode, bool bSuccess, const char * message)
 {
-	if (!bSuccess)
-	{
-		//如果不是我发出去的订单,我就不管了
-		if (!_orders_mon.has_order(localid))
-			return;
-		
-		_orders_mon.erase_order(localid);
+    if (!bSuccess)
+    {
+        //如果不是我发出去的订单,我就不管了
+        if (!_orders_mon.has_order(localid))
+            return;
+        
+        _orders_mon.erase_order(localid);
 
-		do_calc();
-	}
+        do_calc();
+    }
 }
 void WtVWapExeUnit::do_calc()
 {
