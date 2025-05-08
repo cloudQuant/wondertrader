@@ -1,10 +1,12 @@
-﻿/*!
+/*!
  * \file WtMinImpactExeUnit.cpp
+ * \brief 最小冲击执行单元实现文件
  *
+ * 本文件实现了最小冲击执行单元类，通过缩小单笔交易量和控制交易时机
+ * 来尽可能地减少对市场的冲击，实现更优的成交价格
+ * 
  * \author Wesley
  * \date 2020/03/30
- *
- * 
  */
 #include "WtMinImpactExeUnit.h"
 
@@ -15,8 +17,13 @@
 #include "../Share/StrUtil.hpp"
 #include "../Share//fmtlib.h"
 
+/** @brief 外部声明的工厂名称常量 */
 extern const char* FACT_NAME;
 
+/**
+ * @brief 价格模式名称数组
+ * @details 对应不同的价格模式，用于日志输出和调试
+ */
 const char* PriceModeNames[] =
 {
 	"BESTPX",		//最优价
@@ -25,6 +32,12 @@ const char* PriceModeNames[] =
 	"AUTOPX"		//自动
 };
 
+/**
+ * @brief 获取真实目标仓位
+ * @details 如果目标仓位为DBL_MAX，意味着清仓，则返回0；否则返回原值
+ * @param target 需要处理的目标仓位
+ * @return 返回处理后的实际目标仓位
+ */
 inline double get_real_target(double target)
 {
 	if (target == DBL_MAX)			 
@@ -33,12 +46,22 @@ inline double get_real_target(double target)
 	return target;
 }
 
+/**
+ * @brief 判断是否为清仓操作
+ * @details 当目标仓位为DBL_MAX时，表示目标是清仓
+ * @param target 目标仓位
+ * @return 如果是清仓操作返回true，否则返回false
+ */
 inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
 
 
+/**
+ * @brief 构造函数
+ * @details 初始化所有成员变量的默认值，包括行情数据、商品信息、价格模式等
+ */
 WtMinImpactExeUnit::WtMinImpactExeUnit()
 	: _last_tick(NULL)
 	, _comm_info(NULL)
@@ -56,6 +79,10 @@ WtMinImpactExeUnit::WtMinImpactExeUnit()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 释放内部资源，包括最近的行情数据和商品信息
+ */
 WtMinImpactExeUnit::~WtMinImpactExeUnit()
 {
 	if (_last_tick)
@@ -65,16 +92,31 @@ WtMinImpactExeUnit::~WtMinImpactExeUnit()
 		_comm_info->release();
 }
 
+/**
+ * @brief 获取所属执行器工厂名称
+ * @return 返回执行器工厂名称常量
+ */
 const char* WtMinImpactExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @return 返回实现类的名称字符串
+ */
 const char* WtMinImpactExeUnit::getName()
 {
 	return "WtMinImpactExeUnit";
 }
 
+/**
+ * @brief 初始化执行单元
+ * @details 读取配置参数，初始化合约信息和交易时间模板，并设置交易相关的参数
+ * @param ctx 执行单元的运行环境上下文
+ * @param stdCode 标准化的合约代码
+ * @param cfg 包含各种配置参数的变量集合
+ */
 void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
 	ExecuteUnit::init(ctx, stdCode, cfg);
