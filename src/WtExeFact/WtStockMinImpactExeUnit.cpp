@@ -1,94 +1,139 @@
-﻿/*
- * 适用于股票的最小冲击算法
+/*!
+ * \file WtStockMinImpactExeUnit.cpp
+ * \brief 股票最小冲击执行单元实现文件
+ *
+ * 本文件实现了适用于股票交易的最小冲击算法的执行单元，
+ * 支持按股数、金额或比例指定目标仓位，通过智能划分订单和策略化下单
+ * 来最小化对市场的冲击成本
  *
  * \author Huerjie
  * \date 2022/06/01
- *
- *
  */
 
 #include "WtStockMinImpactExeUnit.h"
 
 extern const char* FACT_NAME;
 
+/**
+ * @brief 构造函数
+ * @details 初始化股票最小冲击执行单元的各成员变量，设置默认值
+ */
 WtStockMinImpactExeUnit::WtStockMinImpactExeUnit()
-	: _last_tick(NULL)
-	, _comm_info(NULL)
-	, _price_mode(0)
-	, _price_offset(0)
-	, _expire_secs(0)
+	: _last_tick(NULL)          // 最新行情数据初始化为空
+	, _comm_info(NULL)          // 商品信息初始化为空
+	, _price_mode(0)            // 价格模式默认为最新价
+	, _price_offset(0)          // 价格偏移默认为0
+	, _expire_secs(0)           // 订单超时秒数默认为0
 	//, _cancel_cnt(0)
-	, _target_pos(0)
-	, _cancel_times(0)
-	, _last_place_time(0)
-	, _last_tick_time(0)
-	, _is_clear{ false }
-	, _min_order{ 0 }
-	, _is_KC{ false }
-	, _is_cancel_unmanaged_order{ true }
-	, _is_finish{ true }
-	, _is_first_tick{ true }
-	, _is_ready{ false }
-	, _is_total_money_ready{ false }
+	, _target_pos(0)            // 目标仓位默认为0
+	, _cancel_times(0)          // 撤单次数初始化为0
+	, _last_place_time(0)       // 最后下单时间初始化为0
+	, _last_tick_time(0)        // 最后收到Tick时间初始化为0
+	, _is_clear{ false }        // 初始非清仓状态
+	, _min_order{ 0 }           // 最小下单量初始化为0
+	, _is_KC{ false }           // 初始非科创板股票
+	, _is_cancel_unmanaged_order{ true }  // 默认撤销未管理订单
+	, _is_finish{ true }        // 初始执行完成状态
+	, _is_first_tick{ true }    // 初始为第一个Tick
+	, _is_ready{ false }        // 初始通道未就绪
+	, _is_total_money_ready{ false }  // 初始总资金未就绪
 {
 }
 
+/**
+ * @brief 析构函数
+ * @details 释放内部资源，包括行情数据和商品信息
+ */
 WtStockMinImpactExeUnit::~WtStockMinImpactExeUnit()
 {
+	// 释放行情数据
 	if (_last_tick)
 		_last_tick->release();
 
+	// 释放商品信息
 	if (_comm_info)
 		_comm_info->release();
 }
 
+/**
+ * @brief 获取所属执行器工厂名称
+ * @return 工厂名称字符串
+ */
 const char* WtStockMinImpactExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @return 执行单元名称字符串
+ */
 const char* WtStockMinImpactExeUnit::getName()
 {
 	return "WtStockMinImpactExeUnit";
 }
 
+/**
+ * @brief 初始化执行单元
+ * @details 根据配置参数初始化股票最小冲击执行单元的各种执行参数
+ * @param ctx 执行单元运行的上下文环境
+ * @param stdCode 标准化合约代码
+ * @param cfg 执行单元配置项
+ */
 void WtStockMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
+	// 调用父类初始化方法
 	ExecuteUnit::init(ctx, stdCode, cfg);
+	
+	// 获取并保存商品信息
 	_comm_info = ctx->getCommodityInfo(stdCode);
 	if (_comm_info)
 		_comm_info->retain();
 
+	// 获取并保存交易时段信息
 	_sess_info = ctx->getSessionInfo(stdCode);
 	if (_sess_info)
 		_sess_info->retain();
 
-	_price_offset = cfg->getInt32("offset");	//价格偏移跳数，一般和订单同方向
-	_expire_secs = cfg->getUInt32("expire");	//订单超时秒数
-	_price_mode = cfg->getInt32("pricemode");	//价格类型,0-最新价,-1-最优价,1-对手价,2-自动,默认为0
-	_entrust_span = cfg->getUInt32("span");		//发单时间间隔，单位毫秒
-	_by_rate = cfg->getBoolean("byrate");		//是否按照对手的挂单数的比例下单，如果是true，则rate字段生效，如果是false则lots字段生效
-	_order_lots = cfg->getDouble("lots");		//单次发单手数
-	_qty_rate = cfg->getDouble("rate");			//下单手数比例
+	// 从配置中读取各执行参数
+	_price_offset = cfg->getInt32("offset");	// 价格偏移跳数，一般和订单同方向
+	_expire_secs = cfg->getUInt32("expire");	// 订单超时秒数
+	_price_mode = cfg->getInt32("pricemode");	// 价格类型,0-最新价,-1-最优价,1-对手价,2-自动,默认为0
+	_entrust_span = cfg->getUInt32("span");		// 发单时间间隔，单位毫秒
+	_by_rate = cfg->getBoolean("byrate");		// 是否按照对手的挂单数的比例下单，如果是true，则rate字段生效，如果是false则lots字段生效
+	_order_lots = cfg->getDouble("lots");		// 单次发单手数
+	_qty_rate = cfg->getDouble("rate");			// 下单手数比例
+	
+	// 处理总资金设置，用于持仓比例计算
 	if (cfg->has("total_money"))
 	{
 		_is_total_money_ready = true;
-		_total_money = cfg->getDouble("total_money"); //执行器使用的金额，配合目标比例使用，该字段留空或值小于0，则以账户当前余额为准
+		_total_money = cfg->getDouble("total_money"); // 执行器使用的金额，配合目标比例使用，该字段留空或值小于0，则以账户当前余额为准
 	}
+	
+	// 读取是否撤销未管理订单的配置
 	if (cfg->has("is_cancel_unmanaged_order"))
 		_is_cancel_unmanaged_order = cfg->getBoolean("is_cancel_unmanaged_order");
+	
+	// 读取最大撤单次数配置
 	if (cfg->has("max_cancel_time"))
 		_max_cancel_time = cfg->getInt32("max_cancel_time");
 
+	// 判断是否为科创板股票
 	int code = std::stoi(StrUtil::split(stdCode, ".")[2]);
 	if (code >= 688000)
 	{
 		_is_KC = true;
 	}
+	
+	// 获取最小交易单位
 	_min_hands = get_minOrderQty(stdCode);
-	if (cfg->has("min_order"))					//最小下单数
+	
+	// 读取最小下单量配置
+	if (cfg->has("min_order"))					// 最小下单数
 		_min_order = cfg->getDouble("min_order");
 
+	// 根据交易品种调整最小下单量
 	if (_min_order != 0)
 	{
 		if (_is_KC)
@@ -98,16 +143,15 @@ void WtStockMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTS
 		else
 		{
 			//_min_order = max(_min_order, _min_hands);
-			_min_order = min(_min_order, _min_hands);//2023.6.5-zhaoyk
+			_min_order = min(_min_order, _min_hands); // 2023.6.5-zhaoyk
 		}
 	}
 
-	// 确定T0交易模式
+	// 确定T0交易模式（可转债等可以T+0交易）
 	if (_comm_info->getTradingMode() == TradingMode::TM_Long)
 		_is_t0 = true;
 
-	//auto ticks = _ctx->getTicks(_code.c_str(),1);
-	//ticks->release();
+	// 输出初始化日志
 	ctx->writeLog(fmt::format("MiniImpactExecUnit {} inited, order price: {} ± {} ticks, order expired: {} secs, order timespan:{} millisec, order qty: {} @ {:.2f} min_order: {:.2f} is_cancel_unmanaged_order: {}",
 		stdCode, PriceModeNames[_price_mode + 1], _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots, _min_order, _is_cancel_unmanaged_order ? "true" : "false").c_str());
 }
