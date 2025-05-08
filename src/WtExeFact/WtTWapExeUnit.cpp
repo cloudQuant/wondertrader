@@ -1,4 +1,14 @@
-﻿#include "WtTWapExeUnit.h"
+/*!
+ * @file WtTWapExeUnit.cpp
+ * @author wondertrader
+ * @date 2023/05/18
+ * @brief 基于时间加权平均价格(TWAP)的订单执行单元实现文件
+ * 
+ * 该文件实现了TWAP执行策略的核心逻辑，包括订单生成、发送和管理。
+ * TWAP策略将大单按时间均匀拆分为多个小单，在指定时间内均匀执行，以降低市场冲击
+ */
+
+#include "WtTWapExeUnit.h"
 
 #include "../Share/TimeUtils.hpp"
 #include "../Includes/WTSVariant.hpp"
@@ -13,159 +23,266 @@
 
 extern const char* FACT_NAME;
 
-
+/**
+ * @brief TWAP执行单元的构造函数
+ * @details 初始化所有成员变量为默认值
+ */
 WtTWapExeUnit::WtTWapExeUnit()
-	: _last_tick(NULL)
-	, _comm_info(NULL)
-	, _ord_sticky(0)
-	, _cancel_cnt(0)
-	, _channel_ready(false)
-	, _last_fire_time(0)
-	, _fired_times(0)
-	, _total_times(0)
-	, _total_secs(0)
-	, _price_mode(0)
-	, _price_offset(0)
-	, _target_pos(0)
-	, _cancel_times(0)
-	, _begin_time(0)
-	, _end_time(0)
-	, _last_place_time(0)
-	, _last_tick_time(0)
-	, isCanCancel{ true }
+	: _last_tick(NULL)       // 行情数据指针
+	, _comm_info(NULL)      // 品种信息
+	, _ord_sticky(0)        // 挂单超时时间
+	, _cancel_cnt(0)        // 撤单计数
+	, _channel_ready(false) // 交易通道就绪标志
+	, _last_fire_time(0)    // 上次发单时间
+	, _fired_times(0)       // 已执行次数
+	, _total_times(0)       // 总执行次数
+	, _total_secs(0)        // 总执行时间
+	, _price_mode(0)        // 价格模式
+	, _price_offset(0)      // 价格偏移
+	, _target_pos(0)        // 目标仓位
+	, _cancel_times(0)      // 撤单次数
+	, _begin_time(0)        // 开始时间
+	, _end_time(0)          // 结束时间
+	, _last_place_time(0)   // 上个下单时间
+	, _last_tick_time(0)    // 上个tick时间
+	, isCanCancel{ true }   // 订单是否可撤销
 {
 }
 
 
+/**
+ * @brief TWAP执行单元的析构函数
+ * @details 释放对象所持有的资源，包括行情数据和品种信息
+ */
 WtTWapExeUnit::~WtTWapExeUnit()
 {
+	// 释放行情数据资源
 	if (_last_tick)
 		_last_tick->release();
 
+	// 释放品种信息资源
 	if (_comm_info)
 		_comm_info->release();
 }
 
+/**
+ * @brief 获取实际目标仓位
+ * @details 如果目标仓位是DBL_MAX（清仓标记），则返回0，否则返回原值
+ * @param _target 原始目标仓位
+ * @return 实际目标仓位
+ */
 inline double get_real_target(double _target) {
 	if (_target == DBL_MAX)
 		return 0;
 
 	return _target;
 }
-inline uint32_t calTmSecs(uint32_t begintime, uint32_t endtime) //计算执行时间：s
+/**
+ * @brief 计算时间区间的秒数
+ * @details 将开始时间和结束时间（以HHMM格式表示）转换为总秒数
+ * @param begintime 开始时间，格式为HHMM，如1030表示10:30
+ * @param endtime 结束时间，格式为HHMM，如1100表示11:00
+ * @return 开始时间和结束时间之间的秒数
+ */
+inline uint32_t calTmSecs(uint32_t begintime, uint32_t endtime) 
 {
+	// 将HHMM格式转换为总秒数：小时*3600 + 分钟*60
 	return   ((endtime / 100) * 3600 + (endtime % 100) * 60) - ((begintime / 100) * 3600 + (begintime % 100) * 60);
 
 }
+/**
+ * @brief 检查是否为清仓状态
+ * @details 判断目标仓位是否等于DBL_MAX，该值被用作清仓标记
+ * @param target 目标仓位
+ * @return 如果为清仓状态返回true，否则返回false
+ */
 inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
+/**
+ * @brief 获取所属执行器工厂名称
+ * @details 返回当前执行单元所属的工厂名称，用于执行器的工厂注册和搜寻
+ * @return 执行器工厂名称
+ */
 const char* WtTWapExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @details 返回当前执行单元的名称，用于标识和日志记录
+ * @return 执行单元名称
+ */
 const char* WtTWapExeUnit::getName()
 {
 	return "WtTWapExeUnit";
 }
 
+/**
+ * @brief 初始化执行单元
+ * @details 从配置中读取参数并设置执行单元的各项配置，加载相关资源
+ * @param ctx 执行上下文对象，用于访问交易环境
+ * @param stdCode 标准化合约代码
+ * @param cfg 配置项对象
+ */
 void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
+	// 调用父类初始化
 	ExecuteUnit::init(ctx, stdCode, cfg);
 
-	_comm_info = ctx->getCommodityInfo(stdCode);//获取品种参数
+	// 获取并保存品种信息引用
+	_comm_info = ctx->getCommodityInfo(stdCode);
+	// 如果品种信息有效，增加引用计数
 	if (_comm_info)
 		_comm_info->retain();
-	_sess_info = ctx->getSessionInfo(stdCode);//获取交易时间模板信息
+	
+	// 获取并保存交易时间模板信息
+	_sess_info = ctx->getSessionInfo(stdCode);
 	if (_sess_info)
 		_sess_info->retain();
-	_ord_sticky = cfg->getUInt32("ord_sticky");
-	_begin_time= cfg->getUInt32("begin_time");
-	_end_time = cfg->getUInt32("end_time");
-	_total_secs = cfg->getUInt32("total_secs");
-	_tail_secs = cfg->getUInt32("tail_secs");
-	_total_times = cfg->getUInt32("total_times");
-	_price_mode = cfg->getUInt32("price_mode");
-	_price_offset = cfg->getUInt32("price_offset");
-	_order_lots = cfg->getDouble("lots");		//单次发单手数
+	
+	// 从配置中读取各项参数
+	_ord_sticky = cfg->getUInt32("ord_sticky");      // 挂单超时时间（秒）
+	_begin_time= cfg->getUInt32("begin_time");      // 开始时间（HHMM格式）
+	_end_time = cfg->getUInt32("end_time");         // 结束时间（HHMM格式）
+	_total_secs = cfg->getUInt32("total_secs");     // 总执行时间（秒）
+	_tail_secs = cfg->getUInt32("tail_secs");       // 收尾时间（秒）
+	_total_times = cfg->getUInt32("total_times");   // 总执行次数
+	_price_mode = cfg->getUInt32("price_mode");     // 价格模式（0-最新价,1-最优价,2-对手价）
+	_price_offset = cfg->getUInt32("price_offset"); // 价格偏移
+	_order_lots = cfg->getDouble("lots");           // 单次发单手数
+	
+	// 如果配置中有最小开仓数量参数，则读取
 	if (cfg->has("minopenlots"))
-	_min_open_lots = cfg->getDouble("minopenlots");	//最小开仓数量
-	_total_secs = calTmSecs(_begin_time, _end_time);//执行总时间：秒
-	_fire_span = (_total_secs - _tail_secs) / _total_times;		//单次发单时间间隔,要去掉尾部时间计算,这样的话,最后剩余的数量就有一个兜底发单的机制了
+		_min_open_lots = cfg->getDouble("minopenlots");
+	
+	// 计算执行总时间（秒）
+	_total_secs = calTmSecs(_begin_time, _end_time);
+	
+	// 计算单次发单时间间隔（秒）
+	// 去掉尾部时间后均匀分配，这样最后剩余的数量就有一个兵底发单的机制
+	_fire_span = (_total_secs - _tail_secs) / _total_times;
 
+	// 记录执行单元初始化完成日志
 	ctx->writeLog(fmt::format("执行单元WtTWapExeUnit[{}] 初始化完成,订单超时 {} 秒,执行时限 {} 秒,收尾时间 {} 秒,间隔时间 {} 秒", stdCode, _ord_sticky, _total_secs, _tail_secs, _fire_span).c_str());
 }
 
+/**
+ * @brief 处理订单回报
+ * @details 处理订单状态变化，包括成交、撤销等情况，并更新内部订单管理状态
+ *          如果订单被撤销且目标仓位未达到，则会重新发送订单
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入订单
+ * @param leftover 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤销
+ */
 void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
 {
+	// 如果订单不在监控中，则忽略此回报
 	if (!_orders_mon.has_order(localid))
 		return;
 
+	// 如果订单已撤销或已完全成交，从订单监控器中移除
 	if (isCanceled || leftover == 0)  
 	{
+		// 从订单监控器中删除该订单
 		_orders_mon.erase_order(localid);
 
+		// 减少撤单计数
 		if (_cancel_cnt > 0)
 			_cancel_cnt--;
 		
+		// 记录日志
 		_ctx->writeLog(fmt::format("Order {} updated cancelcnt -> {}", localid, _cancel_cnt).c_str());
 	}
 	/***---begin---23.5.19---zhaoyk***/
+	// 如果订单完全成交且不是因为撤单，重置撤单次数
 	if (leftover == 0 && !isCanceled)
 	{
+		// 订单成交后重置撤单次数
 		_cancel_times = 0;
+		// 记录订单成交日志
 		_ctx->writeLog(fmtutil::format("Order {} has filled", localid));
 	}
 	/***---end---23.5.19---zhaoyk***/
-	//如果全部订单已撤销,这个时候一般是遇到要超时撤单（挂单超时） 
+	// 如果所有订单已撤销（撤单计数为0），处理超时撤单情况
 	if (isCanceled && _cancel_cnt == 0)
 	{
-		
+		// 获取当前实际仓位
 		double realPos = _ctx->getPosition(stdCode);
-		if (!decimal::eq(realPos, _this_target))//真实仓位和本轮目标仓位不相等时候
+		
+		// 如果实际仓位与本轮目标仓位不一致，需要重新发单
+		if (!decimal::eq(realPos, _this_target))
 		{
 			/***---begin---23.5.22---zhaoyk***/
+			// 记录订单撤销后重发日志
 			_ctx->writeLog(fmtutil::format("Order {} of {} canceled, re_fire will be done", localid, stdCode));
+			
+			// 增加撤单次数，用于下次发单时的价格偏移
 			_cancel_times++;
 			
-			//撤单以后重发,一般是加点重发;对最小下单量的校验
-			//fire_at_once(_this_target - realPos);
+			// 撤单后重新发单，确保发单数量不小于最小开仓数量
+			// fire_at_once(_this_target - realPos);
 			fire_at_once(max(_min_open_lots, _this_target - realPos));
 			/***---end---23.5.22---zhaoyk***/
 		}
 	}
 	/***---begin---23.5.22---zhaoyk***/
-	//存在（isCanceled&&_cancel_cnt!=0）的情况,bug需要返回检查
-	if (isCanceled&&_cancel_cnt!=0)
+	// 处理异常情况：订单已撤销但撤单计数不为0，这可能是一个错误状态
+	if (isCanceled && _cancel_cnt != 0)
 	{
+		// 记录错误日志并返回，等待后续检查
 		_ctx->writeLog(fmtutil::format("Order {} of {}  hasn't canceled, error will be return ", localid, stdCode));
 		return;
 	}
 	/***---end---23.5.22---zhaoyk***/
 } 
 
+/**
+ * @brief 处理交易通道就绪回调
+ * @details 当交易通道准备就绪时调用，主要处理未完成订单的状态同步
+ *          包含三种情况的处理：
+ *          1. 有未完成订单但本地无订单记录：清除所有未被管理的订单
+ *          2. 无未完成订单但本地有订单记录：清除本地错误订单
+ *          3. 其他异常情况处理
+ */
 void WtTWapExeUnit::on_channel_ready()
 {
+	// 标记交易通道为就绪状态
 	_channel_ready = true;
+	
+	// 获取未完成的订单数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
 	/***---begin---23.5.18---zhaoyk***/
+	// 情况1: 如果有未完成订单但本地没有订单记录，需要清除未被管理的订单
 	if (!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	//if (undone != 0 && !_orders_mon.has_order())
 	/***---end---23.5.18---zhaoyk***/
 	{
-		//这说明有未完成单不在监控之中,先撤掉
+		// 这说明有未完成订单不在监控中，需要先撤销
 		_ctx->writeLog(fmt::format("{} unmanaged orders of {}, cancel all", undone, _code).c_str());
 
+		// 根据未完成订单的正负判断是买入还是卖出订单
 		bool isBuy = (undone > 0);
+		
+		// 撤销对应方向的所有未完成订单
 		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
+		
+		// 将撤销的订单添加到监控器中进行跟踪
 		_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime());
+		
+		// 更新撤单计数
 		_cancel_cnt += ids.size();
 
+		// 记录撤单日志
 		_ctx->writeLog(fmt::format("Unmanaged order updated cancelcnt to {}", _cancel_cnt).c_str());
 	}
 	/***---begin---23.5.18---zhaoyk***/
+	// 情况2: 如果没有未完成订单但本地有订单记录，需要清除本地错误订单
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order()) 
 	{
 		/*
@@ -175,20 +292,31 @@ void WtTWapExeUnit::on_channel_ready()
 		 *	这种情况，一般是断线重连以后，之前下出去的订单，并没有真正发送到柜台
 		 *	所以这里需要清理掉本地订单
 		 */
+		// 记录日志并清除所有本地订单
 		_ctx->writeLog(fmtutil::format("Local orders of {} not confirmed in trading channel, clear all", _code.c_str()));
 		_orders_mon.clear_orders();
 	}
-	else//参考Minimpactunit
+	// 情况3: 其他异常情况处理
+	else // 参考Minimpactunit实现
 	{
+		// 记录日志，显示当前未完成订单和本地监控状态
 		_ctx->writeLog(fmtutil::format("Unrecognized condition while channle ready,{:.2f} live orders of {} exists,local orders {}exist", undone, _code.c_str(), _orders_mon.has_order() ? "" : "not"));
 	}
 	/***---end---23.5.18---zhaoyk***/
+	
+	// 通道就绪后触发一次计算，重新调整仓位
 	do_calc();
 }
 
+/**
+ * @brief 处理交易通道断开回调
+ * @details 当交易通道断开时被调用，当前为空实现
+ *          可以在此处添加必要的断开后处理逻辑，如标记订单状态、清除本地订单等
+ */
 void WtTWapExeUnit::on_channel_lost()
 {
-
+	// 在交易通道断开时执行的处理逻辑
+	// 当前为空实现
 }
 
 
