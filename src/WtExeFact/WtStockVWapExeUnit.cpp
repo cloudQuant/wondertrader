@@ -302,12 +302,25 @@ void WtStockVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool i
 	}
 }
 
+/**
+ * @brief 处理交易通道就绪回调
+ * @details 当交易通道准备就绪时调用，主要处理未完成订单的状态同步
+ *          包含三种情况的处理：
+ *          1. 有未完成订单但本地无订单记录：清除所有未被管理的订单
+ *          2. 无未完成订单但本地有订单记录：清除本地错误订单
+ *          3. 其他异常情况处理
+ */
 void WtStockVWapExeUnit::on_channel_ready()
 {
+	// 标记交易通道为就绪状态
 	_channel_ready = true;
+	
+	// 获取未完成的订单数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
+	
+	// 情况1: 如果有未完成订单但本地没有订单记录，需要清除未被管理的订单
 	if (!decimal::eq(undone, 0) && !_orders_mon.has_order())
-	{//未完成单不在监控中，撤单
+	{
 		/*
 		 *	如果未完成单不为0，而OMS没有订单
 		 *	这说明有未完成单不在监控之中,全部撤销掉
@@ -316,13 +329,22 @@ void WtStockVWapExeUnit::on_channel_ready()
 		 */
 		_ctx->writeLog(fmt::format("{} unmanaged orders of {},cancel all", undone, _code).c_str());
 
+		// 根据未完成订单的正负判断是买入还是卖出订单
 		bool isBuy = (undone > 0);
+		
+		// 撤销对应方向的所有未完成订单
 		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
+		
+		// 将撤销的订单添加到监控器中进行跟踪
 		_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime());
+		
+		// 更新撤单计数
 		_cancel_cnt += ids.size();
 
+		// 记录撤单日志
 		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
 	}
+	// 情况2: 如果没有未完成订单但本地有订单记录，需要清除本地错误订单
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
 	{	/*
 		 *	By Wesey @ 2021.12.13
@@ -331,64 +353,89 @@ void WtStockVWapExeUnit::on_channel_ready()
 		 *	这种情况，一般是断线重连以后，之前下出去的订单，并没有真正发送到柜台
 		 *	所以这里需要清理掉本地订单
 		 */
+		// 记录日志并清除所有本地订单
 		_ctx->writeLog(fmtutil::format("Local orders of {} not confirmed in trading channel, clear all", _code.c_str()));
 		_orders_mon.clear_orders();
 	}
+	// 情况3: 其他异常情况处理
 	else
 	{
+		// 记录日志，显示当前未完成订单和本地监控状态
 		_ctx->writeLog(fmtutil::format("Unrecognized condition while channle ready, {:.2f} live orders of {} exists, local orders {}exist",
 			undone, _code.c_str(), _orders_mon.has_order() ? "" : "not "));
 	}
+	
+	// 通道就绪后触发一次计算，重新调整仓位
 	do_calc();
 }
 
 
+/**
+ * @brief 处理行情数据回调
+ * @details 当收到新的行情数据时被调用，更新内部状态并检查超时订单，触发交易计算
+ * @param newTick 新的行情数据
+ */
 void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 {
+	// 检查行情数据是否有效且属于当前合约
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
 
+	// 标记是否为第一笔行情
 	bool isFirstTick = false;
-	//原来tick不为空 则要释放掉
+	
+	// 释放旧的行情数据
 	if (_last_tick) {
 		_last_tick->release();
 	}
 	else {
+		// 如果之前没有行情数据，这是第一笔行情
 		isFirstTick = true;
-		//如果行情时间不在交易时间,这种情况一般是集合竞价的行情进来,下单会失败,所以直接过滤掉这笔行情
+		// 如果行情时间不在交易时间内（如集合竞价时段），则过滤掉该行情
 		if (_sess_info != NULL && !_sess_info->isInTradingTime(newTick->actiontime() / 100000))
 			return;
 	}
-	//新的tick数据需要保留
+	// 保存新的行情数据并增加引用计数
 	_last_tick = newTick;
 	_last_tick->retain();
 
-	if (isFirstTick)//如果是第一笔tick,则检查目标仓位,不符合则下单
+	// 如果是第一笔行情，需要检查目标仓位是否需要调整
+	if (isFirstTick)
 	{
+		// 获取当前目标仓位、未完成订单和实际仓位
 		double newVol = _target_pos;
 		const char* stdCode = _code.c_str();
 		double undone = _ctx->getUndoneQty(stdCode);
 		double realPos = _ctx->getPosition(stdCode);
+		
+		// 如果目标仓位不等于未完成订单加实际仓位，需要调整
 		if (!decimal::eq(newVol, undone + realPos))
-		{//如果是第一笔TICK，且目标量==未完成+仓位，退出 
+		{
+			// 触发计算逻辑进行仓位调整
 			do_calc();
 		}
 	}
-	else
+	else // 非第一笔行情处理
 	{
+		// 获取当前时间
 		uint64_t now = TimeUtils::getLocalTimeNow();
 		bool hasCancel = false;
+		
+		// 检查是否有超时订单需要撤销
 		if (_ord_sticky != 0 && _orders_mon.has_order())
 		{
+			// 检查订单是否超时，如果超时则撤销
 			_orders_mon.check_orders(_ord_sticky, now, [this, &hasCancel](uint32_t localid) {
 				if (_ctx->cancel(localid))
 				{
 					_cancel_cnt++;
-					_ctx->writeLog(fmt::format("Order expired, cancelcnt updated to {}", _cancel_cnt).c_str());//订单过期，撤单量更新
+					_ctx->writeLog(fmt::format("Order expired, cancelcnt updated to {}", _cancel_cnt).c_str());
 					hasCancel = true;
 				}
 			});
 		}
+		
+		// 如果没有撤单操作，且距离上次发单时间超过了发单间隔，则触发新的计算
 		if (!hasCancel && (now - _last_fire_time >= _fire_span * 1000))
 		{
 			do_calc();
@@ -410,12 +457,20 @@ void WtStockVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool i
 	// 记录成交日志
 	_ctx->writeLog(fmtutil::format("Order {} of {} traded: {} @ {}", localid, stdCode, vol, price));
 }
+/**
+ * @brief VWAP执行单元的核心计算逻辑
+ * @details 根据当前市场状况、目标仓位和实际仓位计算下一步操作
+ *          包括判断是否需要发单、发单数量、价格策略等
+ *          实现了根据VWAP分布序列分批次执行大单的核心逻辑
+ */
 void WtStockVWapExeUnit::do_calc()
 {
+	// 防止重入计算
 	CalcFlag flag(&_in_calc);
 	if (flag)
 		return;
 
+	// 加锁保护共享数据
 	StdUniqueLock lock(_mtx_calc);
 	const char* code = _code.c_str();
 	double undone = _ctx->getUndoneQty(code);
@@ -649,41 +704,85 @@ void WtStockVWapExeUnit::fire_at_once(double qty)
 	curTick->release();
 }
 
+/**
+ * @brief 设置合约的目标仓位
+ * @details 设置指定合约的目标仓位，并触发VWAP执行计算
+ *          如果目标仓位与当前仓位相同或为负数，则不进行操作
+ *          设置目标仓位时，会重置执行状态并记录当前时间和价格
+ * @param stdCode 合约代码
+ * @param newVol 新的目标仓位量
+ */
 void WtStockVWapExeUnit::set_position(const char * stdCode, double newVol)
 {
+	// 检查合约是否与当前管理的合约一致
 	if (_code.compare(stdCode) != 0)
 		return;
 
+	// 如果目标仓位与当前设置的一样，则不需要重复设置
 	if (decimal::eq(newVol, _target_pos))
 		return;
+	
+	// 验证目标仓位是否合法（不能为负数）
 	if (decimal::lt(newVol, 0))
 	{
 		_ctx->writeLog(fmt::format("{} is an error stock target position", newVol).c_str());
 		return;
 	}
+	
+	// 设置新的目标仓位
 	_target_pos = newVol;
 
+	// 将目标模式设置为股票数量模式
 	_target_mode = TargetMode::stocks;
+	
+	// 重置执行状态
 	_is_finish = false;
+	
+	// 记录当前时间作为开始时间
 	_start_time = TimeUtils::getLocalTimeNow();
+	
+	// 获取当前合约的最新行情并记录开始价格
 	WTSTickData* tick = _ctx->grabLastTick(_code.c_str());
 	if (tick) {
 		_start_price = tick->price();
 		tick->release();
 	}
-	_fired_times = 0;//已执行次数
+	
+	// 重置已执行次数
+	_fired_times = 0;
 
+	// 触发计算逻辑
 	do_calc();
 }
 
+/**
+ * @brief 处理交易通道断开回调
+ * @details 当交易通道断开时被调用，当前为空实现
+ *          可以在此处添加必要的断开后处理逻辑，如标记订单状态、清除本地订单等
+ */
 void WtStockVWapExeUnit::on_channel_lost()
 {
+	// 在交易通道断开时执行的处理逻辑
+	// 当前为空实现
 }
+/**
+ * @brief 清除指定合约的所有仓位
+ * @details 将指定合约的目标仓位和目标数量设置为0，并标记为清仓状态
+ *          如果输入的合约代码与执行单元当前管理的合约不符，则不进行操作
+ * @param stdCode 合约代码
+ */
 void WtStockVWapExeUnit::clear_all_position(const char* stdCode) {
+	// 检查传入的合约代码是否与当前管理的合约一致
 	if (_code.compare(stdCode) != 0)
 		return;
+	
+	// 标记为清仓状态
 	_is_clear = true;
+	
+	// 将目标仓位和目标数量设为0
 	_target_pos = 0;
 	_target_amount = 0;
+	
+	// 触发计算逻辑执行清仓
 	do_calc();
 }
