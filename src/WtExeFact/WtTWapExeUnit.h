@@ -49,69 +49,94 @@ private:
 	void	fire_at_once(double qty);
 
 public:
-	/*
-	*	所属执行器工厂名称
-	*/
+	/**
+	 * @brief 获取所属执行器工厂名称
+	 * @details 返回该执行单元所属的工厂名称，用于执行单元的注册和管理
+	 * @return 工厂名称字符串
+	 */
 	virtual const char* getFactName() override;
 
-	/*
-	*	执行单元名称
-	*/
+	/**
+	 * @brief 获取执行单元名称
+	 * @details 返回该执行单元的名称，用于标识不同类型的执行单元
+	 * @return 执行单元名称字符串
+	 */
 	virtual const char* getName() override;
 
-	/*
-	*	初始化执行单元
-	*	ctx		执行单元运行环境
-	*	code	管理的合约代码
-	*/
+	/**
+	 * @brief 初始化执行单元
+	 * @details 根据提供的执行上下文、合约代码和配置参数初始化执行单元
+	 *          设置各种交易参数如执行时间、价格模式、发单间隔等
+	 * @param ctx 执行单元运行环境，提供交易接口和市场数据
+	 * @param stdCode 标准化合约代码，指定要交易的合约
+	 * @param cfg 配置参数，包含执行单元的各种设置
+	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
 
-	/*
-	*	订单回报
-	*	localid	本地单号
-	*	code	合约代码
-	*	isBuy	买or卖
-	*	leftover	剩余数量
-	*	price	委托价格
-	*	isCanceled	是否已撤销
-	*/
+	/**
+	 * @brief 处理订单回报
+	 * @details 处理订单状态变化，包括成交、撤销等情况，并更新内部订单管理状态
+	 *          如果订单被撤销且目标仓位未达到，则会重新发送订单
+	 * @param localid 本地订单ID
+	 * @param stdCode 标准化合约代码
+	 * @param isBuy 是否为买入订单
+	 * @param leftover 剩余未成交数量
+	 * @param price 委托价格
+	 * @param isCanceled 是否已撤销
+	 */
 	virtual void on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled) override;
 
-	/*
-	*	tick数据回调
-	*	newTick	最新的tick数据
-	*/
+	/**
+	 * @brief 处理行情数据回调
+	 * @details 当收到新的行情数据时调用，更新内部行情缓存并触发相关的交易逻辑
+	 *          包括首次行情处理、交易时间校验、计算目标仓位、超时撤单等
+	 * @param newTick 新的行情数据指针
+	 */
 	virtual void on_tick(WTSTickData* newTick) override;
 
-	/*
-	*	成交回报
-	*	code	合约代码
-	*	isBuy	买or卖
-	*	vol		成交数量,这里没有正负,通过isBuy确定买入还是卖出
-	*	price	成交价格
-	*/
+	/**
+	 * @brief 处理成交回报
+	 * @details 当收到成交回报时调用，当前实现中不在此处触发交易逻辑，而是在on_tick中处理
+	 * @param localid 本地订单ID
+	 * @param stdCode 标准化合约代码
+	 * @param isBuy 是否为买入成交
+	 * @param vol 成交数量，这里没有正负，通过isBuy确定买入还是卖出
+	 * @param price 成交价格
+	 */
 	virtual void on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price) override;
 
-	/*
-	*	下单结果回报
-	*/
+	/**
+	 * @brief 处理委托回报
+	 * @details 当收到委托回报时调用，主要处理委托失败的情况
+	 *          如果委托失败，会从订单监控器中移除该订单并重新计算
+	 * @param localid 本地订单ID
+	 * @param stdCode 标准化合约代码
+	 * @param bSuccess 委托是否成功
+	 * @param message 委托回报消息
+	 */
 	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message) override;
 
-	/*
-	*	设置新的目标仓位
-	*	code	合约代码
-	*	newVol	新的目标仓位
-	*/
+	/**
+	 * @brief 设置目标仓位
+	 * @details 设置执行单元的目标仓位，并触发仓位计算和发单操作
+	 *          当目标仓位与当前目标仓位不同时，重置发单次数并触发do_calc方法
+	 * @param stdCode 标准化合约代码
+	 * @param newVol 新的目标仓位，可以使用DBL_MAX表示清仓
+	 */
 	virtual void set_position(const char* stdCode, double newVol) override;
 
-	/*
-	*	交易通道就绪回调
-	*/
+	/**
+	 * @brief 处理交易通道就绪
+	 * @details 当交易通道就绪时调用，设置内部通道状态标记并触发仓位计算
+	 *          如果有目标仓位且当前有有效的行情数据，则重新计算并发单
+	 */
 	virtual void on_channel_ready() override;
 
-	/*
-	*	交易通道丢失回调
-	*/
+	/**
+	 * @brief 处理交易通道丢失
+	 * @details 当交易通道断开时调用，重置内部通道状态标记
+	 *          在当前实现中，仅将通道状态标记设置为关闭
+	 */
 	virtual void on_channel_lost() override;
 
 
