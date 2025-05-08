@@ -300,46 +300,122 @@ bool set_double(const char* domain, const char* section, const char* key, double
 	return ShareBlocks::one().set_double(domain, section, key, val);
 }
 
+/**
+ * @brief 获取字符串类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的字符串值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为空字符串
+ * @return 字符串值
+ */
 const char* get_string(const char* domain, const char* section, const char* key, const char* defVal /* = "" */)
 {
 	return ShareBlocks::one().get_string(domain, section, key, defVal);
 }
 
+/**
+ * @brief 获取32位整数类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的32位整数值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为0
+ * @return 32位整数值
+ */
 int32_t get_int32(const char* domain, const char* section, const char* key, int32_t defVal /* = 0 */)
 {
 	return ShareBlocks::one().get_int32(domain, section, key, defVal);
 }
 
+/**
+ * @brief 获取64位整数类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的64位整数值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为0
+ * @return 64位整数值
+ */
 int64_t get_int64(const char* domain, const char* section, const char* key, int64_t defVal /* = 0 */)
 {
 	return ShareBlocks::one().get_int64(domain, section, key, defVal);
 }
 
+/**
+ * @brief 获取无符32位整数类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的无符32位整数值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为0
+ * @return 无符32位整数值
+ */
 uint32_t get_uint32(const char* domain, const char* section, const char* key, uint32_t defVal /* = 0 */)
 {
 	return ShareBlocks::one().get_uint32(domain, section, key, defVal);
 }
 
+/**
+ * @brief 获取无符64位整数类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的无符64位整数值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为0
+ * @return 无符64位整数值
+ */
 uint64_t get_uint64(const char* domain, const char* section, const char* key, uint64_t defVal /* = 0 */)
 {
 	return ShareBlocks::one().get_uint64(domain, section, key, defVal);
 }
 
+/**
+ * @brief 获取双精度浮点数类型的共享内存值
+ * @details 获取共享内存中指定域、分区和键的双精度浮点数值
+ * @param domain 域名称
+ * @param section 分区名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回此值，默认为0
+ * @return 双精度浮点数值
+ */
 double get_double(const char* domain, const char* section, const char* key, double defVal /* = 0 */)
 {
 	return ShareBlocks::one().get_double(domain, section, key, defVal);
 }
 
+/**
+ * @brief 初始化命令器
+ * @details 初始化命令器，用于进程间命令传递
+ * @param name 命令器名称
+ * @param isCmder 是否为命令发送方，默认为false
+ * @param path 共享内存文件路径，默认为空字符串
+ * @return 初始化是否成功
+ */
 bool init_cmder(const char* name, bool isCmder /* = false */, const char* path /* = "" */)
 {
 	return ShareBlocks::one().init_cmder(name, isCmder, path);
 }
 
+/**
+ * @brief 添加命令
+ * @details 向命令器中添加一条命令
+ * @param name 命令器名称
+ * @param cmd 要添加的命令
+ * @return 添加是否成功
+ */
 bool add_cmd(const char* name, const char* cmd)
 {
 	return ShareBlocks::one().add_cmd(name, cmd);
 }
 
+/**
+ * @brief 获取命令
+ * @details 从命令器中获取一条命令
+ * @param name 命令器名称
+ * @param lastIdx 上次获取的命令索引，会被更新为当前获取的命令索引
+ * @return 命令字符串，如果没有新命令则返回null
+ */
 const char* get_cmd(const char* name, uint32_t& lastIdx)
 {
 	return ShareBlocks::one().get_cmd(name, lastIdx);
