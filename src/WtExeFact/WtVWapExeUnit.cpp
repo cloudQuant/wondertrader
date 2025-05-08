@@ -367,12 +367,28 @@ void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 	
 }
 
+/**
+ * @brief 处理成交回报
+ * @details 当收到成交回报时调用，在当前实现中仅作为占位函数
+ *          实际的成交处理逻辑在on_tick方法中触发
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param isBuy 是否为买入成交
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void WtVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool isBuy, double vol, double price)
 {//在ontick中触发
 }
-/*
-下单结果回报
-*/
+/**
+ * @brief 处理委托回报
+ * @details 当收到委托回报时调用，主要处理委托失败的情况
+ *          如果委托失败，会从订单监控器中移除该订单并重新计算执行计划
+ * @param localid 本地订单ID
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 委托是否成功
+ * @param message 委托回报消息
+ */
 void WtVWapExeUnit::on_entrust(uint32_t localid, const char * stdCode, bool bSuccess, const char * message)
 {
     if (!bSuccess)
@@ -386,6 +402,13 @@ void WtVWapExeUnit::on_entrust(uint32_t localid, const char * stdCode, bool bSuc
         do_calc();
     }
 }
+/**
+ * @brief 执行VWAP交易计算和下单逻辑
+ * @details 这是VWAP执行单元的核心方法，负责计算目标仓位与实际仓位的差异，
+ *          并根据VWAP算法确定下单时机、数量和价格
+ *          包含多种交易条件检查和价格调整逻辑，确保订单在最优价格执行
+ *          同时处理涨跌停限制、最小下单量等交易约束
+ */
 void WtVWapExeUnit::do_calc()
 {
 	CalcFlag flag(&_in_calc);
@@ -535,6 +558,13 @@ void WtVWapExeUnit::do_calc()
 	curTick->release();
 }
 
+/**
+ * @brief 立即发送交易订单
+ * @details 当需要立即发送订单时调用，例如在订单被撤销后需要重新发送
+ *          根据当前市场状况和价格模式设置订单价格，并处理涨跌停限制
+ *          这个方法与普通的do_calc方法不同，它会立即发送订单而不考虑VWAP算法
+ * @param qty 要交易的数量，正数表示买入，负数表示卖出
+ */
 void WtVWapExeUnit::fire_at_once(double qty)
 {
 	if (decimal::eq(qty, 0))
@@ -583,6 +613,14 @@ void WtVWapExeUnit::fire_at_once(double qty)
 	curTick->release();
 }
 
+/**
+ * @brief 设置目标仓位
+ * @details 设置指定合约的目标仓位，并触发交易计算
+ *          如果合约代码不匹配或目标仓位与当前目标相同，则不进行操作
+ *          否则更新目标仓位并重置执行次数，然后触发交易计算
+ * @param stdCode 标准化合约代码
+ * @param newVol 新的目标仓位数量
+ */
 void WtVWapExeUnit::set_position(const char * stdCode, double newVol)
 {
 	if (_code.compare(stdCode) != 0)
@@ -598,6 +636,12 @@ void WtVWapExeUnit::set_position(const char * stdCode, double newVol)
 	do_calc();
 }
 
+/**
+ * @brief 处理交易通道丢失
+ * @details 当交易通道断开连接或发生异常时调用
+ *          当前实现中仅作为占位函数，可在此处添加通道丢失时的处理逻辑
+ *          例如清理订单状态、记录日志或触发重连机制
+ */
 void WtVWapExeUnit::on_channel_lost()
 {
 }
