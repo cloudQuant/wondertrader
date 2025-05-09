@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file WTSHotMgr.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 主力合约管理器实现
+ *
+ * 实现WTSHotMgr类的各种方法，包括主力合约、次主力合约和自定义切换规则的加载、查询和管理。
+ * 主要功能包括读取切换配置文件、根据日期查询主力和次主力合约、判断合约类型、计算复权因子等。
  */
 #include "WTSHotMgr.h"
 #include "../WTSUtils/WTSCfgLoader.h"
@@ -20,6 +23,11 @@
 #include "../Share/decimal.h"
 
 
+/**
+ * @brief 构造函数
+ * 
+ * 初始化主力合约管理器对象，设置自定义规则映射为空，初始化状态为未初始化
+ */
 WTSHotMgr::WTSHotMgr()
 	: m_mapCustRules(NULL)
 	, m_bInitialized(false)
@@ -27,10 +35,24 @@ WTSHotMgr::WTSHotMgr()
 }
 
 
+/**
+ * @brief 析构函数
+ * 
+ * 析构时不需要释放内存，因为内存释放由release()函数后续调用处理
+ */
 WTSHotMgr::~WTSHotMgr()
 {
 }
 
+/**
+ * @brief 获取标准合约代码对应的规则标签
+ *
+ * 根据标准合约代码查找对应的切换规则标签
+ * 如果合约代码以+或-结尾，则忽略这些符号
+ *
+ * @param stdCode 标准合约代码
+ * @return const char* 对应的规则标签，如果未找到则返回空字符串
+ */
 const char* WTSHotMgr::getRuleTag(const char* stdCode)
 {
 	if (m_mapCustRules == NULL)
@@ -58,6 +80,17 @@ const char* WTSHotMgr::getRuleTag(const char* stdCode)
 	return it->first.c_str();
 }
 
+/**
+ * @brief 获取指定日期的复权因子
+ *
+ * 根据给定的规则标签、品种代码和日期计算复权因子
+ * 如果未指定日期或找不到特定日期的记录，会选择适当的近期复权因子
+ *
+ * @param ruleTag 规则标签
+ * @param fullPid 完整品种代码，格式为“交易所.品种代码”
+ * @param uDate 日期，格式YYYYMMDD，默认为0表示取最新数据
+ * @return double 复权因子，默认为1.0
+ */
 double WTSHotMgr::getRuleFactor(const char* ruleTag, const char* fullPid, uint32_t uDate /* = 0 */ )
 {
 	if (m_mapCustRules == NULL)
