@@ -147,6 +147,15 @@ double WTSHotMgr::getRuleFactor(const char* ruleTag, const char* fullPid, uint32
 }
 
 #pragma region "次主力接口"
+/**
+ * @brief 加载主力合约切换配置文件
+ *
+ * 此函数调用loadCustomRules函数加载主力合约的切换规则配置，使用"HOT"作为规则标签
+ * 加载后将初始化状态标记设置为已初始化
+ *
+ * @param filename 主力合约切换配置文件路径
+ * @return bool 始终返回true，表示加载成功
+ */
 bool WTSHotMgr::loadHots(const char* filename)
 {
 	loadCustomRules("HOT", filename);
@@ -154,6 +163,17 @@ bool WTSHotMgr::loadHots(const char* filename)
 	return true;
 }
 
+/**
+ * @brief 获取指定日期的前一主力合约代码
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用getPrevCustomRawCode函数获取指定日期的前一主力合约代码
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param dt 日期，格式YYYYMMDD
+ * @return const char* 前一主力合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getPrevRawCode(const char* exchg, const char* pid, uint32_t dt)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -162,6 +182,17 @@ const char* WTSHotMgr::getPrevRawCode(const char* exchg, const char* pid, uint32
 	return getPrevCustomRawCode("HOT", fullPid, dt);
 }
 
+/**
+ * @brief 获取指定日期的当前主力合约代码
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用getCustomRawCode函数获取指定日期的当前主力合约代码
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return const char* 当前主力合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getRawCode(const char* exchg, const char* pid, uint32_t dt)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -170,6 +201,17 @@ const char* WTSHotMgr::getRawCode(const char* exchg, const char* pid, uint32_t d
 	return getCustomRawCode("HOT", fullPid, dt);
 }
 
+/**
+ * @brief 判断合约是否为指定日期的主力合约
+ *
+ * 此函数将交易所代码和原始合约代码组合成完整合约代码，
+ * 然后调用isCustomHot函数判断该合约是否为指定日期的主力合约
+ *
+ * @param exchg 交易所代码
+ * @param rawCode 原始合约代码
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return bool 如果是主力合约返回true，否则返回false
+ */
 bool WTSHotMgr::isHot(const char* exchg, const char* rawCode, uint32_t dt)
 {
 	static thread_local char fullCode[64] = { 0 };
@@ -178,6 +220,20 @@ bool WTSHotMgr::isHot(const char* exchg, const char* rawCode, uint32_t dt)
 	return isCustomHot("HOT", fullCode, dt);
 }
 
+/**
+ * @brief 分割指定时间范围内的主力合约切换区间
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用splitCustomSections函数将指定时间范围内的主力合约切换分成多个区间
+ * 每个区间包含一个主力合约代码及其使用的时间段和复权因子
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param sDt 开始日期，格式YYYYMMDD
+ * @param eDt 结束日期，格式YYYYMMDD
+ * @param sections 输出参数，用于存储切分的主力合约区间
+ * @return bool 分割成功返回true，失败返回false
+ */
 bool WTSHotMgr::splitHotSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -188,11 +244,30 @@ bool WTSHotMgr::splitHotSecions(const char* exchg, const char* pid, uint32_t sDt
 #pragma endregion "主力接口"
 
 #pragma region "次主力接口"
+/**
+ * @brief 加载次主力合约切换配置文件
+ *
+ * 此函数调用loadCustomRules函数加载次主力合约的切换规则配置，使用"2ND"作为规则标签
+ *
+ * @param filename 次主力合约切换配置文件路径
+ * @return bool 加载成功返回true，失败返回false
+ */
 bool WTSHotMgr::loadSeconds(const char* filename)
 {
 	return loadCustomRules("2ND", filename);
 }
 
+/**
+ * @brief 获取指定日期的前一次主力合约代码
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用getPrevCustomRawCode函数获取指定日期的前一次主力合约代码
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param dt 日期，格式YYYYMMDD
+ * @return const char* 前一次主力合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getPrevSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -201,6 +276,17 @@ const char* WTSHotMgr::getPrevSecondRawCode(const char* exchg, const char* pid, 
 	return getPrevCustomRawCode("2ND", fullPid, dt);
 }
 
+/**
+ * @brief 获取指定日期的当前次主力合约代码
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用getCustomRawCode函数获取指定日期的当前次主力合约代码
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return const char* 当前次主力合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getSecondRawCode(const char* exchg, const char* pid, uint32_t dt)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -209,14 +295,39 @@ const char* WTSHotMgr::getSecondRawCode(const char* exchg, const char* pid, uint
 	return getCustomRawCode("2ND", fullPid, dt);
 }
 
+/**
+ * @brief 判断合约是否为指定日期的次主力合约
+ *
+ * 此函数将交易所代码和原始合约代码组合成完整合约代码，
+ * 然后调用isCustomHot函数判断该合约是否为指定日期的次主力合约
+ *
+ * @param exchg 交易所代码
+ * @param rawCode 原始合约代码
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return bool 如果是次主力合约返回true，否则返回false
+ */
 bool WTSHotMgr::isSecond(const char* exchg, const char* rawCode, uint32_t dt)
 {
 	static thread_local char fullCode[64] = { 0 };
 	fmtutil::format_to(fullCode, "{}.{}", exchg, rawCode);
 
-	return isCustomHot("2NDT", fullCode, dt);
+	return isCustomHot("2ND", fullCode, dt);
 }
 
+/**
+ * @brief 分割指定时间范围内的次主力合约切换区间
+ *
+ * 此函数将交易所代码和品种代码组合成完整品种代码，
+ * 然后调用splitCustomSections函数将指定时间范围内的次主力合约切换分成多个区间
+ * 每个区间包含一个次主力合约代码及其使用的时间段和复权因子
+ *
+ * @param exchg 交易所代码
+ * @param pid 品种代码
+ * @param sDt 开始日期，格式YYYYMMDD
+ * @param eDt 结束日期，格式YYYYMMDD
+ * @param sections 输出参数，用于存储切分的次主力合约区间
+ * @return bool 分割成功返回true，失败返回false
+ */
 bool WTSHotMgr::splitSecondSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
 {
 	static thread_local char fullPid[64] = { 0 };
@@ -228,6 +339,16 @@ bool WTSHotMgr::splitSecondSecions(const char* exchg, const char* pid, uint32_t 
 #pragma endregion "次主力接口"
 
 #pragma region "自定义主力接口"
+/**
+ * @brief 加载自定义切换规则配置文件
+ *
+ * 根据指定的规则标签和文件路径加载切换规则配置
+ * 支持JSON格式的配置文件，规则包括一系列合约切换日期、从合约、到合约等信息
+ *
+ * @param tag 规则标签，用于区分不同规则，如"HOT"表示主力合约，"2ND"表示次主力合约
+ * @param filename 配置文件路径
+ * @return bool 加载成功返回true，失败返回false
+ */
 bool WTSHotMgr::loadCustomRules(const char* tag, const char* filename)
 {
 	if (!StdFile::exists(filename))
@@ -289,6 +410,17 @@ bool WTSHotMgr::loadCustomRules(const char* tag, const char* filename)
 	return true;
 }
 
+/**
+ * @brief 获取指定日期的前一自定义规则合约代码
+ *
+ * 根据规则标签、完整品种代码和日期，查找并返回当前使用的合约前一个合约代码
+ * 如果指定日期的当前合约是该品种的第一个合约，则无前一合约，返回空字符串
+ *
+ * @param tag 规则标签，如"HOT"表示主力合约，"2ND"表示次主力合约
+ * @param fullPid 完整品种代码，格式为“交易所.品种代码”
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return const char* 前一合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getPrevCustomRawCode(const char* tag, const char* fullPid, uint32_t dt /* = 0 */)
 {
 	if (m_mapCustRules == NULL)
@@ -338,6 +470,17 @@ const char* WTSHotMgr::getPrevCustomRawCode(const char* tag, const char* fullPid
 	return "";
 }
 
+/**
+ * @brief 获取指定日期的当前自定义规则合约代码
+ *
+ * 根据规则标签、完整品种代码和日期，查找并返回当前使用的合约代码
+ * 使用二分查找定位指定日期对应的合约，如果找不到则返回最后一个合约
+ *
+ * @param tag 规则标签，如"HOT"表示主力合约，"2ND"表示次主力合约
+ * @param fullPid 完整品种代码，格式为“交易所.品种代码”
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return const char* 当前合约代码，如果不存在则返回空字符串
+ */
 const char* WTSHotMgr::getCustomRawCode(const char* tag, const char* fullPid, uint32_t dt /* = 0 */)
 {
 	if (m_mapCustRules == NULL)
@@ -375,6 +518,17 @@ const char* WTSHotMgr::getCustomRawCode(const char* tag, const char* fullPid, ui
 	return "";
 }
 
+/**
+ * @brief 判断合约是否为指定日期的自定义规则合约
+ *
+ * 根据规则标签、完整合约代码和日期，判断给定合约是否在指定日期为当前使用的合约
+ * 如果未指定日期，则直接在当前使用合约集合中查找；否则查找指定日期的切换规则并比对
+ *
+ * @param tag 规则标签，如"HOT"表示主力合约，"2ND"表示次主力合约
+ * @param fullCode 完整合约代码，格式为“交易所.合约代码”
+ * @param dt 日期，格式YYYYMMDD，默认为0表示当前日期
+ * @return bool 如果是自定义规则当前合约返回true，否则返回false
+ */
 bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /* = 0 */)
 {
 	if (m_mapCustRules == NULL)
@@ -430,6 +584,19 @@ bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /
 	return false;
 }
 
+/**
+ * @brief 分割指定时间范围内的自定义规则合约切换区间
+ *
+ * 根据规则标签、完整品种代码和时间范围，将指定时间范围内的合约切换分成多个区间
+ * 每个区间包含一个合约代码、区间起始日期、区间结束日期和复权因子
+ *
+ * @param tag 规则标签，如"HOT"表示主力合约，"2ND"表示次主力合约
+ * @param fullPid 完整品种代码，格式为“交易所.品种代码”
+ * @param sDt 开始日期，格式YYYYMMDD
+ * @param eDt 结束日期，格式YYYYMMDD
+ * @param sections 输出参数，用于存储分割的合约切换区间
+ * @return bool 分割成功返回true，失败返回false
+ */
 bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32_t sDt, uint32_t eDt, HotSections& sections)
 {
 	if (m_mapCustRules == NULL)
@@ -482,6 +649,12 @@ bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32
 }
 #pragma endregion "自定义主力接口"
 
+/**
+ * @brief 释放内存资源
+ *
+ * 释放管理器所持有的自定义切换规则映射对象
+ * 注释的代码是早期版本中的主力合约和次主力合约映射对象释放逻辑，现已不再使用
+ */
 void WTSHotMgr::release()
 {
 	//if (m_pExchgHotMap)
