@@ -1,11 +1,15 @@
-﻿/*!
+/*!
  * \file WTSBaseDataMgr.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 基础数据管理器实现文件
+ * 
+ * 本文件实现了WTSBaseDataMgr类，该类负责管理交易系统所需的基础数据，
+ * 包括交易品种、合约信息、交易时段、交易日历等。
+ * 这些基础数据对于交易系统的正常运行至关重要。
  */
 #include "WTSBaseDataMgr.h"
 #include "../WTSUtils/WTSCfgLoader.h"
@@ -18,41 +22,64 @@
 #include "../Share/StrUtil.hpp"
 #include "../Share/StdUtils.hpp"
 
+/**
+ * @brief 默认的节假日模板ID
+ * 
+ * 用于在没有指定节假日模板时使用的默认模板，默认为中国节假日模板
+ */
 const char* DEFAULT_HOLIDAY_TPL = "CHINA";
 
+/**
+ * @brief 构造函数
+ * 
+ * 初始化基础数据管理器，创建各种数据容器用于存储交易所、交易时段、品种和合约信息
+ */
 WTSBaseDataMgr::WTSBaseDataMgr()
 	: m_mapExchgContract(NULL)
 	, m_mapSessions(NULL)
 	, m_mapCommodities(NULL)
 	, m_mapContracts(NULL)
 {
+	// 创建交易所-合约映射容器
 	m_mapExchgContract = WTSExchgContract::create();
+	// 创建交易时段映射容器
 	m_mapSessions = WTSSessionMap::create();
+	// 创建品种映射容器
 	m_mapCommodities = WTSCommodityMap::create();
+	// 创建合约映射容器
 	m_mapContracts = WTSContractMap::create();
 }
 
 
+/**
+ * @brief 析构函数
+ * 
+ * 释放基础数据管理器所持有的各种数据容器资源
+ */
 WTSBaseDataMgr::~WTSBaseDataMgr()
 {
+	// 释放交易所-合约映射容器
 	if (m_mapExchgContract)
 	{
 		m_mapExchgContract->release();
 		m_mapExchgContract = NULL;
 	}
 
+	// 释放交易时段映射容器
 	if (m_mapSessions)
 	{
 		m_mapSessions->release();
 		m_mapSessions = NULL;
 	}
 
+	// 释放品种映射容器
 	if (m_mapCommodities)
 	{
 		m_mapCommodities->release();
 		m_mapCommodities = NULL;
 	}
 
+	// 释放合约映射容器
 	if(m_mapContracts)
 	{
 		m_mapContracts->release();
@@ -60,40 +87,75 @@ WTSBaseDataMgr::~WTSBaseDataMgr()
 	}
 }
 
+/**
+ * @brief 获取品种信息
+ * 
+ * 根据标准品种ID获取相应的品种信息
+ * 
+ * @param exchgpid 标准品种ID，格式为"交易所.品种代码"，如"SHFE.au"
+ * @return WTSCommodityInfo* 返回品种信息指针，如果不存在则返回NULL
+ */
 WTSCommodityInfo* WTSBaseDataMgr::getCommodity(const char* exchgpid)
 {
 	return (WTSCommodityInfo*)m_mapCommodities->get(exchgpid);
 }
 
 
+/**
+ * @brief 获取品种信息
+ * 
+ * 根据交易所代码和品种代码获取相应的品种信息
+ * 
+ * @param exchg 交易所代码，如"SHFE"
+ * @param pid 品种代码，如"au"
+ * @return WTSCommodityInfo* 返回品种信息指针，如果不存在则返回NULL
+ */
 WTSCommodityInfo* WTSBaseDataMgr::getCommodity(const char* exchg, const char* pid)
 {
+	// 检查品种映射容器是否存在
 	if (m_mapCommodities == NULL)
 		return NULL;
 
+	// 构造查询键值，格式为"交易所.品种代码"
 	char key[64] = { 0 };
 	fmt::format_to(key, "{}.{}", exchg, pid);
 
+	// 从品种映射容器中获取品种信息
 	return (WTSCommodityInfo*)m_mapCommodities->get(key);
 }
 
 
+/**
+ * @brief 获取合约信息
+ * 
+ * 根据合约代码、交易所和日期获取合约信息
+ * 
+ * @param code 合约代码，如"au2106"
+ * @param exchg 交易所代码，默认为空字符串
+ * @param uDate 日期，格式为YYYYMMDD，如果非零，则检查合约在该日期是否有效
+ * @return WTSContractInfo* 返回合约信息指针，如果不存在则返回NULL
+ */
 WTSContractInfo* WTSBaseDataMgr::getContract(const char* code, const char* exchg /* = "" */, uint32_t uDate /* = 0 */)
 {
 	//如果直接找到对应的市场代码,则直接
 	
+	// 将合约代码转换为字符串作为查询键
 	auto lKey = std::string(code);
 
+	// 如果没有指定交易所，则从合约映射容器中直接查找
 	if (strlen(exchg) == 0)
 	{
+		// 在合约映射容器中查找合约代码
 		auto it = m_mapContracts->find(lKey);
 		if (it == m_mapContracts->end())
 			return NULL;
 
+		// 获取合约数组
 		WTSArray* ayInst = (WTSArray*)it->second;
 		if (ayInst == NULL || ayInst->size() == 0)
 			return NULL;
 
+		// 遍历合约数组，找到符合条件的合约
 		for(std::size_t i = 0; i < ayInst->size(); i++)
 		{
 			WTSContractInfo* cInfo = (WTSContractInfo*)ayInst->at(i);
@@ -101,6 +163,7 @@ WTSContractInfo* WTSBaseDataMgr::getContract(const char* code, const char* exchg
 			 *	By Wesley @ 2023.10.23
 			 *	if param uDate is not zero, need to check whether contract is valid
 			 */
+			// 如果指定了日期，检查合约在该日期是否有效
 			if (uDate == 0 || (cInfo->getOpenDate() <= uDate && cInfo->getExpireDate() >= uDate))
 				return cInfo;
 		}
@@ -108,11 +171,14 @@ WTSContractInfo* WTSBaseDataMgr::getContract(const char* code, const char* exchg
 	}
 	else
 	{
+		// 如果指定了交易所，则先从交易所-合约映射容器中查找交易所
 		auto sKey = std::string(exchg);
 		auto it = m_mapExchgContract->find(sKey);
 		if (it != m_mapExchgContract->end())
 		{
+			// 获取交易所对应的合约列表
 			WTSContractList* contractList = (WTSContractList*)it->second;
+			// 在合约列表中查找指定的合约代码
 			auto it = contractList->find(lKey);
 			if (it != contractList->end())
 			{
@@ -121,6 +187,7 @@ WTSContractInfo* WTSBaseDataMgr::getContract(const char* code, const char* exchg
 				 *	By Wesley @ 2023.10.23
 				 *	if param uDate is not zero, need to check whether contract is valid
 				 */
+				// 如果指定了日期，检查合约在该日期是否有效
 				if (uDate == 0 || (cInfo->getOpenDate() <= uDate && cInfo->getExpireDate() >= uDate))
 					return cInfo;
 			}
@@ -132,6 +199,15 @@ WTSContractInfo* WTSBaseDataMgr::getContract(const char* code, const char* exchg
 	return NULL;
 }
 
+/**
+ * @brief 获取合约数量
+ * 
+ * 获取指定交易所和日期的合约数量
+ * 
+ * @param exchg 交易所代码，默认为空字符串，如果为空则返回所有交易所的合约数量
+ * @param uDate 日期，格式为YYYYMMDD，如果非零，则只计算在该日期有效的合约
+ * @return uint32_t 返回合约数量
+ */
 uint32_t  WTSBaseDataMgr::getContractSize(const char* exchg /* = "" */, uint32_t uDate /* = 0 */)
 {
 	uint32_t ret = 0;
@@ -169,6 +245,15 @@ uint32_t  WTSBaseDataMgr::getContractSize(const char* exchg /* = "" */, uint32_t
 	return ret;
 }
 
+/**
+ * @brief 获取合约列表
+ * 
+ * 获取指定交易所和日期的合约列表，返回的列表按合约代码排序
+ * 
+ * @param exchg 交易所代码，默认为空字符串，如果为空则返回所有交易所的合约
+ * @param uDate 日期，格式为YYYYMMDD，如果非零，则只返回在该日期有效的合约
+ * @return WTSArray* 返回合约列表，其中包含符合条件的WTSContractInfo对象
+ */
 WTSArray* WTSBaseDataMgr::getContracts(const char* exchg /* = "" */, uint32_t uDate /* = 0 */)
 {
 	WTSArray* ay = WTSArray::create();
