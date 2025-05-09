@@ -1,10 +1,23 @@
-﻿#include "ShareBlocks.h"
+/**
+ * @file ShareBlocks.cpp
+ * @brief WonderTrader共享内存块管理模块实现文件
+ * @details 实现了共享内存块的创建、访问和管理功能，用于进程间数据共享和通信
+ */
+
+#include "ShareBlocks.h"
 #include "../Share/BoostFile.hpp"
 #include "../Share/TimeUtils.hpp"
 #include "../Share/StdUtils.hpp"
 
 using namespace shareblock;
 
+/**
+ * @brief 初始化主进程共享内存
+ * @param name 共享内存名称
+ * @param path 共享内存文件路径，默认为空
+ * @return 初始化是否成功
+ * @details 创建或打开一个共享内存文件，并以主进程模式初始化共享内存块
+ */
 bool ShareBlocks::init_master(const char* name, const char* path/* = ""*/)
 {
 	ShmPair& shm = (ShmPair&)_shm_blocks[name];
@@ -78,6 +91,13 @@ bool ShareBlocks::init_master(const char* name, const char* path/* = ""*/)
 	return true;
 }
 
+/**
+ * @brief 初始化从进程共享内存
+ * @param name 共享内存名称，需要与主进程一致
+ * @param path 共享内存文件路径，默认为空
+ * @return 初始化是否成功
+ * @details 以从进程模式打开并连接到主进程创建的共享内存块
+ */
 bool ShareBlocks::init_slave(const char* name, const char* path/* = ""*/)
 {
 	ShmPair& shm = (ShmPair&)_shm_blocks[name];
@@ -120,6 +140,13 @@ bool ShareBlocks::init_slave(const char* name, const char* path/* = ""*/)
 	return true;
 }
 
+/**
+ * @brief 更新从进程共享内存
+ * @param name 共享内存名称
+ * @param bForce 是否强制更新，即使时间戳未变化
+ * @return 更新是否成功
+ * @details 当主进程修改共享内存后，从进程需要调用此函数更新内存映射和缓存
+ */
 bool ShareBlocks::update_slave(const char* name, bool bForce)
 {
 	ShmPair& shm = (ShmPair&)_shm_blocks[name];
@@ -154,6 +181,12 @@ bool ShareBlocks::update_slave(const char* name, bool bForce)
 	return true;
 }
 
+/**
+ * @brief 释放从进程共享内存
+ * @param name 共享内存名称
+ * @return 释放是否成功
+ * @details 在从进程中释放对共享内存的引用，清理相关资源
+ */
 bool ShareBlocks::release_slave(const char* name)
 {
 	auto it = _shm_blocks.find(name);
@@ -175,6 +208,13 @@ bool ShareBlocks::release_slave(const char* name)
 	return true;
 }
 
+/**
+ * @brief 获取小节的最后更新时间
+ * @param domain 域名称
+ * @param section 小节名称
+ * @return 最后更新时间戳，如果小节不存在则返回0
+ * @details 获取指定域和小节的最后更新时间，用于判断数据是否发生变化
+ */
 uint64_t ShareBlocks::get_section_updatetime(const char* domain, const char* section)
 {
 	auto it = _shm_blocks.find(domain);
@@ -191,6 +231,13 @@ uint64_t ShareBlocks::get_section_updatetime(const char* domain, const char* sec
 	return secInfo._updatetime;
 }
 
+/**
+ * @brief 提交小节更改
+ * @param domain 域名称
+ * @param section 小节名称
+ * @return 提交是否成功
+ * @details 更新指定小节的时间戳，标记小节已被修改，便于从进程检测变化
+ */
 bool ShareBlocks::commit_section(const char* domain, const char* section)
 {
 	auto it = _shm_blocks.find(domain);
@@ -208,6 +255,13 @@ bool ShareBlocks::commit_section(const char* domain, const char* section)
 	return true;
 }
 
+/**
+ * @brief 删除指定小节
+ * @param domain 域名称
+ * @param section 小节名称
+ * @return 删除是否成功
+ * @details 将指定小节的状态设置为无效，并更新时间戳
+ */
 bool ShareBlocks::delete_section(const char* domain, const char*section)
 {
 	auto it = _shm_blocks.find(domain);
@@ -226,6 +280,16 @@ bool ShareBlocks::delete_section(const char* domain, const char*section)
 	return true;
 }
 
+/**
+ * @brief 创建或验证共享内存中的键值对
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param vType 值类型
+ * @param secInfo 输出参数，返回小节信息指针
+ * @return 值的指针，如果失败则返回nullptr
+ * @details 内部函数，用于创建或验证共享内存中的键值对，如果不存在则创建新的键值对
+ */
 void* ShareBlocks::make_valid(const char* domain, const char* section, const char* key, ValueType vType, SecInfo* &secInfo)
 {
 	auto it = _shm_blocks.find(domain);
@@ -296,6 +360,16 @@ void* ShareBlocks::make_valid(const char* domain, const char* section, const cha
 	return keyInfo;
 }
 
+/**
+ * @brief 检查共享内存中的键值对是否有效
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param vType 值类型
+ * @param secInfo 输出参数，返回小节信息指针
+ * @return 值的指针，如果不存在或类型不匹配则返回nullptr
+ * @details 内部函数，用于检查共享内存中的键值对是否存在且类型匹配
+ */
 void* ShareBlocks::check_valid(const char* domain, const char* section, const char* key, ValueType vType, SecInfo* &secInfo)
 {
 	auto it = _shm_blocks.find(domain);
@@ -332,6 +406,12 @@ void* ShareBlocks::check_valid(const char* domain, const char* section, const ch
 	}
 }
 
+/**
+ * @brief 获取指定域下的所有小节
+ * @param domain 域名称
+ * @return 小节名称列表
+ * @details 返回指定域下所有有效小节的名称列表
+ */
 std::vector<std::string> ShareBlocks::get_sections(const char* domain)
 {
 	static std::vector<std::string> emptyRet;
@@ -353,6 +433,13 @@ std::vector<std::string> ShareBlocks::get_sections(const char* domain)
 	return std::move(ret);
 }
 
+/**
+ * @brief 获取指定域和小节下的所有键
+ * @param domain 域名称
+ * @param section 小节名称
+ * @return 键信息指针列表
+ * @details 返回指定域和小节下所有键的信息指针列表
+ */
 std::vector<KeyInfo*> ShareBlocks::get_keys(const char* domain, const char* section)
 {
 	static std::vector<KeyInfo*> emptyRet;
@@ -381,6 +468,16 @@ std::vector<KeyInfo*> ShareBlocks::get_keys(const char* domain, const char* sect
 	return std::move(ret);
 }
 
+/**
+ * @brief 分配字符串类型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为空字符串
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的字符串指针
+ * @details 在共享内存中分配字符串类型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 const char* ShareBlocks::allocate_string(const char* domain, const char* section, const char* key, const char* initVal /* = "" */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -398,6 +495,16 @@ const char* ShareBlocks::allocate_string(const char* domain, const char* section
 	return (secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 分配32位有符号整型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的int32_t指针
+ * @details 在共享内存中分配32位有符号整型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 int32_t* ShareBlocks::allocate_int32(const char* domain, const char* section, const char* key, int32_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -415,6 +522,16 @@ int32_t* ShareBlocks::allocate_int32(const char* domain, const char* section, co
 	return secInfo->get<int32_t>(keyInfo->_offset);
 }
 
+/**
+ * @brief 分配64位有符号整型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的int64_t指针
+ * @details 在共享内存中分配64位有符号整型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 int64_t* ShareBlocks::allocate_int64(const char* domain, const char* section, const char* key, int64_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -432,6 +549,16 @@ int64_t* ShareBlocks::allocate_int64(const char* domain, const char* section, co
 	return secInfo->get<int64_t>(keyInfo->_offset);
 }
 
+/**
+ * @brief 分配32位无符号整型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的uint32_t指针
+ * @details 在共享内存中分配32位无符号整型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 uint32_t* ShareBlocks::allocate_uint32(const char* domain, const char* section, const char* key, uint32_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -449,6 +576,16 @@ uint32_t* ShareBlocks::allocate_uint32(const char* domain, const char* section, 
 	return secInfo->get<uint32_t>(keyInfo->_offset);
 }
 
+/**
+ * @brief 分配64位无符号整型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的uint64_t指针
+ * @details 在共享内存中分配64位无符号整型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 uint64_t* ShareBlocks::allocate_uint64(const char* domain, const char* section, const char* key, uint64_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -466,6 +603,16 @@ uint64_t* ShareBlocks::allocate_uint64(const char* domain, const char* section, 
 	return secInfo->get<uint64_t>(keyInfo->_offset);
 }
 
+/**
+ * @brief 分配双精度浮点型的共享内存
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，默认为false
+ * @return 分配的double指针
+ * @details 在共享内存中分配双精度浮点型的内存，如果键已存在且类型匹配，则返回现有值
+ */
 double* ShareBlocks::allocate_double(const char* domain, const char* section, const char* key, double initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	SecInfo* secInfo = nullptr;
@@ -483,6 +630,15 @@ double* ShareBlocks::allocate_double(const char* domain, const char* section, co
 	return secInfo->get<double>(keyInfo->_offset);
 }
 
+/**
+ * @brief 设置字符串类型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置字符串类型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_string(const char* domain, const char* section, const char* key, const char* val)
 {
 	SecInfo* secInfo = nullptr;
@@ -496,6 +652,15 @@ bool ShareBlocks::set_string(const char* domain, const char* section, const char
 	return true;
 }
 
+/**
+ * @brief 设置32位有符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置32位有符号整型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_int32(const char* domain, const char* section, const char* key, int32_t val)
 {
 	SecInfo* secInfo = nullptr;
@@ -509,6 +674,15 @@ bool ShareBlocks::set_int32(const char* domain, const char* section, const char*
 	return true;
 }
 
+/**
+ * @brief 设置64位有符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置64位有符号整型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_int64(const char* domain, const char* section, const char* key, int64_t val)
 {
 	SecInfo* secInfo = nullptr;
@@ -522,6 +696,15 @@ bool ShareBlocks::set_int64(const char* domain, const char* section, const char*
 	return true;
 }
 
+/**
+ * @brief 设置32位无符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置32位无符号整型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_uint32(const char* domain, const char* section, const char* key, uint32_t val)
 {
 	SecInfo* secInfo = nullptr;
@@ -535,6 +718,15 @@ bool ShareBlocks::set_uint32(const char* domain, const char* section, const char
 	return true;
 }
 
+/**
+ * @brief 设置64位无符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置64位无符号整型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_uint64(const char* domain, const char* section, const char* key, uint64_t val)
 {
 	SecInfo* secInfo = nullptr;
@@ -548,6 +740,15 @@ bool ShareBlocks::set_uint64(const char* domain, const char* section, const char
 	return true;
 }
 
+/**
+ * @brief 设置双精度浮点型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param val 要设置的值
+ * @return 设置是否成功
+ * @details 设置双精度浮点型的共享内存值，如果键不存在或类型不匹配则返回false
+ */
 bool ShareBlocks::set_double(const char* domain, const char* section, const char* key, double val)
 {
 	SecInfo* secInfo = nullptr;
@@ -561,6 +762,15 @@ bool ShareBlocks::set_double(const char* domain, const char* section, const char
 	return true;
 }
 
+/**
+ * @brief 获取字符串类型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为空字符串
+ * @return 字符串值
+ * @details 获取字符串类型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 const char* ShareBlocks::get_string(const char* domain, const char* section, const char* key, const char* defVal /* = "" */)
 {
 	SecInfo* secInfo = nullptr;
@@ -571,6 +781,15 @@ const char* ShareBlocks::get_string(const char* domain, const char* section, con
 	return (const char*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 获取32位有符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为0
+ * @return 32位有符号整型值
+ * @details 获取32位有符号整型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 int32_t ShareBlocks::get_int32(const char* domain, const char* section, const char* key, int32_t defVal /* = 0 */)
 {
 	SecInfo* secInfo = nullptr;
@@ -581,6 +800,15 @@ int32_t ShareBlocks::get_int32(const char* domain, const char* section, const ch
 	return *(int32_t*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 获取32位无符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为0
+ * @return 32位无符号整型值
+ * @details 获取32位无符号整型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 uint32_t ShareBlocks::get_uint32(const char* domain, const char* section, const char* key, uint32_t defVal /* = 0 */)
 {
 	SecInfo* secInfo = nullptr;
@@ -591,6 +819,15 @@ uint32_t ShareBlocks::get_uint32(const char* domain, const char* section, const 
 	return *(uint32_t*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 获取64位有符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为0
+ * @return 64位有符号整型值
+ * @details 获取64位有符号整型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 int64_t ShareBlocks::get_int64(const char* domain, const char* section, const char* key, int64_t defVal /* = 0 */)
 {
 	SecInfo* secInfo = nullptr;
@@ -601,6 +838,15 @@ int64_t ShareBlocks::get_int64(const char* domain, const char* section, const ch
 	return *(int64_t*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 获取64位无符号整型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为0
+ * @return 64位无符号整型值
+ * @details 获取64位无符号整型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 uint64_t ShareBlocks::get_uint64(const char* domain, const char* section, const char* key, uint64_t defVal /* = 0 */)
 {
 	SecInfo* secInfo = nullptr;
@@ -611,6 +857,15 @@ uint64_t ShareBlocks::get_uint64(const char* domain, const char* section, const 
 	return *(uint64_t*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 获取双精度浮点型的共享内存值
+ * @param domain 域名称
+ * @param section 小节名称
+ * @param key 键名称
+ * @param defVal 默认值，当键不存在时返回，默认为0
+ * @return 双精度浮点型值
+ * @details 获取双精度浮点型的共享内存值，如果键不存在或类型不匹配则返回默认值
+ */
 double ShareBlocks::get_double(const char* domain, const char* section, const char* key, double defVal /* = 0 */)
 {
 	SecInfo* secInfo = nullptr;
@@ -621,6 +876,14 @@ double ShareBlocks::get_double(const char* domain, const char* section, const ch
 	return *(double*)(secInfo->_data + keyInfo->_offset);
 }
 
+/**
+ * @brief 初始化命令器
+ * @param name 命令器名称
+ * @param isCmder 是否为命令发送者，默认为false
+ * @param path 命令器文件路径，默认为空
+ * @return 初始化是否成功
+ * @details 初始化命令器，用于进程间命令传递。如果文件不存在则创建新文件
+ */
 bool ShareBlocks::init_cmder(const char* name, bool isCmder /* = false */, const char* path /* = "" */)
 {
 	CmdPair& cmdPair = _cmd_blocks[name];
@@ -666,6 +929,13 @@ bool ShareBlocks::init_cmder(const char* name, bool isCmder /* = false */, const
 	return true;
 }
 
+/**
+ * @brief 添加命令
+ * @param name 命令器名称
+ * @param cmd 命令内容
+ * @return 添加是否成功
+ * @details 向命令器中添加一条命令，只有命令发送者可以添加命令
+ */
 bool ShareBlocks::add_cmd(const char* name, const char* cmd)
 {
 	auto it = _cmd_blocks.find(name);
@@ -697,6 +967,13 @@ bool ShareBlocks::add_cmd(const char* name, const char* cmd)
 	return true;
 }
 
+/**
+ * @brief 获取命令
+ * @param name 命令器名称
+ * @param lastIdx 上次读取的索引，传入参数，会被更新
+ * @return 命令内容，如果没有新命令则返回空字符串
+ * @details 从命令器中获取一条命令，命令发送者不能获取命令
+ */
 const char* ShareBlocks::get_cmd(const char* name, uint32_t& lastIdx)
 {
 	auto it = _cmd_blocks.find(name);
