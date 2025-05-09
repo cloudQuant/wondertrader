@@ -1,11 +1,14 @@
-﻿/*!
+/*!
  * \file WTSDataFactory.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief 数据工厂类实现，用于处理K线数据的生成、更新和提取
+ * 
+ * WTSDataFactory类实现了K线数据的各种处理功能，包括从Tick数据更新K线、
+ * 不同周期K线的合并、提取和管理，是WonderTrader中数据处理的核心组件
  */
 #include "WTSDataFactory.h"
 #include "../Includes/WTSDataDef.hpp"
@@ -16,6 +19,17 @@
 using namespace std;
 
 
+/**
+ * @brief 使用Tick数据更新K线数据
+ *
+ * 根据Tick数据更新现有的K线数据，根据K线周期类型调用相应的更新函数
+ *
+ * @param klineData 需要更新的K线数据对象指针
+ * @param tick Tick数据对象指针
+ * @param sInfo 交易时间信息对象指针
+ * @param bAlignSec 是否按照小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateKlineData(WTSKlineData* klineData, WTSTickData* tick, WTSSessionInfo* sInfo, bool bAlignSec/* = false*/)
 {
 	if(klineData == NULL || tick == NULL)
@@ -47,6 +61,17 @@ WTSBarStruct* WTSDataFactory::updateKlineData(WTSKlineData* klineData, WTSTickDa
 	}
 }
 
+/**
+ * @brief 使用基础K线数据更新K线数据
+ *
+ * 使用一个基础K线数据结构更新现有的K线数据，通常用于从较小周期K线合成较大周期K线
+ *
+ * @param klineData 需要更新的K线数据对象指针
+ * @param newBasicBar 基础K线结构指针
+ * @param sInfo 交易时间信息对象指针
+ * @param bAlignSec 是否按照小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateKlineData(WTSKlineData* klineData, WTSBarStruct* newBasicBar, WTSSessionInfo* sInfo, bool bAlignSec/* = false*/)
 {
 	if (klineData == NULL || newBasicBar == NULL)
@@ -67,6 +92,17 @@ WTSBarStruct* WTSDataFactory::updateKlineData(WTSKlineData* klineData, WTSBarStr
 	}
 }
 
+/**
+ * @brief 使用基础K线结构更新1分钟周期K线数据
+ *
+ * 将基础K线结构数据合并到已有的1分钟周期K线中，可以选择是否按照交易小节对齐
+ *
+ * @param sInfo 交易时间信息对象指针，用于计算时间戳
+ * @param klineData 需要更新的K线数据对象指针
+ * @param newBasicBar 新的基础K线结构指针
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateMin1Data(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSBarStruct* newBasicBar, bool bAlignSec/* = false*/)
 {
 	if (sInfo == NULL)
@@ -184,6 +220,17 @@ WTSBarStruct* WTSDataFactory::updateMin1Data(WTSSessionInfo* sInfo, WTSKlineData
 	return NULL;
 }
 
+/**
+ * @brief 使用Tick数据更新1分钟周期K线数据
+ *
+ * 将单个Tick数据合并到已有的1分钟周期K线中，可以选择是否按照交易小节对齐
+ *
+ * @param sInfo 交易时间信息对象指针，用于计算时间戳
+ * @param klineData 需要更新的K线数据对象指针
+ * @param tick Tick数据对象指针
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateMin1Data(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick, bool bAlignSec /* = false */)
 {
 	//uint32_t curTime = tick->actiontime()/100000;
@@ -299,6 +346,17 @@ WTSBarStruct* WTSDataFactory::updateMin1Data(WTSSessionInfo* sInfo, WTSKlineData
 	}
 }
 
+/**
+ * @brief 使用基础K线结构更新5分钟周期K线数据
+ *
+ * 将基础K线结构数据合并到已有的5分钟周期K线中，可以选择是否按照交易小节对齐
+ *
+ * @param sInfo 交易时间信息对象指针，用于计算时间戳
+ * @param klineData 需要更新的K线数据对象指针
+ * @param newBasicBar 新的基础K线结构指针
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateMin5Data(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSBarStruct* newBasicBar, bool bAlignSec/* = false*/)
 {
 	if (sInfo == NULL)
@@ -415,6 +473,17 @@ WTSBarStruct* WTSDataFactory::updateMin5Data(WTSSessionInfo* sInfo, WTSKlineData
 	return NULL;
 }
 
+/**
+ * @brief 使用Tick数据更新5分钟周期K线数据
+ *
+ * 将单个Tick数据合并到已有的5分钟周期K线中，可以选择是否按照交易小节对齐
+ *
+ * @param sInfo 交易时间信息对象指针，用于计算时间戳
+ * @param klineData 需要更新的K线数据对象指针
+ * @param tick Tick数据对象指针
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateMin5Data(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick, bool bAlignSec /* = false */)
 {
 	auto secMins = sInfo->getSecMinList();
@@ -504,6 +573,16 @@ WTSBarStruct* WTSDataFactory::updateMin5Data(WTSSessionInfo* sInfo, WTSKlineData
 	}
 }
 
+/**
+ * @brief 使用Tick数据更新日线数据
+ *
+ * 将单个Tick数据合并到已有的日线数据中，日线的日期使用交易日期
+ *
+ * @param sInfo 交易时间信息对象指针
+ * @param klineData 需要更新的K线数据对象指针
+ * @param tick Tick数据对象指针
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateDayData(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick)
 {
 	uint32_t curDate = tick->tradingdate();
@@ -541,6 +620,16 @@ WTSBarStruct* WTSDataFactory::updateDayData(WTSSessionInfo* sInfo, WTSKlineData*
 	}
 }
 
+/**
+ * @brief 使用Tick数据更新秒线数据
+ *
+ * 将单个Tick数据合并到已有的秒线数据中，根据klineData中设置的时间单位(times)进行合并
+ *
+ * @param sInfo 交易时间信息对象指针
+ * @param klineData 需要更新的K线数据对象指针
+ * @param tick Tick数据对象指针
+ * @return WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL
+ */
 WTSBarStruct* WTSDataFactory::updateSecData(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick)
 {
 	uint32_t seconds = klineData->times();
@@ -588,6 +677,15 @@ WTSBarStruct* WTSDataFactory::updateSecData(WTSSessionInfo* sInfo, WTSKlineData*
 	}
 }
 
+/**
+ * @brief 获取前一分钟数据
+ *
+ * 根据当前分钟和周期计算前一个周期的分钟数据
+ *
+ * @param curMinute 当前分钟数据，以分钟数计
+ * @param period 周期，默认为1分钟
+ * @return uint32_t 前一个周期的分钟数据
+ */
 uint32_t WTSDataFactory::getPrevMinute(uint32_t curMinute, int period /* = 1 */)
 {
 	uint32_t h = curMinute/100;
@@ -605,6 +703,19 @@ uint32_t WTSDataFactory::getPrevMinute(uint32_t curMinute, int period /* = 1 */)
 	}
 }
 
+/**
+ * @brief 从基础K线切片中提取指定周期的K线数据
+ *
+ * 根据输入的基础K线切片和目标周期，生成新的K线数据
+ *
+ * @param baseKline 基础K线切片对象指针
+ * @param period 目标K线周期
+ * @param times 周期倍数，例如对1分钟周期，times=5表示5分钟
+ * @param sInfo 交易时间信息对象指针
+ * @param bIncludeOpen 是否包含未完成的当前K线，默认为true
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSKlineData* 新生成的K线数据对象指针，失败返回NULL
+ */
 WTSKlineData* WTSDataFactory::extractKlineData(WTSKlineSlice* baseKline, WTSKlinePeriod period, uint32_t times, WTSSessionInfo* sInfo, 
 		bool bIncludeOpen /* = true */, bool bAlignSec /* = false */)
 {
@@ -633,6 +744,18 @@ WTSKlineData* WTSDataFactory::extractKlineData(WTSKlineSlice* baseKline, WTSKlin
 	return NULL;
 }
 
+/**
+ * @brief 从基础K线切片中提取1分钟周期K线数据
+ *
+ * 从基础K线切片中生成指定倍数的1分钟周期K线数据
+ *
+ * @param baseKline 基础K线切片对象指针
+ * @param times 周期倍数，表示生成的K线周期为多少分钟
+ * @param sInfo 交易时间信息对象指针
+ * @param bIncludeOpen 是否包含未完成的当前K线，默认为true
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSKlineData* 新生成的1分钟周期K线数据对象指针，失败返回NULL
+ */
 WTSKlineData* WTSDataFactory::extractMin1Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */)
 {
 	//根据合约代码获取市场信息
@@ -759,6 +882,18 @@ WTSKlineData* WTSDataFactory::extractMin1Data(WTSKlineSlice* baseKline, uint32_t
 	return ret;
 }
 
+/**
+ * @brief 从基础K线切片中提取5分钟周期K线数据
+ *
+ * 从基础K线切片中生成指定倍数的5分钟周期K线数据
+ *
+ * @param baseKline 基础K线切片对象指针
+ * @param times 周期倍数，表示生成的K线周期为5*times分钟
+ * @param sInfo 交易时间信息对象指针
+ * @param bIncludeOpen 是否包含未完成的当前K线，默认为true
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSKlineData* 新生成的5分钟周期K线数据对象指针，失败返回NULL
+ */
 WTSKlineData* WTSDataFactory::extractMin5Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */)
 {
 	if(sInfo == NULL)
@@ -881,6 +1016,16 @@ WTSKlineData* WTSDataFactory::extractMin5Data(WTSKlineSlice* baseKline, uint32_t
 	return ret;
 }
 
+/**
+ * @brief 从基础K线切片中提取日线数据
+ *
+ * 从基础K线切片中生成指定倍数的日线数据
+ *
+ * @param baseKline 基础K线切片对象指针
+ * @param times 周期倍数，表示生成的K线周期为多少天
+ * @param bIncludeOpen 是否包含未完成的当前K线，默认为true
+ * @return WTSKlineData* 新生成的日线数据对象指针，失败返回NULL
+ */
 WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool bIncludeOpen /* = true */)
 {
 	//计算时间步长
@@ -942,6 +1087,18 @@ WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t 
 	return ret;
 }
 
+/**
+ * @brief 从Tick切片中提取秒线数据
+ *
+ * 根据输入的Tick切片和秒数，生成新的秒线K线数据
+ *
+ * @param ayTicks Tick切片对象指针
+ * @param seconds 秒数，表示生成的K线周期为多少秒
+ * @param sInfo 交易时间信息对象指针
+ * @param bUnixTime 是否使用Unix时间戳，默认为false
+ * @param bAlignSec 是否按照交易小节对齐，默认为false
+ * @return WTSKlineData* 新生成的K线数据对象指针，失败返回NULL
+ */
 WTSKlineData* WTSDataFactory::extractKlineData(WTSTickSlice* ayTicks, uint32_t seconds, 
 	WTSSessionInfo* sInfo, bool bUnixTime /* = false */, bool bAlignSec /* = false */)
 {
@@ -1026,6 +1183,16 @@ WTSKlineData* WTSDataFactory::extractKlineData(WTSTickSlice* ayTicks, uint32_t s
 	return ret;
 }
 
+/**
+ * @brief 合并两个K线数据对象
+ *
+ * 将新的K线数据合并到目标K线数据对象中，根据时间戳对齐进行合并
+ * 合并时会将比目标数据早的数据放在前面，比目标数据晚的数据放在后面
+ *
+ * @param klineData 目标K线数据对象指针
+ * @param newKline 新的K线数据对象指针，待合并的数据
+ * @return bool 合并成功返回true，失败返回false
+ */
 bool WTSDataFactory::mergeKlineData(WTSKlineData* klineData, WTSKlineData* newKline)
 {
 	if (klineData == NULL || newKline == NULL)
