@@ -311,7 +311,7 @@ bool WTSHotMgr::isSecond(const char* exchg, const char* rawCode, uint32_t dt)
 	static thread_local char fullCode[64] = { 0 };
 	fmtutil::format_to(fullCode, "{}.{}", exchg, rawCode);
 
-	return isCustomHot("2ND", fullCode, dt);
+	return isCustomHot("2NDT", fullCode, dt);
 }
 
 /**
