@@ -1,4 +1,16 @@
-﻿#include "WTSCfgLoader.h"
+/*!
+ * \file WTSCfgLoader.cpp
+ * \project	WonderTrader
+ *
+ * \author Wesley
+ * \date 2020/03/30
+ * 
+ * \brief 配置加载器实现文件
+ *
+ * 本文件实现了WTSCfgLoader类，提供了JSON和YAML格式的配置文件解析功能。
+ * 包含了将JSON和YAML数据转换为WTSVariant对象的转换函数和编码处理功能。
+ */
+#include "WTSCfgLoader.h"
 #include "../Share/StrUtil.hpp"
 #include "../Share/StdUtils.hpp"
 
@@ -9,6 +21,16 @@
 namespace rj = rapidjson;
 
 
+/**
+ * @brief 将rapidjson解析的JSON数据转换为WTSVariant对象
+ * 
+ * 递归遍历JSON数据结构，将其转换为WTSVariant对象
+ * 支持对象、数组、字符串、数字和布尔类型的转换
+ * 
+ * @param root rapidjson解析的JSON数据节点
+ * @param params 输出的WTSVariant对象，用于存储转换后的数据
+ * @return bool 转换是否成功
+ */
 bool json_to_variant(const rj::Value& root, WTSVariant* params)
 {
 	if (root.IsObject() && params->type() != WTSVariant::VT_Object)
@@ -107,6 +129,14 @@ bool json_to_variant(const rj::Value& root, WTSVariant* params)
 	return true;
 }
 
+/**
+ * @brief 从字符串解析JSON格式的配置
+ * 
+ * 使用rapidjson库解析JSON字符串，并将结果转换为WTSVariant对象
+ * 
+ * @param content JSON格式的字符串
+ * @return WTSVariant* 解析后的可变类型对象，解析失败时返回NULL
+ */
 WTSVariant* WTSCfgLoader::load_from_json(const char* content)
 {
 	rj::Document root;
@@ -126,6 +156,16 @@ WTSVariant* WTSCfgLoader::load_from_json(const char* content)
 }
 
 #include "../WTSUtils/yamlcpp/yaml.h"
+/**
+ * @brief 将YAML::Node转换为WTSVariant对象
+ * 
+ * 递归遍历YAML数据结构，将其转换为WTSVariant对象
+ * 支持映射、序列和标量类型的转换
+ * 
+ * @param root YAML::Node类型的YAML数据节点
+ * @param params 输出的WTSVariant对象，用于存储转换后的数据
+ * @return bool 转换是否成功
+ */
 bool yaml_to_variant(const YAML::Node& root, WTSVariant* params)
 {
 	if (root.IsNull() && params->type() != WTSVariant::VT_Object)
@@ -177,6 +217,14 @@ bool yaml_to_variant(const YAML::Node& root, WTSVariant* params)
 	return true;
 }
 
+/**
+ * @brief 从字符串解析YAML格式的配置
+ * 
+ * 使用yaml-cpp库解析YAML字符串，并将结果转换为WTSVariant对象
+ * 
+ * @param content YAML格式的字符串
+ * @return WTSVariant* 解析后的可变类型对象，解析失败时返回NULL
+ */
 WTSVariant* WTSCfgLoader::load_from_yaml(const char* content)
 {
 	YAML::Node root = YAML::Load(content);
@@ -194,6 +242,17 @@ WTSVariant* WTSCfgLoader::load_from_yaml(const char* content)
 	return ret;
 }
 
+/**
+ * @brief 从字符串内容加载配置
+ * 
+ * 根据指定的格式解析字符串内容
+ * 自动处理字符串编码问题，支持UTF-8和GBK编码
+ * 在Windows平台上会将UTF-8转换为GBK，在Linux平台上会将GBK转换为UTF-8
+ * 
+ * @param content 配置内容字符串
+ * @param isYaml 是否为YAML格式，默认为false（JSON格式）
+ * @return WTSVariant* 解析后的可变类型对象，解析失败时返回NULL
+ */
 WTSVariant* WTSCfgLoader::load_from_content(const std::string& content, bool isYaml /* = false */)
 {
 	//加一个自动检测编码的逻辑
@@ -219,6 +278,16 @@ WTSVariant* WTSCfgLoader::load_from_content(const std::string& content, bool isY
 		return load_from_json(buffer.c_str());
 }
 
+/**
+ * @brief 从文件加载配置
+ * 
+ * 根据文件扩展名自动选择JSON或YAML解析器解析配置文件
+ * 支持.json、.yaml和.yml扩展名的文件
+ * 自动处理文件编码问题，在Windows上将UTF-8转换为GBK，在Linux上将GBK转换为UTF-8
+ * 
+ * @param filename 配置文件路径
+ * @return WTSVariant* 解析后的可变类型对象，文件不存在或解析失败时返回NULL
+ */
 WTSVariant* WTSCfgLoader::load_from_file(const char* filename)
 {
 	if (!StdFile::exists(filename))
