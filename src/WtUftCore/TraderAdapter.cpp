@@ -559,6 +559,18 @@ uint32_t TraderAdapter::getInfos(const char* stdCode)
 	return statInfo->infos();
 }
 
+/*!
+ * \brief 买入操作
+ * \details 执行买入操作，根据合约规则和交易策略生成相应的委托订单。如果合约支持多开仓，则创建开仓委托；如果不支持，则先平仓再开仓
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格
+ * \param qty 委托数量
+ * \param flag 委托标志，用于指定特殊的委托类型
+ * \param bForceClose 是否强制平仓
+ * \param cInfo 合约信息对象指针，如果为NULL则会自动获取
+ * \return 创建的订单ID列表
+ */
 OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
@@ -839,6 +851,18 @@ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int f
 	return ret;
 }
 
+/*!
+ * \brief 卖出操作
+ * \details 执行卖出操作，根据合约规则和交易策略生成相应的委托订单。如果合约支持多开仓，则创建开空委托；如果不支持，则先平仓再开仓
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格
+ * \param qty 委托数量
+ * \param flag 委托标志，用于指定特殊的委托类型
+ * \param bForceClose 是否强制平仓
+ * \param cInfo 合约信息对象指针，如果为NULL则会自动获取
+ * \return 创建的订单ID列表
+ */
 OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
@@ -1115,6 +1139,16 @@ OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int 
 }
 
 
+/*!
+ * \brief 开多仓操作
+ * \details 创建并提交开多仓委托，新建一个WTSEntrust对象并设置相应参数后提交委托
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格，如果为0则使用市价委托
+ * \param qty 委托数量
+ * \param flag 特殊标志，默认为0表示普通委托
+ * \return 本地订单ID，如果委托失败则返回0
+ */
 uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	//if (_risk_mon_enabled && !checkOrderLimits(stdCode))
@@ -1144,6 +1178,16 @@ uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, 
 	return ret;
 }
 
+/*!
+ * \brief 开空仓操作
+ * \details 创建并提交开空仓委托，新建一个WTSEntrust对象并设置相应参数后提交委托
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格，如果为0则使用市价委托
+ * \param qty 委托数量
+ * \param flag 特殊标志，默认为0表示普通委托
+ * \return 本地订单ID，如果委托失败则返回0
+ */
 uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty, int flag/* = 0*/)
 {
 	//if (_risk_mon_enabled && !checkOrderLimits(stdCode))
@@ -1173,6 +1217,17 @@ uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty,
 	return ret;
 }
 
+/*!
+ * \brief 平多仓操作
+ * \details 创建并提交平多仓委托，新建一个WTSEntrust对象并设置相应参数后提交委托
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格，如果为0则使用市价委托
+ * \param qty 委托数量
+ * \param isToday 是否平今仓，默认为false表示平昨仓
+ * \param flag 特殊标志，默认为0表示普通委托
+ * \return 本地订单ID，如果委托失败则返回0
+ */
 uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag/* = 0*/)
 {
 	//if (_risk_mon_enabled && !checkOrderLimits(stdCode))
@@ -1202,6 +1257,17 @@ uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty,
 	return ret;
 }
 
+/*!
+ * \brief 平空仓操作
+ * \details 创建并提交平空仓委托，新建一个WTSEntrust对象并设置相应参数后提交委托
+ * 
+ * \param stdCode 标准化合约代码
+ * \param price 委托价格，如果为0则使用市价委托
+ * \param qty 委托数量
+ * \param isToday 是否平今仓，默认为false表示平昨仓
+ * \param flag 特殊标志，默认为0表示普通委托
+ * \return 本地订单ID，如果委托失败则返回0
+ */
 uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag/* = 0*/)
 {
 	//if (_risk_mon_enabled && !checkOrderLimits(stdCode))
@@ -2037,22 +2103,49 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 	_trader_api->queryAccount();
 }
 
+/*!
+ * \brief 处理交易API错误
+ * \details 处理交易API返回的错误信息，将错误信息输出到日志中
+ * 
+ * \param err 错误信息对象指针
+ * \param pData 附加数据指针，默认为NULL
+ */
 void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
 {
 	if(err)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Error of trading channel occured: {}", _id.c_str(), err->getMessage());
 }
 
+/*!
+ * \brief 获取基础数据管理器
+ * \details 返回交易适配器使用的基础数据管理器对象
+ * 
+ * \return 基础数据管理器对象指针
+ */
 IBaseDataMgr* TraderAdapter::getBaseDataMgr()
 {
 	return _bd_mgr;
 }
 
+/*!
+ * \brief 处理交易API日志
+ * \details 将交易API生成的日志信息转发到系统日志中
+ * 
+ * \param ll 日志级别
+ * \param message 日志消息内容
+ */
 void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
 {
 	WTSLogger::log_dyn_raw("trader", _id.c_str(), ll, message);
 }
 
+/*!
+ * \brief 检查撤单限制
+ * \details 检查指定合约是否可以进行撤单操作，包括检查排除列表和风控参数
+ * 
+ * \param stdCode 标准化合约代码
+ * \return 如果可以撤单返回true，否则返回false
+ */
 bool TraderAdapter::checkCancelLimits(const char* stdCode)
 {
 	if (_exclude_codes.find(stdCode) != _exclude_codes.end())
@@ -2104,6 +2197,13 @@ bool TraderAdapter::checkCancelLimits(const char* stdCode)
 	return true;
 }
 
+/*!
+ * \brief 检查交易是否启用
+ * \details 检查指定合约是否允许进行交易，包括检查风控开关和排除列表
+ * 
+ * \param stdCode 标准化合约代码
+ * \return 如果允许交易返回true，否则返回false
+ */
 bool TraderAdapter::isTradeEnabled(const char* stdCode) const
 {
 	if (!_risk_mon_enabled)
@@ -2115,6 +2215,13 @@ bool TraderAdapter::isTradeEnabled(const char* stdCode) const
 	return true;
 }
 
+/*!
+ * \brief 检查委托限制
+ * \details 检查指定合约是否可以进行委托操作，包括检查排除列表和风控参数
+ * 
+ * \param stdCode 标准化合约代码
+ * \return 如果可以委托返回true，否则返回false
+ */
 bool TraderAdapter::checkOrderLimits(const char* stdCode)
 {
 	if (_exclude_codes.find(stdCode) != _exclude_codes.end())
@@ -2166,6 +2273,13 @@ bool TraderAdapter::checkOrderLimits(const char* stdCode)
 	return true;
 }
 
+/*!
+ * \brief 获取风控参数
+ * \details 根据标准化合约代码获取对应的风控参数，如果没有找到则返回默认参数
+ * 
+ * \param stdCode 标准化合约代码
+ * \return 风控参数指针，如果没有匹配的参数则返回默认参数
+ */
 const TraderAdapter::RiskParams* TraderAdapter::getRiskParams(const char* stdCode)
 {
 	auto idx = StrUtil::findFirst(stdCode, '.');
@@ -2187,6 +2301,14 @@ const TraderAdapter::RiskParams* TraderAdapter::getRiskParams(const char* stdCod
 
 //////////////////////////////////////////////////////////////////////////
 //TraderAdapterMgr
+/*!
+ * \brief 添加交易适配器
+ * \details 将交易适配器添加到管理器中，使用交易适配器名称作为键
+ * 
+ * \param tname 交易适配器名称
+ * \param adapter 交易适配器指针
+ * \return 添加成功返回true，否则返回false
+ */
 bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 {
 	if (adapter == NULL || strlen(tname) == 0)
@@ -2204,6 +2326,13 @@ bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 	return true;
 }
 
+/*!
+ * \brief 获取交易适配器
+ * \details 根据交易适配器名称获取对应的交易适配器对象
+ * 
+ * \param tname 交易适配器名称
+ * \return 交易适配器指针，如果没有找到则返回空指针
+ */
 TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 {
 	auto it = _adapters.find(tname);
@@ -2215,6 +2344,10 @@ TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 	return TraderAdapterPtr();
 }
 
+/*!
+ * \brief 启动所有交易适配器
+ * \details 遍历并启动管理器中的所有交易适配器
+ */
 void TraderAdapterMgr::run()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
@@ -2225,6 +2358,10 @@ void TraderAdapterMgr::run()
 	WTSLogger::info("{} trading channels started", _adapters.size());
 }
 
+/*!
+ * \brief 释放所有交易适配器资源
+ * \details 遍历并释放管理器中的所有交易适配器资源
+ */
 void TraderAdapterMgr::release()
 {
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
