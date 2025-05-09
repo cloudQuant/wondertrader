@@ -1067,63 +1067,114 @@ uint32_t WTSBaseDataMgr::getTradingDate(const char* pid, uint32_t uOffDate /* = 
 	return uOffDate;
 }
 
+/**
+ * @brief 获取下一个交易日
+ * 
+ * 根据指定的日期和品种/节假日模板ID，获取向后偏移指定天数的交易日
+ * 跳过周末和节假日，只计算有效的交易日
+ * 
+ * @param pid 品种ID或节假日模板ID，取决于isTpl参数
+ * @param uDate 起始日期，格式YYYYMMDD
+ * @param days 需要向后偏移的交易日数量，默认为1
+ * @param isTpl 是否传入的是模板ID
+ * @return uint32_t 返回计算出的交易日期，格式YYYYMMDD
+ */
 uint32_t WTSBaseDataMgr::getNextTDate(const char* pid, uint32_t uDate, int days /* = 1 */, bool isTpl /* = false */)
 {
+	// 初始化当前日期为起始日期
 	uint32_t curDate = uDate;
+	// 记录还需要偏移的有效交易日数量
 	int left = days;
 	while (true)
 	{
+		// 将当前日期转换为tm结构体
 		tm t;
 		memset(&t, 0, sizeof(tm));
 		t.tm_year = curDate / 10000 - 1900;
 		t.tm_mon = (curDate % 10000) / 100 - 1;
 		t.tm_mday = curDate % 100;
 		//t.tm_isdst 	
+		// 转换为time_t类型并向后偏移一天(86400秒)
 		time_t ts = mktime(&t);
 		ts += 86400;
 
+		// 将偏移后的时间转回日期格式
 		tm* newT = localtime(&ts);
 		curDate = (newT->tm_year + 1900) * 10000 + (newT->tm_mon + 1) * 100 + newT->tm_mday;
+		// 判断新日期是否为有效交易日（非周末且非节假日）
 		if (newT->tm_wday != 0 && newT->tm_wday != 6 && !isHoliday(pid, curDate, isTpl))
 		{
-			//如果不是周末,也不是节假日,则剩余的天数-1
+			// 如果不是周末,也不是节假日,则剩余的天数-1
 			left--;
+			// 当已经找到足够数量的交易日后返回结果
 			if (left == 0)
 				return curDate;
 		}
 	}
 }
 
+/**
+ * @brief 获取上一个交易日
+ * 
+ * 根据指定的日期和品种/节假日模板ID，获取向前偏移指定天数的交易日
+ * 跳过周末和节假日，只计算有效的交易日
+ * 
+ * @param pid 品种ID或节假日模板ID，取决于isTpl参数
+ * @param uDate 起始日期，格式YYYYMMDD
+ * @param days 需要向前偏移的交易日数量，默认为1
+ * @param isTpl 是否传入的是模板ID
+ * @return uint32_t 返回计算出的交易日期，格式YYYYMMDD
+ */
 uint32_t WTSBaseDataMgr::getPrevTDate(const char* pid, uint32_t uDate, int days /* = 1 */, bool isTpl /* = false */)
 {
+	// 初始化当前日期为起始日期
 	uint32_t curDate = uDate;
+	// 记录还需要偏移的有效交易日数量
 	int left = days;
 	while (true)
 	{
+		// 将当前日期转换为tm结构体
 		tm t;
 		memset(&t, 0, sizeof(tm));
 		t.tm_year = curDate / 10000 - 1900;
 		t.tm_mon = (curDate % 10000) / 100 - 1;
 		t.tm_mday = curDate % 100;
 		//t.tm_isdst 	
+		// 转换为time_t类型并向前偏移一天(86400秒)
 		time_t ts = mktime(&t);
 		ts -= 86400;
 
+		// 将偏移后的时间转回日期格式
 		tm* newT = localtime(&ts);
 		curDate = (newT->tm_year + 1900) * 10000 + (newT->tm_mon + 1) * 100 + newT->tm_mday;
+		// 判断新日期是否为有效交易日（非周末且非节假日）
 		if (newT->tm_wday != 0 && newT->tm_wday != 6 && !isHoliday(pid, curDate, isTpl))
 		{
-			//如果不是周末,也不是节假日,则剩余的天数-1
+			// 如果不是周末,也不是节假日,则剩余的天数-1
 			left--;
+			// 当已经找到足够数量的交易日后返回结果
 			if (left == 0)
 				return curDate;
 		}
 	}
 }
 
+/**
+ * @brief 判断是否为交易日
+ * 
+ * 根据指定的日期和品种/模板ID判断该日期是否为有效交易日
+ * 有效交易日必须非周末且非节假日
+ * 
+ * @param pid 品种ID或节假日模板ID，取决于isTpl参数
+ * @param uDate 需要判断的日期，格式YYYYMMDD
+ * @param isTpl 是否传入的是模板ID
+ * @return bool 如果是交易日返回true，否则返回false
+ */
 bool WTSBaseDataMgr::isTradingDate(const char* pid, uint32_t uDate, bool isTpl /* = false */)
 {
+	// 获取日期的星期几
 	uint32_t wd = TimeUtils::getWeekDay(uDate);
+	// 如果不是周六(6)、周日(0)且不是节假日，则为交易日
 	if (wd != 0 && wd != 6 && !isHoliday(pid, uDate, isTpl))
 	{
 		return true;
@@ -1132,36 +1183,70 @@ bool WTSBaseDataMgr::isTradingDate(const char* pid, uint32_t uDate, bool isTpl /
 	return false;
 }
 
+/**
+ * @brief 设置当前交易日
+ * 
+ * 为指定的品种/模板设置当前的交易日期
+ * 该值会在交易模板中缓存供后续使用
+ * 
+ * @param pid 品种ID或节假日模板ID，取决于isTpl参数
+ * @param uDate 要设置的交易日期，格式YYYYMMDD
+ * @param isTpl 是否传入的是模板ID
+ */
 void WTSBaseDataMgr::setTradingDate(const char* pid, uint32_t uDate, bool isTpl /* = false */)
 {
+	// 获取节假日模板ID
 	std::string tplID = pid;
 	if (!isTpl)
-		tplID = getTplIDByPID(pid);
+		tplID = getTplIDByPID(pid); // 如果传入的是品种ID，需要转换为模板ID
 
+	// 在映射中查找指定的模板ID
 	auto it = m_mapTradingDay.find(tplID);
-	if (it == m_mapTradingDay.end())
+	if (it == m_mapTradingDay.end()) // 如果模板不存在，直接返回
 		return;
 
+	// 获取交易日模板并设置当前交易日
 	TradingDayTpl* tpl = (TradingDayTpl*)&it->second;
 	tpl->_cur_tdate = uDate;
 }
 
 
+/**
+ * @brief 获取交易时段关联的品种集合
+ * 
+ * 根据交易时段ID获取使用该交易时段的所有品种代码集合
+ * 
+ * @param sid 交易时段ID
+ * @return CodeSet* 品种代码集合指针，如果无相关品种则返回NULL
+ */
 CodeSet* WTSBaseDataMgr::getSessionComms(const char* sid)
 {
+	// 在交易时段与品种的关联映射中查找指定的交易时段ID
 	auto it = m_mapSessionCode.find(sid);
 	if (it == m_mapSessionCode.end())
 		return NULL;
 
+	// 返回找到的品种集合
 	return (CodeSet*)&it->second;
 }
 
+/**
+ * @brief 根据品种ID获取交易日历模板ID
+ * 
+ * 从品种标准ID中提取交易所和代码，然后获取其关联的节假日模板ID
+ * 
+ * @param pid 品种标准ID，格式为“交易所.代码”
+ * @return const char* 品种关联的节假日模板ID，如果品种不存在则返回空字符串
+ */
 const char* WTSBaseDataMgr::getTplIDByPID(const char* pid)
 {
+	// 将品种标准ID分解为交易所和代码两部分
 	const StringVector& ay = StrUtil::split(pid, ".");
+	// 获取指定交易所和代码的品种信息
 	WTSCommodityInfo* commInfo = getCommodity(ay[0].c_str(), ay[1].c_str());
 	if (commInfo == NULL)
 		return "";
 
+	// 返回品种关联的节假日模板ID
 	return commInfo->getTradingTpl();
 }
