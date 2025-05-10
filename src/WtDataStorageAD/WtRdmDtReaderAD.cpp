@@ -1,4 +1,11 @@
-﻿#include "WtRdmDtReaderAD.h"
+/*!
+ * @file WtRdmDtReaderAD.cpp
+ * @author wondertrader
+ * @brief 基于LMDB存储的历史数据读取器实现
+ * @details 实现了IRdmDtReader接口，提供从LMDB读取K线和行情数据的功能
+ */
+
+#include "WtRdmDtReaderAD.h"
 #include "LMDBKeys.h"
 
 #include "../Includes/WTSVariant.hpp"
@@ -14,6 +21,16 @@
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+
+/**
+ * @brief 日志输出工具函数
+ * @tparam Args 参数类型包
+ * @param sink 数据读取器回调接口
+ * @param ll 日志级别
+ * @param format 格式化字符串
+ * @param args 格式化参数
+ * @details 将格式化消息通过sink接口输出到日志系统
+ */
 template<typename... Args>
 inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -27,14 +44,27 @@ inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const cha
 	sink->reader_log(ll, buffer);
 }
 
+/**
+ * @brief 动态链接库导出函数块
+ */
 extern "C"
 {
+	/**
+	 * @brief 创建数据读取器实例
+	 * @return 数据读取器接口指针
+	 * @details 通过动态链接库导出的函数，创建一个新的数据读取器实例
+	 */
 	EXPORT_FLAG IRdmDtReader* createRdmDtReader()
 	{
 		IRdmDtReader* ret = new WtRdmDtReaderAD();
 		return ret;
 	}
 
+	/**
+	 * @brief 删除数据读取器实例
+	 * @param reader 要删除的读取器指针
+	 * @details 释放数据读取器对象占用的内存
+	 */
 	EXPORT_FLAG void deleteRdmDtReader(IRdmDtReader* reader)
 	{
 		if (reader != NULL)
