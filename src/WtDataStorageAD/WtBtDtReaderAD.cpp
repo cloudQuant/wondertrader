@@ -1,4 +1,14 @@
-﻿#include "WtBtDtReaderAD.h"
+/*!
+ * \file WtBtDtReaderAD.cpp
+ * \brief 基于LMDB的回测数据读取器实现文件
+ * 
+ * 该文件实现了基于LMDB数据库的回测数据读取器，用于从LMDB数据库中读取历史行情数据供回测使用
+ * 
+ * \author Wesley
+ * \date 2022/01/05
+ */
+
+#include "WtBtDtReaderAD.h"
 #include "LMDBKeys.h"
 
 #include "../Includes/WTSStruct.h"
@@ -10,6 +20,16 @@ USING_NS_WTP;
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+/**
+ * \brief 日志输出函数
+ * 
+ * 将格式化的日志信息输出到指定的接收器
+ * 
+ * \param sink 日志接收器
+ * \param ll 日志级别
+ * \param format 格式化字符串
+ * \param args 可变参数列表
+ */
 template<typename... Args>
 inline void pipe_btreader_log(IBtDtReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -23,14 +43,27 @@ inline void pipe_btreader_log(IBtDtReaderSink* sink, WTSLogLevel ll, const char*
 	sink->reader_log(ll, buffer);
 }
 
+/**
+ * \brief 导出函数声明
+ */
 extern "C"
 {
+	/**
+	 * \brief 创建回测数据读取器实例
+	 * 
+	 * \return 返回新创建的WtBtDtReaderAD实例
+	 */
 	EXPORT_FLAG IBtDtReader* createBtDtReader()
 	{
 		IBtDtReader* ret = new WtBtDtReaderAD();
 		return ret;
 	}
 
+	/**
+	 * \brief 删除回测数据读取器实例
+	 * 
+	 * \param reader 要删除的读取器实例指针
+	 */
 	EXPORT_FLAG void deleteBtDtReader(IBtDtReader* reader)
 	{
 		if (reader != NULL)
@@ -38,16 +71,32 @@ extern "C"
 	}
 };
 
+/**
+ * \brief WtBtDtReaderAD类的构造函数
+ */
 WtBtDtReaderAD::WtBtDtReaderAD()
 {
 }
 
 
+/**
+ * \brief WtBtDtReaderAD类的析构函数
+ * 
+ * 清理资源并释放内存
+ */
 WtBtDtReaderAD::~WtBtDtReaderAD()
 {
 
 }
 
+/**
+ * \brief 初始化回测数据读取器
+ * 
+ * 根据配置初始化数据读取器，设置数据存储路径和日志接收器
+ * 
+ * \param cfg 配置项，包含数据存储路径等信息
+ * \param sink 数据接收器，用于接收读取器返回的数据和日志
+ */
 void WtBtDtReaderAD::init(WTSVariant* cfg, IBtDtReaderSink* sink)
 {
 	_sink = sink;
@@ -61,6 +110,17 @@ void WtBtDtReaderAD::init(WTSVariant* cfg, IBtDtReaderSink* sink)
 	pipe_btreader_log(_sink, LL_INFO, "WtBtDtReaderAD initialized, root data dir is {}", _base_dir);
 }
 
+/**
+ * \brief 读取原始K线数据
+ * 
+ * 从LMDB数据库中读取指定交易所、合约和周期的K线数据
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param period K线周期
+ * \param buffer 输出参数，用于存储读取的数据
+ * \return 返回true表示读取成功，false表示读取失败
+ */
 bool WtBtDtReaderAD::read_raw_bars(const char* exchg, const char* code, WTSKlinePeriod period, std::string& buffer)
 {
 	//直接从LMDB读取
@@ -91,6 +151,17 @@ bool WtBtDtReaderAD::read_raw_bars(const char* exchg, const char* code, WTSKline
 	return true;
 }
 
+/**
+ * \brief 读取原始Tick数据
+ * 
+ * 从LMDB数据库中读取指定交易所、合约和日期的Tick数据
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param uDate 交易日期，格式为YYYYMMDD
+ * \param buffer 输出参数，用于存储读取的数据
+ * \return 返回true表示读取成功，false表示读取失败
+ */
 bool WtBtDtReaderAD::read_raw_ticks(const char* exchg, const char* code, uint32_t uDate, std::string& buffer)
 {
 	//直接从LMDB读取
@@ -121,6 +192,17 @@ bool WtBtDtReaderAD::read_raw_ticks(const char* exchg, const char* code, uint32_
 	return true;
 }
 
+/**
+ * \brief 获取指定交易所和周期的K线数据库
+ * 
+ * 根据交易所和K线周期获取对应的LMDB数据库实例。
+ * 如果数据库已经打开，则直接返回缓存的实例；
+ * 否则尝试打开数据库并缓存实例以便后续使用。
+ * 
+ * \param exchg 交易所代码
+ * \param period K线周期，支持1分钟、5分钟和日线
+ * \return 返回LMDB数据库指针，如果不存在或打开失败则返回空指针
+ */
 WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePeriod period)
 {
 	WtLMDBMap* the_map = NULL;
@@ -166,6 +248,17 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	return std::move(dbPtr);
 }
 
+/**
+ * \brief 获取指定交易所和合约的Tick数据库
+ * 
+ * 根据交易所和合约代码获取对应的Tick数据库实例。
+ * 如果数据库已经打开，则直接返回缓存的实例；
+ * 否则尝试打开数据库并缓存实例以便后续使用。
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 返回LMDB数据库指针，如果不存在或打开失败则返回空指针
+ */
 WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_t_db(const char* exchg, const char* code)
 {
 	std::string key = StrUtil::printf("%s.%s", exchg, code);
