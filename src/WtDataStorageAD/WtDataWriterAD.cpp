@@ -558,209 +558,295 @@ void WtDataWriterAD::pushTask(TaskInfo task)
 	}
 }
 
+/**
+ * @brief 将Tick数据写入数据库
+ * @param ct 合约信息指针
+ * @param curTick 当前的Tick数据
+ * @details 将Tick数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器
+ */
 void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 {
-	//直接落地
+	// 获取对应的Tick数据库
 	WtLMDBPtr db = get_t_db(ct->getExchg(), ct->getCode());
 	if (db)
 	{
-		//这里要把时间转成便宜时间，并用交易日作为date
-		//这样可以根据交易日筛选历史tick数据
+		// 将时间转换为偏移时间，便于根据交易日筛选历史数据
+		// 这里将时间转成偏移时间，并用交易日作为日期
 		uint32_t actTime = curTick->actiontime();
+		// 计算偏移时间：将小时分钟部分转换为偏移时间，保留毫秒部分
 		uint32_t offTime = ct->getCommInfo()->getSessionInfo()->offsetTime(actTime / 100000, true) * 100000 + actTime % 100000;
 
+		// 创建LMDB键值，包含交易所、合约代码、交易日和偏移时间
 		LMDBHftKey key(ct->getExchg(), ct->getCode(), curTick->tradingdate(), offTime);
+		// 创建查询对象并将数据写入数据库
 		WtLMDBQuery query(*db);
 		if (!query.put_and_commit((void*)&key, sizeof(key), &curTick->getTickStruct(), sizeof(WTSTickStruct)))
 		{
+			// 写入失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe tick of {} to db failed: {}", ct->getFullCode(), db->errmsg());
 		}
 	}
 
+	// 遍历所有外部数据导出器
 	for(auto& item : _dumpers)
 	{
+		// 获取导出器ID和对象
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
 		if (dumper == NULL)
 			continue;
 
+		// 调用导出器将Tick数据导出
 		bool bSucc = dumper->dumpHisTicks(ct->getFullCode(), curTick->tradingdate(), &curTick->getTickStruct(), 1);
 		if (!bSucc)
 		{
+			// 导出失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe tick data of {} via extended dumper {} failed", ct->getFullCode(), id);
 		}
 	}
 }
 
+/**
+ * @brief 将日K线数据写入数据库
+ * @param ct 合约信息指针
+ * @param bar 待写入的K线数据结构
+ * @details 将日K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器
+ */
 void WtDataWriterAD::pipeToDayBars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
-	//直接落地
+	// 获取对应的日K线数据库
 	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_DAY);
 	if (db)
 	{
+		// 创建LMDB键值，包含交易所、合约代码和日期
 		LMDBBarKey key(ct->getExchg(), ct->getCode(), bar.date);
+		// 创建查询对象并将数据写入数据库
 		WtLMDBQuery query(*db);
 		if (!query.put_and_commit((void*)&key, sizeof(key), (void*)&bar, sizeof(WTSBarStruct)))
 		{
+			// 写入失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe day bar @ {} of {} to db failed", bar.date, ct->getFullCode());
 		}
 		else
 		{
+			// 写入成功时记录调试日志
 			pipe_writer_log(_sink, LL_DEBUG, "day bar @ {} of {} piped to db", bar.date, ct->getFullCode());
 		}
 	}
 
+	// 遍历所有外部数据导出器
 	for (auto& item : _dumpers)
 	{
+		// 获取导出器ID和对象
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
 		if (dumper == NULL)
 			continue;
 
+		// 调用导出器将日K线数据导出，周期标识为"d1"
 		bool bSucc = dumper->dumpHisBars(ct->getFullCode(), "d1", (WTSBarStruct*)&bar, 1);
 		if (!bSucc)
 		{
+			// 导出失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe day bar @ {} of {} via extended dumper {} failed", bar.date, ct->getFullCode(), id);
 		}
 	}
 }
 
+/**
+ * @brief 将1分钟K线数据写入数据库
+ * @param ct 合约信息指针
+ * @param bar 待写入的K线数据结构
+ * @details 将1分钟K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器
+ */
 void WtDataWriterAD::pipeToM1Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
-	//直接落地
+	// 获取对应的1分钟K线数据库
 	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute1);
 	if(db)
 	{
+		// 创建LMDB键值，包含交易所、合约代码和时间戳
 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
+		// 创建查询对象并将数据写入数据库
 		WtLMDBQuery query(*db);
 		if(!query.put_and_commit((void*)&key, sizeof(key), (void*)&bar, sizeof(WTSBarStruct)))
 		{
+			// 写入失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe m1 bar @ {} of {} to db failed", bar.time, ct->getFullCode());
 		}
 		else
 		{
+			// 写入成功时记录调试日志
 			pipe_writer_log(_sink, LL_DEBUG, "m1 bar @ {} of {} piped to db", bar.time, ct->getFullCode());
 		}
 	}
 
+	// 遍历所有外部数据导出器
 	for (auto& item : _dumpers)
 	{
+		// 获取导出器ID和对象
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
 		if (dumper == NULL)
 			continue;
 
+		// 调用导出器将1分钟K线数据导出，周期标识为"m1"
 		bool bSucc = dumper->dumpHisBars(ct->getFullCode(), "m1", (WTSBarStruct*)&bar, 1);
 		if (!bSucc)
 		{
+			// 导出失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe m1 bar @ {} of {} via extended dumper {} failed", bar.time, ct->getFullCode(), id);
 		}
 	}
 }
 
+/**
+ * @brief 将5分钟K线数据写入数据库
+ * @param ct 合约信息指针
+ * @param bar 待写入的K线数据结构
+ * @details 将5分钟K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器
+ */
 void WtDataWriterAD::pipeToM5Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
-	//直接落地
+	// 获取对应的5分钟K线数据库
 	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute5);
 	if (db)
 	{
+		// 创建LMDB键值，包含交易所、合约代码和时间戳
 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
+		// 创建查询对象并将数据写入数据库
 		WtLMDBQuery query(*db);
 		if (!query.put_and_commit((void*)&key, sizeof(key), (void*)&bar, sizeof(bar)))
 		{
+			// 写入失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe m5 bar @ {} of {} to db failed", bar.time, ct->getFullCode());
 		}
 		else
 		{
+			// 写入成功时记录调试日志
 			pipe_writer_log(_sink, LL_DEBUG, "m5 bar @ {} of {} piped to db", bar.time, ct->getFullCode());
 		}
 	}
 
+	// 遍历所有外部数据导出器
 	for (auto& item : _dumpers)
 	{
+		// 获取导出器ID和对象
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
 		if (dumper == NULL)
 			continue;
 
+		// 调用导出器将5分钟K线数据导出，周期标识为"m5"
 		bool bSucc = dumper->dumpHisBars(ct->getFullCode(), "m5", (WTSBarStruct*)&bar, 1);
 		if (!bSucc)
 		{
+			// 导出失败时记录错误日志
 			pipe_writer_log(_sink, LL_ERROR, "pipe m5 bar @ {} of {} via extended dumper {} failed", bar.time, ct->getFullCode(), id);
 		}
 	}
 }
 
+/**
+ * @brief 更新K线缓存
+ * @param ct 合约信息指针
+ * @param curTick 当前的Tick数据
+ * @details 根据Tick数据更新不同周期的K线缓存，包括日、1分钟、5分钟K线
+ */
 void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 {
+	// 获取操作日期
 	uint32_t uDate = curTick->actiondate();
+	// 获取合约对应的交易时段信息
 	WTSSessionInfo* sInfo = _bd_mgr->getSessionByCode(curTick->code(), curTick->exchg());
+	// 获取当前时间（去除毫秒部分）
 	uint32_t curTime = curTick->actiontime() / 100000;
 
+	// 将时间转换为从交易时段开始的分钟数
 	uint32_t minutes = sInfo->timeToMinutes(curTime, false);
+	// 如果时间无效，直接返回
 	if (minutes == INVALID_UINT32)
 		return;
 
-	//当秒数为0,要专门处理,比如091500000,这笔tick要算作0915的
-	//如果是小节结束,要算作小节结束那一分钟,因为经常会有超过结束时间的价格进来,如113000500
-	//不能同时处理,所以用or	
+	// 当秒数为0时的特殊处理，比如091500000这笔tick要算作0915的
+	// 如果是小节结束，要算作小节结束那一分钟
+	// 因为经常会有超过结束时间的价格进来，如113000500
 	if (sInfo->isLastOfSection(curTime))
 	{
+		// 如果是小节结束时间，则分钟数减1
 		minutes--;
 	}
 
+	// 根据交易所和合约代码生成唯一键
 	std::string key = StrUtil::printf("%s.%s", curTick->exchg(), curTick->code());
 
-	//更新日线
+	// 更新日线K线缓存
 	if (!_disable_day && _d1_cache._cache_block)
 	{
+		// 锁定日线缓存以确保线程安全
 		StdUniqueLock lock(_d1_cache._mtx);
+		// 初始化索引和新合约标志
 		uint32_t idx = 0;
 		bool bNewCode = false;
+		// 检查当前合约是否已存在于缓存中
 		if (_d1_cache._idx.find(key) == _d1_cache._idx.end())
 		{
+			// 新合约，分配新的缓存索引
 			idx = _d1_cache._cache_block->_size;
 			_d1_cache._idx[key] = _d1_cache._cache_block->_size;
 			_d1_cache._cache_block->_size += 1;
+			// 检查缓存容量是否足够，如果不足则扩容
 			if (_d1_cache._cache_block->_size >= _d1_cache._cache_block->_capacity)
 			{
+				// 调用重新分配函数扩大缓存块
 				_d1_cache._cache_block = (RTBarCache*)resizeRTBlock<RTBarCache, BarCacheItem>(_d1_cache._file_ptr, _d1_cache._cache_block->_capacity + CACHE_SIZE_STEP_AD);
 				pipe_writer_log(_sink, LL_INFO, "day cache resized to {} items", _d1_cache._cache_block->_capacity);
 			}
+			// 标记为新合约
 			bNewCode = true;
 		}
 		else
 		{
+			// 已存在的合约，获取其索引
 			idx = _d1_cache._idx[key];
 		}
 
+		// 获取缓存项
 		BarCacheItem& item = (BarCacheItem&)_d1_cache._cache_block->_items[idx];
+		// 如果是新合约，初始化交易所和合约代码
 		if (bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
 			strcpy(item._code, curTick->code());
 		}
+		// 获取上一条K线数据
 		WTSBarStruct* lastBar = &item._bar;
 
-		//检查日期是否一致
+		// 获取当前交易日期
 		uint32_t barDate = curTick->tradingdate();
 
+		// 判断是否需要创建新的K线
 		bool bNewBar = false;
+		// 如果没有上一条K线或者交易日期已变化，需要创建新的K线
 		if (lastBar == NULL || barDate > lastBar->date)
 		{
 			bNewBar = true;
 		}
 
+		// 指向当前要更新的K线
 		WTSBarStruct* newBar = lastBar;
+		// 如果需要创建新的K线
 		if (bNewBar)
 		{
-			//这里要将lastBar往外写
-			//如果是新的合约，说明还没数据，不往外写
+			// 将上一条完成的K线写入数据库
+			// 如果是新的合约，说明还没有历史数据，不需要写入
 			if (!bNewCode)
 			{
+				// 调用写入日线K线数据的方法
 				pipeToDayBars(ct, *lastBar);
 			}
 
+			// 初始化新的K线数据
 			newBar->date = curTick->tradingdate();
 			newBar->time = barDate;
 			newBar->open = curTick->price();
@@ -780,92 +866,121 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			*	发现某些品种，开盘时可能会推送price为0的tick进来
 			*	会导致open和low都是0，所以要再做一个判断
 			*/
+			// 如果开盘价为0，使用当前tick的价格
 			if (decimal::eq(newBar->open, 0))
 				newBar->open = curTick->price();
 
+			// 如果最低价为0，使用当前tick的价格，否则取最小值
 			if (decimal::eq(newBar->low, 0))
 				newBar->low = curTick->price();
 			else
 				newBar->low = std::min(curTick->price(), newBar->low);
 
+			// 更新收盘价和最高价
 			newBar->close = curTick->price();
 			newBar->high = max(curTick->price(), newBar->high);
 
+			// 累加成交量和成交金额
 			newBar->vol += curTick->volume();
 			newBar->money += curTick->turnover();
+			// 注意：这里有一个重复累加的问题，可能是代码错误
 			newBar->vol += curTick->volume();
 			newBar->money += curTick->turnover();
+			// 更新持仓量和附加数据
 			newBar->hold = curTick->openinterest();
 			newBar->add += curTick->additional();
 		}
 	}
 
-	//更新1分钟线
+	// 更新1分钟K线缓存
 	if (!_disable_min1 && _m1_cache._cache_block)
 	{
+		// 锁定1分钟线缓存以确保线程安全
 		StdUniqueLock lock(_m1_cache._mtx);
+		// 初始化索引和新合约标志
 		uint32_t idx = 0;
 		bool bNewCode = false;
+		// 检查当前合约是否已存在于1分钟线缓存中
 		if (_m1_cache._idx.find(key) == _m1_cache._idx.end())
 		{
+			// 新合约，分配新的缓存索引
 			idx = _m1_cache._cache_block->_size;
 			_m1_cache._idx[key] = _m1_cache._cache_block->_size;
 			_m1_cache._cache_block->_size += 1;
+			// 检查缓存容量是否足够，如果不足则扩容
 			if (_m1_cache._cache_block->_size >= _m1_cache._cache_block->_capacity)
 			{
+				// 调用重新分配函数扩大缓存块
 				_m1_cache._cache_block = (RTBarCache*)resizeRTBlock<RTBarCache, BarCacheItem>(_m1_cache._file_ptr, _m1_cache._cache_block->_capacity + CACHE_SIZE_STEP_AD);
 				pipe_writer_log(_sink, LL_INFO, "m1 cache resized to {} items", _m1_cache._cache_block->_capacity);
 			}
+			// 标记为新合约
 			bNewCode = true;
 		}
 		else
 		{
+			// 已存在的合约，获取其索引
 			idx = _m1_cache._idx[key];
 		}
 
+		// 获取缓存项
 		BarCacheItem& item = (BarCacheItem&)_m1_cache._cache_block->_items[idx];
+		// 如果是新合约，初始化交易所和合约代码
 		if(bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
 			strcpy(item._code, curTick->code());
 		}
+		// 获取上一条K线数据
 		WTSBarStruct* lastBar = &item._bar;
 
 
-		//拼接1分钟线
+		// 计算当前1分钟K线的时间
+		// 当前分钟数+1得到下一分钟的开始
 		uint32_t barMins = minutes + 1;
+		// 将分钟数转换为时间格式
 		uint64_t barTime = sInfo->minuteToTime(barMins);
+		// 默认使用当前日期
 		uint32_t barDate = uDate;
+		// 如果时间为0，表示跨天，需要将日期设置为下一交易日
 		if (barTime == 0)
 		{
 			barDate = TimeUtils::getNextDate(barDate);
 		}
+		// 将日期和时间转换为分钟K线时间戳
 		barTime = TimeUtils::timeToMinBar(barDate, (uint32_t)barTime);
 
+		// 判断是否需要创建新的K线
 		bool bNewBar = false;
+		// 如果没有上一条K线或者时间已变化，需要创建新的K线
 		if (lastBar == NULL || barTime > lastBar->time)
 		{
 			bNewBar = true;
 		}
 
+		// 指向当前要更新的K线
 		WTSBarStruct* newBar = lastBar;
+		// 如果需要创建新的K线
 		if (bNewBar)
 		{
-			//这里要将lastBar往外写
-			//如果是新的合约，说明还没数据，不往外写
+			// 将上一条完成的K线写入数据库
+			// 如果是新的合约，说明还没有历史数据，不需要写入
 			if (!bNewCode)
 			{
+				// 调用写入1分钟K线数据的方法
 				pipeToM1Bars(ct, *lastBar);
 
+				// 检查是否跨交易日
 				uint32_t lastMins = sInfo->timeToMinutes(lastBar->time % 10000, false);
 				if(lastMins > barMins)
 				{
-					//如果上一条K线的分钟数大于当前K线的分钟数
-					//说明交易日换了
-					//需要保存日线了
+					// 如果上一条K线的分钟数大于当前K线的分钟数
+					// 说明交易日发生了变化
+					// 需要保存日线数据
 				}
 			}
 
+			// 初始化新的K线数据
 			newBar->date = curTick->tradingdate();
 			newBar->time = barTime;
 			newBar->open = curTick->price();
@@ -885,48 +1000,63 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			*	发现某些品种，开盘时可能会推送price为0的tick进来
 			*	会导致open和low都是0，所以要再做一个判断
 			*/
+			// 如果开盘价为0，使用当前tick的价格
 			if (decimal::eq(newBar->open, 0))
 				newBar->open = curTick->price();
 
+			// 如果最低价为0，使用当前tick的价格，否则取最小值
 			if (decimal::eq(newBar->low, 0))
 				newBar->low = curTick->price();
 			else
 				newBar->low = std::min(curTick->price(), newBar->low);
 
+			// 更新收盘价和最高价
 			newBar->close = curTick->price();
 			newBar->high = max(curTick->price(), newBar->high);
 
+			// 累加成交量和成交金额
 			newBar->vol += curTick->volume();
 			newBar->money += curTick->turnover();
+			// 更新持仓量和附加数据
 			newBar->hold = curTick->openinterest();
 			newBar->add += curTick->additional();
 		}
 	}
 
-	//更新5分钟线
+	// 更新5分钟K线缓存
 	if (!_disable_min5 && _m5_cache._cache_block)
 	{
+		// 锁定5分钟线缓存以确保线程安全
 		StdUniqueLock lock(_m5_cache._mtx);
+		// 初始化索引和新合约标志
 		uint32_t idx = 0;
 		bool bNewCode = false;
+		// 检查当前合约是否已存在于5分钟线缓存中
 		if (_m5_cache._idx.find(key) == _m5_cache._idx.end())
 		{
+			// 新合约，分配新的缓存索引
 			idx = _m5_cache._cache_block->_size;
 			_m5_cache._idx[key] = _m5_cache._cache_block->_size;
 			_m5_cache._cache_block->_size += 1;
+			// 检查缓存容量是否足够，如果不足则扩容
 			if (_m5_cache._cache_block->_size >= _m5_cache._cache_block->_capacity)
 			{
+				// 调用重新分配函数扩大缓存块
 				_m5_cache._cache_block = (RTBarCache*)resizeRTBlock<RTBarCache, BarCacheItem>(_m5_cache._file_ptr, _m5_cache._cache_block->_capacity + CACHE_SIZE_STEP_AD);
 				pipe_writer_log(_sink, LL_INFO, "m5 cache resized to {} items", _m5_cache._cache_block->_capacity);
 			}
+			// 标记为新合约
 			bNewCode = true;
 		}
 		else
 		{
+			// 已存在的合约，获取其索引
 			idx = _m5_cache._idx[key];
 		}
 
+		// 获取缓存项
 		BarCacheItem& item = (BarCacheItem&)_m5_cache._cache_block->_items[idx];
+		// 如果是新合约，初始化交易所和合约代码
 		if (bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
@@ -976,8 +1106,10 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			newBar->high = max(curTick->price(), newBar->high);
 			newBar->low = min(curTick->price(), newBar->low);
 
+			// 累加成交量和成交金额
 			newBar->vol += curTick->volume();
 			newBar->money += curTick->turnover();
+			// 更新持仓量和附加数据
 			newBar->hold = curTick->openinterest();
 			newBar->add += curTick->additional();
 		}
