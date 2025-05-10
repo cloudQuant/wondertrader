@@ -1101,41 +1101,86 @@ double UftStraContext::stra_enum_position(const char* stdCode)
 	return _trader->enumPosition(stdCode);
 }
 
+/**
+ * @brief 获取未完成委托数量
+ * @details 获取指定合约的未完成（未成交）委托数量
+ * @param stdCode 合约代码
+ * @return 返回未完成委托数量
+ */
 double UftStraContext::stra_get_undone(const char* stdCode)
 {
 	return _trader->getUndoneQty(stdCode);
 }
 
+/**
+ * @brief 获取合约信息计数
+ * @details 获取指定合约的信息计数，通常用于检测合约的可用性
+ * @param stdCode 合约代码
+ * @return 返回合约信息计数
+ */
 uint32_t UftStraContext::stra_get_infos(const char* stdCode)
 {
 	return _trader->getInfos(stdCode);
 }
 
+/**
+ * @brief 获取当前价格
+ * @details 获取指定合约的当前最新价格
+ * @param stdCode 合约代码
+ * @return 返回当前价格
+ */
 double UftStraContext::stra_get_price(const char* stdCode)
 {
 	return _engine->get_cur_price(stdCode);
 }
 
+/**
+ * @brief 获取当前交易日期
+ * @details 获取当前交易日期，格式为YYYYMMDD
+ * @return 返回当前交易日期
+ */
 uint32_t UftStraContext::stra_get_date()
 {
 	return _engine->get_date();
 }
 
+/**
+ * @brief 获取当前交易时间
+ * @details 获取当前交易时间，格式为HHMMSS
+ * @return 返回当前交易时间
+ */
 uint32_t UftStraContext::stra_get_time()
 {
 	return _engine->get_raw_time();
 }
 
+/**
+ * @brief 获取当前时间秒数
+ * @details 获取从零点开始的秒数，范围0-86399，用于更精确的时间计算
+ * @return 返回当前秒数
+ */
 uint32_t UftStraContext::stra_get_secs()
 {
 	return _engine->get_secs();
 }
 
+/**
+ * @brief 撤销指定委托
+ * @details 根据本地委托ID撤销特定委托
+ * @param localid 本地委托ID
+ * @return 撤销成功返回true，失败返回false
+ */
 bool UftStraContext::stra_cancel(uint32_t localid)
 {
 	return _trader->cancel(localid);
 }
 
+/**
+ * @brief 撤销全部委托
+ * @details 撤销指定合约的所有未成交委托，当前撤单频率检查功能已被注释
+ * @param stdCode 合约代码，如果为空则撤销所有合约的委托
+ * @return 返回被撤销委托的本地ID列表
+ */
 OrderIDs UftStraContext::stra_cancel_all(const char* stdCode)
 {
 	//撤单频率检查
@@ -1145,6 +1190,15 @@ OrderIDs UftStraContext::stra_cancel_all(const char* stdCode)
 	return _trader->cancelAll(stdCode);
 }
 
+/**
+ * @brief 买入委托
+ * @details 创建买入委托，可用于开多仓或平空仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID列表
+ */
 OrderIDs UftStraContext::stra_buy(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	auto ids = _trader->buy(stdCode, price, qty, flag, false);
@@ -1156,6 +1210,15 @@ OrderIDs UftStraContext::stra_buy(const char* stdCode, double price, double qty,
 	return std::move(ids);
 }
 
+/**
+ * @brief 卖出委托
+ * @details 创建卖出委托，可用于开空仓或平多仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID列表
+ */
 OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	auto ids = _trader->sell(stdCode, price, qty, flag, false);
@@ -1166,6 +1229,15 @@ OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty
 	return std::move(ids);
 }
 
+/**
+ * @brief 开多仓
+ * @details 创建开多仓委托，即买入并建立多头持仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID
+ */
 uint32_t UftStraContext::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	uint32_t localid = _trader->openLong(stdCode, price, qty, flag);
@@ -1173,6 +1245,16 @@ uint32_t UftStraContext::stra_enter_long(const char* stdCode, double price, doub
 	return localid;
 }
 
+/**
+ * @brief 平多仓
+ * @details 创建平多仓委托，即卖出并平掉多头持仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param isToday 是否平今仓，默认为false
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID
+ */
 uint32_t UftStraContext::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
 	uint32_t localid = _trader->closeLong(stdCode, price, qty, isToday, flag);
@@ -1180,6 +1262,15 @@ uint32_t UftStraContext::stra_exit_long(const char* stdCode, double price, doubl
 	return localid;
 }
 
+/**
+ * @brief 开空仓
+ * @details 创建开空仓委托，即卖出并建立空头持仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID
+ */
 uint32_t UftStraContext::stra_enter_short(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
 	uint32_t localid = _trader->openShort(stdCode, price, qty, flag);
@@ -1187,6 +1278,16 @@ uint32_t UftStraContext::stra_enter_short(const char* stdCode, double price, dou
 	return localid;
 }
 
+/**
+ * @brief 平空仓
+ * @details 创建平空仓委托，即买入并平掉空头持仓
+ * @param stdCode 合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param isToday 是否平今仓，默认为false
+ * @param flag 标记，默认为0
+ * @return 返回生成的本地委托ID
+ */
 uint32_t UftStraContext::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
 	uint32_t localid = _trader->closeShort(stdCode, price, qty, isToday, flag);
@@ -1194,11 +1295,25 @@ uint32_t UftStraContext::stra_exit_short(const char* stdCode, double price, doub
 	return localid;
 }
 
+/**
+ * @brief 获取合约信息
+ * @details 根据标准合约代码获取对应的商品信息
+ * @param stdCode 标准合约代码
+ * @return 返回商品信息指针，如果不存在则返回nullptr
+ */
 WTSCommodityInfo* UftStraContext::stra_get_comminfo(const char* stdCode)
 {
 	return _engine->get_commodity_info(stdCode);
 }
 
+/**
+ * @brief 获取K线切片数据
+ * @details 获取指定合约的K线切片数据，并自动订阅相应的tick数据
+ * @param stdCode 标准合约代码
+ * @param period 周期标识符，如"m1"/"d1"等
+ * @param count 获取的K线数量
+ * @return 返回K线切片数据指针，如果不存在则返回nullptr
+ */
 WTSKlineSlice* UftStraContext::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
 	thread_local static char basePeriod[2] = { 0 };
@@ -1215,6 +1330,13 @@ WTSKlineSlice* UftStraContext::stra_get_bars(const char* stdCode, const char* pe
 	return ret;
 }
 
+/**
+ * @brief 获取Tick切片数据
+ * @details 获取指定合约的Tick切片数据，并自动订阅相应的tick数据
+ * @param stdCode 标准合约代码
+ * @param count 获取的Tick数量
+ * @return 返回Tick切片数据指针，如果不存在则返回nullptr
+ */
 WTSTickSlice* UftStraContext::stra_get_ticks(const char* stdCode, uint32_t count)
 {
 	WTSTickSlice* ticks = _engine->get_tick_slice(_context_id, stdCode, count);
@@ -1224,6 +1346,13 @@ WTSTickSlice* UftStraContext::stra_get_ticks(const char* stdCode, uint32_t count
 	return ticks;
 }
 
+/**
+ * @brief 获取逆序逐笔委托明细数据
+ * @details 获取指定合约的逆序逐笔委托明细数据，并自动订阅相应的委托明细数据
+ * @param stdCode 标准合约代码
+ * @param count 获取的委托明细数量
+ * @return 返回委托明细切片数据指针，如果不存在则返回nullptr
+ */
 WTSOrdDtlSlice* UftStraContext::stra_get_order_detail(const char* stdCode, uint32_t count)
 {
 	WTSOrdDtlSlice* ret = _engine->get_order_detail_slice(_context_id, stdCode, count);
@@ -1233,6 +1362,13 @@ WTSOrdDtlSlice* UftStraContext::stra_get_order_detail(const char* stdCode, uint3
 	return ret;
 }
 
+/**
+ * @brief 获取逆序委托队列数据
+ * @details 获取指定合约的逆序委托队列数据，并自动订阅相应的委托队列数据
+ * @param stdCode 标准合约代码
+ * @param count 获取的委托队列数量
+ * @return 返回委托队列切片数据指针，如果不存在则返回nullptr
+ */
 WTSOrdQueSlice* UftStraContext::stra_get_order_queue(const char* stdCode, uint32_t count)
 {
 	WTSOrdQueSlice* ret = _engine->get_order_queue_slice(_context_id, stdCode, count);
@@ -1243,6 +1379,13 @@ WTSOrdQueSlice* UftStraContext::stra_get_order_queue(const char* stdCode, uint32
 }
 
 
+/**
+ * @brief 获取逆序逐笔成交数据
+ * @details 获取指定合约的逆序逐笔成交数据，并自动订阅相应的成交数据
+ * @param stdCode 标准合约代码
+ * @param count 获取的成交数量
+ * @return 返回成交切片数据指针，如果不存在则返回nullptr
+ */
 WTSTransSlice* UftStraContext::stra_get_transaction(const char* stdCode, uint32_t count)
 {
 	WTSTransSlice* ret = _engine->get_transaction_slice(_context_id, stdCode, count);
@@ -1253,45 +1396,86 @@ WTSTransSlice* UftStraContext::stra_get_transaction(const char* stdCode, uint32_
 }
 
 
+/**
+ * @brief 获取合约最新的tick数据
+ * @details 获取指定合约的最新的一笔tick数据
+ * @param stdCode 标准合约代码
+ * @return 返回tick数据指针，如果不存在则返回nullptr
+ */
 WTSTickData* UftStraContext::stra_get_last_tick(const char* stdCode)
 {
 	return _engine->get_last_tick(_context_id, stdCode);
 }
 
+/**
+ * @brief 订阅合约的tick数据
+ * @details 订阅指定合约的tick行情数据，订阅后可以接收到实时推送的行情数据
+ * @param stdCode 标准合约代码
+ */
 void UftStraContext::stra_sub_ticks(const char* stdCode)
 {
 	_engine->sub_tick(id(), stdCode);
 	log_info("Market Data subscribed: {}", stdCode);
 }
 
+/**
+ * @brief 订阅合约的逐笔委托明细数据
+ * @details 订阅指定合约的逐笔委托明细数据，订阅后可以接收到实时推送的委托明细数据
+ * @param stdCode 标准合约代码
+ */
 void UftStraContext::stra_sub_order_details(const char* stdCode)
 {
 	_engine->sub_order_detail(id(), stdCode);
 	log_info("Order details subscribed: {}", stdCode);
 }
 
+/**
+ * @brief 订阅合约的委托队列数据
+ * @details 订阅指定合约的委托队列数据，订阅后可以接收到实时推送的委托队列数据
+ * @param stdCode 标准合约代码
+ */
 void UftStraContext::stra_sub_order_queues(const char* stdCode)
 {
 	_engine->sub_order_queue(id(), stdCode);
 	log_info("Order queues subscribed: {}", stdCode);
 }
 
+/**
+ * @brief 订阅合约的逐笔成交数据
+ * @details 订阅指定合约的逐笔成交数据，订阅后可以接收到实时推送的成交数据
+ * @param stdCode 标准合约代码
+ */
 void UftStraContext::stra_sub_transactions(const char* stdCode)
 {
 	_engine->sub_transaction(id(), stdCode);
 	log_info("Transactions subscribed: {}", stdCode);
 }
 
+/**
+ * @brief 记录信息级别日志
+ * @details 记录策略的信息级别日志到日志系统
+ * @param message 日志消息内容
+ */
 void UftStraContext::stra_log_info(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message);
 }
 
+/**
+ * @brief 记录调试级别日志
+ * @details 记录策略的调试级别日志到日志系统
+ * @param message 日志消息内容
+ */
 void UftStraContext::stra_log_debug(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message);
 }
 
+/**
+ * @brief 记录错误级别日志
+ * @details 记录策略的错误级别日志到日志系统
+ * @param message 日志消息内容
+ */
 void UftStraContext::stra_log_error(const char* message)
 {
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
