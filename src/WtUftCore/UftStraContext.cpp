@@ -903,16 +903,37 @@ int32_t UftStraContext::read_param(const char* name, int32_t defVal /* = 0 */)
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 读取uint32类型参数
+ * @details 从参数管理器中读取指定名称的uint32参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的uint32值
+ */
 uint32_t UftStraContext::read_param(const char* name, uint32_t defVal /* = 0 */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 读取int64类型参数
+ * @details 从参数管理器中读取指定名称的int64参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的int64值
+ */
 int64_t UftStraContext::read_param(const char* name, int64_t defVal /* = 0 */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 读取uint64类型参数
+ * @details 从参数管理器中读取指定名称的uint64参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的uint64值
+ */
 uint64_t UftStraContext::read_param(const char* name, uint64_t defVal /* = 0 */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
@@ -930,36 +951,92 @@ double UftStraContext::read_param(const char* name, double defVal /* = 0 */)
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 同步int32类型参数
+ * @details 为策略分配可同步的int32参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的指针，可以直接读写
+ */
 int32_t* UftStraContext::sync_param(const char* name, int32_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite, false);
 }
 
+/**
+ * @brief 同步uint32类型参数
+ * @details 为策略分配可同步的uint32参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的指针，可以直接读写
+ */
 uint32_t* UftStraContext::sync_param(const char* name, uint32_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite, false);
 }
 
+/**
+ * @brief 同步int64类型参数
+ * @details 为策略分配可同步的int64参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的指针，可以直接读写
+ */
 int64_t* UftStraContext::sync_param(const char* name, int64_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite, false);
 }
 
+/**
+ * @brief 同步uint64类型参数
+ * @details 为策略分配可同步的uint64参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的指针，可以直接读写
+ */
 uint64_t* UftStraContext::sync_param(const char* name, uint64_t initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite, false);
 }
 
+/**
+ * @brief 同步double类型参数
+ * @details 为策略分配可同步的double参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为0
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的指针，可以直接读写
+ */
 double* UftStraContext::sync_param(const char* name, double initVal /* = 0 */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite, false);
 }
 
+/**
+ * @brief 同步字符串类型参数
+ * @details 为策略分配可同步的字符串参数，可进行双向读写
+ * @param name 参数名称
+ * @param initVal 初始值，默认为空字符串
+ * @param bForceWrite 是否强制写入，即使该参数已经存在，默认为false
+ * @return 返回指向参数值的字符串指针
+ */
 const char* UftStraContext::sync_param(const char* name, const char* initVal /* = "" */, bool bForceWrite/* = false*/)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, initVal, bForceWrite);
 }
 
+/**
+ * @brief 获取指定合约的持仓量
+ * @details 通过交易适配器获取指定合约的流动持仓量
+ * @param stdCode 合约代码
+ * @param bOnlyValid 是否只返回有效持仓，默认为false
+ * @param iFlag 额外的标志位，默认为0
+ * @return 返回持仓量，正数表示多头，负数表示空头
+ */
 double UftStraContext::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, int32_t iFlag /* = 0 */)
 {
 	return _trader->getPosition(stdCode, bOnlyValid, iFlag);
