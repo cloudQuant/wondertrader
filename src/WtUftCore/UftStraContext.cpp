@@ -702,6 +702,11 @@ void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong
 		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
 }
 
+/**
+ * @brief 处理交易通道就绪事件
+ * @details 当交易通道准备就绪时触发，检查交易日是否变化，如果变化则加载本地数据
+ * @param tradingday 交易日日期，格式为YYYYMMDD
+ */
 void UftStraContext::on_channel_ready(uint32_t tradingday)
 {
 	if (_tradingday != tradingday)
@@ -730,12 +735,24 @@ void UftStraContext::on_channel_ready(uint32_t tradingday)
 	}
 }
 
+/**
+ * @brief 处理交易通道丢失事件
+ * @details 当交易通道断开连接时触发，转发给策略对象处理
+ */
 void UftStraContext::on_channel_lost()
 {
 	if (_strategy)
 		_strategy->on_channel_lost(this);
 }
 
+/**
+ * @brief 处理委托回报
+ * @details 接收并处理委托回报信息，确认委托是否成功提交
+ * @param localid 本地委托ID
+ * @param stdCode 合约代码
+ * @param bSuccess 是否成功
+ * @param message 委托回报消息
+ */
 void UftStraContext::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
 	if (!is_my_order(localid))
@@ -745,6 +762,17 @@ void UftStraContext::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 		_strategy->on_entrust(localid, bSuccess, message);
 }
 
+/**
+ * @brief 处理持仓变化事件
+ * @details 接收并处理账户持仓变化的通知，当前该函数被注释掉了，账户持仓通知不转发给策略
+ * @param stdCode 合约代码
+ * @param isLong 是否为多头
+ * @param prevol 之前的持仓量
+ * @param preavail 之前的可用仓位
+ * @param newvol 新的持仓量
+ * @param newavail 新的可用仓位
+ * @param tradingday 交易日
+ */
 void UftStraContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
 {
 	//账户的持仓通知不给策略了
@@ -752,18 +780,32 @@ void UftStraContext::on_position(const char* stdCode, bool isLong, double prevol
 	//	_strategy->on_position(this, stdCode, isLong, prevol, preavail, newvol, newavail);
 }
 
+/**
+ * @brief 处理交易会话开始事件
+ * @details 当交易会话开始时触发，转发给策略对象处理
+ * @param uTDate 交易日期，格式为YYYYMMDD
+ */
 void UftStraContext::on_session_begin(uint32_t uTDate)
 {
 	if (_strategy)
 		_strategy->on_session_begin(this, uTDate);
 }
 
+/**
+ * @brief 处理交易会话结束事件
+ * @details 当交易会话结束时触发，转发给策略对象处理
+ * @param uTDate 交易日期，格式为YYYYMMDD
+ */
 void UftStraContext::on_session_end(uint32_t uTDate)
 {
 	if (_strategy)
 		_strategy->on_session_end(this, uTDate);
 }
 
+/**
+ * @brief 处理参数更新事件
+ * @details 当策略参数被更新时触发，转发给策略对象处理
+ */
 void UftStraContext::on_params_updated()
 {
 	if (_strategy)
