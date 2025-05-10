@@ -1,11 +1,13 @@
-﻿/*!
- * \file HftStraContext.cpp
+/*!
+ * \file UftStraContext.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief UFT策略上下文实现
+ * \details 实现了UftStraContext类，为UFT（超高频交易）策略提供执行环境
+ *          包括对行情数据处理、交易指令发送、持仓管理、参数设置等功能
  */
 #include "UftStraContext.h"
 #include "WtUftEngine.h"
@@ -25,16 +27,31 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 
+/**
+ * @brief 数据块大小增长步长
+ * @details 内存数据块每次分配的大小，用于存储订单、成交等信息
+ */
 static const uint32_t DATA_SIZE_STEP = 8000;	//信息量每天最多4000
 
 USING_NS_WTP;
 
+/**
+ * @brief 生成唯一的UFT策略上下文ID
+ * @details 使用原子操作生成递增的上下文ID，确保在多线程环境下的安全性
+ * @return 返回生成的唯一上下文ID
+ */
 inline uint32_t makeUftCtxId()
 {
 	static std::atomic<uint32_t> _auto_context_id{ 6000 };
 	return _auto_context_id.fetch_add(1);
 }
 
+/**
+ * @brief UftStraContext类的构造函数
+ * @details 创建一个策略上下文对象，初始化基本参数
+ * @param engine 引擎对象指针
+ * @param name 策略名称
+ */
 UftStraContext::UftStraContext(WtUftEngine* engine, const char* name)
 	: IUftStraCtx(name)
 	, _engine(engine)
@@ -44,11 +61,19 @@ UftStraContext::UftStraContext(WtUftEngine* engine, const char* name)
 	_context_id = makeUftCtxId();
 }
 
-
+/**
+ * @brief UftStraContext类的析构函数
+ * @details 释放策略上下文对象相关资源
+ */
 UftStraContext::~UftStraContext()
 {
 }
 
+/**
+ * @brief 设置交易适配器
+ * @details 将交易适配器与策略上下文关联，用于交易指令的发送和处理
+ * @param trader 交易适配器指针
+ */
 void UftStraContext::setTrader(TraderAdapter* trader)
 {
 	_trader = trader;
@@ -61,6 +86,12 @@ void UftStraContext::on_init()
 }
 
 
+/**
+ * @brief 处理Tick数据
+ * @details 接收并处理实时Tick行情数据，计算持仓的动态盈亏，然后调用策略的on_tick回调函数
+ * @param stdCode 合约代码
+ * @param newTick 最新的Tick数据
+ */
 void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
 {
 	auto it = _positions.find(stdCode);
@@ -91,30 +122,66 @@ void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
 		_strategy->on_tick(this, stdCode, newTick);
 }
 
+/**
+ * @brief 处理委托队列数据
+ * @details 接收并转发委托队列数据到策略对象
+ * @param stdCode 合约代码
+ * @param newOrdQue 最新的委托队列数据
+ */
 void UftStraContext::on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	if (_strategy)
 		_strategy->on_order_queue(this, stdCode, newOrdQue);
 }
 
+/**
+ * @brief 处理委托明细数据
+ * @details 接收并转发委托明细数据到策略对象
+ * @param stdCode 合约代码
+ * @param newOrdDtl 最新的委托明细数据
+ */
 void UftStraContext::on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	if (_strategy)
 		_strategy->on_order_detail(this, stdCode, newOrdDtl);
 }
 
+/**
+ * @brief 处理成交明细数据
+ * @details 接收并转发市场成交数据到策略对象
+ * @param stdCode 合约代码
+ * @param newTrans 最新的成交明细数据
+ */
 void UftStraContext::on_transaction(const char* stdCode, WTSTransData* newTrans)
 {
 	if (_strategy)
 		_strategy->on_transaction(this, stdCode, newTrans);
 }
 
+/**
+ * @brief 处理K线数据
+ * @details 接收并转发K线数据到策略对象，支持不同周期的K线处理
+ * @param code 合约代码
+ * @param period 周期类型如"m1"/"m5"/"d1"
+ * @param times 周期倍数
+ * @param newBar 最新的K线数据
+ */
 void UftStraContext::on_bar(const char* code, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
 	if (_strategy)
 		_strategy->on_bar(this, code, period, times, newBar);
 }
 
+/**
+ * @brief 处理成交回报
+ * @details 处理委托成交信息，更新持仓记录和计算交易盈亏。包括开仓、平仓等不同类型成交的处理适应FIFO的持仓管理方式
+ * @param localid 本地委托ID
+ * @param stdCode 合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标识，0为开仓，1为平仓
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
 void UftStraContext::on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
 {
 	if (!is_my_order(localid))
@@ -588,6 +655,18 @@ void UftStraContext::on_trade(uint32_t localid, const char* stdCode, bool isLong
 		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
 }
 
+/**
+ * @brief 处理委托状态变化
+ * @details 处理委托状态的更新，包括新委托、成交和撤单等状态变化，并更新本地委托记录
+ * @param localid 本地委托ID
+ * @param stdCode 合约代码
+ * @param isLong 是否为多头方向
+ * @param offset 开平标识，0为开仓，1为平仓
+ * @param totalQty 委托总数量
+ * @param leftQty 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤销，默认为false
+ */
 void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
 {
 	auto it = _order_ids.find(localid);
@@ -691,16 +770,37 @@ void UftStraContext::on_params_updated()
 		_strategy->on_params_updated();
 }
 
+/**
+ * @brief 监控字符串类型参数
+ * @details 将指定的字符串参数加入监控列表，当参数发生变化时会触发回调
+ * @param name 参数名称
+ * @param val 参数初始值
+ * @return 返回分配的字符串参数指针
+ */
 const char* UftStraContext::watch_param(const char* name, const char* val)
 {
 	return ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
 }
 
+/**
+ * @brief 监控int64类型参数
+ * @details 将指定的int64类型参数加入监控列表，当参数发生变化时会触发回调
+ * @param name 参数名称
+ * @param val 参数初始值
+ * @return 返回分配的int64参数值
+ */
 int64_t UftStraContext::watch_param(const char* name, int64_t val)
 {
 	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
 }
 
+/**
+ * @brief 监控int32类型参数
+ * @details 将指定的int32类型参数加入监控列表，当参数发生变化时会触发回调
+ * @param name 参数名称
+ * @param val 参数初始值
+ * @return 返回分配的int32参数值
+ */
 int32_t UftStraContext::watch_param(const char* name, int32_t val)
 {
 	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
@@ -716,21 +816,46 @@ uint32_t UftStraContext::watch_param(const char* name, uint32_t val)
 	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
 }
 
+/**
+ * @brief 监控double类型参数
+ * @details 将指定的double类型参数加入监控列表，当参数发生变化时会触发回调
+ * @param name 参数名称
+ * @param val 参数初始值
+ * @return 返回分配的double参数值
+ */
 double UftStraContext::watch_param(const char* name, double val)
 {
 	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
 }
 
+/**
+ * @brief 提交参数监控器
+ * @details 提交所有已注册的参数监控器，开始实际监控参数变化
+ */
 void UftStraContext::commit_param_watcher()
 {
 	ShareManager::self().commit_param_watcher(_name.c_str());
 }
 
+/**
+ * @brief 读取字符串类型参数
+ * @details 从参数管理器中读取指定名称的字符串参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的字符串值
+ */
 const char* UftStraContext::read_param(const char* name, const char* defVal /* = "" */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 读取int32类型参数
+ * @details 从参数管理器中读取指定名称的int32参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的int32值
+ */
 int32_t UftStraContext::read_param(const char* name, int32_t defVal /* = 0 */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
@@ -751,6 +876,13 @@ uint64_t UftStraContext::read_param(const char* name, uint64_t defVal /* = 0 */)
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
 }
 
+/**
+ * @brief 读取double类型参数
+ * @details 从参数管理器中读取指定名称的double参数
+ * @param name 参数名称
+ * @param defVal 默认值，如果参数不存在则返回该值
+ * @return 返回参数的double值
+ */
 double UftStraContext::read_param(const char* name, double defVal /* = 0 */)
 {
 	return ShareManager::self().get_value(_name.c_str(), name, defVal);
@@ -791,6 +923,12 @@ double UftStraContext::stra_get_position(const char* stdCode, bool bOnlyValid /*
 	return _trader->getPosition(stdCode, bOnlyValid, iFlag);
 }
 
+/**
+ * @brief 获取本地持仓量
+ * @details 获取策略本地管理的指定合约的持仓量，不进行远程查询
+ * @param stdCode 合约代码
+ * @return 返回本地持仓量，正数表示多头，负数表示空头，0表示无持仓
+ */
 double UftStraContext::stra_get_local_position(const char* stdCode)
 {
 	auto it = _positions.find(stdCode);
@@ -801,6 +939,12 @@ double UftStraContext::stra_get_local_position(const char* stdCode)
 	return pInfo._volume;
 }
 
+/**
+ * @brief 获取本地持仓浮动盈亏
+ * @details 获取策略本地管理的指定合约的浮动盈亏（未实现盈亏）
+ * @param stdCode 合约代码
+ * @return 返回浮动盈亏金额
+ */
 double UftStraContext::stra_get_local_posprofit(const char* stdCode)
 {
 	auto it = _positions.find(stdCode);
@@ -811,6 +955,12 @@ double UftStraContext::stra_get_local_posprofit(const char* stdCode)
 	return pInfo._dynprofit;
 }
 
+/**
+ * @brief 获取本地平仓盈亏
+ * @details 获取策略本地管理的指定合约的平仓盈亏（已实现盈亏）
+ * @param stdCode 合约代码
+ * @return 返回平仓盈亏金额
+ */
 double UftStraContext::stra_get_local_closeprofit(const char* stdCode)
 {
 	auto it = _positions.find(stdCode);
@@ -821,7 +971,12 @@ double UftStraContext::stra_get_local_closeprofit(const char* stdCode)
 	return pInfo._total_profit;
 }
 
-
+/**
+ * @brief 枚举持仓
+ * @details 通过交易适配器获取并枚举指定合约的所有持仓
+ * @param stdCode 合约代码
+ * @return 返回该合约的持仓量
+ */
 double UftStraContext::stra_enum_position(const char* stdCode)
 {
 	return _trader->enumPosition(stdCode);
@@ -1023,6 +1178,11 @@ void UftStraContext::stra_log_error(const char* message)
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
+/**
+ * @brief 加载本地持仓和订单数据
+ * @details 从本地内存映射文件中读取策略的持仓、订单、成交和回合数据。
+ *          包含处理手动设置的持仓数据（通过mannual.yaml文件）和交易日切换的逻辑
+ */
 void UftStraContext::load_local_data()
 {
 	if (_tradingday == 0)
