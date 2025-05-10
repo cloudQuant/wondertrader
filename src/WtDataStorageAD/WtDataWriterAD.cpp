@@ -1116,125 +1116,179 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 	}
 }
 
+/**
+ * @brief 获取合约当前的Tick数据
+ * @param code 合约代码
+ * @param exchg 交易所代码，默认为空字符串
+ * @return WTSTickData* 返回合约的最新Tick数据指针，如果不存在则返回NULL
+ * @details 从缓存中获取指定合约的最新Tick数据
+ */
 WTSTickData* WtDataWriterAD::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
+	// 检查合约代码是否为空
 	if (strlen(code) == 0)
 		return NULL;
 
+	// 从基础数据管理器中获取合约信息
 	WTSContractInfo* ct = _bd_mgr->getContract(code, exchg);
+	// 如果找不到合约信息，返回NULL
 	if (ct == NULL)
 		return NULL;
 
+	// 生成缓存键，格式为“交易所.合约代码”
 	std::string key = StrUtil::printf("%s.%s", ct->getExchg(), ct->getCode());
+	// 锁定Tick缓存以确保线程安全
 	StdUniqueLock lock(_mtx_tick_cache);
+	// 在缓存索引中查找合约的Tick数据
 	auto it = _tick_cache_idx.find(key);
+	// 如果找不到，返回NULL
 	if (it == _tick_cache_idx.end())
 		return NULL;
 
+	// 获取缓存项的索引
 	uint32_t idx = it->second;
+	// 获取缓存项
 	TickCacheItem& item = _tick_cache_block->_items[idx];
+	// 创建并返回新的Tick数据对象
 	return WTSTickData::create(item._tick);
 }
 
+/**
+ * @brief 更新Tick缓存
+ * @param ct 合约信息指针
+ * @param curTick 当前的Tick数据
+ * @param procFlag 处理标志，0-不预处理，1-预处理成交量和成交额，2-特殊处理
+ * @return bool 更新成功返回true，失败返回false
+ * @details 将最新的Tick数据更新到内存缓存中，并根据处理标志进行不同的预处理
+ */
 bool WtDataWriterAD::updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag)
 {
+	// 检查参数和缓存块是否有效
 	if (curTick == NULL || _tick_cache_block == NULL)
 	{
 		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
 		return false;
 	}
 
+	// 锁定Tick缓存以确保线程安全
 	StdUniqueLock lock(_mtx_tick_cache);
+	// 生成缓存键，格式为“交易所.合约代码”
 	std::string key = StrUtil::printf("%s.%s", curTick->exchg(), curTick->code());
+	// 初始化索引
 	uint32_t idx = 0;
+	// 检查当前合约是否已存在于缓存中
 	if (_tick_cache_idx.find(key) == _tick_cache_idx.end())
 	{
+		// 新合约，分配新的缓存索引
 		idx = _tick_cache_block->_size;
 		_tick_cache_idx[key] = _tick_cache_block->_size;
 		_tick_cache_block->_size += 1;
+		// 检查缓存容量是否足够，如果不足则扩容
 		if(_tick_cache_block->_size >= _tick_cache_block->_capacity)
 		{
+			// 调用重新分配函数扩大缓存块
 			_tick_cache_block = (RTTickCache*)resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, _tick_cache_block->_capacity + CACHE_SIZE_STEP_AD);
 			pipe_writer_log(_sink, LL_INFO, "Tick Cache resized to {} items", _tick_cache_block->_capacity);
 		}
 	}
 	else
 	{
+		// 已存在的合约，获取其索引
 		idx = _tick_cache_idx[key];
 	}
 
 
+	// 获取缓存项
 	TickCacheItem& item = _tick_cache_block->_items[idx];
+	// 检查交易日期是否小于缓存中的日期，如果是则返回失败
 	if (curTick->tradingdate() < item._date)
 	{
 		pipe_writer_log(_sink, LL_INFO, "Tradingday[{}] of {} is less than cached tradingday[{}]", curTick->tradingdate(), curTick->code(), item._date);
 		return false;
 	}
 
+	// 获取新Tick的数据结构
 	WTSTickStruct& newTick = curTick->getTickStruct();
 
+	// 如果是新的交易日
 	if (curTick->tradingdate() > item._date)
 	{
+		// 更新缓存中的交易日期
 		item._date = curTick->tradingdate();
 		
-		if(procFlag == 0)
+		// 根据处理标志进行不同的处理
+		if(procFlag == 0) // 不预处理，直接复制
 		{
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
 		}
-		else if (procFlag == 1)
+		else if (procFlag == 1) // 预处理成交量和成交额
 		{
+			// 复制新的Tick数据
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
 
+			// 设置单笔成交量、成交额和持仓量变化
 			item._tick.volume = item._tick.total_volume;
 			item._tick.turn_over = item._tick.total_turnover;
 			item._tick.diff_interest = item._tick.open_interest - item._tick.pre_interest;
 
+			// 同样更新新Tick的各项数据
 			newTick.volume = newTick.total_volume;
 			newTick.turn_over = newTick.total_turnover;
 			newTick.diff_interest = newTick.open_interest - newTick.pre_interest;
 		}
-		else if(procFlag == 2)
+		else if(procFlag == 2) // 特殊处理
 		{
+			// 保存上一个交易日的收盘价和持仓量作为前收盘价和前持仓量
 			double pre_close = item._tick.price;
 			double pre_interest = item._tick.open_interest;
 
+			// 如果总成交量为0，则使用单笔成交量加上缓存中的总成交量
 			if (decimal::eq(newTick.total_volume, 0))
 				newTick.total_volume = newTick.volume + item._tick.total_volume;
 
+			// 如果总成交额为0，则使用单笔成交额加上缓存中的总成交额
 			if (decimal::eq(newTick.total_turnover, 0))
 				newTick.total_turnover = newTick.turn_over + item._tick.total_turnover;
 
+			// 如果开盘价为0，则使用当前价格作为开盘价
 			if (decimal::eq(newTick.open, 0))
 				newTick.open = newTick.price;
 
+			// 如果最高价为0，则使用当前价格作为最高价
 			if (decimal::eq(newTick.high, 0))
 				newTick.high = newTick.price;
 
+			// 如果最低价为0，则使用当前价格作为最低价
 			if (decimal::eq(newTick.low, 0))
 				newTick.low =newTick.price;
 
+			// 复制新的Tick数据到缓存
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
+			// 设置前收盘价和前持仓量
 			item._tick.pre_close = pre_close;
 			item._tick.pre_interest = pre_interest;
 		}
 
-		//	newTick.trading_date, curTick->exchg(), curTick->code(), curTick->volume(),
-		//	curTick->turnover(), curTick->openinterest(), curTick->additional());
+		// 记录新交易日的第一个Tick数据的日志
 		pipe_writer_log(_sink, LL_INFO, "First tick of new tradingday {},{}.{},{},{},{},{},{}", 
 			newTick.trading_date, curTick->exchg(), curTick->code(), curTick->price(), curTick->volume(),
 			curTick->turnover(), curTick->openinterest(), curTick->additional());
 	}
-	else
+	else // 如果是同一交易日的数据
 	{
-		//如果缓存里的数据日期大于最新行情的日期
-		//或者缓存里的时间大于等于最新行情的时间,数据就不需要处理
+		// 如果缓存里的数据日期大于最新行情的日期
+		// 或者缓存里的时间大于等于最新行情的时间,数据就不需要处理
+		// 获取合约对应的交易时段信息
 		WTSSessionInfo* sInfo = _bd_mgr->getSessionByCode(curTick->code(), curTick->exchg());
+		// 计算偏移后的交易日期
 		uint32_t tdate = sInfo->getOffsetDate(curTick->actiondate(), curTick->actiontime() / 100000);
+		// 如果偏移后的日期大于交易日期，说明数据异常
 		if (tdate > curTick->tradingdate())
 		{
 			pipe_writer_log(_sink, LL_ERROR, "Last tick of {}.{} with time {}.{} has an exception, abandoned", curTick->exchg(), curTick->code(), curTick->actiondate(), curTick->actiontime());
 			return false;
 		}
+		// 如果新Tick的总成交量小于缓存中的总成交量，且不是特殊处理模式，则跳过
 		else if (curTick->totalvolume() < item._tick.total_volume && procFlag != 2)
 		{
 			pipe_writer_log(_sink, LL_ERROR, "Last tick of {}.{} with time {}.{}, volume {} is less than cached volume {}, abandoned", 
@@ -1242,109 +1296,152 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, 
 			return false;
 		}
 
-		//时间戳相同,但是成交量大于等于原来的,这种情况一般是郑商所,这里的处理方式就是时间戳+200毫秒
-		//By Wesley @ 2021.12.21
-		//今天发现居然一秒出现了4笔，实在是有点无语
-		//只能把500毫秒的变化量改成200，并且改成发生时间小于等于上一笔的判断
+		// 时间戳相同但成交量大于等于原来的情况处理
+		// 这种情况一般是郑商所的特殊情况，处理方式是时间戳+200毫秒
+		// By Wesley @ 2021.12.21
+		// 由于一秒内可能出现多笔数据，将时间增量从500毫秒改为200毫秒
 		if(newTick.action_date == item._tick.action_date && newTick.action_time <= item._tick.action_time && newTick.total_volume >= item._tick.total_volume)
 		{
+			// 增加200毫秒以区分不同的Tick
 			newTick.action_time += 200;
 		}
 
-		//这里就要看需不需要预处理了
-		if(procFlag == 0)
+		// 根据处理标志进行不同的处理
+		if(procFlag == 0) // 不预处理，直接复制
 		{
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
 		}
-		else if (procFlag == 1)
+		else if (procFlag == 1) // 预处理成交量和成交额
 		{
+			// 计算单笔成交量、成交额和持仓量变化
 			newTick.volume = newTick.total_volume - item._tick.total_volume;
 			newTick.turn_over = newTick.total_turnover - item._tick.total_turnover;
 			newTick.diff_interest = newTick.open_interest - item._tick.open_interest;
 
+			// 复制新的Tick数据到缓存
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
 		}
-		else if (procFlag == 2)
+		else if (procFlag == 2) // 特殊处理模式
 		{
-			//自动累加
-			//如果总成交量为0，则需要累加上一笔的总成交量
+			// 自动累加处理
+			// 如果总成交量为0，则需要累加上一笔的总成交量
 			if(decimal::eq(newTick.total_volume, 0))
 				newTick.total_volume = newTick.volume + item._tick.total_volume;
 
+			// 如果总成交额为0，则需要累加上一笔的总成交额
 			if (decimal::eq(newTick.total_turnover, 0))
 				newTick.total_turnover = newTick.turn_over + item._tick.total_turnover;
 
+			// 如果开盘价为0，则使用当前价格作为开盘价
 			if (decimal::eq(newTick.open, 0))
 				newTick.open = newTick.price;
 
+			// 如果最高价为0，则取当前价格和缓存中最高价的最大值
 			if (decimal::eq(newTick.high, 0))
 				newTick.high = max(newTick.price, item._tick.high);
 
+			// 如果最低价为0，则取当前价格和缓存中最低价的最大值
+			// 注意：这里可能有错误，应该是取最小值而非最大值
 			if (decimal::eq(newTick.low, 0))
 				newTick.low = max(newTick.price, item._tick.low);
 
+			// 复制新的Tick数据到缓存
 			memcpy(&item._tick, &newTick, sizeof(WTSTickStruct));
 		}
 	}
 
+	// 更新成功
 	return true;
 }
 
+/**
+ * @brief 获取指定交易所和周期的K线数据库
+ * @param exchg 交易所代码
+ * @param period K线周期（日、1分钟、5分钟）
+ * @return WtLMDBPtr LMDB数据库指针，如果失败则返回空指针
+ * @details 根据交易所和K线周期获取相应的LMDB数据库，如果数据库不存在则创建新的数据库
+ */
 WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePeriod period)
 {
+	// 初始化数据库映射和子目录
 	WtLMDBMap* the_map = NULL;
 	std::string subdir;
-	if (period == KP_Minute1)
+	// 根据K线周期选择相应的数据库映射和子目录
+	if (period == KP_Minute1) // 1分钟K线
 	{
 		the_map = &_exchg_m1_dbs;
 		subdir = "min1";
 	}
-	else if (period == KP_Minute5)
+	else if (period == KP_Minute5) // 5分钟K线
 	{
 		the_map = &_exchg_m5_dbs;
 		subdir = "min5";
 	}
-	else if (period == KP_DAY)
+	else if (period == KP_DAY) // 日K线
 	{
 		the_map = &_exchg_d1_dbs;
 		subdir = "day";
 	}
-	else
+	else // 不支持的周期，返回空指针
 		return std::move(WtLMDBPtr());
 
+	// 在映射中查找指定交易所的数据库
 	auto it = the_map->find(exchg);
+	// 如果找到已存在的数据库，直接返回
 	if (it != the_map->end())
 		return std::move(it->second);
 
+	// 创建新的LMDB数据库
 	WtLMDBPtr dbPtr(new WtLMDB(false));
+	// 生成数据库路径
 	std::string path = StrUtil::printf("%s%s/%s/", _base_dir.c_str(), subdir.c_str(), exchg);
+	// 创建目录结构
 	boost::filesystem::create_directories(path);
+	// 打开数据库，如果失败则记录错误并返回空指针
 	if(!dbPtr->open(path.c_str(), _kline_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening {} db at {} failed: {}", subdir, path, dbPtr->errmsg());
 		return std::move(WtLMDBPtr());
 	}
 
+	// 将新创建的数据库添加到映射中
 	(*the_map)[exchg] = dbPtr;
+	// 返回数据库指针
 	return std::move(dbPtr);
 }
 
+/**
+ * @brief 获取指定交易所和合约的Tick数据库
+ * @param exchg 交易所代码
+ * @param code 合约代码
+ * @return WtLMDBPtr LMDB数据库指针，如果失败则返回空指针
+ * @details 根据交易所和合约代码获取相应的Tick数据库，如果数据库不存在则创建新的数据库
+ */
 WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char* code)
 {
+	// 生成唯一键，格式为“交易所.合约代码”
 	std::string key = StrUtil::printf("%s.%s", exchg, code);
+	// 在映射中查找指定合约的Tick数据库
 	auto it = _tick_dbs.find(key);
+	// 如果找到已存在的数据库，直接返回
 	if (it != _tick_dbs.end())
 		return std::move(it->second);
 
+	// 创建新的LMDB数据库
 	WtLMDBPtr dbPtr(new WtLMDB(false));
+	// 生成数据库路径，格式为“基础目录/ticks/交易所/合约代码”
 	std::string path = StrUtil::printf("%sticks/%s/%s", _base_dir.c_str(), exchg, code);
+	// 创建目录结构
 	boost::filesystem::create_directories(path);
+	// 打开数据库，如果失败则记录错误并返回空指针
 	if (!dbPtr->open(path.c_str(), _tick_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening tick db at {} failed: %s", path, dbPtr->errmsg());
 		return std::move(WtLMDBPtr());
 	}
 
+	// 将新创建的数据库添加到映射中
 	_tick_dbs[key] = dbPtr;
+	// 返回数据库指针
 	return std::move(dbPtr);
 }
