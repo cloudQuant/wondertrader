@@ -644,17 +644,44 @@ UftContextPtr WtUftEngine::getContext(uint32_t id)
 	return it->second;
 }
 
+/**
+ * @brief 获取委托队列切片数据
+ * @param sid 策略ID
+ * @param code 标准化合约代码
+ * @param count 请求的数据条数
+ * @return 委托队列切片数据指针
+ * @details 获取指定合约的委托队列切片数据，直接调用数据管理器的相应方法
+ */
 WTSOrdQueSlice* WtUftEngine::get_order_queue_slice(uint32_t sid, const char* code, uint32_t count)
 {
+	// 直接调用数据管理器获取委托队列切片
 	return _data_mgr->get_order_queue_slice(code, count);
 }
 
+/**
+ * @brief 获取逆序委托切片数据
+ * @param sid 策略ID
+ * @param code 标准化合约代码
+ * @param count 请求的数据条数
+ * @return 逆序委托切片数据指针
+ * @details 获取指定合约的逆序委托切片数据，直接调用数据管理器的相应方法
+ */
 WTSOrdDtlSlice* WtUftEngine::get_order_detail_slice(uint32_t sid, const char* code, uint32_t count)
 {
+	// 直接调用数据管理器获取逆序委托切片
 	return _data_mgr->get_order_detail_slice(code, count);
 }
 
+/**
+ * @brief 获取逆序页成交切片数据
+ * @param sid 策略ID
+ * @param code 标准化合约代码
+ * @param count 请求的数据条数
+ * @return 逆序页成交切片数据指针
+ * @details 获取指定合约的逆序页成交切片数据，直接调用数据管理器的相应方法
+ */
 WTSTransSlice* WtUftEngine::get_transaction_slice(uint32_t sid, const char* code, uint32_t count)
 {
+	// 直接调用数据管理器获取逆序页成交切片
 	return _data_mgr->get_transaction_slice(code, count);
 }
