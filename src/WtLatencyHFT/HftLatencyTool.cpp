@@ -418,6 +418,11 @@ namespace hft
 		return true;
 	}
 
+	/**
+	 * @brief 初始化高频交易策略
+	 * @return 初始化是否成功
+	 * @details 创建高频交易策略上下文，设置测试策略，并将其添加到引擎中
+	 */
 	bool HftLatencyTool::initStrategies()
 	{
 		HftStraContext* ctx = new HftStraContext(&_engine, "stra", false, 0);
@@ -432,6 +437,12 @@ namespace hft
 		return true;
 	}
 
+	/**
+	 * @brief 初始化高频交易引擎
+	 * @param cfg 引擎配置对象
+	 * @return 初始化是否成功
+	 * @details 初始化高频交易引擎，设置相关的数据管理器和适配器管理器
+	 */
 	bool HftLatencyTool::initEngine(WTSVariant* cfg)
 	{
 		WTSLogger::warn("Trading enviroment initialzied with engine: HFT");
@@ -442,6 +453,11 @@ namespace hft
 	}
 
 
+	/**
+	 * @brief 初始化模块
+	 * @return 初始化是否成功
+	 * @details 初始化解析器和交易器模块，并将它们添加到相应的适配器管理器中
+	 */
 	bool HftLatencyTool::initModules()
 	{
 		{
@@ -461,6 +477,10 @@ namespace hft
 		return true;
 	}
 
+	/**
+	 * @brief 运行高频交易延迟测试
+	 * @details 启动解析器、交易器和引擎，绑定CPU核心，然后执行测试运行
+	 */
 	void HftLatencyTool::run()
 	{
 		if (_core != 0)
