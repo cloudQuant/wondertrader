@@ -1,4 +1,15 @@
-﻿#include "WtDataReaderAD.h"
+/*!
+ * \file WtDataReaderAD.cpp
+ * \brief WtDataReaderAD数据读取器实现文件
+ * 
+ * 该文件实现了基于LMDB的历史数据读取器，用于从LMDB数据库中读取K线和Tick数据
+ * 并提供缓存机制以提高读取效率
+ * 
+ * \author Wesley
+ * \date 2022/01/05
+ */
+
+#include "WtDataReaderAD.h"
 #include "LMDBKeys.h"
 
 #include "../Includes/WTSVariant.hpp"
@@ -13,6 +24,18 @@
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+
+/**
+ * \brief 格式化并输出日志到数据读取器接收器
+ * 
+ * 该函数使用fmtlib格式化日志消息，然后将其发送到数据读取器接收器
+ * 
+ * \tparam Args 可变参数模板，用于格式化字符串
+ * \param sink 数据读取器接收器指针
+ * \param ll 日志级别
+ * \param format 格式化字符串
+ * \param args 格式化参数
+ */
 template<typename... Args>
 inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -28,12 +51,26 @@ inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* f
 
 extern "C"
 {
+	/**
+	 * \brief 创建数据读取器实例
+	 * 
+	 * 该函数用于创建WtDataReaderAD类的实例，供外部模块调用
+	 * 
+	 * \return 返回IDataReader接口指针
+	 */
 	EXPORT_FLAG IDataReader* createDataReader()
 	{
 		IDataReader* ret = new WtDataReaderAD();
 		return ret;
 	}
 
+	/**
+	 * \brief 删除数据读取器实例
+	 * 
+	 * 该函数用于删除通过createDataReader创建的数据读取器实例
+	 * 
+	 * \param reader 要删除的数据读取器指针
+	 */
 	EXPORT_FLAG void deleteDataReader(IDataReader* reader)
 	{
 		if (reader != NULL)
@@ -42,6 +79,11 @@ extern "C"
 };
 
 
+/**
+ * \brief WtDataReaderAD类构造函数
+ * 
+ * 初始化类成员变量，包括最后更新时间、基础数据管理器和主力合约管理器
+ */
 WtDataReaderAD::WtDataReaderAD()
 	: _last_time(0)
 	, _base_data_mgr(NULL)
@@ -50,10 +92,22 @@ WtDataReaderAD::WtDataReaderAD()
 }
 
 
+/**
+ * \brief WtDataReaderAD类析构函数
+ */
 WtDataReaderAD::~WtDataReaderAD()
 {
 }
 
+/**
+ * \brief 初始化数据读取器
+ * 
+ * 该方法初始化数据读取器，包括设置基础数据目录、缓存文件名等
+ * 
+ * \param cfg 配置参数，包含数据存储路径等配置项
+ * \param sink 数据接收器，用于回调通知和日志输出
+ * \param loader 历史数据加载器，可选参数，默认为NULL
+ */
 void WtDataReaderAD::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader /* = NULL */)
 {
 	IDataReader::init(cfg, sink, loader);
@@ -74,6 +128,24 @@ void WtDataReaderAD::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader
 	pipe_reader_log(sink, LL_INFO, "WtDataReaderAD initialized, root data folder is {}", _base_dir);
 }
 
+/**
+ * \brief 读取Tick数据切片
+ * 
+ * 该方法根据标准代码、数量和结束时间，从LMDB数据库中读取指定数量的Tick数据
+ * 处理流程包括：
+ * 1. 提取合约信息
+ * 2. 处理结束时间
+ * 3. 计算交易日期
+ * 4. 处理主力合约转换
+ * 5. 检查缓存状态并决定加载策略
+ * 6. 从LMDB读取数据
+ * 7. 生成数据切片
+ * 
+ * \param stdCode 标准合约代码
+ * \param count 需要的Tick数量
+ * \param etime 结束时间，格式为YYYYMMDDHHMMSSMMM，默认值0表示当前时间
+ * \return 返回Tick数据切片，如果读取失败则返回NULL
+ */
 WTSTickSlice* WtDataReaderAD::readTickSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -202,6 +274,16 @@ WTSTickSlice* WtDataReaderAD::readTickSlice(const char* stdCode, uint32_t count,
 	}
 }
 
+/**
+ * \brief 将K线数据读入到缓冲区
+ * 
+ * 该方法从LMDB数据库中读取指定交易所、合约和周期的K线数据，并将其存储到字符串缓冲区中
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param period K线周期
+ * \return 包含K线数据的字符串缓冲区
+ */
 std::string WtDataReaderAD::read_bars_to_buffer(const char* exchg, const char* code, WTSKlinePeriod period)
 {
 	//直接从LMDB读取
@@ -224,6 +306,18 @@ std::string WtDataReaderAD::read_bars_to_buffer(const char* exchg, const char* c
 	return std::move(buffer);
 }
 
+/**
+ * \brief 将历史数据放入缓存
+ * 
+ * 该方法从LMDB数据库中读取指定数量的K线数据并存入内存缓存
+ * 
+ * \param key 缓存键名，通常是标准合约代码
+ * \param stdCode 标准合约代码
+ * \param period K线周期
+ * \param count 请求的数据条数
+ * \return true 缓存成功
+ * \return false 缓存失败
+ */
 bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* stdCode, WTSKlinePeriod period, uint32_t count)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -263,6 +357,17 @@ bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* st
 	return true;
 }
 
+/**
+ * \brief 从LMDB更新K线缓存
+ * 
+ * 该方法从LMDB数据库中读取指定交易所、合约和周期的K线数据，并更新到内存缓存中
+ * 
+ * \param barsList 要更新的K线列表缓存
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param period K线周期
+ * \param lastBarTime 最后K线时间，引用参数，会被更新
+ */
 void WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime)
 {
 	bool isDay = (period == KP_DAY);
@@ -300,6 +405,16 @@ void WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exch
 		PERIOD_NAME[period], exchg, code, isDay?barsList._bars.back().date:barsList._bars.back().time);
 }
 
+/**
+ * \brief 获取实时缓存的K线数据
+ * 
+ * 从内存映射文件中读取最新的实时K线数据
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \param period K线周期
+ * \return 返回最新的K线数据结构指针，如果读取失败则返回NULL
+ */
 WTSBarStruct* WtDataReaderAD::get_rt_cache_bar(const char* exchg, const char* code, WTSKlinePeriod period)
 {
 	RTBarCacheWrapper* wrapper = NULL;
@@ -363,6 +478,24 @@ WTSBarStruct* WtDataReaderAD::get_rt_cache_bar(const char* exchg, const char* co
 	return NULL;
 }
 
+/**
+ * \brief 读取K线数据切片
+ * 
+ * 该方法根据标准代码、周期类型、数量和结束时间，从LMDB数据库中读取指定数量的K线数据
+ * 处理流程类似于readTickSlice，包括：
+ * 1. 提取合约信息
+ * 2. 处理结束时间
+ * 3. 计算交易日期
+ * 4. 处理主力合约转换
+ * 5. 检查缓存状态，必要时从存储中读取数据
+ * 6. 生成数据切片
+ * 
+ * \param stdCode 标准合约代码
+ * \param period K线周期类型
+ * \param count 需要的K线数量
+ * \param etime 结束时间，格式为YYYYMMDDHHMMSS，默认值0表示当前时间
+ * \return 返回K线数据切片，如果读取失败则返回NULL
+ */
 WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -491,6 +624,16 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 	return NULL;
 }
 
+/**
+ * \brief 分钟结束时的回调处理
+ * 
+ * 该方法在每分钟结束时被调用，用于更新内存中的K线缓存
+ * 对于不同周期的K线数据，会从LMDB数据库和实时缓存中获取最新数据
+ * 
+ * \param uDate 当前日期，格式为YYYYMMDD
+ * \param uTime 当前时间，格式为HHMM
+ * \param endTDate 结束交易日，默认为0
+ */
 void WtDataReaderAD::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */)
 {
 	//这里应该触发检查
@@ -549,6 +692,16 @@ void WtDataReaderAD::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDa
 	_last_time = nowTime;
 }
 
+/**
+ * \brief 获取K线数据库连接
+ * 
+ * 根据交易所代码和周期类型获取对应的LMDB数据库连接
+ * 如果数据库连接不存在，则创建新的连接
+ * 
+ * \param exchg 交易所代码
+ * \param period K线周期，支持1分钟、5分钟和日线
+ * \return 返回LMDB数据库指针，如果不存在则创建
+ */
 WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePeriod period)
 {
 	WtLMDBMap* the_map = NULL;
@@ -592,6 +745,16 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	return std::move(dbPtr);
 }
 
+/**
+ * \brief 获取Tick数据库连接
+ * 
+ * 根据交易所和合约代码获取对应的LMDB数据库连接
+ * 如果数据库连接不存在，则创建新的连接
+ * 
+ * \param exchg 交易所代码
+ * \param code 合约代码
+ * \return 返回LMDB数据库指针，如果不存在则创建
+ */
 WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char* code)
 {
 	std::string key = StrUtil::printf("%s.%s", exchg, code);
