@@ -1,11 +1,12 @@
-﻿/*!
- * \file WtHftEngine.cpp
+/*!
+ * \file WtUftEngine.cpp
  * \project	WonderTrader
  *
  * \author Wesley
  * \date 2020/03/30
  * 
- * \brief 
+ * \brief UFT策略引擎实现文件
+ * \details 实现了WtUftEngine类的各种方法，负责超高频交易(UFT)策略的执行和管理
  */
 #define WIN32_LEAN_AND_MEAN
 
@@ -27,23 +28,36 @@
 
 USING_NS_WTP;
 
+/**
+ * @brief 构造函数
+ * @details 初始化UFT引擎对象，获取当前系统时间并设置初始化参数
+ */
 WtUftEngine::WtUftEngine()
 	: _cfg(NULL)
 	, _tm_ticker(NULL)
 	, _notifier(NULL)
 {
+	// 获取当前系统日期和时间
 	TimeUtils::getDateTime(_cur_date, _cur_time);
+	// 提取秒数部分
 	_cur_secs = _cur_time % 100000;
+	// 计算分钟时间
 	_cur_time /= 100000;
 	_cur_raw_time = _cur_time;
 	_cur_tdate = _cur_date;
 
+	// 设置全局时间
 	WtHelper::setTime(_cur_date, _cur_time, _cur_secs);
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 清理引擎资源，释放内存，关闭时间计时器
+ */
 WtUftEngine::~WtUftEngine()
 {
+	// 停止并释放时间计时器
 	if (_tm_ticker)
 	{
 		_tm_ticker->stop();
@@ -51,28 +65,47 @@ WtUftEngine::~WtUftEngine()
 		_tm_ticker = NULL;
 	}
 
+	// 释放配置对象
 	if (_cfg)
 		_cfg->release();
 }
 
+/**
+ * @brief 设置当前日期和时间
+ * @param curDate 当前日期，格式YYYYMMDD
+ * @param curTime 当前时间，格式HHMM
+ * @param curSecs 当前秒数，包含毫秒，默认为0
+ * @param rawTime 原始时间，默认为0（使用curTime）
+ * @details 设置引擎内部时间并更新全局时间
+ */
 void WtUftEngine::set_date_time(uint32_t curDate, uint32_t curTime, uint32_t curSecs /* = 0 */, uint32_t rawTime /* = 0 */)
 {
+	// 设置引擎内部日期和时间
 	_cur_date = curDate;
 	_cur_time = curTime;
 	_cur_secs = curSecs;
 
+	// 如果原始时间未指定，使用当前时间
 	if (rawTime == 0)
 		rawTime = curTime;
 
 	_cur_raw_time = rawTime;
 
+	// 更新全局时间
 	WtHelper::setTime(_cur_date, _cur_raw_time, _cur_secs);
 }
 
+/**
+ * @brief 设置交易日期
+ * @param curTDate 当前交易日期，格式YYYYMMDD
+ * @details 设置引擎内部交易日期并更新全局交易日期
+ */
 void WtUftEngine::set_trading_date(uint32_t curTDate)
 {
+	// 设置引擎内部交易日期
 	_cur_tdate = curTDate;
 
+	// 更新全局交易日期
 	WtHelper::setTDate(curTDate);
 }
 
