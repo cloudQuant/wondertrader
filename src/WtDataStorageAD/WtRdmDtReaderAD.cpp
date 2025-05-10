@@ -1,4 +1,4 @@
-/*!
+/**
  * @file WtRdmDtReaderAD.cpp
  * @author wondertrader
  * @brief 基于LMDB存储的历史数据读取器实现
@@ -21,7 +21,6 @@
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
-
 /**
  * @brief 日志输出工具函数
  * @tparam Args 参数类型包
@@ -73,6 +72,10 @@ extern "C"
 };
 
 
+/**
+ * @brief WtRdmDtReaderAD类的构造函数
+ * @details 初始化基础数据管理器和主力合约管理器为空
+ */
 WtRdmDtReaderAD::WtRdmDtReaderAD()
 	: _base_data_mgr(NULL)
 	, _hot_mgr(NULL)
@@ -80,10 +83,20 @@ WtRdmDtReaderAD::WtRdmDtReaderAD()
 }
 
 
+/**
+ * @brief WtRdmDtReaderAD类的析构函数
+ * @details 负责清理资源，当前为空实现
+ */
 WtRdmDtReaderAD::~WtRdmDtReaderAD()
 {
 }
 
+/**
+ * @brief 初始化数据读取器
+ * @param cfg 配置参数，包含数据存储路径等信息
+ * @param sink 数据读取器的接收器，用于获取基础数据管理器和主力合约管理器
+ * @details 初始化数据读取器，设置基础数据路径，并获取必要的管理器实例
+ */
 void WtRdmDtReaderAD::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 {
 	IRdmDtReader::init(cfg, sink);
@@ -100,12 +113,28 @@ void WtRdmDtReaderAD::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 	pipe_rdmreader_log(sink, LL_INFO, "WtRdmDtReaderAD initialized, root data folder is {}", _base_dir);
 }
 
+/**
+ * @brief 根据数量读取Tick切片数据
+ * @param stdCode 标准品种代码
+ * @param count 要读取的Tick数量
+ * @param etime 结束时间，默认为0表示当前时间
+ * @return WTSTickSlice* Tick数据切片指针，如果读取失败则返回NULL
+ * @details 根据指定的品种代码、数量和结束时间读取Tick数据切片，当前为TODO项，未实现
+ */
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
 	//TODO: 以后再来实现吧
 	return NULL;
 }
 
+/**
+ * @brief 根据时间范围读取Tick切片数据
+ * @param stdCode 标准品种代码
+ * @param stime 开始时间，格式为YYYYMMDDHHMMSSMMM
+ * @param etime 结束时间，格式为YYYYMMDDHHMMSSMMM，默认为0表示当前时间
+ * @return WTSTickSlice* Tick数据切片指针，如果读取失败则返回NULL
+ * @details 根据指定的品种代码和时间范围从LMDB数据库读取Tick数据，并返回数据切片
+ */
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -278,18 +307,43 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 	}
 }
 
+/**
+ * @brief 根据数量读取K线切片数据
+ * @param stdCode 标准品种代码
+ * @param period K线周期，如日线、分钟线等
+ * @param count 要读取的K线数量
+ * @param etime 结束时间，默认为0表示当前时间
+ * @return WTSKlineSlice* K线数据切片指针，如果读取失败则返回NULL
+ * @details 根据指定的品种代码、周期、数量和结束时间读取K线数据切片，当前为TODO项，未实现
+ */
 WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
 	//TODO: 以后再来实现吧
 	return NULL;
 }
 
+/**
+ * @brief 根据日期读取Tick切片数据
+ * @param stdCode 标准品种代码
+ * @param uDate 交易日期，格式为YYYYMMDD
+ * @return WTSTickSlice* Tick数据切片指针，如果读取失败则返回NULL
+ * @details 根据指定的品种代码和交易日期读取当天的所有Tick数据，当前为TODO项，未实现
+ */
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByDate(const char* stdCode, uint32_t uDate )
 {
 	//TODO: 以后再来实现吧
 	return NULL;
 }
 
+/**
+ * @brief 根据时间范围读取K线切片数据
+ * @param stdCode 标准品种代码
+ * @param period K线周期，如日线、分钟线等
+ * @param stime 开始时间，格式为YYYYMMDDHHMM
+ * @param etime 结束时间，格式为YYYYMMDDHHMM，默认为0表示当前时间
+ * @return WTSKlineSlice* K线数据切片指针，如果读取失败则返回NULL
+ * @details 根据指定的品种代码、周期和时间范围从LMDB数据库读取K线数据，并返回数据切片
+ */
 WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
@@ -417,6 +471,13 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 	}
 }
 
+/**
+ * @brief 获取K线数据库连接
+ * @param exchg 交易所代码
+ * @param period K线周期，如日线、1分钟线、5分钟线等
+ * @return WtLMDBPtr LMDB数据库连接指针
+ * @details 根据交易所和K线周期获取对应的LMDB数据库连接，如果连接不存在则创建新连接
+ */
 WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_k_db(const char* exchg, WTSKlinePeriod period)
 {
 	WtLMDBMap* the_map = NULL;
@@ -460,6 +521,13 @@ WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_k_db(const char* exchg, WTSKline
 	return std::move(dbPtr);
 }
 
+/**
+ * @brief 获取Tick数据库连接
+ * @param exchg 交易所代码
+ * @param code 品种代码
+ * @return WtLMDBPtr LMDB数据库连接指针
+ * @details 根据交易所和品种代码获取对应的Tick数据LMDB数据库连接，如果连接不存在则创建新连接
+ */
 WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_t_db(const char* exchg, const char* code)
 {
 	std::string key = StrUtil::printf("%s.%s", exchg, code);
