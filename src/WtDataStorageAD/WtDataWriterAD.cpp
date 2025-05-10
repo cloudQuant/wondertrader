@@ -1,4 +1,14 @@
-﻿#include "WtDataWriterAD.h"
+/**
+ * @file WtDataWriterAD.cpp
+ * @brief 基于LMDB的数据存储引擎实现文件
+ * @details 该文件实现了WtDataWriterAD类，用于将行情数据写入LMDB数据库，
+ *          并管理相关的内存缓存，支持多种周期的数据存储
+ * @author Wesley
+ * @date 2022-01-05
+ * @version 1.0
+ */
+
+#include "WtDataWriterAD.h"
 #include "LMDBKeys.h"
 
 #include "../Includes/WTSSessionInfo.hpp"
@@ -13,8 +23,22 @@
 
 using namespace std;
 
-//By Wesley @ 2022.01.05
+/**
+ * @brief 引入fmt库处理格式化输出
+ * @author Wesley
+ * @date 2022-01-05
+ */
 #include "../Share/fmtlib.h"
+
+/**
+ * @brief 将日志输出到数据写入器的接收器
+ * @tparam Args 可变参数类型
+ * @param sink 数据写入器的接收器指针
+ * @param ll 日志级别
+ * @param format 格式化字符串
+ * @param args 格式化参数
+ * @details 使用fmt库将格式化的日志输出到数据写入器的接收器中
+ */
 template<typename... Args>
 inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -28,14 +52,28 @@ inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* f
 	sink->outputLog(ll, buffer);
 }
 
+/**
+ * @brief C接口导出函数定义
+ * @details 提供给外部模块调用的C风格接口函数，用于创建和删除数据写入器实例
+ */
 extern "C"
 {
+	/**
+	 * @brief 创建数据写入器实例
+	 * @return IDataWriter* 数据写入器接口指针
+	 * @details 创建一个WtDataWriterAD实例并返回其接口指针
+	 */
 	EXPORT_FLAG IDataWriter* createWriter()
 	{
 		IDataWriter* ret = new WtDataWriterAD();
 		return ret;
 	}
 
+	/**
+	 * @brief 删除数据写入器实例
+	 * @param writer 数据写入器接口指针的引用
+	 * @details 删除指定的数据写入器实例并将指针设置为空
+	 */
 	EXPORT_FLAG void deleteWriter(IDataWriter* &writer)
 	{
 		if (writer != NULL)
@@ -46,78 +84,121 @@ extern "C"
 	}
 };
 
+/**
+ * @brief 缓存大小增长步长
+ * @details 当需要扩展缓存时，每次增加的缓存项数量
+ */
 static const uint32_t CACHE_SIZE_STEP_AD = 400;
 
-
+/**
+ * @brief WtDataWriterAD类的构造函数
+ * @details 初始化数据写入器的各项参数，设置默认值
+ */
 WtDataWriterAD::WtDataWriterAD()
-	: _terminated(false)
-	, _log_group_size(1000)
-	, _disable_day(false)
-	, _disable_min1(false)
-	, _disable_min5(false)
-	, _disable_tick(false)
-	, _tick_cache_block(nullptr)
-	, _tick_mapsize(16*1024*1024)
-	, _kline_mapsize(8*1024*1024)
+	: _terminated(false)           // 终止标志初始化为否
+	, _log_group_size(1000)        // 日志分组大小默认为1000
+	, _disable_day(false)          // 默认启用日K线存储
+	, _disable_min1(false)         // 默认启用1分钟K线存储
+	, _disable_min5(false)         // 默认启用5分钟K线存储
+	, _disable_tick(false)         // 默认启用Tick数据存储
+	, _tick_cache_block(nullptr)   // Tick缓存块初始化为空
+	, _tick_mapsize(16*1024*1024)  // Tick数据库映射大小默认为16MB
+	, _kline_mapsize(8*1024*1024)  // K线数据库映射大小默认为8MB
 {
 }
 
 
+/**
+ * @brief WtDataWriterAD类的析构函数
+ * @details 释放数据写入器占用的资源
+ */
 WtDataWriterAD::~WtDataWriterAD()
 {
+	// 由于使用了智能指针管理资源，所以析构函数中无需额外的资源释放操作
 }
 
+/**
+ * @brief 初始化数据写入器
+ * @param params 初始化参数，包含数据存储路径、缓存设置等
+ * @param sink 数据写入器的回调接口，用于输出日志和获取基础数据管理器
+ * @return bool 初始化是否成功
+ * @details 该方法负责创建必要的目录结构、设置缓存文件名称、解析配置参数并加载缓存
+ */
 bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
 {
+	// 调用父类初始化方法
 	IDataWriter::init(params, sink);
 
+	// 获取基础数据管理器
 	_bd_mgr = sink->getBDMgr();
 
+	// 设置数据存储基础目录并确保目录存在
 	_base_dir = StrUtil::standardisePath(params->getCString("path"));
 	if (!BoostFile::exists(_base_dir.c_str()))
 		BoostFile::create_directories(_base_dir.c_str());
 
+	// 设置缓存文件名称
 	_cache_file_tick = "cache_tick.dmb";
 	_m1_cache._filename = "cache_m1.dmb";
 	_m5_cache._filename = "cache_m5.dmb";
 	_d1_cache._filename = "cache_d1.dmb";
 
+	// 从参数中获取日志分组大小
 	_log_group_size = params->getUInt32("groupsize");
 
+	// 从参数中获取禁用标志
 	_disable_tick = params->getBoolean("disabletick");
 	_disable_min1 = params->getBoolean("disablemin1");
 	_disable_min5 = params->getBoolean("disablemin5");
 	_disable_day = params->getBoolean("disableday");
 
+	// 可选参数：Tick数据库映射大小
 	if (params->has("tickmapsize"))
 		_tick_mapsize = params->getUInt32("tickmapsize");
 
+	// 可选参数：K线数据库映射大小
 	if (params->has("klinemapsize"))
 		_kline_mapsize = params->getUInt32("klinemapsize");
 
+	// 加载缓存文件
 	loadCache();
 
 	return true;
 }
 
+/**
+ * @brief 释放数据写入器资源
+ * @details 终止异步任务处理线程并释放相关资源
+ */
 void WtDataWriterAD::release()
 {
+	// 设置终止标志
 	_terminated = true;
+
+	// 如果存在任务处理线程，则通知其终止并等待其完成
 	if (_task_thrd)
 	{
 		_task_cond.notify_all();
 		_task_thrd->join();
 	}
+	// 注意：由于使用了智能指针管理资源，其他资源会在析构时自动释放
 }
 
+/**
+ * @brief 加载缓存文件
+ * @details 加载或创建Tick和K线缓存文件，并初始化相关的内存结构
+ */
 void WtDataWriterAD::loadCache()
 {
+	// 加载Tick缓存文件
 	if (_tick_cache_file == NULL)
 	{
 		bool bNew = false;
 		std::string filename = _base_dir + _cache_file_tick;
+		// 如果缓存文件不存在，创建新文件
 		if (!BoostFile::exists(filename.c_str()))
 		{
+			// 计算文件大小：头部 + 数据项 * 初始容量
 			uint64_t uSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
 			bf.create_new_file(filename.c_str());
@@ -126,16 +207,21 @@ void WtDataWriterAD::loadCache()
 			bNew = true;
 		}
 
+		// 创建内存映射文件对象并映射缓存文件
 		_tick_cache_file.reset(new BoostMappingFile);
 		_tick_cache_file->map(filename.c_str());
+		// 获取缓存块指针
 		_tick_cache_block = (RTTickCache*)_tick_cache_file->addr();
 
+		// 确保缓存大小不超过容量
 		_tick_cache_block->_size = min(_tick_cache_block->_size, _tick_cache_block->_capacity);
 
 		if (bNew)
 		{
+			// 如果是新创建的缓存文件，初始化缓存块
 			memset(_tick_cache_block, 0, _tick_cache_file->size());
 
+			// 设置缓存块的基本属性
 			_tick_cache_block->_capacity = CACHE_SIZE_STEP_AD;
 			_tick_cache_block->_type = BT_RT_Cache;
 			_tick_cache_block->_size = 0;
@@ -144,21 +230,26 @@ void WtDataWriterAD::loadCache()
 		}
 		else
 		{
+			// 如果是加载现有缓存文件，构建索引映射
 			for (uint32_t i = 0; i < _tick_cache_block->_size; i++)
 			{
 				const TickCacheItem& item = _tick_cache_block->_items[i];
+				// 使用交易所和合约代码组合作为索引键
 				std::string key = StrUtil::printf("%s.%s", item._tick.exchg, item._tick.code);
 				_tick_cache_idx[key] = i;
 			}
 		}
 	}
 
+	// 加载1分钟K线缓存文件
 	if (_m1_cache.empty())
 	{
 		bool bNew = false;
 		std::string filename = _base_dir + _m1_cache._filename;
+		// 如果缓存文件不存在，创建新文件
 		if (!BoostFile::exists(filename.c_str()))
 		{
+			// 计算文件大小：头部 + 数据项 * 初始容量
 			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
 			bf.create_new_file(filename.c_str());
@@ -167,16 +258,21 @@ void WtDataWriterAD::loadCache()
 			bNew = true;
 		}
 
+		// 创建内存映射文件对象并映射缓存文件
 		_m1_cache._file_ptr.reset(new BoostMappingFile);
 		_m1_cache._file_ptr->map(filename.c_str());
+		// 获取缓存块指针
 		_m1_cache._cache_block = (RTBarCache*)_m1_cache._file_ptr->addr();
 
+		// 确保缓存大小不超过容量
 		_m1_cache._cache_block->_size = min(_m1_cache._cache_block->_size, _m1_cache._cache_block->_capacity);
 
 		if (bNew)
 		{
+			// 如果是新创建的缓存文件，初始化缓存块
 			memset(_m1_cache._cache_block, 0, _m1_cache._file_ptr->size());
 
+			// 设置缓存块的基本属性
 			_m1_cache._cache_block->_capacity = CACHE_SIZE_STEP_AD;
 			_m1_cache._cache_block->_type = BT_RT_Cache;
 			_m1_cache._cache_block->_size = 0;
@@ -185,9 +281,11 @@ void WtDataWriterAD::loadCache()
 		}
 		else
 		{
+			// 如果是加载现有缓存文件，构建索引映射
 			for (uint32_t i = 0; i < _m1_cache._cache_block->_size; i++)
 			{
 				const BarCacheItem& item = _m1_cache._cache_block->_items[i];
+				// 使用交易所和合约代码组合作为索引键
 				std::string key = StrUtil::printf("%s.%s", item._exchg, item._code);
 				_m1_cache._idx[key] = i;
 			}
@@ -277,24 +375,39 @@ void WtDataWriterAD::loadCache()
 	}
 }
 
+/**
+ * @brief 调整实时数据块的大小
+ * @tparam HeaderType 数据块头部类型
+ * @tparam T 数据项类型
+ * @param mfPtr 内存映射文件指针
+ * @param nCount 需要的数据项数量
+ * @return void* 调整后的内存块指针
+ * @details 当缓存容量不足时，该方法会重新分配内存并调整映射文件的大小
+ */
 template<typename HeaderType, typename T>
 void* WtDataWriterAD::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 {
+	// 检查映射文件指针是否有效
 	if (mfPtr == NULL)
 		return NULL;
 
 	//调用该函数之前,应该已经申请了写锁了
+	// 获取块头部指针
 	RTBlockHeader* tBlock = (RTBlockHeader*)mfPtr->addr();
+	// 如果当前容量足够，直接返回
 	if (tBlock->_capacity >= nCount)
 		return mfPtr->addr();
 
+	// 获取文件名和计算新旧大小
 	const char* filename = mfPtr->filename();
 	uint64_t uOldSize = sizeof(HeaderType) + sizeof(T)*tBlock->_capacity;
 	uint64_t uNewSize = sizeof(HeaderType) + sizeof(T)*nCount;
+	// 创建空数据块用于扩展文件
 	std::string data;
 	data.resize((std::size_t)(uNewSize - uOldSize), 0);
 	try
 	{
+		// 打开文件并在尾部添加空间
 		BoostFile f;
 		f.open_existing_file(filename);
 		f.seek_to_end();
@@ -303,57 +416,76 @@ void* WtDataWriterAD::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 	}
 	catch(std::exception& ex)
 	{
+		// 扩展文件失败时记录错误并返回原指针
 		pipe_writer_log(_sink, LL_ERROR, "Exception occured while expanding RT cache file of {}[{}]: {}", filename, uNewSize, ex.what());
 		return mfPtr->addr();
 	}
 
+	// 创建新的映射文件对象
 	BoostMappingFile* pNewMf = new BoostMappingFile();
 	if (!pNewMf->map(filename))
 	{
+		// 映射失败时清理资源并返回NULL
 		delete pNewMf;
 		return NULL;
 	}
 
+	// 更新智能指针
 	mfPtr.reset(pNewMf);
 
+	// 更新块头部并返回新的内存地址
 	tBlock = (RTBlockHeader*)mfPtr->addr();
 	tBlock->_capacity = nCount;
 	return mfPtr->addr();
 }
 
+/**
+ * @brief 写入Tick数据
+ * @param curTick 当前的Tick数据
+ * @param procFlag 处理标志，控制数据处理方式（0=直接写入，1=预处理，2=自动累加）
+ * @return bool 写入是否成功
+ * @details 将Tick数据写入缓存和数据库，并触发相关的K线生成和存储逻辑
+ */
 bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
+	// 检查输入参数是否有效
 	if (curTick == NULL)
 		return false;
 
+	// 增加引用计数，确保在异步任务中不会被释放
 	curTick->retain();
+	// 将写入任务添加到异步任务队列
 	pushTask([this, curTick, procFlag](){
 
 		do
 		{
+			// 获取合约信息
 			WTSContractInfo* ct = curTick->getContractInfo();
 			if(ct == NULL)
 				break;
 
+			// 获取商品信息
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
-			//再根据状态过滤
+			// 根据交易时段过滤
 			if (!_sink->canSessionReceive(commInfo->getSession()))
 				break;
 
-			//先更新缓存
+			// 先更新Tick缓存，如果更新失败则终止处理
 			if (!updateTickCache(ct, curTick, procFlag))
 				break;
 
-			//写到tick缓存
+			// 如果未禁用Tick存储，则将数据写入数据库
 			if(!_disable_tick)
 				pipeToTicks(ct, curTick);
 
-			//写到K线缓存
+			// 更新K线缓存，生成各周期K线
 			updateBarCache(ct, curTick);
 
+			// 广播Tick数据给监听器
 			_sink->broadcastTick(curTick);
 
+			// 统计并定期输出日志
 			static wt_hashmap<std::string, uint64_t> _tcnt_map;
 			_tcnt_map[curTick->exchg()]++;
 			if (_tcnt_map[curTick->exchg()] % _log_group_size == 0)
@@ -362,30 +494,44 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 			}
 		} while (false);
 
+		// 释放Tick数据的引用
 		curTick->release();
 	});
 	return true;
 }
 
+/**
+ * @brief 添加异步任务
+ * @param task 任务函数对象
+ * @details 将任务添加到任务队列中，并根据配置决定是否异步执行。
+ *          如果开启异步模式，则由任务线程处理；否则直接同步执行。
+ */
 void WtDataWriterAD::pushTask(TaskInfo task)
 {
+	// 如果开启了异步任务模式
 	if(_async_task)
 	{
+		// 加锁并将任务添加到队列
 		StdUniqueLock lck(_task_mtx);
 		_tasks.push(task);
+		// 通知等待中的任务处理线程
 		_task_cond.notify_all();
 	}
 	else
 	{
+		// 如果不是异步模式，直接执行任务
 		task();
 		return;
 	}
 
+	// 如果任务线程还没有创建，则创建一个新的任务处理线程
 	if(_task_thrd == NULL)
 	{
 		_task_thrd.reset(new StdThread([this](){
+			// 线程主循环，直到收到终止信号
 			while (!_terminated)
 			{
+				// 如果任务队列为空，等待新任务
 				if(_tasks.empty())
 				{
 					StdUniqueLock lck(_task_mtx);
@@ -393,12 +539,14 @@ void WtDataWriterAD::pushTask(TaskInfo task)
 					continue;
 				}
 
+				// 创建临时队列并交换任务，减少锁的持有时间
 				std::queue<TaskInfo> tempQueue;
 				{
 					StdUniqueLock lck(_task_mtx);
 					tempQueue.swap(_tasks);
 				}
 
+				// 处理临时队列中的所有任务
 				while(!tempQueue.empty())
 				{
 					TaskInfo& curTask = tempQueue.front();
