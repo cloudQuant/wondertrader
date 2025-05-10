@@ -109,60 +109,119 @@ void WtUftEngine::set_trading_date(uint32_t curTDate)
 	WtHelper::setTDate(curTDate);
 }
 
+/**
+ * @brief 获取品种信息
+ * @param stdCode 标准化合约代码，格式为“交易所.合约代码”
+ * @return 品种信息指针，如果找不到则返回NULL
+ * @details 根据标准化合约代码解析出交易所和合约代码，然后获取对应的品种信息
+ */
 WTSCommodityInfo* WtUftEngine::get_commodity_info(const char* stdCode)
 {
+	// 拆分标准化合约代码，格式为“交易所.合约代码”
 	const StringVector& ay = StrUtil::split(stdCode, ".");
+	// 根据交易所和合约代码获取合约信息
 	WTSContractInfo* cInfo = _base_data_mgr->getContract(ay[1].c_str(), ay[0].c_str());
 	if (cInfo == NULL)
 		return NULL;
 
+	// 从合约信息中获取品种信息
 	return cInfo->getCommInfo();
 }
 
+/**
+ * @brief 获取合约信息
+ * @param stdCode 标准化合约代码，格式为“交易所.合约代码”
+ * @return 合约信息指针，如果找不到则返回NULL
+ * @details 根据标准化合约代码解析出交易所和合约代码，然后返回对应的合约信息
+ */
 WTSContractInfo* WtUftEngine::get_contract_info(const char* stdCode)
 {
+	// 拆分标准化合约代码，格式为“交易所.合约代码”
 	const StringVector& ay = StrUtil::split(stdCode, ".");
+	// 直接从基础数据管理器中获取合约信息
 	return _base_data_mgr->getContract(ay[1].c_str(), ay[0].c_str());
 }
 
+/**
+ * @brief 获取交易时段信息
+ * @param sid 交易时段ID或标准化合约代码
+ * @param isCode 是否为合约代码，默认为false
+ * @return 交易时段信息指针，如果找不到则返回NULL
+ * @details 根据交易时段ID或标准化合约代码获取对应的交易时段信息
+ */
 WTSSessionInfo* WtUftEngine::get_session_info(const char* sid, bool isCode /* = false */)
 {
+	// 如果不是合约代码，直接根据交易时段ID获取交易时段信息
 	if (!isCode)
 		return _base_data_mgr->getSession(sid);
 
+	// 如果是合约代码，先拆分标准化合约代码
 	const StringVector& ay = StrUtil::split(sid, ".");
+	// 获取合约信息
 	WTSContractInfo* cInfo = _base_data_mgr->getContract(ay[1].c_str(), ay[0].c_str());
 	if (cInfo == NULL)
 		return NULL;
 
+	// 从合约信息中获取品种信息，再从品种信息中获取交易时段信息
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
 	return commInfo->getSessionInfo();
 }
 
+/**
+ * @brief 获取Tick切片数据
+ * @param sid 策略ID
+ * @param code 标准化合约代码
+ * @param count 请求的数据条数
+ * @return Tick切片数据指针
+ * @details 根据策略ID、合约代码和请求数量获取Tick切片数据，但当前实现为空
+ * @note 当前实现直接返回NULL，后续的数据获取代码被不可达（注释了执行但未删除）
+ */
 WTSTickSlice* WtUftEngine::get_tick_slice(uint32_t sid, const char* code, uint32_t count)
 {
 	return NULL;
 	return _data_mgr->get_tick_slice(code, count);
 }
 
+/**
+ * @brief 获取最新的Tick数据
+ * @param sid 策略ID
+ * @param stdCode 标准化合约代码
+ * @return 最新的Tick数据指针，如果找不到则返回NULL
+ * @details 从数据管理器中获取指定合约的最新Tick数据
+ */
 WTSTickData* WtUftEngine::get_last_tick(uint32_t sid, const char* stdCode)
 {
 	return _data_mgr->grab_last_tick(stdCode);
 }
 
+/**
+ * @brief 获取K线切片数据
+ * @param sid 策略ID
+ * @param stdCode 标准化合约代码
+ * @param period 周期标识（如"m"代表分钟，"d"代表天）
+ * @param count 请求的数据条数
+ * @param times 周期倍数，默认为1
+ * @param etime 结束时间戳，默认为0（当前时间）
+ * @return K线切片数据指针
+ * @details 根据策略ID、合约代码、周期等参数获取K线切片数据
+ * @note 当前实现直接返回NULL，后续的处理代码被不可达（注释了执行但未删除）
+ */
 WTSKlineSlice* WtUftEngine::get_kline_slice(uint32_t sid, const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, uint64_t etime /* = 0 */)
 {
 	return NULL;
+	// 下面代码因为上面的return语句而不可达
 	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(stdCode);
 	if (cInfo == NULL)
 		return NULL;
 
 	WTSSessionInfo* sInfo = cInfo->getSessionInfo();
 
+	// 构造唯一的订阅键值
 	std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
 	SubList& sids = _bar_sub_map[key];
 	sids.insert(sid);
 
+	// 根据周期标识和倍数确定实际的K线周期
 	WTSKlinePeriod kp;
 	if (strcmp(period, "m") == 0)
 	{
@@ -179,45 +238,83 @@ WTSKlineSlice* WtUftEngine::get_kline_slice(uint32_t sid, const char* stdCode, c
 		kp = KP_DAY;
 	}
 
+	// 从数据管理器中获取K线切片
 	return _data_mgr->get_kline_slice(stdCode, kp, times, count, etime);
 }
 
+/**
+ * @brief 订阅Tick数据
+ * @param sid 策略ID
+ * @param stdCode 标准化合约代码
+ * @details 将指定策略添加到特定合约的Tick数据订阅列表中
+ */
 void WtUftEngine::sub_tick(uint32_t sid, const char* stdCode)
 {
+	// 获取该合约的订阅列表，如果不存在会自动创建
 	SubList& sids = _tick_sub_map[stdCode];
+	// 将策略ID添加到订阅列表中
 	sids.insert(sid);
 }
 
+/**
+ * @brief 获取当前价格
+ * @param stdCode 标准化合约代码
+ * @return 当前价格，如果没有Tick数据则返回0.0
+ * @details 从最新的Tick数据中提取当前价格
+ */
 double WtUftEngine::get_cur_price(const char* stdCode)
 {
+	// 获取最新的Tick数据
 	WTSTickData* lastTick = _data_mgr->grab_last_tick(stdCode);
 	if (lastTick == NULL)
 		return 0.0;
 
+	// 提取价格信息
 	double ret = lastTick->price();
+	// 释放数据对象
 	lastTick->release();
 	return ret;
 }
 
+/**
+ * @brief 通知策略参数更新
+ * @param name 策略名称
+ * @details 当策略参数发生更新时，通知并触发对应策略的参数更新回调
+ */
 void WtUftEngine::notify_params_update(const char* name)
 {
+	// 遍历所有策略上下文
 	for(auto& v : _ctx_map)
 	{
 		const UftContextPtr& context = v.second;
+		// 找到匹配名称的策略
 		if(strcmp(context->name(), name) == 0)
 		{
+			// 触发策略的参数更新回调
 			context->on_params_updated();
 			break;
 		}
 	}
 }
 
+/**
+ * @brief 初始化UFT引擎
+ * @param cfg 配置项变量集
+ * @param bdMgr 基础数据管理器指针
+ * @param dataMgr UFT数据管理器指针
+ * @param notifier 事件通知器指针
+ * @details 设置各类管理器指针和加载配置项，为引擎运行做准备
+ */
 void WtUftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtUftDtMgr* dataMgr, EventNotifier* notifier)
 {
+	// 设置基础数据管理器
 	_base_data_mgr = bdMgr;
+	// 设置UFT数据管理器
 	_data_mgr = dataMgr;
+	// 设置事件通知器
 	_notifier = notifier;
 
+	// 保存配置项并增加引用计数
 	_cfg = cfg;
 	if(_cfg) _cfg->retain();
 }
