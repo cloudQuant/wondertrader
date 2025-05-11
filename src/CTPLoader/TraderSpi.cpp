@@ -158,26 +158,52 @@ inline double checkValid(double val)
 }
 
 
+/**
+ * \brief 前置连接成功回调函数
+ * 
+ * 当交易前置连接成功建立后调用此函数
+ * 输出连接成功日志，并发起认证请求
+ */
 void CTraderSpi::OnFrontConnected()
 {
 	std::cerr << "--->>> " << "OnFrontConnected" << std::endl;
-	///用户登录请求
+	// 发起认证请求
 	ReqAuth();
 }
 
+/**
+ * \brief 发送认证请求
+ * 
+ * 在连接建立后发送认证请求，用于验证交易用户身份
+ * 填充经纪商ID、用户ID、应用ID和授权码等认证信息
+ */
 void CTraderSpi::ReqAuth()
 {
+	// 创建并初始化认证请求结构
 	CThostFtdcReqAuthenticateField req;
 	memset(&req, 0, sizeof(req));
+	// 填充认证信息
 	strcpy(req.BrokerID, BROKER_ID.c_str());
 	strcpy(req.UserID, INVESTOR_ID.c_str());
-	//strcpy(req.UserProductInfo, m_strProdInfo.c_str());
-	strcpy(req.AuthCode, AUTHCODE.c_str());
 	strcpy(req.AppID, APPID.c_str());
+	strcpy(req.AuthCode, AUTHCODE.c_str());
+
+	// 发送认证请求
 	int iResult = pUserApi->ReqAuthenticate(&req, ++iRequestID);
 	std::cerr << "--->>> Requesting authentication: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
 
+/**
+ * \brief 认证响应回调函数
+ * 
+ * 当收到认证请求的响应时调用此函数
+ * 如果认证成功，则发起用户登录请求
+ * 
+ * \param pRspAuthenticateField 认证响应信息
+ * \param pRspInfo 错误信息，如果为NULL表示成功
+ * \param nRequestID 请求ID
+ * \param bIsLast 是否为最后一条消息
+ */
 void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspAuthenticate" << std::endl;
@@ -187,17 +213,37 @@ void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentic
 	}
 }
 
+/**
+ * \brief 发送用户登录请求
+ * 
+ * 在认证成功后发送登录请求，用于登录交易系统
+ * 填充经纪商ID、用户ID和密码等登录信息
+ */
 void CTraderSpi::ReqUserLogin()
 {
+	// 创建并初始化登录请求结构
 	CThostFtdcReqUserLoginField req;
 	memset(&req, 0, sizeof(req));
+	// 填充登录信息
 	strcpy(req.BrokerID, BROKER_ID.c_str());
 	strcpy(req.UserID, INVESTOR_ID.c_str());
 	strcpy(req.Password, PASSWORD.c_str());
+	// 发送登录请求
 	int iResult = pUserApi->ReqUserLogin(&req, ++iRequestID);
 	std::cerr << "--->>> Requesting user login: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
 
+/**
+ * \brief 登录响应回调函数
+ * 
+ * 当收到登录请求的响应时调用此函数
+ * 如果登录成功，则保存会话参数并发起合约查询请求
+ * 
+ * \param pRspUserLogin 登录响应信息
+ * \param pRspInfo 错误信息，如果为NULL表示成功
+ * \param nRequestID 请求ID
+ * \param bIsLast 是否为最后一条消息
+ */
 void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
 	CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
@@ -210,19 +256,29 @@ void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
 		int iNextOrderRef = atoi(pRspUserLogin->MaxOrderRef);
 		iNextOrderRef++;
 		fmtutil::format_to(ORDER_REF, "{}", iNextOrderRef);
-		///获取当前交易日
+		// 获取当前交易日
 		m_lTradingDate = atoi(pUserApi->GetTradingDay());
 
+		// 尝试从本地JSON文件加载合约信息
 		LoadFromJson();
 
+		// 发送合约查询请求
 		ReqQryInstrument();
 	}
 }
 
+/**
+ * \brief 发送合约查询请求
+ * 
+ * 在登录成功后发送查询合约请求，获取所有可交易合约的信息
+ * 该查询不设置过滤条件，将获取所有合约
+ */
 void CTraderSpi::ReqQryInstrument()
 {
+	// 创建并初始化合约查询结构
 	CThostFtdcQryInstrumentField req;
 	memset(&req, 0, sizeof(req));
+	// 发送合约查询请求，不设置过滤条件将查询所有合约
 	int iResult = pUserApi->ReqQryInstrument(&req, ++iRequestID);
 	std::cerr << "--->>> Quering instruments: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
@@ -281,6 +337,19 @@ inline ContractCategory wrapCategory(TThostFtdcProductClassType cType)
 }
 
 
+/**
+ * \brief 合约查询响应回调函数
+ * 
+ * 当收到合约查询的响应时调用此函数
+ * 将CTP合约信息转换为WonderTrader框架所需的格式
+ * 并处理合约的交易时段、手续费等信息
+ * 当所有合约信息接收完成后，将合约信息保存为JSON格式
+ * 
+ * \param pInstrument 合约信息结构
+ * \param pRspInfo 错误信息，如果为NULL表示成功
+ * \param nRequestID 请求ID
+ * \param bIsLast 是否为最后一条消息
+ */
 void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo))
@@ -457,6 +526,13 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 	}
 }
 
+/**
+ * \brief 从本地JSON文件加载合约信息
+ * 
+ * 尝试从指定的JSON文件中加载合约和品种信息
+ * 如果文件存在且格式正确，则读取其中的信息并填充到内存中
+ * 这样可以避免每次都需要从交易所获取全部合约信息
+ */
 void CTraderSpi::LoadFromJson()
 {
 	std::string path = SAVEPATH;
@@ -543,6 +619,14 @@ void CTraderSpi::LoadFromJson()
 	std::cerr << "--->>> " << "LoadFromJson" << std::endl;
 }
 
+/**
+ * \brief 将合约信息转储为JSON格式
+ * 
+ * 将已获取的合约信息和品种信息转换为JSON格式
+ * 并分别保存为两个文件：
+ * 1. 品种文件(commodities.json)：包含品种的交易时段、手续费等信息
+ * 2. 合约文件(contracts.json)：包含合约的到期日、合约乘数等信息
+ */
 void CTraderSpi::DumpToJson()
 {
 	//两个文件,一个contracts.json,一个commodities.json
@@ -655,6 +739,14 @@ void CTraderSpi::DumpToJson()
 }
 
 
+/**
+ * \brief 前置断开连接回调函数
+ * 
+ * 当交易前置连接断开时调用此函数
+ * 输出断开连接的原因代码，CTP API会自动重连
+ * 
+ * \param nReason 断开原因代码
+ */
 void CTraderSpi::OnFrontDisconnected(int nReason)
 {
 	std::cerr << "--->>> " << "OnFrontDisconnected" << std::endl;
@@ -662,12 +754,31 @@ void CTraderSpi::OnFrontDisconnected(int nReason)
 }
 
 
+/**
+ * \brief 错误响应回调函数
+ * 
+ * 当收到错误响应时调用此函数
+ * 输出错误信息，帮助识别和跟踪问题
+ * 
+ * \param pRspInfo 错误信息结构
+ * \param nRequestID 请求ID
+ * \param bIsLast 是否为最后一条消息
+ */
 void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspError" << std::endl;
 	IsErrorRspInfo(pRspInfo);
 }
 
+/**
+ * \brief 检查响应信息是否包含错误
+ * 
+ * 检查CTP响应信息中是否包含错误信息
+ * 如果错误代码不为0，则表示有错误，并输出错误信息
+ * 
+ * \param pRspInfo CTP响应信息结构
+ * \return 如果有错误返回true，否则返回false
+ */
 bool CTraderSpi::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 {
 	// 如果ErrorID != 0, 说明收到了错误的响应
