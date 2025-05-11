@@ -1,4 +1,19 @@
-﻿#include <iostream>
+/*!
+ * \file TraderSpi.cpp
+ * \brief CTP交易接口回调类实现
+ * 
+ * 该文件实现了CTP交易接口的回调函数，用于获取合约信息
+ * 并将合约信息转换为WonderTrader框架所需的JSON格式
+ * 主要实现功能包括：
+ * 1. 连接CTP交易系统并进行认证登录
+ * 2. 查询并获取合约信息
+ * 3. 将合约信息转换为WonderTrader框架格式
+ * 4. 将转换后的信息保存为JSON文件
+ * 
+ * \author Wesley
+ */
+
+#include <iostream>
 #include <set>
 #include <stdint.h>
 #include <fstream>
@@ -18,6 +33,15 @@ namespace rj = rapidjson;
 
 #include "TraderSpi.h"
 
+/**
+ * \brief 编码文本为UTF-8格式
+ * 
+ * 在非Windows平台上将文本转换为UTF-8编码
+ * 在Windows平台上直接返回原文本
+ * 
+ * \param s 输入文本
+ * \return 转换后的文本
+ */
 inline const char* encode_text(const char* s)
 {
 #ifdef _MSC_VER
@@ -67,10 +91,20 @@ CommodityMap _commodities;
 ContractMap _contracts;
 
 
+/**
+ * \brief 从合约代码中提取品种代码
+ * 
+ * 从合约代码中提取字母部分作为品种代码
+ * 例如：从"cu2301"中提取"cu"
+ * 
+ * \param instrument 合约代码
+ * \return 品种代码
+ */
 std::string extractProductID(const char* instrument)
 {
 	std::string strRet;
 	int nLen = 0;
+	// 提取字母部分作为品种代码
 	while ('A' <= instrument[nLen] && instrument[nLen] <= 'z')
 	{
 		strRet += instrument[nLen];
@@ -80,21 +114,41 @@ std::string extractProductID(const char* instrument)
 	return strRet;
 }
 
+/**
+ * \brief 从合约名称中提取品种名称
+ * 
+ * 从合约名称中去除数字部分，保留品种名称
+ * 例如：从"沃尔沃铜2301"中提取"沃尔沃铜"
+ * 
+ * \param cname 合约名称
+ * \return 品种名称
+ */
 std::string extractProductName(const char* cname)
 {
 	std::string strRet;
+	// 从名称的末尾开始向前查找非数字字符
 	auto idx = strlen(cname) - 1;
 	while (isdigit(cname[idx]) && idx > 0)
 	{
 		idx--;
 	}
 
+	// 复制非数字部分作为品种名称
 	strRet.append(cname, idx + 1);
 	return strRet;
 }
 
 std::set<std::string>	prod_set;
 
+/**
+ * \brief 检查浮点数值是否有效
+ * 
+ * 检查浮点数值是否为最大值，如果是则返回0
+ * 用于处理CTP接口返回的无效浮点数值
+ * 
+ * \param val 输入浮点数值
+ * \return 如果输入为最大值则返回0，否则返回原值
+ */
 inline double checkValid(double val)
 {
 	if (val == DBL_MAX || val == FLT_MAX)
@@ -173,6 +227,14 @@ void CTraderSpi::ReqQryInstrument()
 	std::cerr << "--->>> Quering instruments: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
 
+/**
+ * \brief 检查产品类型是否为期权
+ * 
+ * 检查CTP产品类型是否为期权或现货期权
+ * 
+ * \param pClass CTP产品类型
+ * \return 如果是期权则返回true，否则返回false
+ */
 inline bool isOption(TThostFtdcProductClassType pClass)
 {
 	if (pClass == THOST_FTDC_PC_Options || pClass == THOST_FTDC_PC_SpotOption)
@@ -181,21 +243,38 @@ inline bool isOption(TThostFtdcProductClassType pClass)
 	return false;
 }
 
+/**
+ * \brief 检查产品类型是否为期货
+ * 
+ * 检查CTP产品类型是否为期货
+ * 
+ * \param pClass CTP产品类型
+ * \return 如果是期货则返回true，否则返回false
+ */
 inline bool isFuture(TThostFtdcProductClassType pClass)
 {
 	return pClass == THOST_FTDC_PC_Futures;
 }
 
+/**
+ * \brief 将CTP产品类型转换为WonderTrader合约类型
+ * 
+ * 将CTP接口的产品类型转换为WonderTrader框架中的合约类型
+ * 
+ * \param cType CTP产品类型
+ * \return WonderTrader合约类型
+ * \throw std::runtime_error 如果产品类型不支持则抛出异常
+ */
 inline ContractCategory wrapCategory(TThostFtdcProductClassType cType)
 {
 	switch (cType)
 	{
-	case THOST_FTDC_PC_Futures: return CC_Future;
-	case THOST_FTDC_PC_Options: return CC_FutOption;
-	case THOST_FTDC_PC_Combination: return CC_Combination;
-	case THOST_FTDC_PC_Spot: return CC_Spot;
-	case THOST_FTDC_PC_EFP: return CC_EFP;
-	case THOST_FTDC_PC_SpotOption: return CC_SpotOption;
+	case THOST_FTDC_PC_Futures: return CC_Future;      // 期货
+	case THOST_FTDC_PC_Options: return CC_FutOption;    // 期权
+	case THOST_FTDC_PC_Combination: return CC_Combination; // 组合
+	case THOST_FTDC_PC_Spot: return CC_Spot;           // 现货
+	case THOST_FTDC_PC_EFP: return CC_EFP;             // 期货期权组合
+	case THOST_FTDC_PC_SpotOption: return CC_SpotOption;  // 现货期权
 	default:
 		throw std::runtime_error("non implemented category");
 	}

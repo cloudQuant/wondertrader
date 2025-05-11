@@ -1,4 +1,21 @@
-﻿#include <string>
+/*!
+ * \file CTPLoader.cpp
+ * \brief CTP合约信息加载器主模块
+ * 
+ * 该文件实现了CTP合约信息加载器，用于从交易所获取合约信息
+ * 并将其转换为WonderTrader框架所需的JSON格式
+ * 主要功能包括：
+ * 1. 读取配置文件并初始化CTP接口
+ * 2. 加载合约映射文件，将交易所代码映射到中文名称
+ * 3. 创建并运行交易API实例，获取合约信息
+ * 4. 支持动态加载不同版本的CTP API
+ * 
+ * 使用CTP API v6.3.15版本
+ * 
+ * \author Wesley
+ */
+
+#include <string>
 #include <map>
 //v6.3.15
 #include "../API/CTP6.3.15/ThostFtdcTraderApi.h"
@@ -18,33 +35,61 @@ USING_NS_WTP;
 
 #include <boost/filesystem.hpp>
 
-// UserApi对象
+//! CTP交易API对象
 CThostFtdcTraderApi* pUserApi;
 
-// 配置参数
-std::string	FRONT_ADDR;	// 前置地址
-std::string	BROKER_ID;	// 经纪公司代码
-std::string	INVESTOR_ID;// 投资者代码
-std::string	PASSWORD;	// 用户密码
-std::string SAVEPATH;	//保存位置
+//! 配置参数
+//! 交易前置地址
+std::string	FRONT_ADDR;
+//! 经纪公司代码
+std::string	BROKER_ID;
+//! 投资者代码
+std::string	INVESTOR_ID;
+//! 用户密码
+std::string	PASSWORD;
+//! 数据保存路径
+std::string SAVEPATH;
+//! 应用程序ID，用于认证
 std::string APPID;
+//! 授权码，用于认证
 std::string AUTHCODE;
-uint32_t	CLASSMASK;	//期权
-bool		ONLYINCFG;	//只落地配置文件有的
+//! 合约类型掩码，1-期货，2-期权，4-股票
+int32_t	CLASSMASK;
+//! 是否只处理配置文件中有的合约
+bool		ONLYINCFG;
 
-std::string COMM_FILE;		//输出的品种文件名
-std::string CONT_FILE;		//输出的合约文件名
+//! 输出的品种文件名
+std::string COMM_FILE;
+//! 输出的合约文件名
+std::string CONT_FILE;
 
-std::string MODULE_NAME;	//外部模块名
+//! CTP API模块名称
+std::string MODULE_NAME;
 
+/**
+ * \brief 字符串映射类型
+ * 
+ * 用于存储合约代码到名称的映射和合约代码到交易时段的映射
+ */
 typedef std::map<std::string, std::string>	SymbolMap;
+//! 合约代码到名称的映射
 SymbolMap	MAP_NAME;
+//! 合约代码到交易时段的映射
 SymbolMap	MAP_SESSION;
 
+/**
+ * \brief CTP API创建函数类型
+ * 
+ * 指向CTP API创建函数的函数指针类型
+ * 
+ * \param flowPath 流文件路径
+ * \return 返回创建的CTP API对象
+ */
 typedef CThostFtdcTraderApi* (*CTPCreator)(const char *);
+//! CTP API创建函数指针
 CTPCreator		g_ctpCreator = NULL;
 
-// 请求编号
+//! 请求编号，用于跟踪请求
 int iRequestID = 0;
 
 #ifdef _MSC_VER
@@ -62,6 +107,20 @@ extern "C"
 }
 #endif
 
+/**
+ * \brief 运行CTP合约信息加载器
+ * 
+ * 该函数是合约信息加载器的主入口点，完成以下工作：
+ * 1. 读取配置文件并初始化参数
+ * 2. 加载合约映射文件
+ * 3. 初始化并运行CTP API实例
+ * 4. 获取合约信息并转换为WonderTrader框架格式
+ * 
+ * \param cfgfile 配置文件路径
+ * \param bAsync 是否异步运行，如果为true则不等待API返回
+ * \param isFile 是否为文件路径，如果为false则cfgfile为配置内容字符串
+ * \return 成功返回0，失败返回非0值
+ */
 int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 {
 	std::string map_files;
